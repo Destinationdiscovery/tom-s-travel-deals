@@ -1,4 +1,6 @@
 import DealCard from "./DealCard";
+import { Button } from "./ui/button";
+import { ExternalLink } from "lucide-react";
 import santoriniImg from "@/assets/deal-santorini.jpg";
 import maldivesImg from "@/assets/deal-maldives.jpg";
 import cruiseImg from "@/assets/deal-cruise.jpg";
@@ -49,13 +51,14 @@ const DealsSection = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <span className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-            Featured Deals
+            Featured Adventures
           </span>
           <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-4">
-            Escape to Your Dream Destination
+            Ready for Your Next Journey?
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Handpicked travel experiences at unbeatable prices. Last-minute steals and group adventures waiting for you.
+            Handpicked travel experiences I personally recommend. These are destinations I've explored 
+            or know will deliver unforgettable memories.
           </p>
         </div>
 
@@ -69,6 +72,17 @@ const DealsSection = () => {
               <DealCard {...deal} />
             </div>
           ))}
+        </div>
+
+        <div className="text-center mt-12">
+          <Button 
+            variant="outline" 
+            size="lg"
+            onClick={() => window.open("https://tom.travelonly.com/experiences", "_blank")}
+            className="gap-2"
+          >
+            View All Experiences <ExternalLink className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     </section>

@@ -24,9 +24,9 @@ const DealCard = ({
   groupSize,
 }: DealCardProps) => {
   const badgeConfig = {
-    "last-minute": { label: "Last Minute", className: "bg-destructive text-destructive-foreground" },
-    group: { label: "Group Deal", className: "bg-secondary text-secondary-foreground" },
-    popular: { label: "Most Popular", className: "bg-accent text-accent-foreground" },
+    "last-minute": { label: "Limited Time", className: "bg-destructive text-destructive-foreground" },
+    group: { label: "Group Adventure", className: "bg-secondary text-secondary-foreground" },
+    popular: { label: "Fan Favorite", className: "bg-accent text-accent-foreground" },
   };
 
   return (
@@ -86,7 +86,7 @@ const DealCard = ({
             <span className="text-sm text-muted-foreground">/person</span>
           </div>
           <Button variant="default" size="sm">
-            View Deal
+            Learn More
           </Button>
         </div>
       </div>

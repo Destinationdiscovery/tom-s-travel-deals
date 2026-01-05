@@ -1,20 +1,78 @@
-import { Plane, Heart } from "lucide-react";
+import { Compass, Heart, Mail, Phone, ExternalLink } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-foreground py-12">
+    <footer className="bg-foreground py-16">
       <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-2">
-            <Plane className="h-6 w-6 text-primary" />
-            <div>
-              <h3 className="font-display text-lg font-bold text-background">Tom Laracy</h3>
-              <p className="text-xs text-muted-foreground">Travelonly Agent</p>
+        <div className="grid md:grid-cols-4 gap-12 mb-12">
+          {/* Brand */}
+          <div className="md:col-span-2">
+            <div className="flex items-center gap-2 mb-4">
+              <Compass className="h-8 w-8 text-primary" />
+              <div>
+                <h3 className="font-display text-xl font-bold text-background">Tom Laracy</h3>
+                <p className="text-xs text-muted-foreground">Travel Guide & Explorer</p>
+              </div>
             </div>
+            <p className="text-muted-foreground text-sm max-w-sm mb-4">
+              Sharing real travel experiences and helping fellow adventurers discover the world. 
+              When you're ready to book, I'm here to make it unforgettable.
+            </p>
+            <a 
+              href="https://tom.travelonly.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-primary hover:text-primary/80 transition-colors text-sm"
+            >
+              Visit my Travelonly profile <ExternalLink className="h-4 w-4" />
+            </a>
           </div>
 
+          {/* Quick Links */}
+          <div>
+            <h4 className="font-semibold text-background mb-4">Explore</h4>
+            <nav className="flex flex-col gap-2">
+              <Link to="/destinations" className="text-muted-foreground hover:text-primary transition-colors text-sm">
+                Destinations
+              </Link>
+              <a href="/#deals" className="text-muted-foreground hover:text-primary transition-colors text-sm">
+                Featured Trips
+              </a>
+              <a href="/#about" className="text-muted-foreground hover:text-primary transition-colors text-sm">
+                About Tom
+              </a>
+              <a href="/#newsletter" className="text-muted-foreground hover:text-primary transition-colors text-sm">
+                Join Community
+              </a>
+            </nav>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <h4 className="font-semibold text-background mb-4">Get in Touch</h4>
+            <div className="flex flex-col gap-3">
+              <a 
+                href="mailto:tlaracy@travelonly.com" 
+                className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors text-sm"
+              >
+                <Mail className="h-4 w-4" />
+                tlaracy@travelonly.com
+              </a>
+              <a 
+                href="tel:519-771-2534" 
+                className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors text-sm"
+              >
+                <Phone className="h-4 w-4" />
+                519-771-2534
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div className="border-t border-muted-foreground/20 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <span>Made with</span>
             <Heart className="h-4 w-4 text-primary fill-primary" />
@@ -22,7 +80,7 @@ const Footer = () => {
           </div>
 
           <p className="text-sm text-muted-foreground">
-            © {currentYear} Tom Laracy Travel. All rights reserved.
+            © {currentYear} Tom Laracy Travel. Travelonly Certified Agent.
           </p>
         </div>
       </div>
