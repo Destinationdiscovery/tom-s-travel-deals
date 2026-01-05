@@ -1,11 +1,18 @@
 import { Button } from "@/components/ui/button";
-import { Plane, Menu, X } from "lucide-react";
+import { Compass, Menu, X } from "lucide-react";
 import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
+  const isHomePage = location.pathname === "/";
 
   const scrollToSection = (id: string) => {
+    if (!isHomePage) {
+      window.location.href = `/#${id}`;
+      return;
+    }
     const element = document.getElementById(id);
     element?.scrollIntoView({ behavior: "smooth" });
     setIsMenuOpen(false);
@@ -14,39 +21,39 @@ const Header = () => {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Plane className="h-8 w-8 text-primary" />
+        <Link to="/" className="flex items-center gap-2">
+          <Compass className="h-8 w-8 text-primary" />
           <div>
             <h1 className="font-display text-xl font-bold text-foreground">Tom Laracy</h1>
-            <p className="text-xs text-muted-foreground">Travelonly Agent</p>
+            <p className="text-xs text-muted-foreground">Travel Guide & Explorer</p>
           </div>
-        </div>
+        </Link>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-8">
+          <Link 
+            to="/destinations"
+            className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+          >
+            Destinations
+          </Link>
           <button 
             onClick={() => scrollToSection("deals")}
             className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
           >
-            Travel Deals
+            Featured Trips
           </button>
           <button 
             onClick={() => scrollToSection("about")}
             className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
           >
-            About
-          </button>
-          <button 
-            onClick={() => scrollToSection("newsletter")}
-            className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-          >
-            Newsletter
+            About Tom
           </button>
           <Button 
             variant="default"
-            onClick={() => scrollToSection("contact")}
+            onClick={() => scrollToSection("newsletter")}
           >
-            Get in Touch
+            Join Community
           </Button>
         </nav>
 
@@ -63,30 +70,31 @@ const Header = () => {
       {isMenuOpen && (
         <div className="md:hidden bg-background border-t border-border animate-fade-in">
           <nav className="container mx-auto px-4 py-4 flex flex-col gap-4">
+            <Link 
+              to="/destinations"
+              className="text-left text-sm font-medium text-muted-foreground hover:text-primary transition-colors py-2"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Destinations
+            </Link>
             <button 
               onClick={() => scrollToSection("deals")}
               className="text-left text-sm font-medium text-muted-foreground hover:text-primary transition-colors py-2"
             >
-              Travel Deals
+              Featured Trips
             </button>
             <button 
               onClick={() => scrollToSection("about")}
               className="text-left text-sm font-medium text-muted-foreground hover:text-primary transition-colors py-2"
             >
-              About
-            </button>
-            <button 
-              onClick={() => scrollToSection("newsletter")}
-              className="text-left text-sm font-medium text-muted-foreground hover:text-primary transition-colors py-2"
-            >
-              Newsletter
+              About Tom
             </button>
             <Button 
               variant="default"
-              onClick={() => scrollToSection("contact")}
+              onClick={() => scrollToSection("newsletter")}
               className="w-full"
             >
-              Get in Touch
+              Join Community
             </Button>
           </nav>
         </div>

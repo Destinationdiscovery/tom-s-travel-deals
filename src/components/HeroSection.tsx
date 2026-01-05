@@ -1,25 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ArrowRight, MapPin } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
+import { ArrowRight, Compass } from "lucide-react";
 import heroImage from "@/assets/hero-beach.jpg";
 
 const HeroSection = () => {
-  const [email, setEmail] = useState("");
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email.trim()) {
-      toast.error("Please enter your email");
-      return;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      toast.error("Please enter a valid email");
-      return;
-    }
-    toast.success("Thanks for subscribing! Your dream vacation awaits.");
-    setEmail("");
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    element?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
@@ -36,36 +22,42 @@ const HeroSection = () => {
       <div className="relative z-10 container mx-auto px-4 py-32 text-center">
         <div className="max-w-3xl mx-auto space-y-8 animate-fade-up">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/20 backdrop-blur-sm border border-primary/30">
-            <MapPin className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium text-primary-foreground">Exclusive Travel Deals</span>
+            <Compass className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium text-primary-foreground">Travel Stories & Inspiration</span>
           </div>
 
           <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold text-primary-foreground leading-tight">
-            Your Dream Vacation
-            <span className="block text-gradient">Starts Here</span>
+            Let's Discover the World
+            <span className="block text-gradient">Together</span>
           </h1>
 
           <p className="text-lg md:text-xl text-primary-foreground/80 max-w-2xl mx-auto font-body">
-            Discover exclusive last-minute deals, group getaways, and unforgettable destinations. 
-            Let me help you plan the perfect escape.
+            Real travel experiences, honest reviews, and destination insights from someone who's been there. 
+            Your journey to unforgettable adventures starts here.
           </p>
 
-          {/* Email Capture Form */}
-          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-            <Input
-              type="email"
-              placeholder="Enter your email for deals"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="h-14 bg-primary-foreground/10 backdrop-blur-sm border-primary-foreground/30 text-primary-foreground placeholder:text-primary-foreground/60 focus:border-primary"
-            />
-            <Button variant="hero" size="xl" type="submit" className="gap-2">
-              Subscribe <ArrowRight className="h-5 w-5" />
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              variant="hero" 
+              size="xl" 
+              onClick={() => scrollToSection("destinations")}
+              className="gap-2"
+            >
+              Explore Destinations <ArrowRight className="h-5 w-5" />
             </Button>
-          </form>
+            <Button 
+              variant="heroOutline" 
+              size="xl" 
+              onClick={() => scrollToSection("deals")}
+              className="gap-2"
+            >
+              View Featured Trips
+            </Button>
+          </div>
 
           <p className="text-sm text-primary-foreground/60">
-            Join 2,000+ travelers getting weekly deal alerts
+            Join our community of travel enthusiasts discovering the world
           </p>
         </div>
       </div>

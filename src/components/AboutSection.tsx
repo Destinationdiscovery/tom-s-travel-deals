@@ -1,30 +1,30 @@
-import { CheckCircle, Award, Heart, Globe } from "lucide-react";
+import { Globe, Heart, MapPin, Camera } from "lucide-react";
 
 const features = [
   {
-    icon: Award,
-    title: "Certified Expert",
-    description: "Travelonly certified agent with years of experience crafting perfect vacations.",
+    icon: Globe,
+    title: "20+ Countries Explored",
+    description: "From Caribbean beaches to European cities, I've experienced destinations firsthand to share real insights.",
   },
   {
     icon: Heart,
-    title: "Personal Service",
-    description: "Dedicated one-on-one attention to understand your travel dreams and preferences.",
+    title: "Passionate Travel Advocate",
+    description: "Travel has transformed my life, and I love helping others discover that same magic.",
   },
   {
-    icon: Globe,
-    title: "Global Access",
-    description: "Exclusive deals and partnerships with top resorts and airlines worldwide.",
+    icon: Camera,
+    title: "Real Experiences Shared",
+    description: "No stock photos here—my reviews feature my own photos, videos, and honest opinions.",
   },
 ];
 
-const benefits = [
-  "Best price guarantee on all bookings",
-  "24/7 travel support during your trip",
-  "Exclusive group travel discounts",
-  "Custom itinerary planning included",
-  "Last-minute deal alerts",
-  "Flexible booking options",
+const travelPhilosophy = [
+  "Travel is about connection, not just destinations",
+  "The best trips blend adventure with relaxation",
+  "Every destination has a hidden gem worth finding",
+  "Group travel creates memories that last forever",
+  "Sometimes the unplanned moments are the best",
+  "Sharing experiences helps others travel smarter",
 ];
 
 const AboutSection = () => {
@@ -36,16 +36,20 @@ const AboutSection = () => {
           <div className="space-y-8">
             <div>
               <span className="inline-block px-4 py-2 rounded-full bg-secondary/20 text-secondary text-sm font-medium mb-4">
-                About Your Agent
+                Meet Your Travel Guide
               </span>
               <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-6">
                 Hi, I'm <span className="text-gradient">Tom Laracy</span>
               </h2>
+              <p className="text-muted-foreground text-lg leading-relaxed mb-4">
+                I'm not just a travel agent—I'm a fellow traveler who believes the best recommendations 
+                come from real experiences. Every destination I share, I've walked those beaches, 
+                tasted that food, and captured those sunsets myself.
+              </p>
               <p className="text-muted-foreground text-lg leading-relaxed">
-                As your dedicated Travelonly agent, I specialize in creating unforgettable 
-                travel experiences tailored just for you. Whether you're dreaming of a 
-                romantic getaway, an adventure with friends, or a family vacation, 
-                I'm here to make it happen.
+                Through this community, I want to inspire you to explore, share honest insights 
+                that help you travel smarter, and connect with others who share the wanderlust. 
+                When you're ready to book, I'm here to help make it happen.
               </p>
             </div>
 
@@ -64,18 +68,23 @@ const AboutSection = () => {
             </div>
           </div>
 
-          {/* Benefits Card */}
+          {/* Travel Philosophy Card */}
           <div className="bg-card rounded-3xl p-8 md:p-12 shadow-elevated">
             <h3 className="font-display text-2xl font-bold text-card-foreground mb-8">
-              Why Book With Me?
+              My Travel Philosophy
             </h3>
             <div className="grid gap-4">
-              {benefits.map((benefit) => (
-                <div key={benefit} className="flex items-center gap-3">
-                  <CheckCircle className="h-5 w-5 text-primary flex-shrink-0" />
-                  <span className="text-card-foreground">{benefit}</span>
+              {travelPhilosophy.map((belief) => (
+                <div key={belief} className="flex items-center gap-3">
+                  <MapPin className="h-5 w-5 text-primary flex-shrink-0" />
+                  <span className="text-card-foreground">{belief}</span>
                 </div>
               ))}
+            </div>
+            <div className="mt-8 pt-6 border-t border-border">
+              <p className="text-sm text-muted-foreground italic">
+                "The world is a book, and those who do not travel read only one page." — Saint Augustine
+              </p>
             </div>
           </div>
         </div>
