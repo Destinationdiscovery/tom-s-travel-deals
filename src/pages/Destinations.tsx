@@ -7,6 +7,7 @@ import santoriniImg from "@/assets/deal-santorini.jpg";
 import maldivesImg from "@/assets/deal-maldives.jpg";
 import cruiseImg from "@/assets/deal-cruise.jpg";
 import alpsImg from "@/assets/deal-alps.jpg";
+import cubaImg from "@/assets/deal-cuba.jpg";
 
 interface Destination {
   slug: string;
@@ -22,6 +23,18 @@ interface Destination {
 }
 
 const destinations: Destination[] = [
+  {
+    slug: "cuba-vila-gale",
+    image: cubaImg,
+    destination: "Vila Galé Paredón",
+    country: "Cayo Coco, Cuba",
+    region: "Caribbean",
+    teaser: "Better than expected for Cuba, delivering strong value at a fraction of typical Caribbean prices.",
+    rating: 4,
+    dateVisited: "December 2024",
+    hasVideo: false,
+    tags: ["Budget", "Beach", "All-Inclusive"],
+  },
   {
     slug: "santorini-greece",
     image: santoriniImg,
