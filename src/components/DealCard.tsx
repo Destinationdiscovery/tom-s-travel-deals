@@ -6,8 +6,6 @@ interface DealCardProps {
   image: string;
   destination: string;
   description: string;
-  price: string;
-  originalPrice?: string;
   duration: string;
   type: "last-minute" | "group" | "popular";
   groupSize?: string;
@@ -17,8 +15,6 @@ const DealCard = ({
   image,
   destination,
   description,
-  price,
-  originalPrice,
   duration,
   type,
   groupSize,
@@ -42,11 +38,6 @@ const DealCard = ({
         <Badge className={`absolute top-4 left-4 ${badgeConfig[type].className}`}>
           {badgeConfig[type].label}
         </Badge>
-        {originalPrice && (
-          <div className="absolute top-4 right-4 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-semibold">
-            Save {Math.round((1 - parseInt(price.replace(/[^0-9]/g, "")) / parseInt(originalPrice.replace(/[^0-9]/g, ""))) * 100)}%
-          </div>
-        )}
       </div>
 
       {/* Content */}
@@ -75,18 +66,9 @@ const DealCard = ({
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-4 border-t border-border">
-          <div>
-            {originalPrice && (
-              <span className="text-sm text-muted-foreground line-through mr-2">
-                {originalPrice}
-              </span>
-            )}
-            <span className="text-2xl font-bold text-primary">{price}</span>
-            <span className="text-sm text-muted-foreground">/person</span>
-          </div>
-          <Button variant="default" size="sm">
-            Learn More
+        <div className="pt-4 border-t border-border">
+          <Button variant="default" className="w-full">
+            Let's Plan This Trip
           </Button>
         </div>
       </div>
