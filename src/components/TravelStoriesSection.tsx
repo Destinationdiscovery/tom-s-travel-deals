@@ -42,7 +42,7 @@ const destinations: DestinationPreview[] = [
     image: cruiseImg,
     destination: "Caribbean Cruise",
     country: "Various Islands",
-    teaser: "Island hopping with a group of friends—here's what we loved, what surprised us, and what we'd do differently.",
+    teaser: "Island hopping with a group of friends - here's what we loved, what surprised us, and what we'd do differently.",
     rating: 4.5,
     dateVisited: "January 2024",
     hasVideo: false,
@@ -61,7 +61,7 @@ const TravelStoriesSection = () => {
             Destination Discovery
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Honest reviews from my travels—the good, the great, and everything in between. 
+            Honest reviews from my travels - the good, the great, and everything in between. 
             Photos, videos, and tips from real experiences.
           </p>
         </div>
