@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import santoriniImg from "@/assets/deal-santorini.jpg";
 import maldivesImg from "@/assets/deal-maldives.jpg";
 import cruiseImg from "@/assets/deal-cruise.jpg";
+import cubaImg from "@/assets/deal-cuba.jpg";
 
 interface DestinationPreview {
   slug: string;
@@ -17,6 +18,16 @@ interface DestinationPreview {
 }
 
 const destinations: DestinationPreview[] = [
+  {
+    slug: "cuba-vila-gale",
+    image: cubaImg,
+    destination: "Vila Galé Paredón",
+    country: "Cayo Coco, Cuba",
+    teaser: "Better than expected for Cuba, delivering strong value at a fraction of typical Caribbean prices.",
+    rating: 4,
+    dateVisited: "December 2024",
+    hasVideo: false,
+  },
   {
     slug: "santorini-greece",
     image: santoriniImg,
@@ -36,16 +47,6 @@ const destinations: DestinationPreview[] = [
     rating: 4.9,
     dateVisited: "March 2024",
     hasVideo: true,
-  },
-  {
-    slug: "caribbean-cruise",
-    image: cruiseImg,
-    destination: "Caribbean Cruise",
-    country: "Various Islands",
-    teaser: "Island hopping with a group of friends - here's what we loved, what surprised us, and what we'd do differently.",
-    rating: 4.5,
-    dateVisited: "January 2024",
-    hasVideo: false,
   },
 ];
 

@@ -11,6 +11,7 @@ import santoriniImg from "@/assets/deal-santorini.jpg";
 import maldivesImg from "@/assets/deal-maldives.jpg";
 import cruiseImg from "@/assets/deal-cruise.jpg";
 import alpsImg from "@/assets/deal-alps.jpg";
+import cubaImg from "@/assets/deal-cuba.jpg";
 
 interface ReviewData {
   slug: string;
@@ -21,10 +22,13 @@ interface ReviewData {
   duration: string;
   rating: number;
   ratings: {
-    accommodations: number;
-    food: number;
-    activities: number;
-    value: number;
+    accommodations?: number;
+    food?: number;
+    activities?: number;
+    value?: number;
+    rooms?: number;
+    beach?: number;
+    service?: number;
   };
   summary: string;
   fullReview: string[];
@@ -150,6 +154,47 @@ const reviews: Record<string, ReviewData> = {
       "Grocery stores and picnic lunches save money on expensive dining",
     ],
     bestFor: ["Adventure seekers", "Hikers", "Nature photographers", "Train enthusiasts"],
+  },
+  "cuba-vila-gale": {
+    slug: "cuba-vila-gale",
+    image: cubaImg,
+    destination: "Vila Galé Paredón",
+    country: "Cayo Coco, Cuba",
+    dateVisited: "December 2024 - January 2025",
+    duration: "7 nights",
+    rating: 4,
+    ratings: {
+      food: 3.5,
+      rooms: 3.5,
+      beach: 4,
+      service: 3.5,
+      value: 4.5,
+    },
+    summary: "Better than expected for Cuba, delivering strong value at a fraction of typical Caribbean prices. Rated in the context of Cuban resorts, not compared to the broader Caribbean.",
+    fullReview: [
+      "I travel frequently both personally and professionally as a travel consultant, so I arrived at Vila Galé Paredón with realistic expectations for Cuba. My first impression was very positive. The resort felt clean, updated, and well maintained from the moment we arrived. The lobby was bright and welcoming, check-in was easy, and the grounds throughout the property were immaculate. Right away, it felt better than I had expected for Cuba.",
+      "The resort is spread across five to six separate buildings, each with three floors. There are no elevators, so if you have mobility concerns, requesting a ground-floor room would be important. Our room was fine but fairly standard. It had two beds, a desk, a small table and chair, a double closet with about seven or eight hangers, a safe, and a small bar fridge that was usually unstocked. The beds were comfortable, though each bed only had one pillow, and the pillows were more on the flat side than fluffy.",
+      "The bathroom layout was well designed. The toilet was in a separate water closet, and the shower was large with both a rain head and a handheld wand. Hot water was always available. The room did have shampoo, conditioner, and body lotion, although I brought my own and did not use them.",
+      "One thing worth noting is the electrical setup. The rooms use 220-volt outlets, but standard North American plugs fit the sockets and worked fine for charging phones, as most devices convert voltage automatically. The in-room hairdryer also worked without issue. However, if you plan to bring your own hairdryer or straightener, you will need a proper voltage converter. One of our nieces did not have one and ended up melting her hairdryer.",
+      "Food was one of the stronger parts of the stay overall, with some clear highs and lows. Based on my experience as a travel consultant who has stayed at many Caribbean and Cuban all-inclusive resorts, the food here was better than I typically expect in Cuba. The main buffet was fully indoors, which I appreciated, as there were no birds in the food area. There was always a wide selection including a pasta bar, made-to-order fish, chicken, beef, and mussels, along with rice dishes, hot chicken options, meats, cheeses, olives, salads, and ice cream. Interestingly, I did not see French fries once all week, but there were plenty of plantain chips available. We were traveling with a group of 18, and everyone was always able to find something they liked. I would rate the buffet a 4.5 out of 5.",
+      "The resort has four à la carte restaurants, although only two are open on any given night. We tried the Cuban and the Mediterranean. The Cuban restaurant was disappointing for me and I would rate it a 1 out of 5, while the Mediterranean was excellent and easily a 4 out of 5.",
+      "Every day at noon, there is a pizza bar set up by the kids pool. The pizza itself was very good, but they only make 100 personal-sized pizzas per day. In reality, you need to be there at least 10 minutes early to place an order. Guests arriving even shortly after noon were consistently told the pizzas were already gone.",
+      "There is also a 24-hour snack bar serving simple items like grilled cheese, hamburgers, and hot dogs, along with a barbecue grill by the main pool that is open for a couple of hours each day.",
+      "Drinks required a bit of planning. Friends who arrived two days before us warned that there was absolutely no vodka anywhere in the resort, so we brought bottles from duty free. There was no shortage of beer, rum, tequila, or red and white wine, so as long as you are flexible, you will be fine.",
+      "The beach is what Cuba is known for, and this one mostly delivered. The sand was soft and white, and the water was warm even in late December with a beautiful aqua-blue color. There were plenty of loungers, good shade from palapas, and a beach bar close by. Non-motorized water activities were included at no extra cost, such as small catamarans, paddle boats, and kayaks, but they do need to be reserved in advance. One unexpected downside was the jellyfish. Some days there were only a few, while other days there were hundreds. I still went in the water, as did most of our group. A few people were stung and said it was not much worse than a bee sting, but it did limit how long I personally stayed in the water. Under normal conditions, this would be a 5 out of 5 beach, but because of the jellyfish I would rate it a 4 out of 5.",
+      "The resort has three pools, each with a very different atmosphere. The main pool is the party pool and has a swim-up bar, louder music, and daily activities. There were lots of chairs and shaded areas available. Another pool is more family-oriented and has a gradual entry, making it better for kids. The standout for me was the infinity pool. It is set away from the main areas, which meant it was rarely busy. It is large, overlooks the ocean, and has its own bar, day beds, and loungers. It was easily one of the best spots at the resort.",
+      "Service was the most inconsistent part of the stay. This mirrors what I often see when evaluating Cuban resorts professionally. There is no room service, and rooms only come with two white bath towels. No hand towels or face cloths were provided. Towel replacement was not always timely, and we were told that missing bath towels would also be charged, although the exact cost was unclear. Bottled water in the room fridge was inconsistent, and the mini bar itself was never stocked. Each room also receives two beach towels, which can be exchanged daily at the pool, but we were told that losing one would result in an $80 USD replacement fee, which felt excessive.",
+      "That said, the bartenders and waitstaff were excellent. They were friendly, helpful, and genuinely pleasant throughout the week, and they made a noticeable difference in the overall experience. On the other hand, our Sunwing Nexus representative provided inaccurate information about an excursion, which resulted in some members of our group ending up on a different experience than expected. The same representative was also not very helpful when it came to coordinating pickup times after our flight was delayed.",
+    ],
+    tips: [
+      "Bring duty-free vodka if that matters to you - there was none available at the resort during our stay",
+      "Be at the pizza bar at least 10 minutes before noon - they only make 100 pizzas per day and they go fast",
+      "Request a ground-floor room if you have mobility concerns, as there are no elevators",
+      "Keep track of both bath towels and beach towels - we were told missing bath towels would be charged, and missing beach towels cost $80 USD each",
+      "Bring a voltage converter if you plan to use your own hair tools - the rooms are 220V",
+      "Reserve non-motorized water activities in advance if you want to use them",
+    ],
+    bestFor: ["Budget travelers", "Groups", "Adults who like both quiet and lively pool options", "Beach lovers who are flexible", "First-time visitors to Cuba"],
   },
 };
 
