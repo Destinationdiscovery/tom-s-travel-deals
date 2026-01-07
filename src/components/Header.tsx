@@ -25,7 +25,7 @@ const Header = () => {
           <Compass className="h-8 w-8 text-primary" />
           <div>
             <h1 className="font-display text-xl font-bold text-foreground">Tom Laracy</h1>
-            <p className="text-xs text-muted-foreground">Travel Guide & Explorer</p>
+            <p className="text-xs text-muted-foreground">Travel Consultant Est. 2011</p>
           </div>
         </Link>
 
