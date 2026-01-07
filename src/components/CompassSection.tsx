@@ -6,55 +6,9 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { ArrowRight } from "lucide-react";
-
-import packingImg from "@/assets/curacao-gallery-6.webp";
-import guidesImg from "@/assets/deal-santorini.jpg";
-import budgetImg from "@/assets/deal-cruise.jpg";
-import insuranceImg from "@/assets/deal-alps.jpg";
-import timingImg from "@/assets/deal-maldives.jpg";
-
-const articles = [
-  {
-    id: 1,
-    title: "Essential Packing Tips for Beach Destinations",
-    category: "Packing",
-    image: packingImg,
-    excerpt: "Master the art of packing light while having everything you need for sun, sand, and adventure.",
-    categoryColor: "bg-blue-500",
-  },
-  {
-    id: 2,
-    title: "Destination Guides: Where to Go Next",
-    category: "Guides",
-    image: guidesImg,
-    excerpt: "Curated recommendations for every type of traveler, from romantic getaways to family adventures.",
-    categoryColor: "bg-emerald-500",
-  },
-  {
-    id: 3,
-    title: "Budget Travel Hacks That Actually Work",
-    category: "Budget",
-    image: budgetImg,
-    excerpt: "Smart strategies to stretch your travel budget without sacrificing comfort or experience.",
-    categoryColor: "bg-amber-500",
-  },
-  {
-    id: 4,
-    title: "Travel Insurance: What You Really Need",
-    category: "Insurance",
-    image: insuranceImg,
-    excerpt: "Understanding coverage options and why the right policy can save your trip.",
-    categoryColor: "bg-purple-500",
-  },
-  {
-    id: 5,
-    title: "Best Times to Visit Popular Destinations",
-    category: "Timing",
-    image: timingImg,
-    excerpt: "Seasonal guides to help you plan the perfect trip with ideal weather and fewer crowds.",
-    categoryColor: "bg-teal-500",
-  },
-];
+import { Link } from "react-router-dom";
+import { compassArticles } from "@/data/compassArticles";
+import { Button } from "@/components/ui/button";
 
 const CompassSection = () => {
   return (
@@ -80,13 +34,14 @@ const CompassSection = () => {
           className="w-full"
         >
           <CarouselContent className="-ml-4">
-            {articles.map((article, index) => (
+            {compassArticles.map((article, index) => (
               <CarouselItem 
                 key={article.id} 
                 className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3"
               >
-                <div 
-                  className="group relative overflow-hidden rounded-2xl bg-card shadow-soft hover:shadow-elevated transition-all duration-300 hover:-translate-y-1 animate-fade-up"
+                <Link 
+                  to={`/compass/${article.slug}`}
+                  className="group block relative overflow-hidden rounded-2xl bg-card shadow-soft hover:shadow-elevated transition-all duration-300 hover:-translate-y-1 animate-fade-up"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   {/* Image with gradient overlay */}
@@ -112,18 +67,28 @@ const CompassSection = () => {
                     <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
                       {article.excerpt}
                     </p>
-                    <button className="inline-flex items-center gap-2 text-primary font-medium text-sm group/link">
+                    <span className="inline-flex items-center gap-2 text-primary font-medium text-sm group/link">
                       Read More 
                       <ArrowRight className="h-4 w-4 transition-transform group-hover/link:translate-x-1" />
-                    </button>
+                    </span>
                   </div>
-                </div>
+                </Link>
               </CarouselItem>
             ))}
           </CarouselContent>
           <CarouselPrevious className="hidden md:flex -left-4 lg:-left-6" />
           <CarouselNext className="hidden md:flex -right-4 lg:-right-6" />
         </Carousel>
+
+        {/* View All Button */}
+        <div className="text-center mt-12">
+          <Link to="/compass">
+            <Button variant="outline" size="lg">
+              View All Articles
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
       </div>
     </section>
   );
