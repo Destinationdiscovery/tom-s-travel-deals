@@ -21,6 +21,7 @@ import cubaGallery11 from "@/assets/cuba-gallery-11.jpg";
 import cubaGallery12 from "@/assets/cuba-gallery-12.jpg";
 import cubaGallery13 from "@/assets/cuba-gallery-13.jpg";
 import cubaGallery14 from "@/assets/cuba-gallery-14.jpg";
+import curacaoImg from "@/assets/curacao-hero.avif";
 
 interface ReviewData {
   slug: string;
@@ -89,6 +90,48 @@ const reviews: Record<string, ReviewData> = {
     ],
     bestFor: ["Budget travelers", "Groups", "Adults who like both quiet and lively pool options", "Beach lovers who are flexible", "First-time visitors to Cuba"],
     gallery: [cubaGallery1, cubaGallery2, cubaGallery3, cubaGallery4, cubaGallery5, cubaGallery6, cubaGallery7, cubaGallery8, cubaGallery9, cubaGallery10, cubaGallery11, cubaGallery12, cubaGallery13, cubaGallery14],
+  },
+  "curacao-blue-bay": {
+    slug: "curacao-blue-bay",
+    image: curacaoImg,
+    destination: "Vila in Blue Bay Resort",
+    country: "Curaçao",
+    dateVisited: "November 23 – 30, 2024",
+    duration: "7 nights",
+    rating: 5,
+    ratings: {
+      accommodations: 5,
+      beach: 4.8,
+      food: 4.9,
+      value: 5,
+    },
+    summary: "A luxury private villa with an infinity pool that offered space, privacy, and easy access to some of Curaçao's best beaches.",
+    fullReview: [
+      "As a travel consultant, I've stayed in and evaluated a wide range of villas and upscale accommodations, and this stay at Blue Bay Resort truly stood out. We traveled as three couples, and from the moment we arrived, it was clear this villa was an excellent choice for both comfort and flexibility.",
+      "The villa itself was modern, spacious, and beautifully designed over two levels. There are three bedrooms in total, two with king beds and one with two twin beds, which worked perfectly for our group. Each bedroom has its own en-suite bathroom with a walk-in shower, and there is also an additional half bathroom, which was especially convenient when spending time in the shared living spaces. Towels and hair dryers were provided, and everything felt well thought out for a group stay.",
+      "The upper level became our main gathering space. The open-concept living room and fully equipped kitchen made it feel more like a high-end home than a vacation rental. The kitchen included a large island, American-style fridge, dishwasher, wine fridge, combination microwave and oven, Nespresso machine, and all the essentials you would need for cooking. Large sliding doors opened directly onto the terrace, seamlessly blending indoor and outdoor living.",
+      "The outdoor area was easily one of the highlights of the trip. The private infinity pool overlooked both the ocean and the golf course and was the perfect place to relax at the end of the day. The terrace was furnished with an eight-person dining table, sun loungers, a lounge seating area, and an electric BBQ. Evenings were often spent here, enjoying drinks and watching the Caribbean sunsets. A small but thoughtful touch was the outdoor sink at the back of the villa, which made rinsing snorkel or dive gear quick and easy.",
+      "Downstairs, the remaining two bedrooms opened directly to the outside through patio doors, giving those rooms a very private feel. All bedrooms were air-conditioned, had smart TVs, and plenty of closet space. The villa felt quiet, secure, and extremely well maintained throughout our stay.",
+      "The villa is located within the gated Blue Bay Golf and Beach Resort, which is beautifully landscaped and very well secured. One of the biggest perks was how close everything felt, including the beach, which was only about a one-minute walk away.",
+      "Beaches were a major focus of this trip, and we visited four in total. One important thing to know before arriving in Curaçao is that sand shoes are essential. Many beaches have coral fragments at the shoreline, and walking into the water barefoot can be uncomfortable.",
+      "Blue Bay Beach was the most convenient and the one we used most often. Located within the gated resort and just a short walk from the villa, it sits in a protected bay with calm, warm, aqua-blue water. The sand is soft once you are past the waterline, and there is plenty of shade from palapas. What really sets this beach apart is the convenience. There are two restaurants, an ice cream shop, and a pizza spot right on-site, making it easy to spend an entire day there without leaving.",
+      "Grote Knip, about a 45-minute drive from the villa, is one of Curaçao's most iconic beaches. The water is stunning and the scenery feels more rugged and natural. Amenities are limited, though. When we visited, the washrooms were locked, and while there were a few food trucks nearby, this is not a beach with much infrastructure. Loungers are available for a fee. It's absolutely worth visiting, but it's best enjoyed if you come prepared.",
+      "Cas Abao Beach, roughly 30 minutes from the villa, offered a nice balance of beauty and comfort. The beach sits in a small bay with clear, calm water. There is an entrance fee and you pay for loungers, but the facilities were noticeably better, including clean washrooms. This was one of the easier beaches to settle into for several hours.",
+      "Mambo Beach was a completely different experience. This is Curaçao's most commercial beach area and feels more like a beachfront strip than a traditional beach. It's lined with beach clubs, restaurants, bars, and shops, and has a lively, social atmosphere. The water is calm due to breakwaters, but the focus here is more on dining, shopping, and nightlife than quiet beach time.",
+      "Food was easy to manage during our stay. One of the advantages of this villa is its location, with a full grocery store just a three-minute drive away. Prices were very similar to Ontario, which made budgeting straightforward. We typically bought groceries for breakfasts, lunches, snacks, and drinks.",
+      "In the evenings, we mostly ate out and explored restaurants around the island. Restaurant pricing across Curaçao was also comparable to Ontario, whether casual or more upscale. From a travel consultant perspective, this makes Curaçao an easy destination to plan for, as there are very few surprises when it comes to food costs.",
+      "We pre-booked a rental car before arriving, and it was one of the best decisions of the trip. The rental company picked our group up at the airport and drove us directly to the villa, where the car was already waiting for us. It was smooth, efficient, and stress-free.",
+      "Driving in Curaçao felt very similar to driving in Ontario. Roads were in good condition, signage was clear, and we felt comfortable driving everywhere we went. Having a rental car made it easy to explore beaches, restaurants, and the colorful streets of Willemstad at our own pace. From a professional standpoint, I would strongly recommend renting a car when staying in a villa on the island.",
+    ],
+    tips: [
+      "Pack sand shoes - most beaches have coral at the shoreline",
+      "Rent a car - Curaçao is easy to drive and much better explored independently",
+      "Take advantage of the nearby grocery store for breakfasts, lunches, and snacks",
+      "Plan to eat out at night - restaurant prices are comparable to Ontario",
+      "A villa stay is ideal for couples or small groups who value space and privacy",
+    ],
+    bestFor: ["Couples traveling together", "Travelers who want space and privacy", "Independent travelers who enjoy exploring", "Beach hoppers", "Those who prefer flexibility over an all-inclusive experience"],
+    gallery: [curacaoImg],
   },
 };
 
