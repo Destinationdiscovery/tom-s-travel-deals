@@ -18,6 +18,13 @@ import cubaGallery4 from "@/assets/cuba-gallery-4.jpg";
 import cubaGallery5 from "@/assets/cuba-gallery-5.jpg";
 import cubaGallery6 from "@/assets/cuba-gallery-6.jpg";
 import cubaGallery7 from "@/assets/cuba-gallery-7.jpg";
+import cubaGallery8 from "@/assets/cuba-gallery-8.jpg";
+import cubaGallery9 from "@/assets/cuba-gallery-9.jpg";
+import cubaGallery10 from "@/assets/cuba-gallery-10.jpg";
+import cubaGallery11 from "@/assets/cuba-gallery-11.jpg";
+import cubaGallery12 from "@/assets/cuba-gallery-12.jpg";
+import cubaGallery13 from "@/assets/cuba-gallery-13.jpg";
+import cubaGallery14 from "@/assets/cuba-gallery-14.jpg";
 
 interface ReviewData {
   slug: string;
@@ -202,7 +209,7 @@ const reviews: Record<string, ReviewData> = {
       "Reserve non-motorized water activities in advance if you want to use them",
     ],
     bestFor: ["Budget travelers", "Groups", "Adults who like both quiet and lively pool options", "Beach lovers who are flexible", "First-time visitors to Cuba"],
-    gallery: [cubaGallery1, cubaGallery2, cubaGallery3, cubaGallery4, cubaGallery5, cubaGallery6, cubaGallery7],
+    gallery: [cubaGallery1, cubaGallery2, cubaGallery3, cubaGallery4, cubaGallery5, cubaGallery6, cubaGallery7, cubaGallery8, cubaGallery9, cubaGallery10, cubaGallery11, cubaGallery12, cubaGallery13, cubaGallery14],
   },
 };
 
