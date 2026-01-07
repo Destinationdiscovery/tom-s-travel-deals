@@ -32,6 +32,9 @@ import curacaoGallery7 from "@/assets/curacao-gallery-7.jpg";
 import curacaoGallery8 from "@/assets/curacao-gallery-8.jpg";
 import curacaoGallery9 from "@/assets/curacao-gallery-9.webp";
 import curacaoGallery10 from "@/assets/curacao-gallery-10.webp";
+import curacaoGallery11 from "@/assets/curacao-gallery-11.webp";
+import curacaoGallery12 from "@/assets/curacao-gallery-12.jpeg";
+import curacaoGallery13 from "@/assets/curacao-gallery-13.webp";
 
 interface ReviewData {
   slug: string;
@@ -141,7 +144,7 @@ const reviews: Record<string, ReviewData> = {
       "A villa stay is ideal for couples or small groups who value space and privacy",
     ],
     bestFor: ["Couples traveling together", "Travelers who want space and privacy", "Independent travelers who enjoy exploring", "Beach hoppers", "Those who prefer flexibility over an all-inclusive experience"],
-    gallery: [curacaoImg, curacaoGallery1, curacaoGallery2, curacaoGallery3, curacaoGallery4, curacaoGallery5, curacaoGallery6, curacaoGallery7, curacaoGallery8, curacaoGallery9, curacaoGallery10],
+    gallery: [curacaoImg, curacaoGallery1, curacaoGallery2, curacaoGallery3, curacaoGallery4, curacaoGallery5, curacaoGallery6, curacaoGallery7, curacaoGallery8, curacaoGallery9, curacaoGallery10, curacaoGallery11, curacaoGallery12, curacaoGallery13],
   },
 };
 
