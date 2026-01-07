@@ -4,6 +4,7 @@ import { Star, ArrowRight, Play, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import cubaImg from "@/assets/deal-cuba.jpg";
+import curacaoImg from "@/assets/curacao-hero.avif";
 
 interface Destination {
   slug: string;
@@ -30,6 +31,18 @@ const destinations: Destination[] = [
     dateVisited: "December 2024",
     hasVideo: false,
     tags: ["Budget", "Beach", "All-Inclusive"],
+  },
+  {
+    slug: "curacao-blue-bay",
+    image: curacaoImg,
+    destination: "Vila in Blue Bay Resort",
+    country: "Curaçao",
+    region: "Caribbean",
+    teaser: "A luxury private villa with an infinity pool that offered space, privacy, and easy access to some of Curaçao's best beaches.",
+    rating: 5,
+    dateVisited: "November 2024",
+    hasVideo: false,
+    tags: ["Villa", "Luxury", "Beach", "Privacy"],
   },
 ];
 
