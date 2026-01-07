@@ -38,14 +38,11 @@ const Footer = () => {
               <Link to="/destinations" className="text-muted-foreground hover:text-primary transition-colors text-sm">
                 Destinations
               </Link>
-              <a href="/#deals" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                Featured Trips
+              <a href="/#compass" className="text-muted-foreground hover:text-primary transition-colors text-sm">
+                The Compass
               </a>
               <a href="/#about" className="text-muted-foreground hover:text-primary transition-colors text-sm">
                 About Tom
-              </a>
-              <a href="/#newsletter" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                Join Community
               </a>
             </nav>
           </div>

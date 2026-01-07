@@ -38,10 +38,10 @@ const Header = () => {
             Destinations
           </Link>
           <button 
-            onClick={() => scrollToSection("deals")}
+            onClick={() => scrollToSection("compass")}
             className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
           >
-            Featured Trips
+            The Compass
           </button>
           <button 
             onClick={() => scrollToSection("about")}
@@ -49,12 +49,6 @@ const Header = () => {
           >
             About Tom
           </button>
-          <Button 
-            variant="default"
-            onClick={() => scrollToSection("newsletter")}
-          >
-            Join Community
-          </Button>
         </nav>
 
         {/* Mobile Menu Button */}
@@ -78,10 +72,10 @@ const Header = () => {
               Destinations
             </Link>
             <button 
-              onClick={() => scrollToSection("deals")}
+              onClick={() => scrollToSection("compass")}
               className="text-left text-sm font-medium text-muted-foreground hover:text-primary transition-colors py-2"
             >
-              Featured Trips
+              The Compass
             </button>
             <button 
               onClick={() => scrollToSection("about")}
@@ -89,13 +83,6 @@ const Header = () => {
             >
               About Tom
             </button>
-            <Button 
-              variant="default"
-              onClick={() => scrollToSection("newsletter")}
-              className="w-full"
-            >
-              Join Community
-            </Button>
           </nav>
         </div>
       )}
