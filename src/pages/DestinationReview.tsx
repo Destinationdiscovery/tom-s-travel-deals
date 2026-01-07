@@ -6,10 +6,6 @@ import { Star, ArrowLeft, Calendar, MapPin, Heart, Share2, MessageCircle, Send }
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import santoriniImg from "@/assets/deal-santorini.jpg";
-import maldivesImg from "@/assets/deal-maldives.jpg";
-import cruiseImg from "@/assets/deal-cruise.jpg";
-import alpsImg from "@/assets/deal-alps.jpg";
 import cubaImg from "@/assets/deal-cuba.jpg";
 import cubaGallery1 from "@/assets/cuba-gallery-1.jpg";
 import cubaGallery2 from "@/assets/cuba-gallery-2.jpg";
@@ -52,123 +48,6 @@ interface ReviewData {
 }
 
 const reviews: Record<string, ReviewData> = {
-  "santorini-greece": {
-    slug: "santorini-greece",
-    image: santoriniImg,
-    destination: "Santorini",
-    country: "Greece",
-    dateVisited: "October 2024",
-    duration: "7 nights",
-    rating: 4.8,
-    ratings: {
-      accommodations: 5,
-      food: 4.5,
-      activities: 4.5,
-      value: 4,
-    },
-    summary: "Santorini exceeded every expectation. The iconic white-washed buildings cascading down volcanic cliffs, the sunsets that paint the sky in impossible colors, and the warm Greek hospitality made this trip unforgettable.",
-    fullReview: [
-      "I've seen countless photos of Santorini, but nothing prepares you for seeing Oia at sunset in person. The way the light transforms the white buildings into a canvas of gold, pink, and purple is genuinely magical. I stayed in a cave hotel carved into the caldera—waking up to that view every morning never got old.",
-      "The food scene here is exceptional. Fresh seafood, local wines from volcanic soil, and those famous Greek salads. My favorite meal was at a small family taverna in Imerovigli—grilled octopus that melted in your mouth, paired with Assyrtiko wine from a local vineyard.",
-      "Beyond the postcard views, I loved exploring the quieter side of the island. The hike from Fira to Oia along the caldera rim offers incredible views and takes you through smaller villages where you can escape the crowds. The black sand beaches at Perissa are perfect for a more relaxed afternoon.",
-    ],
-    tips: [
-      "Visit in shoulder season (May or October) for fewer crowds and better prices",
-      "Book your sunset dinner spot at least a week in advance",
-      "Rent an ATV to explore the island—it's the best way to get around",
-      "Stay in Imerovigli for the views without the Oia crowds",
-      "Take a boat tour to the volcanic islands and hot springs",
-    ],
-    bestFor: ["Couples", "Photographers", "Wine lovers", "Romance seekers"],
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-  },
-  "maldives-overwater": {
-    slug: "maldives-overwater",
-    image: maldivesImg,
-    destination: "Maldives",
-    country: "Indian Ocean",
-    dateVisited: "March 2024",
-    duration: "5 nights",
-    rating: 4.9,
-    ratings: {
-      accommodations: 5,
-      food: 5,
-      activities: 4.5,
-      value: 3.5,
-    },
-    summary: "The Maldives is every bit as stunning as the photos suggest—crystal clear water, vibrant marine life, and overwater bungalows that feel like a dream. Yes, it's pricey, but for a bucket-list experience, it delivers.",
-    fullReview: [
-      "Stepping off the seaplane onto the resort's jetty, I immediately understood the hype. The water is impossibly clear, shifting from turquoise to deep blue, with fish visible from 20 feet up. My overwater villa had a glass floor panel—I spotted a reef shark swimming beneath while having morning coffee.",
-      "Snorkeling here is world-class. The house reef was steps from my villa, teeming with colorful fish, sea turtles, and even manta rays. The resort arranged a night snorkeling trip where we swam with bioluminescent plankton—genuinely surreal.",
-      "Food was exceptional but expensive (a warning for budget-conscious travelers). The seafood is incredibly fresh, and the resort had multiple restaurants ranging from casual beach grills to fine dining. The floating breakfast in my villa pool was Instagram-worthy and delicious.",
-    ],
-    tips: [
-      "Go all-inclusive if possible—à la carte adds up quickly",
-      "Bring reef-safe sunscreen and lots of it",
-      "Pack a good underwater camera for snorkeling",
-      "Book excursions through the resort for the best experiences",
-      "The dry season (December-April) offers the best weather",
-    ],
-    bestFor: ["Honeymooners", "Snorkeling enthusiasts", "Luxury seekers", "Beach lovers"],
-  },
-  "caribbean-cruise": {
-    slug: "caribbean-cruise",
-    image: cruiseImg,
-    destination: "Caribbean Cruise",
-    country: "Various Islands",
-    dateVisited: "January 2024",
-    duration: "7 nights",
-    rating: 4.5,
-    ratings: {
-      accommodations: 4,
-      food: 4.5,
-      activities: 5,
-      value: 4.5,
-    },
-    summary: "A week island-hopping with friends was the perfect mix of adventure and relaxation. Each port offered something different, from beach days to historic tours, and the ship itself was a floating resort with endless entertainment.",
-    fullReview: [
-      "We departed from Miami and hit four islands: Cozumel, Grand Cayman, Jamaica, and Haiti's private beach. Each stop was different—snorkeling in crystal-clear Mexican waters, swimming with stingrays in Cayman, exploring Dunn's River Falls in Jamaica.",
-      "The group dynamic made this trip special. Cruises are perfect for groups because there's something for everyone. Some of us hit the pool deck while others explored the spa. We'd meet up for dinner and shows, then split off again. The flexibility is unmatched.",
-      "Pro tip: book excursions in advance, especially for popular activities. We almost missed out on the stingray experience because we waited until we boarded. Also, balcony cabins are worth the upgrade—watching islands appear on the horizon from your private space is magical.",
-    ],
-    tips: [
-      "Book excursions before boarding for the best selection",
-      "Balcony cabins are worth the upgrade for the views",
-      "Bring a lanyard for your cruise card—you use it constantly",
-      "Don't skip the port days for the ship—the islands are the highlight",
-      "Drink packages can save money if you plan to imbibe",
-    ],
-    bestFor: ["Groups", "First-time cruisers", "Beach lovers", "Those who want variety"],
-  },
-  "swiss-alps": {
-    slug: "swiss-alps",
-    image: alpsImg,
-    destination: "Swiss Alps",
-    country: "Switzerland",
-    dateVisited: "August 2023",
-    duration: "6 nights",
-    rating: 4.7,
-    ratings: {
-      accommodations: 4.5,
-      food: 4,
-      activities: 5,
-      value: 3.5,
-    },
-    summary: "The Swiss Alps deliver on every postcard promise—dramatic peaks, charming villages, and outdoor adventures around every corner. Switzerland is expensive, but the natural beauty is worth every franc.",
-    fullReview: [
-      "Based in Interlaken, I had access to two stunning lakes and countless mountain adventures. The Jungfraujoch—Top of Europe—was the highlight: riding a train through the Eiger to emerge at 11,000 feet with glaciers stretching in every direction.",
-      "Hiking here is world-class. The trails are well-marked and maintained, with mountain huts offering refreshments along the way. I tackled the Schynige Platte to First trail, a challenging but rewarding day that offered views of the Eiger, Mönch, and Jungfrau.",
-      "The charming villages are straight out of a storybook. Lauterbrunnen's waterfall-lined valley, Grindelwald's mountain backdrop, and Mürren's car-free streets made every evening stroll magical. The fondue didn't hurt either.",
-    ],
-    tips: [
-      "Get a Swiss Travel Pass—it covers most trains and saves money",
-      "Book mountain railways in advance during peak season",
-      "Weather changes quickly—pack layers even in summer",
-      "Stay in smaller villages for better value than resort towns",
-      "Grocery stores and picnic lunches save money on expensive dining",
-    ],
-    bestFor: ["Adventure seekers", "Hikers", "Nature photographers", "Train enthusiasts"],
-  },
   "cuba-vila-gale": {
     slug: "cuba-vila-gale",
     image: cubaImg,

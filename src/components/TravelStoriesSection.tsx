@@ -1,9 +1,6 @@
 import { Star, ArrowRight, Play } from "lucide-react";
 import { Button } from "./ui/button";
 import { Link } from "react-router-dom";
-import santoriniImg from "@/assets/deal-santorini.jpg";
-import maldivesImg from "@/assets/deal-maldives.jpg";
-import cruiseImg from "@/assets/deal-cruise.jpg";
 import cubaImg from "@/assets/deal-cuba.jpg";
 
 interface DestinationPreview {
@@ -27,26 +24,6 @@ const destinations: DestinationPreview[] = [
     rating: 4,
     dateVisited: "December 2024",
     hasVideo: false,
-  },
-  {
-    slug: "santorini-greece",
-    image: santoriniImg,
-    destination: "Santorini",
-    country: "Greece",
-    teaser: "The sunsets here changed my perspective on what 'breathtaking' really means. Here's everything you need to know before you go.",
-    rating: 4.8,
-    dateVisited: "October 2024",
-    hasVideo: true,
-  },
-  {
-    slug: "maldives-overwater",
-    image: maldivesImg,
-    destination: "Maldives",
-    country: "Indian Ocean",
-    teaser: "Is the hype real? I spent a week in an overwater bungalow to find out. Spoiler: bring snorkel gear.",
-    rating: 4.9,
-    dateVisited: "March 2024",
-    hasVideo: true,
   },
 ];
 

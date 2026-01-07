@@ -3,10 +3,6 @@ import Footer from "@/components/Footer";
 import { Star, ArrowRight, Play, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import santoriniImg from "@/assets/deal-santorini.jpg";
-import maldivesImg from "@/assets/deal-maldives.jpg";
-import cruiseImg from "@/assets/deal-cruise.jpg";
-import alpsImg from "@/assets/deal-alps.jpg";
 import cubaImg from "@/assets/deal-cuba.jpg";
 
 interface Destination {
@@ -34,54 +30,6 @@ const destinations: Destination[] = [
     dateVisited: "December 2024",
     hasVideo: false,
     tags: ["Budget", "Beach", "All-Inclusive"],
-  },
-  {
-    slug: "santorini-greece",
-    image: santoriniImg,
-    destination: "Santorini",
-    country: "Greece",
-    region: "Europe",
-    teaser: "The sunsets here changed my perspective on what 'breathtaking' really means. Here's everything you need to know before you go.",
-    rating: 4.8,
-    dateVisited: "October 2024",
-    hasVideo: true,
-    tags: ["Romance", "Beach", "Photography"],
-  },
-  {
-    slug: "maldives-overwater",
-    image: maldivesImg,
-    destination: "Maldives",
-    country: "Indian Ocean",
-    region: "Asia",
-    teaser: "Is the hype real? I spent a week in an overwater bungalow to find out. Spoiler: bring snorkel gear.",
-    rating: 4.9,
-    dateVisited: "March 2024",
-    hasVideo: true,
-    tags: ["Luxury", "Beach", "Snorkeling"],
-  },
-  {
-    slug: "caribbean-cruise",
-    image: cruiseImg,
-    destination: "Caribbean Cruise",
-    country: "Various Islands",
-    region: "Caribbean",
-    teaser: "Island hopping with a group of friends—here's what we loved, what surprised us, and what we'd do differently.",
-    rating: 4.5,
-    dateVisited: "January 2024",
-    hasVideo: false,
-    tags: ["Cruise", "Group Travel", "Beach"],
-  },
-  {
-    slug: "swiss-alps",
-    image: alpsImg,
-    destination: "Swiss Alps",
-    country: "Switzerland",
-    region: "Europe",
-    teaser: "Mountain views that make you feel tiny in the best way. Perfect for adventure seekers and nature lovers alike.",
-    rating: 4.7,
-    dateVisited: "August 2023",
-    hasVideo: true,
-    tags: ["Adventure", "Mountains", "Hiking"],
   },
 ];
 
