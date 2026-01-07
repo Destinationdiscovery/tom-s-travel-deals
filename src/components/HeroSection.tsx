@@ -21,8 +21,7 @@ const HeroSection = () => {
           </h1>
 
           <p className="text-lg md:text-xl text-primary-foreground/80 max-w-2xl mx-auto font-body">
-            Real travel experiences, honest reviews, and destination insights from someone who's been there. 
-            Your journey to unforgettable adventures starts here.
+            With over a decade of experience as a travel consultant, I share real experiences, honest reviews, and destination insights to help you plan your perfect trip.
           </p>
         </div>
       </div>
