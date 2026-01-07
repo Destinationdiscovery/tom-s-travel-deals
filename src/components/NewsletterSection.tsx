@@ -18,7 +18,7 @@ const NewsletterSection = () => {
       toast.error("Please enter a valid email");
       return;
     }
-    toast.success(`Thanks ${name}! You'll receive exclusive deals soon.`);
+    toast.success(`Thanks ${name}! You'll receive honest destination insights soon.`);
     setEmail("");
     setName("");
   };
@@ -33,15 +33,15 @@ const NewsletterSection = () => {
         <div className="max-w-2xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-foreground/10 backdrop-blur-sm mb-6">
             <Sparkles className="h-4 w-4 text-primary-foreground" />
-            <span className="text-sm font-medium text-primary-foreground">Exclusive Member Benefits</span>
+            <span className="text-sm font-medium text-primary-foreground">Travel Consultant Insights</span>
           </div>
 
           <h2 className="font-display text-3xl md:text-5xl font-bold text-primary-foreground mb-6">
-            Never Miss a Deal Again
+            Not Sure If a Destination Is Right for You?
           </h2>
           <p className="text-lg text-primary-foreground/80 mb-10">
-            Join my travel deals newsletter and be the first to know about flash sales, 
-            last-minute getaways, and exclusive group vacation offers.
+            I send occasional emails with honest pros and cons, practical planning tips, 
+            and real expectations from destinations I personally visit and review.
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4 max-w-md mx-auto">
@@ -73,12 +73,12 @@ const NewsletterSection = () => {
 
             <Button variant="warm" size="xl" type="submit" className="w-full gap-2">
               <Send className="h-5 w-5" />
-              Subscribe to Deals Newsletter
+              Get Honest Destination Advice
             </Button>
           </form>
 
           <p className="text-sm text-primary-foreground/60 mt-6">
-            No spam, ever. Unsubscribe anytime. Your email is safe with me.
+            No spam. Unsubscribe anytime.
           </p>
         </div>
       </div>
