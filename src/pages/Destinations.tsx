@@ -35,7 +35,7 @@ const destinations: Destination[] = [
   {
     slug: "curacao-blue-bay",
     image: curacaoImg,
-    destination: "Vila in Blue Bay Resort",
+    destination: "Villa in Blue Bay Resort",
     country: "Curaçao",
     region: "Caribbean",
     teaser: "A luxury private villa with an infinity pool that offered space, privacy, and easy access to some of Curaçao's best beaches.",
