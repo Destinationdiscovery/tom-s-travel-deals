@@ -110,7 +110,7 @@ const CompassArticle = () => {
                     Let me help you put this advice into action with a personalized travel plan.
                   </p>
                   <a
-                    href="https://form.jotform.com/250973058498069"
+                    href="https://form.jotform.com/tlaracy/ready-to-plan-your-trip"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
