@@ -20,7 +20,8 @@ const NewsletterSection = () => {
           </h2>
           <p className="text-lg text-primary-foreground/80 mb-10">
             I send occasional emails with honest pros and cons, practical planning tips, 
-            and real expectations from destinations I personally visit and review.
+            and real expectations from destinations I personally visit and review. 
+            Have a destination in mind? Request a review and I'll give you my honest assessment before you book.
           </p>
 
           <Button 
