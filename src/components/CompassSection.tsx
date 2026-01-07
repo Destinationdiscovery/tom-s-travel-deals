@@ -68,7 +68,7 @@ const CompassSection = () => {
             The Compass
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Navigate your next adventure with insider tips, destination guides, and travel wisdom.
+            Insider tips and travel wisdom from over a decade of experience as a travel consultant.
           </p>
         </div>
 
