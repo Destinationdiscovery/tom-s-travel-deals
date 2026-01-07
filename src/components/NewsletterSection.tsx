@@ -1,28 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Mail, Sparkles, Send } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
+import { Sparkles, Send } from "lucide-react";
 
 const NewsletterSection = () => {
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email.trim() || !name.trim()) {
-      toast.error("Please fill in all fields");
-      return;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      toast.error("Please enter a valid email");
-      return;
-    }
-    toast.success(`Thanks ${name}! You'll receive honest destination insights soon.`);
-    setEmail("");
-    setName("");
-  };
-
   return (
     <section id="newsletter" className="py-24 bg-hero-gradient relative overflow-hidden">
       {/* Decorative Elements */}
@@ -44,38 +23,21 @@ const NewsletterSection = () => {
             and real expectations from destinations I personally visit and review.
           </p>
 
-          <form onSubmit={handleSubmit} className="space-y-4 max-w-md mx-auto">
-            <div className="flex gap-4">
-              <div className="relative flex-1">
-                <Input
-                  type="text"
-                  placeholder="Your name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="h-14 pl-12 bg-primary-foreground/10 backdrop-blur-sm border-primary-foreground/30 text-primary-foreground placeholder:text-primary-foreground/60"
-                />
-                <div className="absolute left-4 top-1/2 -translate-y-1/2">
-                  <span className="text-primary-foreground/60">👋</span>
-                </div>
-              </div>
-            </div>
-            
-            <div className="relative">
-              <Input
-                type="email"
-                placeholder="Your email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="h-14 pl-12 bg-primary-foreground/10 backdrop-blur-sm border-primary-foreground/30 text-primary-foreground placeholder:text-primary-foreground/60"
-              />
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-primary-foreground/60" />
-            </div>
-
-            <Button variant="warm" size="xl" type="submit" className="w-full gap-2">
+          <Button 
+            variant="warm" 
+            size="xl" 
+            className="gap-2"
+            asChild
+          >
+            <a 
+              href="https://form.jotform.com/tlaracy/honest-destination-advice-from-a-tr" 
+              target="_blank" 
+              rel="noopener noreferrer"
+            >
               <Send className="h-5 w-5" />
               Get Honest Destination Advice
-            </Button>
-          </form>
+            </a>
+          </Button>
 
           <p className="text-sm text-primary-foreground/60 mt-6">
             No spam. Unsubscribe anytime.
