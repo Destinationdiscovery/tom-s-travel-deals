@@ -1,9 +1,20 @@
 import { Button } from "@/components/ui/button";
 import { Sparkles, Send } from "lucide-react";
+import heroImage from "@/assets/curacao-hero.avif";
 
 const NewsletterSection = () => {
   return (
-    <section id="newsletter" className="py-24 bg-hero-gradient relative overflow-hidden">
+    <section id="newsletter" className="py-24 relative overflow-hidden">
+      {/* Background Image with Overlay */}
+      <div className="absolute inset-0">
+        <img 
+          src={heroImage} 
+          alt="" 
+          className="w-full h-full object-cover" 
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/85 to-accent/80" />
+      </div>
+
       {/* Decorative Elements */}
       <div className="absolute top-0 left-0 w-64 h-64 bg-primary-foreground/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-accent/20 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
