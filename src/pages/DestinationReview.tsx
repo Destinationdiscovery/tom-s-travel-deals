@@ -1,17 +1,20 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useParams, Link } from "react-router-dom";
-import { Star, ArrowLeft, Calendar, MapPin, Heart, Share2, MessageCircle, Send } from "lucide-react";
+import { Star, ArrowLeft, Calendar, MapPin, Heart, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { useState } from "react";
-import { toast } from "sonner";
 import santoriniImg from "@/assets/deal-santorini.jpg";
 import maldivesImg from "@/assets/deal-maldives.jpg";
 import cruiseImg from "@/assets/deal-cruise.jpg";
 import alpsImg from "@/assets/deal-alps.jpg";
 import cubaImg from "@/assets/deal-cuba.jpg";
+import cubaGallery1 from "@/assets/cuba-gallery-1.jpg";
+import cubaGallery2 from "@/assets/cuba-gallery-2.jpg";
+import cubaGallery3 from "@/assets/cuba-gallery-3.jpg";
+import cubaGallery4 from "@/assets/cuba-gallery-4.jpg";
+import cubaGallery5 from "@/assets/cuba-gallery-5.jpg";
+import cubaGallery6 from "@/assets/cuba-gallery-6.jpg";
+import cubaGallery7 from "@/assets/cuba-gallery-7.jpg";
 
 interface ReviewData {
   slug: string;
@@ -35,6 +38,7 @@ interface ReviewData {
   tips: string[];
   bestFor: string[];
   videoUrl?: string;
+  gallery?: string[];
 }
 
 const reviews: Record<string, ReviewData> = {
@@ -195,53 +199,14 @@ const reviews: Record<string, ReviewData> = {
       "Reserve non-motorized water activities in advance if you want to use them",
     ],
     bestFor: ["Budget travelers", "Groups", "Adults who like both quiet and lively pool options", "Beach lovers who are flexible", "First-time visitors to Cuba"],
+    gallery: [cubaGallery1, cubaGallery2, cubaGallery3, cubaGallery4, cubaGallery5, cubaGallery6, cubaGallery7],
   },
 };
-
-interface Comment {
-  id: number;
-  name: string;
-  date: string;
-  content: string;
-}
 
 const DestinationReview = () => {
   const { slug } = useParams<{ slug: string }>();
   const review = slug ? reviews[slug] : null;
   
-  const [comments, setComments] = useState<Comment[]>([
-    {
-      id: 1,
-      name: "Sarah M.",
-      date: "2 weeks ago",
-      content: "Great review, Tom! We're planning our trip for next spring and your tips about shoulder season are super helpful. Did you find it easy to get around without a car?",
-    },
-    {
-      id: 2,
-      name: "Mike & Lisa",
-      date: "1 month ago",
-      content: "Just got back from here following your recommendations. The taverna in Imerovigli was amazing! Thanks for the tip about the hike too—highlight of our trip.",
-    },
-  ]);
-  
-  const [newComment, setNewComment] = useState({ name: "", content: "" });
-
-  const handleCommentSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newComment.name.trim() || !newComment.content.trim()) {
-      toast.error("Please fill in your name and comment");
-      return;
-    }
-    const comment: Comment = {
-      id: Date.now(),
-      name: newComment.name,
-      date: "Just now",
-      content: newComment.content,
-    };
-    setComments([comment, ...comments]);
-    setNewComment({ name: "", content: "" });
-    toast.success("Thanks for sharing your experience!");
-  };
 
   if (!review) {
     return (
@@ -376,49 +341,26 @@ const DestinationReview = () => {
                 </ul>
               </div>
 
-              {/* Comments Section */}
-              <div className="space-y-8">
-                <h2 className="font-display text-2xl font-bold text-foreground flex items-center gap-2">
-                  <MessageCircle className="h-6 w-6" />
-                  Share Your Experience
-                </h2>
-                
-                {/* Comment Form */}
-                <form onSubmit={handleCommentSubmit} className="bg-card rounded-2xl p-6 shadow-soft space-y-4">
-                  <p className="text-muted-foreground">
-                    Been to {review.destination}? Share your thoughts and tips with the community!
-                  </p>
-                  <Input
-                    placeholder="Your name"
-                    value={newComment.name}
-                    onChange={(e) => setNewComment({ ...newComment, name: e.target.value })}
-                    className="bg-background"
-                  />
-                  <Textarea
-                    placeholder="Share your experience, tips, or questions..."
-                    value={newComment.content}
-                    onChange={(e) => setNewComment({ ...newComment, content: e.target.value })}
-                    className="bg-background min-h-[100px]"
-                  />
-                  <Button type="submit" className="gap-2">
-                    <Send className="h-4 w-4" />
-                    Post Comment
-                  </Button>
-                </form>
-
-                {/* Comments List */}
+              {/* Gallery */}
+              {review.gallery && review.gallery.length > 0 && (
                 <div className="space-y-6">
-                  {comments.map((comment) => (
-                    <div key={comment.id} className="bg-card rounded-xl p-6 shadow-soft">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="font-semibold text-foreground">{comment.name}</span>
-                        <span className="text-sm text-muted-foreground">{comment.date}</span>
+                  <h2 className="font-display text-2xl font-bold text-foreground">Photo Gallery</h2>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {review.gallery.map((image, index) => (
+                      <div 
+                        key={index} 
+                        className="aspect-[4/3] rounded-xl overflow-hidden"
+                      >
+                        <img 
+                          src={image} 
+                          alt={`${review.destination} gallery image ${index + 1}`}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        />
                       </div>
-                      <p className="text-muted-foreground">{comment.content}</p>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Sidebar */}
@@ -460,9 +402,11 @@ const DestinationReview = () => {
                 <div className="mt-8">
                   <Button 
                     className="w-full"
-                    onClick={() => window.open("https://tom.travelonly.com", "_blank")}
+                    asChild
                   >
-                    Ready to Go? Let's Plan
+                    <a href="mailto:tlaracy@travelonly.com?subject=Let's Plan My Trip">
+                      Ready to Go? Let's Plan
+                    </a>
                   </Button>
                   <p className="text-xs text-muted-foreground text-center mt-2">
                     No pressure—just here to help when you're ready
