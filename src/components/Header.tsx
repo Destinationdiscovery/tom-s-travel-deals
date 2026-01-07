@@ -43,12 +43,18 @@ const Header = () => {
           >
             The Compass
           </button>
-          <button 
-            onClick={() => scrollToSection("about")}
+          <Link 
+            to="/about"
             className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
           >
             About Tom
-          </button>
+          </Link>
+          <Link 
+            to="/contact"
+            className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+          >
+            Contact
+          </Link>
         </nav>
 
         {/* Mobile Menu Button */}
@@ -77,12 +83,20 @@ const Header = () => {
             >
               The Compass
             </button>
-            <button 
-              onClick={() => scrollToSection("about")}
+            <Link 
+              to="/about"
               className="text-left text-sm font-medium text-muted-foreground hover:text-primary transition-colors py-2"
+              onClick={() => setIsMenuOpen(false)}
             >
               About Tom
-            </button>
+            </Link>
+            <Link 
+              to="/contact"
+              className="text-left text-sm font-medium text-muted-foreground hover:text-primary transition-colors py-2"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Contact
+            </Link>
           </nav>
         </div>
       )}

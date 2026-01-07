@@ -14,7 +14,7 @@ const Footer = () => {
               <Compass className="h-8 w-8 text-primary" />
               <div>
                 <h3 className="font-display text-xl font-bold text-background">Tom Laracy</h3>
-                <p className="text-xs text-muted-foreground">Travel Guide & Explorer</p>
+                <p className="text-xs text-muted-foreground">Travel Consultant Est. 2011</p>
               </div>
             </div>
             <p className="text-muted-foreground text-sm max-w-sm mb-4">
@@ -41,9 +41,12 @@ const Footer = () => {
               <a href="/#compass" className="text-muted-foreground hover:text-primary transition-colors text-sm">
                 The Compass
               </a>
-              <a href="/#about" className="text-muted-foreground hover:text-primary transition-colors text-sm">
+              <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors text-sm">
                 About Tom
-              </a>
+              </Link>
+              <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-sm">
+                Contact
+              </Link>
             </nav>
           </div>
 
