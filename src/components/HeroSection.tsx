@@ -1,4 +1,4 @@
-import heroImage from "@/assets/hero-beach.jpg";
+import heroImage from "@/assets/mexico-gallery-22.jpg";
 
 const HeroSection = () => {
 
@@ -9,7 +9,7 @@ const HeroSection = () => {
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${heroImage})` }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-foreground/60 via-foreground/40 to-foreground/70" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60" />
       </div>
 
       {/* Content */}
