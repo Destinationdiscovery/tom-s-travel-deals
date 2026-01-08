@@ -3,6 +3,7 @@ import { Button } from "./ui/button";
 import { Link } from "react-router-dom";
 import cubaImg from "@/assets/deal-cuba.jpg";
 import curacaoImg from "@/assets/curacao-hero.avif";
+import mexicoImg from "@/assets/mexico-hero.webp";
 
 interface DestinationPreview {
   slug: string;
@@ -16,6 +17,16 @@ interface DestinationPreview {
 }
 
 const destinations: DestinationPreview[] = [
+  {
+    slug: "mexico-barcelo-riviera",
+    image: mexicoImg,
+    destination: "Barceló Maya Riviera Adults Only",
+    country: "Riviera Maya, Mexico",
+    teaser: "A grand, modern adults-only resort that delivers a luxury feel, incredible pools, excellent dining, and outstanding value for the Riviera Maya.",
+    rating: 4.9,
+    dateVisited: "September 2025",
+    hasVideo: false,
+  },
   {
     slug: "cuba-vila-gale",
     image: cubaImg,

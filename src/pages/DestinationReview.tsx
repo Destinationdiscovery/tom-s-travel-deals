@@ -35,6 +35,29 @@ import curacaoGallery10 from "@/assets/curacao-gallery-10.webp";
 import curacaoGallery11 from "@/assets/curacao-gallery-11.webp";
 import curacaoGallery12 from "@/assets/curacao-gallery-12.jpeg";
 import curacaoGallery13 from "@/assets/curacao-gallery-13.webp";
+import mexicoImg from "@/assets/mexico-hero.webp";
+import mexicoGallery1 from "@/assets/mexico-gallery-1.webp";
+import mexicoGallery2 from "@/assets/mexico-gallery-2.jpg";
+import mexicoGallery3 from "@/assets/mexico-gallery-3.jpg";
+import mexicoGallery4 from "@/assets/mexico-gallery-4.jpg";
+import mexicoGallery5 from "@/assets/mexico-gallery-5.jpg";
+import mexicoGallery6 from "@/assets/mexico-gallery-6.jpeg";
+import mexicoGallery7 from "@/assets/mexico-gallery-7.jpg";
+import mexicoGallery8 from "@/assets/mexico-gallery-8.jpeg";
+import mexicoGallery9 from "@/assets/mexico-gallery-9.jpg";
+import mexicoGallery10 from "@/assets/mexico-gallery-10.jpg";
+import mexicoGallery11 from "@/assets/mexico-gallery-11.jpg";
+import mexicoGallery12 from "@/assets/mexico-gallery-12.jpg";
+import mexicoGallery13 from "@/assets/mexico-gallery-13.jpg";
+import mexicoGallery14 from "@/assets/mexico-gallery-14.jpg";
+import mexicoGallery15 from "@/assets/mexico-gallery-15.jpg";
+import mexicoGallery16 from "@/assets/mexico-gallery-16.jpg";
+import mexicoGallery17 from "@/assets/mexico-gallery-17.jpg";
+import mexicoGallery18 from "@/assets/mexico-gallery-18.jpg";
+import mexicoGallery19 from "@/assets/mexico-gallery-19.jpg";
+import mexicoGallery20 from "@/assets/mexico-gallery-20.jpg";
+import mexicoGallery21 from "@/assets/mexico-gallery-21.jpg";
+import mexicoGallery22 from "@/assets/mexico-gallery-22.jpg";
 
 interface ReviewData {
   slug: string;
@@ -52,6 +75,7 @@ interface ReviewData {
     rooms?: number;
     beach?: number;
     service?: number;
+    pools?: number;
   };
   summary: string;
   fullReview: string[];
@@ -62,6 +86,50 @@ interface ReviewData {
 }
 
 const reviews: Record<string, ReviewData> = {
+  "mexico-barcelo-riviera": {
+    slug: "mexico-barcelo-riviera",
+    image: mexicoImg,
+    destination: "Barceló Maya Riviera Adults Only",
+    country: "Riviera Maya, Mexico",
+    dateVisited: "September 2025",
+    duration: "7 nights",
+    rating: 4.9,
+    ratings: {
+      rooms: 4.8,
+      food: 4.8,
+      beach: 4.9,
+      pools: 5,
+      service: 4.7,
+      value: 4.9,
+    },
+    summary: "A grand, modern adults-only resort that delivers a luxury feel, incredible pools, excellent dining, and outstanding value for the Riviera Maya.",
+    fullReview: [
+      "I stayed at Barceló Maya Riviera Adults Only in September as part of my work reviewing resorts for clients, and it made a strong impression right from arrival. Opened in 2019, the resort still feels very new, modern, and polished. It's located about 40 minutes south of Playa del Carmen within the larger gated Barceló resort complex, which immediately gives the area a safe and well-organized feel.",
+      "The scale of this resort is impressive. With roughly 850 rooms housed in one expansive, ocean-facing building, it's undeniably large, yet because everything is contained within a single structure, it never felt overwhelming. The design leans grand and luxurious, with wide, massive hallways and open spaces that reinforce the upscale atmosphere rather than making it feel crowded. There's also a large convention center on site, which adds to the sense that this is a substantial, high-end property.",
+      "The main lobby and lounge area really sets the tone. It's modern, open, and social, with a massive TV screen that becomes a central gathering spot, especially in the evenings or during sporting events. It feels lively without being chaotic and very much geared toward an adults-only crowd.",
+      "The rooms are modern, spacious, air-conditioned, and very comfortable. Every room includes a private terrace with a hot tub, and many have excellent ocean views. For guests looking to upgrade, there are also swim-up rooms with private pool access. From a travel consultant perspective, the room product here is strong and well designed for couples who want something upscale without stepping into ultra-luxury pricing. Guests who opt for the VIP upgrade gain access to additional amenities like a private lounge and 24-hour room service, which noticeably elevates the experience.",
+      "The outdoor spaces are a major highlight. The resort features what is often referred to as the largest infinity pool in Mexico, and it truly lives up to that reputation. The pool is enormous, with built-in lounge beds, multiple sections, and two swim-up bars. Even when the resort is busy, it never felt crowded. There is also a music bar with a live DJ that adds energy during the day without overwhelming the rest of the resort.",
+      "The beach is equally impressive. The resort sits in a bay, which keeps the water calm and ideal for swimming. During my September stay, there was little to no seaweed, and the water was clear and inviting. Palm trees line the beach, creating a classic Caribbean feel, and there were plenty of loungers available. There is no dedicated beach service, which is worth noting, but the quality of the beach itself more than makes up for it.",
+      "Dining was another standout. Guests have access to a strong buffet for breakfast and lunch, along with four specialty à la carte restaurants offering Italian, Japanese, French, and Mexican cuisine for dinner. Both the buffets and à la cartes were consistently excellent, with the à la carte restaurants in particular exceeding expectations for a large all-inclusive resort. Reservations are important, but well worth the effort.",
+      "One of the biggest advantages of staying at Barceló Maya Riviera is access to the neighboring Barceló resorts within the gated complex. This gives guests additional restaurants, entertainment, and amenities to explore, significantly increasing the overall value of the stay.",
+      "Overall, Barceló Maya Riviera Adults Only delivers a grand, modern, and luxurious experience at a price point that remains accessible. From a professional standpoint, it's one of the strongest adults-only options in the Playa del Carmen area for travelers who want upscale amenities, excellent food, and a lively yet refined atmosphere without paying true ultra-luxury rates.",
+    ],
+    tips: [
+      "Staying at the adults-only Riviera gives you access to the neighboring Barceló resorts, which adds a lot of dining and entertainment variety.",
+      "The infinity pool is one of the largest in Mexico and never feels crowded, even during busier periods.",
+      "Consider the VIP upgrade if you value extras like a private lounge and 24-hour room service.",
+      "The beach sits in a protected bay, making it ideal for swimming with generally calm water.",
+      "Make à la carte restaurant reservations early to get your preferred dining times.",
+    ],
+    bestFor: [
+      "Couples looking for a modern adults-only resort",
+      "Travelers who want a luxury feel without ultra-luxury pricing",
+      "Guests who enjoy large, lively pool areas",
+      "Those who want access to multiple resorts without changing hotels",
+      "Adults who want upscale amenities, good food, and a polished atmosphere",
+    ],
+    gallery: [mexicoImg, mexicoGallery1, mexicoGallery2, mexicoGallery3, mexicoGallery4, mexicoGallery5, mexicoGallery6, mexicoGallery7, mexicoGallery8, mexicoGallery9, mexicoGallery10, mexicoGallery11, mexicoGallery12, mexicoGallery13, mexicoGallery14, mexicoGallery15, mexicoGallery16, mexicoGallery17, mexicoGallery18, mexicoGallery19, mexicoGallery20, mexicoGallery21, mexicoGallery22],
+  },
   "cuba-vila-gale": {
     slug: "cuba-vila-gale",
     image: cubaImg,
