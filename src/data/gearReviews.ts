@@ -1,3 +1,5 @@
+import gearAdapterMain from "@/assets/gear-adapter-main.jpg";
+
 export interface GearReview {
   id: string;
   slug: string;
@@ -21,9 +23,9 @@ export const gearReviews: GearReview[] = [
     id: "1",
     slug: "travel-converter-cuba-europe",
     name: "Universal Travel Adapter",
-    brand: "EPICKA",
+    brand: "Fortuna Mille",
     category: "Tech",
-    image: "/placeholder.svg",
+    image: gearAdapterMain,
     rating: 5,
     testedOn: "Cuba 2024, European trips",
     price: "$$",
@@ -39,7 +41,7 @@ export const gearReviews: GearReview[] = [
       "No built-in voltage converter (most modern devices don't need one)"
     ],
     fullReview: "After years of traveling with multiple adapters, I finally found one that handles everything. This universal adapter has been my go-to for Cuba trips (which have their own unique outlet requirements) and all my European adventures. The build quality is solid, and having USB ports built-in means fewer things to pack. I've charged my phone, laptop, and camera simultaneously without issues. Essential for any international traveler.",
-    amazonLink: "https://amazon.com",
+    amazonLink: "https://amzn.to/4pubjPC",
     bestFor: ["Cuba travelers", "European trips", "International travelers"]
   },
   {
