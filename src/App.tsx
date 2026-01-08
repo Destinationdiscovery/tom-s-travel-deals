@@ -8,6 +8,8 @@ import Destinations from "./pages/Destinations";
 import DestinationReview from "./pages/DestinationReview";
 import Compass from "./pages/Compass";
 import CompassArticle from "./pages/CompassArticle";
+import Gear from "./pages/Gear";
+import GearReview from "./pages/GearReview";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
@@ -26,6 +28,8 @@ const App = () => (
           <Route path="/destinations/:slug" element={<DestinationReview />} />
           <Route path="/compass" element={<Compass />} />
           <Route path="/compass/:slug" element={<CompassArticle />} />
+          <Route path="/gear" element={<Gear />} />
+          <Route path="/gear/:slug" element={<GearReview />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

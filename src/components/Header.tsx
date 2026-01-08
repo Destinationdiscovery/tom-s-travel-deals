@@ -37,6 +37,12 @@ const Header = () => {
           >
             Destinations
           </Link>
+          <Link 
+            to="/gear"
+            className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+          >
+            Gear Reviews
+          </Link>
           <button 
             onClick={() => scrollToSection("compass")}
             className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
@@ -76,6 +82,13 @@ const Header = () => {
               onClick={() => setIsMenuOpen(false)}
             >
               Destinations
+            </Link>
+            <Link 
+              to="/gear"
+              className="text-left text-sm font-medium text-muted-foreground hover:text-primary transition-colors py-2"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Gear Reviews
             </Link>
             <button 
               onClick={() => scrollToSection("compass")}
