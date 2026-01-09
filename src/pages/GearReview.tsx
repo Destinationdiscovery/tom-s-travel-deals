@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { gearReviews } from "@/data/gearReviews";
-
+import heroBeach from "@/assets/hero-beach.jpg";
 const GearReview = () => {
   const { slug } = useParams<{ slug: string }>();
   const gear = gearReviews.find((g) => g.slug === slug);
@@ -52,8 +52,8 @@ const GearReview = () => {
         {/* Hero Section */}
         <div className="relative h-[40vh] md:h-[50vh] overflow-hidden">
           <img
-            src={gallery[selectedImage]}
-            alt={gear.name}
+            src={heroBeach}
+            alt="Travel Gear Discovery"
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
