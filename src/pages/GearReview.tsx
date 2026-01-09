@@ -1,15 +1,18 @@
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Star, Check, X, ArrowLeft, ExternalLink } from "lucide-react";
+import { Star, ArrowLeft, Lightbulb, ExternalLink, ShoppingCart } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { gearReviews } from "@/data/gearReviews";
 
 const GearReview = () => {
   const { slug } = useParams<{ slug: string }>();
   const gear = gearReviews.find((g) => g.slug === slug);
+  const [selectedImage, setSelectedImage] = useState(0);
 
   if (!gear) {
     return (
@@ -19,7 +22,7 @@ const GearReview = () => {
           <div className="text-center">
             <h1 className="text-2xl font-bold text-foreground mb-4">Gear not found</h1>
             <Link to="/gear">
-              <Button variant="outline">Back to Gear Reviews</Button>
+              <Button variant="outline">Back to Gear Discovery</Button>
             </Link>
           </div>
         </main>
@@ -32,224 +35,254 @@ const GearReview = () => {
     (g) => g.category === gear.category && g.id !== gear.id
   ).slice(0, 3);
 
+  const gallery = gear.gallery || [gear.image];
+
+  const ratingLabels: Record<string, string> = {
+    buildQuality: "Build Quality",
+    portability: "Portability",
+    value: "Value",
+    easeOfUse: "Ease of Use",
+    durability: "Durability",
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <main className="pt-20">
-        {/* Back Navigation */}
-        <div className="container mx-auto px-4 py-4">
-          <Link to="/gear" className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Gear Reviews
-          </Link>
+        {/* Hero Section */}
+        <div className="relative h-[40vh] md:h-[50vh] overflow-hidden">
+          <img
+            src={gallery[selectedImage]}
+            alt={gear.name}
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
+            <div className="container mx-auto">
+              <Link 
+                to="/gear" 
+                className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors mb-4"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Gear Discovery
+              </Link>
+              <Badge className="mb-3 bg-primary text-primary-foreground">
+                {gear.category}
+              </Badge>
+              <p className="text-white/80 text-sm mb-1">{gear.brand}</p>
+              <h1 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-white">
+                {gear.name}
+              </h1>
+            </div>
+          </div>
         </div>
 
-        {/* Hero Section */}
-        <section className="py-8 md:py-12">
-          <div className="container mx-auto px-4">
-            <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
-              {/* Product Image */}
-              <div className="aspect-square bg-muted rounded-lg overflow-hidden">
-                <img
-                  src={gear.image}
-                  alt={gear.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
+        {/* Main Content */}
+        <div className="container mx-auto px-4 py-8 md:py-12">
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Main Column */}
+            <div className="lg:col-span-2 space-y-8">
+              {/* Summary Card */}
+              <Card className="border-primary/20 bg-primary/5">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="flex items-center gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`h-6 w-6 ${
+                            i < gear.rating
+                              ? "fill-primary text-primary"
+                              : "text-muted-foreground/30"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-2xl font-bold text-foreground">{gear.rating}/5</span>
+                  </div>
+                  <p className="text-muted-foreground text-lg leading-relaxed">
+                    {gear.excerpt}
+                  </p>
+                  <div className="flex flex-wrap gap-3 mt-4">
+                    <Badge variant="outline" className="text-sm">
+                      Price: {gear.price}
+                    </Badge>
+                    <Badge variant="outline" className="text-sm">
+                      Tested: {gear.testedOn}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
 
-              {/* Product Info */}
-              <div className="flex flex-col justify-center">
-                <Badge className="w-fit mb-4 bg-primary text-primary-foreground">
-                  {gear.category}
-                </Badge>
-                <p className="text-muted-foreground mb-2">{gear.brand}</p>
-                <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
-                  {gear.name}
-                </h1>
-                
-                {/* Rating */}
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="flex items-center gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-5 w-5 ${
-                          i < gear.rating
-                            ? "fill-primary text-primary"
-                            : "text-muted-foreground/30"
+              {/* My Experience */}
+              <section>
+                <h2 className="font-display text-2xl font-bold text-foreground mb-6">
+                  My Experience
+                </h2>
+                <div className="space-y-4">
+                  {gear.fullReview.map((paragraph, index) => (
+                    <p key={index} className="text-muted-foreground leading-relaxed">
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
+              </section>
+
+              {/* Tom's Tips */}
+              {gear.tips && gear.tips.length > 0 && (
+                <section className="bg-muted/30 rounded-lg p-6">
+                  <h2 className="font-display text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
+                    <Lightbulb className="h-6 w-6 text-primary" />
+                    Tom's Tips
+                  </h2>
+                  <ol className="space-y-4">
+                    {gear.tips.map((tip, index) => (
+                      <li key={index} className="flex gap-4">
+                        <span className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-semibold text-sm">
+                          {index + 1}
+                        </span>
+                        <p className="text-muted-foreground leading-relaxed pt-1">
+                          {tip}
+                        </p>
+                      </li>
+                    ))}
+                  </ol>
+                </section>
+              )}
+
+              {/* Photo Gallery */}
+              {gallery.length > 1 && (
+                <section>
+                  <h2 className="font-display text-2xl font-bold text-foreground mb-6">
+                    Photos
+                  </h2>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {gallery.map((image, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedImage(index)}
+                        className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${
+                          selectedImage === index 
+                            ? "border-primary ring-2 ring-primary/20" 
+                            : "border-transparent hover:border-primary/50"
                         }`}
-                      />
+                      >
+                        <img
+                          src={image}
+                          alt={`${gear.name} - Photo ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
                     ))}
                   </div>
-                  <span className="text-foreground font-semibold">{gear.rating}/5</span>
-                </div>
+                </section>
+              )}
 
-                {/* Key Stats */}
-                <div className="flex flex-wrap gap-3 mb-6">
-                  <Badge variant="outline" className="text-sm">
-                    Price: {gear.price}
-                  </Badge>
-                  <Badge variant="outline" className="text-sm">
-                    Tested: {gear.testedOn}
-                  </Badge>
-                </div>
-
-                <p className="text-muted-foreground mb-6 text-lg">
-                  {gear.excerpt}
-                </p>
-
-                {/* Amazon Button */}
-                <a href={gear.amazonLink} target="_blank" rel="noopener noreferrer">
-                  <Button size="lg" className="gap-2 w-full md:w-auto">
-                    Check Price on Amazon
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
-                </a>
-
-                {/* Affiliate Disclosure */}
-                <p className="text-xs text-muted-foreground mt-4 italic">
-                  This post contains affiliate links. If you purchase through these links, I may earn a small commission at no extra cost to you.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Pros & Cons */}
-        <section className="py-12 bg-muted/30">
-          <div className="container mx-auto px-4">
-            <h2 className="font-display text-2xl font-bold text-foreground mb-8 text-center">
-              The Verdict
-            </h2>
-            <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-              {/* Pros */}
-              <Card className="border-green-500/20 bg-green-500/5">
-                <CardContent className="p-6">
-                  <h3 className="font-semibold text-lg text-foreground mb-4 flex items-center gap-2">
-                    <Check className="h-5 w-5 text-green-500" />
-                    What I Love
-                  </h3>
-                  <ul className="space-y-3">
-                    {gear.pros.map((pro, index) => (
-                      <li key={index} className="flex items-start gap-2 text-muted-foreground">
-                        <Check className="h-4 w-4 text-green-500 mt-1 shrink-0" />
-                        {pro}
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-
-              {/* Cons */}
-              <Card className="border-red-500/20 bg-red-500/5">
-                <CardContent className="p-6">
-                  <h3 className="font-semibold text-lg text-foreground mb-4 flex items-center gap-2">
-                    <X className="h-5 w-5 text-red-500" />
-                    What Could Be Better
-                  </h3>
-                  <ul className="space-y-3">
-                    {gear.cons.map((con, index) => (
-                      <li key={index} className="flex items-start gap-2 text-muted-foreground">
-                        <X className="h-4 w-4 text-red-500 mt-1 shrink-0" />
-                        {con}
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
-
-        {/* Full Review */}
-        <section className="py-12">
-          <div className="container mx-auto px-4">
-            <div className="max-w-3xl mx-auto">
-              <h2 className="font-display text-2xl font-bold text-foreground mb-6">
-                My Experience
-              </h2>
-              <p className="text-muted-foreground leading-relaxed text-lg">
-                {gear.fullReview}
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Best For */}
-        <section className="py-12 bg-muted/30">
-          <div className="container mx-auto px-4">
-            <div className="max-w-3xl mx-auto text-center">
-              <h2 className="font-display text-2xl font-bold text-foreground mb-6">
-                Best For
-              </h2>
-              <div className="flex flex-wrap justify-center gap-3">
-                {gear.bestFor.map((tag, index) => (
-                  <Badge key={index} variant="secondary" className="text-sm px-4 py-2">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* CTA */}
-        <section className="py-12">
-          <div className="container mx-auto px-4 text-center">
-            <a href={gear.amazonLink} target="_blank" rel="noopener noreferrer">
-              <Button size="lg" className="gap-2">
-                Check Price on Amazon
-                <ExternalLink className="h-4 w-4" />
-              </Button>
-            </a>
-            <p className="text-xs text-muted-foreground mt-4 italic">
-              Affiliate link – I may earn a small commission at no extra cost to you.
-            </p>
-          </div>
-        </section>
-
-        {/* Related Gear */}
-        {relatedGear.length > 0 && (
-          <section className="py-12 bg-muted/30">
-            <div className="container mx-auto px-4">
-              <h2 className="font-display text-2xl font-bold text-foreground mb-8 text-center">
-                More {gear.category} Reviews
-              </h2>
-              <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-                {relatedGear.map((related) => (
-                  <Link key={related.id} to={`/gear/${related.slug}`}>
-                    <Card className="h-full overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer">
-                      <div className="aspect-square bg-muted relative overflow-hidden">
-                        <img
-                          src={related.image}
-                          alt={related.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      </div>
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-1 mb-2">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`h-3 w-3 ${
-                                i < related.rating
-                                  ? "fill-primary text-primary"
-                                  : "text-muted-foreground/30"
-                              }`}
+              {/* Related Gear */}
+              {relatedGear.length > 0 && (
+                <section>
+                  <h2 className="font-display text-2xl font-bold text-foreground mb-6">
+                    More {gear.category} Reviews
+                  </h2>
+                  <div className="grid md:grid-cols-3 gap-4">
+                    {relatedGear.map((related) => (
+                      <Link key={related.id} to={`/gear/${related.slug}`}>
+                        <Card className="h-full overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer">
+                          <div className="aspect-square bg-muted relative overflow-hidden">
+                            <img
+                              src={related.image}
+                              alt={related.name}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             />
-                          ))}
+                          </div>
+                          <CardContent className="p-4">
+                            <div className="flex items-center gap-1 mb-2">
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`h-3 w-3 ${
+                                    i < related.rating
+                                      ? "fill-primary text-primary"
+                                      : "text-muted-foreground/30"
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                            <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                              {related.name}
+                            </h3>
+                          </CardContent>
+                        </Card>
+                      </Link>
+                    ))}
+                  </div>
+                </section>
+              )}
+            </div>
+
+            {/* Sidebar */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-24 space-y-6">
+                {/* Rating Breakdown */}
+                <Card>
+                  <CardContent className="p-6">
+                    <h3 className="font-display text-lg font-semibold text-foreground mb-4">
+                      Rating Breakdown
+                    </h3>
+                    <div className="space-y-4">
+                      {Object.entries(gear.ratings).map(([key, value]) => (
+                        <div key={key}>
+                          <div className="flex justify-between text-sm mb-1">
+                            <span className="text-muted-foreground">{ratingLabels[key]}</span>
+                            <span className="font-medium text-foreground">{value}/5</span>
+                          </div>
+                          <Progress value={value * 20} className="h-2" />
                         </div>
-                        <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                          {related.name}
-                        </h3>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                ))}
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Best For */}
+                <Card>
+                  <CardContent className="p-6">
+                    <h3 className="font-display text-lg font-semibold text-foreground mb-4">
+                      Best For
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {gear.bestFor.map((tag, index) => (
+                        <Badge key={index} variant="secondary" className="text-sm">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Buy Button */}
+                <Card className="border-primary/20 bg-primary/5">
+                  <CardContent className="p-6">
+                    <a 
+                      href={gear.amazonLink} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="block"
+                    >
+                      <Button size="lg" className="w-full gap-2">
+                        <ShoppingCart className="h-5 w-5" />
+                        Buy on Amazon
+                        <ExternalLink className="h-4 w-4" />
+                      </Button>
+                    </a>
+                    <p className="text-xs text-muted-foreground mt-4 text-center italic">
+                      Affiliate link – I may earn a small commission at no extra cost to you.
+                    </p>
+                  </CardContent>
+                </Card>
               </div>
             </div>
-          </section>
-        )}
+          </div>
+        </div>
       </main>
       <Footer />
     </div>
