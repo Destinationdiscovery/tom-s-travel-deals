@@ -40,7 +40,7 @@ export const gearReviews: GearReview[] = [
     rating: 5,
     ratings: {
       buildQuality: 5,
-      portability: 4,
+      portability: 5,
       value: 5,
       easeOfUse: 5,
       durability: 5,
