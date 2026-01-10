@@ -1,6 +1,9 @@
 import gearAdapterMain from "@/assets/gear-adapter-main.jpg";
 import gearAdapterAngles from "@/assets/gear-adapter-angles.jpg";
 import gearAdapterDevices from "@/assets/gear-adapter-devices.jpg";
+import gearPackingCubesMain from "@/assets/gear-packing-cubes-main.jpg";
+import gearPackingCubesSet from "@/assets/gear-packing-cubes-set.jpg";
+import gearPackingCubesFeatures from "@/assets/gear-packing-cubes-features.jpg";
 
 export interface GearReview {
   id: string;
@@ -76,45 +79,48 @@ export const gearReviews: GearReview[] = [
   {
     id: "2",
     slug: "packing-cubes",
-    name: "Compression Packing Cubes Set",
-    brand: "Peak Design",
+    name: "Packing Cubes",
+    brand: "BAGAIL",
     category: "Luggage",
-    image: "/placeholder.svg",
-    rating: 5,
+    image: gearPackingCubesMain,
+    rating: 4.5,
     ratings: {
       buildQuality: 5,
-      portability: 5,
-      value: 4,
-      easeOfUse: 4,
+      portability: 4,
+      value: 5,
+      easeOfUse: 5,
       durability: 5,
     },
-    testedOn: "15+ trips since 2022",
+    testedOn: "Cuba, Curaçao, Italy (17 days), Nashville, Las Vegas",
     price: "$$",
-    excerpt: "These compression cubes changed how I pack. I can now fit a week's worth of clothes in a carry-on and stay organized throughout the trip.",
+    excerpt: "Packing cubes let me fit more into my luggage, keep everything organized, and easily move clothes from suitcase to dresser without unpacking, which makes travel and longer stays much easier.",
     pros: [
-      "Compression zippers reduce volume by 30-50%",
-      "Mesh panels for visibility and breathability",
-      "Durable weatherproof material",
-      "Multiple sizes for different clothing types"
+      "Helps me pack more into my suitcase while staying organized",
+      "Makes it easy to separate clothing by type",
+      "Great for both long trips and short weekend getaways",
+      "Durable and holds up well across frequent travel",
+      "Makes carry-on-only travel much more manageable"
     ],
     cons: [
-      "Premium price point",
-      "Takes practice to maximize compression"
+      "Zippers can be stressed if you try to overstuff the cubes",
+      "The included laundry bag could be larger, especially for longer trips",
+      "Cubes are on the larger side - smaller cubes may be better for frequent carry-on only travelers"
     ],
     fullReview: [
-      "I resisted packing cubes for years, thinking they were unnecessary. I was wrong. These compression cubes have transformed my packing routine.",
-      "The compression feature is game-changing—I can pack more while keeping everything organized. I use the large cube for shirts and pants, medium for underwear and socks, and small for accessories.",
-      "When I arrive at my destination, I just pull out the cubes and put them in drawers. No more rummaging through a messy suitcase.",
-      "The weatherproof material has also come in handy during unexpected rain while transferring between terminals."
+      "I pack similar items into each cube, such as shorts and swimsuits, t-shirts, underwear and socks, and longer-sleeve items, which keeps everything easy to find. On longer trips, they make it much easier to pack more while staying organized, and I'll often use one cube for dirty clothes as the trip goes on.",
+      "For shorter weekend trips, packing cubes help me fit everything into a carry-on, which makes traveling lighter and simpler. What I appreciate most is how they help me pack more into my suitcase while staying organized, and they're great for separating clothing by type.",
+      "These cubes are durable and hold up well across frequent travel. I've tested them on week-long trips to Cuba and Curaçao, a 17-day trip to Italy, a weekend trip to Nashville, and a 5-day trip to Las Vegas.",
+      "If I'm moving between hotels, I usually leave the cubes in my suitcase. If I'm staying in one place for a week or longer, I'll pull them out and place them directly into a closet or dresser, which makes settling in much easier."
     ],
     tips: [
-      "Roll clothes instead of folding for maximum compression",
-      "Use the mesh side facing up so you can see contents at a glance",
-      "Dedicate one cube to dirty laundry during your trip",
-      "The small cube is perfect for chargers and tech accessories"
+      "Pack similar items into each cube - shorts and swimsuits, t-shirts, underwear and socks, longer-sleeve items",
+      "Use one cube for dirty laundry as your trip goes on",
+      "For shorter trips, packing cubes help you fit everything into a carry-on",
+      "Pull cubes out and place them directly into a closet or dresser for longer stays"
     ],
-    amazonLink: "https://amazon.com",
-    bestFor: ["Frequent travelers", "Carry-on only travelers", "Organization enthusiasts"]
+    amazonLink: "https://amzn.to/49NivBR",
+    bestFor: ["Travelers who like to stay organized", "Trips of one week or longer", "Carry-on travelers"],
+    gallery: [gearPackingCubesMain, gearPackingCubesSet, gearPackingCubesFeatures]
   },
   {
     id: "3",

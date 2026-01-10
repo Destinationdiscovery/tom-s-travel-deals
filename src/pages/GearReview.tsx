@@ -87,16 +87,22 @@ const GearReview = () => {
                 <CardContent className="p-6">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="flex items-center gap-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`h-6 w-6 ${
-                            i < gear.rating
-                              ? "fill-primary text-primary"
-                              : "text-muted-foreground/30"
-                          }`}
-                        />
-                      ))}
+                      {[...Array(5)].map((_, i) => {
+                        const filled = i < Math.floor(gear.rating);
+                        const half = i === Math.floor(gear.rating) && gear.rating % 1 !== 0;
+                        return (
+                          <Star
+                            key={i}
+                            className={`h-6 w-6 ${
+                              filled
+                                ? "fill-primary text-primary"
+                                : half
+                                ? "fill-primary/50 text-primary"
+                                : "text-muted-foreground/30"
+                            }`}
+                          />
+                        );
+                      })}
                     </div>
                     <span className="text-2xl font-bold text-foreground">{gear.rating}/5</span>
                   </div>
@@ -197,16 +203,22 @@ const GearReview = () => {
                           </div>
                           <CardContent className="p-4">
                             <div className="flex items-center gap-1 mb-2">
-                              {[...Array(5)].map((_, i) => (
-                                <Star
-                                  key={i}
-                                  className={`h-3 w-3 ${
-                                    i < related.rating
-                                      ? "fill-primary text-primary"
-                                      : "text-muted-foreground/30"
-                                  }`}
-                                />
-                              ))}
+                              {[...Array(5)].map((_, i) => {
+                                const filled = i < Math.floor(related.rating);
+                                const half = i === Math.floor(related.rating) && related.rating % 1 !== 0;
+                                return (
+                                  <Star
+                                    key={i}
+                                    className={`h-3 w-3 ${
+                                      filled
+                                        ? "fill-primary text-primary"
+                                        : half
+                                        ? "fill-primary/50 text-primary"
+                                        : "text-muted-foreground/30"
+                                    }`}
+                                  />
+                                );
+                              })}
                             </div>
                             <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
                               {related.name}
