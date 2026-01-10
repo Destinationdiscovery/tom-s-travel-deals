@@ -7,6 +7,10 @@ import gearPackingCubesFeatures from "@/assets/gear-packing-cubes-features.jpg";
 import gearPhoneHolderMain from "@/assets/gear-phone-holder-main.jpg";
 import gearPhoneHolderAngles from "@/assets/gear-phone-holder-angles.jpg";
 import gearPhoneHolderUses from "@/assets/gear-phone-holder-uses.jpg";
+import gearWaterHammockMain from "@/assets/gear-water-hammock-main.jpg";
+import gearWaterHammockFeatures from "@/assets/gear-water-hammock-features.jpg";
+import gearWaterHammockDimensions from "@/assets/gear-water-hammock-dimensions.jpg";
+import gearWaterHammockPacking from "@/assets/gear-water-hammock-packing.jpg";
 
 export interface GearReview {
   id: string;
@@ -172,46 +176,48 @@ export const gearReviews: GearReview[] = [
   },
   {
     id: "4",
-    slug: "inflatable-pool-float-hammock",
-    name: "Inflatable Pool Float Hammock",
+    slug: "inflatable-water-hammock",
+    name: "Inflatable Water Hammock",
     brand: "Aqua",
     category: "Beach & Pool",
-    image: "/placeholder.svg",
-    rating: 4,
+    image: gearWaterHammockMain,
+    rating: 4.8,
     ratings: {
-      buildQuality: 3,
+      buildQuality: 4.5,
       portability: 5,
       value: 5,
-      easeOfUse: 5,
-      durability: 3,
+      easeOfUse: 4.8,
+      durability: 4.7,
     },
-    testedOn: "Mexico resort 2024, Multiple beach trips",
+    testedOn: "Ocean use in Cuba and Curaçao",
     price: "$",
-    excerpt: "The perfect resort companion. Lightweight, packable, and comfortable enough to spend hours floating in the pool or ocean.",
+    excerpt: "These inflatable water hammocks have been a great addition to my travel gear, especially given the price point. They take up virtually no space in my luggage and make it comfortable to relax in the water without constantly swimming.",
     pros: [
-      "Packs flat in luggage",
-      "Comfortable mesh center keeps you cool",
-      "Supports up to 250 lbs",
-      "Inflates quickly without a pump"
+      "Very affordable - picked up two for under $20",
+      "Takes up virtually no space in luggage",
+      "Easy to inflate and just as easy to deflate",
+      "Comfortable for long stretches of floating in the water",
+      "Good durability so far across multiple ocean trips"
     ],
     cons: [
-      "Not the most durable for rough use",
-      "Can drift in ocean currents"
+      "Limited long-term durability data so far",
+      "May not hold up as well in rougher water conditions"
     ],
     fullReview: [
-      "I discovered these inflatable hammock floats on my last Mexico trip and now I never travel to a beach destination without one.",
-      "Unlike bulky pool floats, these pack completely flat and weigh almost nothing. The mesh center keeps you in the water just enough to stay cool while you relax.",
-      "I've used mine at resort pools, calm beaches, and even cenotes. It inflates in about 30 seconds and deflates just as fast.",
-      "At this price point, even if it only lasts a few trips, it's worth every penny for the relaxation it provides."
+      "These inflatable water hammocks have been a great addition to my travel gear, especially given the price point. I picked up two for under $20, which makes them very affordable, and they take up virtually no space in my luggage.",
+      "They're easy to inflate and just as easy to deflate, which makes packing and unpacking simple. I've used them in the ocean on my last two trips to Cuba and Curaçao, and durability has been good so far.",
+      "My wife and I love them because we enjoy spending long stretches of time floating in the water, and these make it comfortable to relax without constantly swimming.",
+      "Given how little space they take up, they're an easy item to bring along on beach-focused trips."
     ],
     tips: [
-      "Inflate it fully for pool use, slightly less for ocean floating",
-      "The mesh center is great for staying cool but can snag on rough surfaces",
-      "Bring a small repair kit for longer trips just in case",
-      "Works best in calm water - avoid strong currents"
+      "Pick up two so you and a travel partner can both relax in the water",
+      "Easy to inflate and deflate - no pump needed",
+      "Great for ocean use in calm conditions",
+      "Takes up virtually no space - easy to bring on any beach trip"
     ],
-    amazonLink: "https://amazon.com",
-    bestFor: ["Beach vacations", "Resort travelers", "Pool lovers"]
+    amazonLink: "https://amzn.to/4jAiR2a",
+    bestFor: ["Beach vacations", "Couples who enjoy floating", "Travelers who want to pack light"],
+    gallery: [gearWaterHammockMain, gearWaterHammockFeatures, gearWaterHammockDimensions, gearWaterHammockPacking]
   }
 ];
 
