@@ -45,33 +45,32 @@ export const gearReviews: GearReview[] = [
       easeOfUse: 5,
       durability: 5,
     },
-    testedOn: "Cuba 2024, European trips",
-    price: "$$",
-    excerpt: "The only adapter you'll ever need for Cuba's unique outlets and European travel. I've tested this across multiple countries and it's never let me down.",
+    testedOn: "Cuba (2025), Curaçao (2025), Italy (2023)",
+    price: "$",
+    excerpt: "A low-cost, portable adapter that's durable, easy to pack, and one of those items I don't want to get caught without when traveling internationally.",
     pros: [
-      "Works in Cuba's Type A/B and European Type C/E/F outlets",
-      "Built-in USB-A and USB-C ports for charging multiple devices",
-      "Compact design fits easily in carry-on",
-      "Surge protection keeps devices safe"
+      "Compact size that takes up very little space in my bag",
+      "Affordable price point, making it easy to own multiple adapters",
+      "Inexpensive enough to buy for all family members",
+      "Very durable - I've used these for over three years across multiple trips and they still work like new"
     ],
     cons: [
-      "Slightly bulky for minimalist packers",
-      "No built-in voltage converter (most modern devices don't need one)"
+      "This is a plug adapter, not a voltage converter - it does not change the voltage from the outlet",
+      "If you plan to use items like hair dryers or straighteners, you'll need a proper voltage converter, not just a travel adapter"
     ],
     fullReview: [
-      "After years of traveling with multiple adapters, I finally found one that handles everything. This universal adapter has been my go-to for Cuba trips (which have their own unique outlet requirements) and all my European adventures.",
-      "The build quality is solid, and having USB ports built-in means fewer things to pack. I've charged my phone, laptop, and camera simultaneously without issues. The surge protection gives me peace of mind when plugging into older outlets in places like Havana.",
-      "For Cuba specifically, this is essential. The country uses a mix of outlet types, and many hotels have outlets that don't match standard North American plugs. This adapter handles all of them without any issues.",
-      "Essential for any international traveler, and at this price point, it's a no-brainer investment for your travel kit."
+      "In today's world, electronics like cell phones, Bluetooth speakers, headphones, and tablets have become necessities when I travel. Whether I'm traveling for leisure or work, I always have multiple devices with me, and keeping them charged is often just as important as remembering my passport. Having this travel adapter ensures I can always keep my devices charged and ready to use, no matter where I am.",
+      "What I appreciate most is the compact size that takes up very little space in my bag, and the affordable price point makes it easy to own multiple adapters - even for all family members. I've used these for over three years across multiple trips and they still work like new.",
+      "One important thing to know: this is a plug adapter, not a voltage converter. It doesn't change the voltage coming from the outlet. Most modern electronics like cell phones, tablets, headphones, and Bluetooth speakers are dual-voltage (220V compatible), and this adapter simply allows you to plug them into foreign outlets so they can charge properly.",
+      "I don't leave home without it when traveling internationally. I pack it in my luggage and typically use it on the nightstand or anywhere I'm charging my phone or other devices."
     ],
     tips: [
-      "Always check that your devices are dual-voltage (110-240V) before plugging in abroad",
-      "The USB-C port delivers fast charging - use it for your phone",
-      "Keep it in your carry-on so you can charge devices during layovers",
-      "The built-in surge protection is especially valuable in older hotels"
+      "Always keep one in your carry-on so you can charge your phone immediately on arrival, especially in case your checked luggage is delayed or lost",
+      "Most modern electronics (phones, tablets, Bluetooth speakers) are dual-voltage, so this adapter is all you need",
+      "For hair dryers or straighteners, you'll need a voltage converter - this adapter alone won't work"
     ],
-    amazonLink: "https://amzn.to/4pubjPC",
-    bestFor: ["Cuba travelers", "European trips", "International travelers"],
+    amazonLink: "https://amzn.to/4qLP5K8",
+    bestFor: ["North American travelers", "International travelers", "Budget-conscious travelers"],
     gallery: [gearAdapterMain, gearAdapterAngles, gearAdapterDevices]
   },
   {
