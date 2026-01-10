@@ -4,6 +4,9 @@ import gearAdapterDevices from "@/assets/gear-adapter-devices.jpg";
 import gearPackingCubesMain from "@/assets/gear-packing-cubes-main.jpg";
 import gearPackingCubesSet from "@/assets/gear-packing-cubes-set.jpg";
 import gearPackingCubesFeatures from "@/assets/gear-packing-cubes-features.jpg";
+import gearPhoneHolderMain from "@/assets/gear-phone-holder-main.jpg";
+import gearPhoneHolderAngles from "@/assets/gear-phone-holder-angles.jpg";
+import gearPhoneHolderUses from "@/assets/gear-phone-holder-uses.jpg";
 
 export interface GearReview {
   id: string;
@@ -126,44 +129,46 @@ export const gearReviews: GearReview[] = [
     id: "3",
     slug: "airplane-phone-holder-mount",
     name: "Airplane Phone Holder Mount",
-    brand: "Perilogics",
+    brand: "NOZEWOWA",
     category: "Tech",
-    image: "/placeholder.svg",
-    rating: 4,
+    image: gearPhoneHolderMain,
+    rating: 4.8,
     ratings: {
-      buildQuality: 4,
+      buildQuality: 4.5,
       portability: 5,
       value: 5,
-      easeOfUse: 4,
-      durability: 4,
+      easeOfUse: 4.9,
+      durability: 4.8,
     },
-    testedOn: "10+ long-haul flights",
+    testedOn: "Flights during my trip to Cuba",
     price: "$",
-    excerpt: "Clamps onto the tray table or seat-back for hands-free viewing during flights. A simple solution that makes long flights much more comfortable.",
+    excerpt: "This airplane phone holder has been a game changer for me, especially on flights that no longer have seatback screens. It clips securely onto the seat in front of you and keeps your phone at eye level for hands-free viewing.",
     pros: [
-      "Universal fit for all phone sizes",
-      "No installation—just clamp and go",
-      "Adjustable viewing angles",
-      "Lightweight and portable"
+      "Clips securely onto the seat in front of you",
+      "Keeps phone at eye level for comfortable hands-free viewing",
+      "Also clips onto luggage handles for airport use",
+      "Very affordable - picked up two for around $20",
+      "Compact and easy to pack in carry-on"
     ],
     cons: [
-      "Doesn't work on all seat types",
-      "Can feel slightly wobbly during turbulence"
+      "Hinge is very tight when brand new and can feel like it might break if opened too forcefully",
+      "Limited long-term durability data so far"
     ],
     fullReview: [
-      "On long flights, holding your phone to watch movies gets tiring fast. This simple mount clamps onto the tray table latch or seat-back entertainment screen, giving you a perfect hands-free viewing experience.",
-      "I've used it on flights to Mexico, Cuba, and across Europe. It works with any phone case and adjusts to portrait or landscape mode.",
-      "The only downside is some newer seat designs have thicker latches that make clamping tricky, but it works on 90% of seats I've encountered.",
-      "At this price point, it's an absolute must-have for anyone who watches content on flights."
+      "This airplane phone holder has been a game changer for me, especially on flights that no longer have seatback screens. I picked up two for around $20, which makes it very affordable, and it immediately solved the problem I always had with holding my phone or trying to balance it on the tray table.",
+      "It clips securely onto the seat in front of you and keeps your phone at eye level, making it far more comfortable to watch videos hands-free during a flight. I also really like that it clips onto my luggage handle, which allows me to watch content or use my phone hands-free while waiting in airports.",
+      "The only thing worth noting is the hinge. When it's brand new, it's very tight and can feel like it might break if you open it too forcefully, so I was careful at first until it loosened slightly.",
+      "After using it on my trip to Cuba, it's already earned a permanent spot in my carry-on."
     ],
     tips: [
-      "Test the clamp on the tray table before takeoff to find the best position",
-      "Works great with tablets too if the clamp can grip them",
-      "Download your content before the flight for the best experience",
-      "Keep it in your personal item for easy access during boarding"
+      "Be careful opening the hinge when brand new - it's very tight at first",
+      "Also works great clipped onto your luggage handle at airports",
+      "Keep it in your carry-on for easy access during flights",
+      "The tight hinge will loosen slightly after a few uses"
     ],
-    amazonLink: "https://amazon.com",
-    bestFor: ["Long-haul travelers", "Entertainment lovers", "Budget travelers"]
+    amazonLink: "https://amzn.to/4szOXix",
+    bestFor: ["Long-haul travelers", "Flights without seatback screens", "Budget travelers"],
+    gallery: [gearPhoneHolderMain, gearPhoneHolderAngles, gearPhoneHolderUses]
   },
   {
     id: "4",
