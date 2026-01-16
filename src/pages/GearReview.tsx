@@ -134,6 +134,35 @@ const GearReview = () => {
                 </div>
               </section>
 
+              {/* Amazon CTA */}
+              {gear.amazonLink && (
+                <Card className="border-primary bg-gradient-to-r from-primary/10 to-primary/5">
+                  <CardContent className="p-6 text-center">
+                    <ShoppingCart className="h-10 w-10 text-primary mx-auto mb-3" />
+                    <h3 className="font-display text-xl font-semibold text-foreground mb-2">
+                      Interested in this gear?
+                    </h3>
+                    <p className="text-muted-foreground mb-4">
+                      You can check out the exact {gear.name} I use and read more reviews on Amazon.
+                    </p>
+                    <a
+                      href={gear.amazonLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Button size="lg" className="gap-2">
+                        <ShoppingCart className="h-5 w-5" />
+                        View on Amazon
+                        <ExternalLink className="h-4 w-4" />
+                      </Button>
+                    </a>
+                    <p className="text-xs text-muted-foreground mt-4 italic">
+                      Affiliate link – I may earn a small commission at no extra cost to you.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Tom's Tips */}
               {gear.tips && gear.tips.length > 0 && (
                 <section className="bg-muted/30 rounded-lg p-6">
