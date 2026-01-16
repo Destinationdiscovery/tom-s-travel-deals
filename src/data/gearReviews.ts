@@ -11,6 +11,9 @@ import gearWaterHammockMain from "@/assets/gear-water-hammock-main.jpg";
 import gearWaterHammockFeatures from "@/assets/gear-water-hammock-features.jpg";
 import gearWaterHammockDimensions from "@/assets/gear-water-hammock-dimensions.jpg";
 import gearWaterHammockPacking from "@/assets/gear-water-hammock-packing.jpg";
+import gearThermacellMain from "@/assets/gear-thermacell-main.jpg";
+import gearThermacellProduct from "@/assets/gear-thermacell-product.jpg";
+import gearThermacellZone from "@/assets/gear-thermacell-zone.jpg";
 
 export interface GearReview {
   id: string;
@@ -218,6 +221,52 @@ export const gearReviews: GearReview[] = [
     amazonLink: "https://amzn.to/4jAiR2a",
     bestFor: ["Beach vacations", "Couples who enjoy floating", "Travelers who want to pack light"],
     gallery: [gearWaterHammockMain, gearWaterHammockFeatures, gearWaterHammockDimensions, gearWaterHammockPacking]
+  },
+  {
+    id: "5",
+    slug: "thermacell-patio-shield-mosquito-repellent",
+    name: "Thermacell Patio Shield Mosquito Repellent",
+    brand: "Thermacell",
+    category: "Accessories",
+    image: gearThermacellMain,
+    rating: 4.9,
+    ratings: {
+      buildQuality: 5,
+      portability: 4.8,
+      value: 4.8,
+      easeOfUse: 5,
+      durability: 5,
+    },
+    testedOn: "Cuba and Curaçao (2025)",
+    price: "$$",
+    excerpt: "I was skeptical at first, but after using this on two tropical trips, the Thermacell Patio Shield has become something I won't travel without.",
+    pros: [
+      "Creates roughly a 20-foot mosquito-free radius",
+      "DEET-free - no chemicals on your skin",
+      "Rechargeable battery lasts a long time",
+      "Just turn it on and let it work",
+      "Extremely effective in high-mosquito environments"
+    ],
+    cons: [
+      "Not tiny - takes up some luggage space and weight",
+      "Mid-range price point"
+    ],
+    fullReview: [
+      "I've used the Thermacell Patio Shield on two trips so far, one to Cuba in 2025 and another to Curaçao in 2025. Cuba was easily the worst in terms of mosquitoes, especially in the evenings. I spent a lot of time sitting in an open-air lobby bar, and the difference between having this on versus off was honestly unbelievable.",
+      "When it wasn't running, the mosquitoes were everywhere. The moment I turned it on, they basically disappeared. It created roughly a 20-foot radius where you could actually sit and relax without constantly swatting at your legs and arms. I had doubts before using it, but after seeing how well it worked night after night, those doubts disappeared quickly.",
+      "One of the biggest reasons I like this unit is that it's DEET-free and doesn't require spraying chemicals on your skin. You just turn it on and let it do its thing. The rechargeable battery lasts a long time as well. I used it every evening and never once worried about it dying on me.",
+      "It's not tiny, and it does take up some luggage space and a bit of weight, but for trips where you're spending time outdoors in tropical destinations, it's absolutely worth it. The price sits in the mid range, but considering how effective it is, I think it's money well spent.",
+      "If you're going anywhere warm, humid, or tropical and plan on being outside in the evenings, this is one of those items that quickly feels essential once you've used it."
+    ],
+    tips: [
+      "Place it on the floor near where you're sitting for better coverage, especially around your legs and ankles",
+      "It's ideal for patios, balconies, beach bars, and resort common areas",
+      "Worth packing even if space is tight if you're traveling somewhere tropical",
+      "Recharge it fully before heading out for the evening so it runs worry-free"
+    ],
+    amazonLink: "https://amzn.to/4jHDXf7",
+    bestFor: ["Tropical destinations", "Evening outdoor dining", "Resort patios and balconies", "Mosquito-heavy areas"],
+    gallery: [gearThermacellMain, gearThermacellProduct, gearThermacellZone]
   }
 ];
 
