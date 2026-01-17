@@ -69,9 +69,9 @@ const destinations: DestinationPreview[] = [
 
 const TravelStoriesSection = () => {
   return (
-    <section id="destinations" className="py-24 bg-background">
+    <section id="destinations" className="py-12 bg-background">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
+        <div className="text-center mb-8">
           <span className="inline-block px-4 py-2 rounded-full bg-secondary/20 text-secondary text-sm font-medium mb-4">
             Real Experiences
           </span>
@@ -159,7 +159,7 @@ const TravelStoriesSection = () => {
           </Carousel>
         </div>
 
-        <div className="text-center mt-12">
+        <div className="text-center mt-8">
           <Link to="/destinations">
             <Button variant="outline" size="lg" className="gap-2">
               View All Destinations <ArrowRight className="h-4 w-4" />

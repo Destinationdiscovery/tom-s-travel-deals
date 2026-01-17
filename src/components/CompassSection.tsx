@@ -12,9 +12,9 @@ import { Button } from "@/components/ui/button";
 
 const CompassSection = () => {
   return (
-    <section id="compass" className="py-24 bg-warm-gradient">
+    <section id="compass" className="py-12 bg-warm-gradient">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
+        <div className="text-center mb-8">
           <span className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
             Travel Intel
           </span>
@@ -81,7 +81,7 @@ const CompassSection = () => {
         </Carousel>
 
         {/* View All Button */}
-        <div className="text-center mt-12">
+        <div className="text-center mt-8">
           <Link to="/compass">
             <Button variant="outline" size="lg">
               View All Articles
