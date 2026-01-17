@@ -1,6 +1,13 @@
 import { Star, ArrowRight, Play } from "lucide-react";
 import { Button } from "./ui/button";
 import { Link } from "react-router-dom";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+} from "@/components/ui/carousel";
 import cubaImg from "@/assets/deal-cuba.jpg";
 import curacaoImg from "@/assets/curacao-hero.avif";
 import mexicoImg from "@/assets/mexico-hero.webp";
@@ -77,67 +84,79 @@ const TravelStoriesSection = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {destinations.map((dest, index) => (
-            <Link 
-              key={dest.slug}
-              to={`/destinations/${dest.slug}`}
-              className="group block"
-            >
-              <article 
-                className="bg-card rounded-2xl overflow-hidden shadow-soft hover:shadow-elevated transition-all duration-500 hover:-translate-y-2 animate-fade-up"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                {/* Image */}
-                <div className="relative h-56 overflow-hidden">
-                  <img
-                    src={dest.image}
-                    alt={dest.destination}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 to-transparent" />
-                  
-                  {dest.hasVideo && (
-                    <div className="absolute top-4 right-4 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
-                      <Play className="h-3 w-3 fill-current" />
-                      Video
-                    </div>
-                  )}
-                  
-                  <div className="absolute bottom-4 left-4">
-                    <p className="text-primary-foreground/80 text-sm">{dest.country}</p>
-                    <h3 className="font-display text-2xl font-bold text-primary-foreground">
-                      {dest.destination}
-                    </h3>
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="p-6 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star 
-                          key={i} 
-                          className={`h-4 w-4 ${i < Math.floor(dest.rating) ? 'text-accent fill-accent' : 'text-muted-foreground'}`} 
+        <div className="relative px-12">
+          <Carousel
+            opts={{
+              align: "start",
+              loop: true,
+            }}
+            className="w-full"
+          >
+            <CarouselContent className="-ml-4">
+              {destinations.map((dest, index) => (
+                <CarouselItem key={dest.slug} className="pl-4 basis-full md:basis-1/3">
+                  <Link 
+                    to={`/destinations/${dest.slug}`}
+                    className="group block h-full"
+                  >
+                    <article 
+                      className="bg-card rounded-2xl overflow-hidden shadow-soft hover:shadow-elevated transition-all duration-500 hover:-translate-y-2 h-full"
+                    >
+                      {/* Image */}
+                      <div className="relative h-56 overflow-hidden">
+                        <img
+                          src={dest.image}
+                          alt={dest.destination}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                         />
-                      ))}
-                      <span className="text-sm font-medium text-foreground ml-1">{dest.rating}</span>
-                    </div>
-                    <span className="text-xs text-muted-foreground">{dest.dateVisited}</span>
-                  </div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 to-transparent" />
+                        
+                        {dest.hasVideo && (
+                          <div className="absolute top-4 right-4 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+                            <Play className="h-3 w-3 fill-current" />
+                            Video
+                          </div>
+                        )}
+                        
+                        <div className="absolute bottom-4 left-4">
+                          <p className="text-primary-foreground/80 text-sm">{dest.country}</p>
+                          <h3 className="font-display text-2xl font-bold text-primary-foreground">
+                            {dest.destination}
+                          </h3>
+                        </div>
+                      </div>
 
-                  <p className="text-muted-foreground text-sm line-clamp-3">
-                    {dest.teaser}
-                  </p>
+                      {/* Content */}
+                      <div className="p-6 space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1">
+                            {[...Array(5)].map((_, i) => (
+                              <Star 
+                                key={i} 
+                                className={`h-4 w-4 ${i < Math.floor(dest.rating) ? 'text-accent fill-accent' : 'text-muted-foreground'}`} 
+                              />
+                            ))}
+                            <span className="text-sm font-medium text-foreground ml-1">{dest.rating}</span>
+                          </div>
+                          <span className="text-xs text-muted-foreground">{dest.dateVisited}</span>
+                        </div>
 
-                  <div className="flex items-center text-primary text-sm font-medium group-hover:gap-2 transition-all">
-                    Read My Review <ArrowRight className="h-4 w-4 ml-1" />
-                  </div>
-                </div>
-              </article>
-            </Link>
-          ))}
+                        <p className="text-muted-foreground text-sm line-clamp-3">
+                          {dest.teaser}
+                        </p>
+
+                        <div className="flex items-center text-primary text-sm font-medium group-hover:gap-2 transition-all">
+                          Read My Review <ArrowRight className="h-4 w-4 ml-1" />
+                        </div>
+                      </div>
+                    </article>
+                  </Link>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="left-0" />
+            <CarouselNext className="right-0" />
+          </Carousel>
         </div>
 
         <div className="text-center mt-12">
