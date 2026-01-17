@@ -1,10 +1,9 @@
-import { useState } from "react";
+
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useParams, Link } from "react-router-dom";
-import { Star, ArrowLeft, Calendar, MapPin, Heart, Share2, MessageCircle, Send } from "lucide-react";
-import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
+import { Star, ArrowLeft, Calendar, MapPin, Heart, Share2, MessageCircle, Mail } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import cubaImg from "@/assets/deal-cuba.jpg";
 import cubaGallery1 from "@/assets/cuba-gallery-1.jpg";
@@ -255,37 +254,9 @@ const reviews: Record<string, ReviewData> = {
   },
 };
 
-interface Comment {
-  id: number;
-  author: string;
-  date: string;
-  content: string;
-}
-
 const DestinationReview = () => {
   const { slug } = useParams<{ slug: string }>();
   const review = slug ? reviews[slug] : null;
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [newComment, setNewComment] = useState("");
-  const [authorName, setAuthorName] = useState("");
-
-  const handleCommentSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newComment.trim()) return;
-
-    const comment: Comment = {
-      id: Date.now(),
-      author: authorName.trim() || "Anonymous",
-      date: new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }),
-      content: newComment.trim(),
-    };
-
-    setComments([...comments, comment]);
-    setNewComment("");
-    setAuthorName("");
-    toast.success("Your comment has been posted!");
-  };
-
 
   if (!review) {
     return (
@@ -442,70 +413,21 @@ const DestinationReview = () => {
               )}
 
               {/* Questions & Comments Section */}
-              <div className="space-y-6">
-                <div className="flex items-center gap-3">
+              <div className="mt-16 pt-12 border-t border-border">
+                <div className="flex items-center gap-3 mb-4">
                   <MessageCircle className="h-6 w-6 text-primary" />
                   <h2 className="font-display text-2xl font-bold text-foreground">Questions & Comments</h2>
                 </div>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground mb-6">
                   Have a question about this destination or want to share your own experience? I'd love to hear from you!
                 </p>
-
-                {/* Comment Form */}
-                <form onSubmit={handleCommentSubmit} className="bg-card rounded-2xl p-6 shadow-soft space-y-4">
-                  <div>
-                    <label htmlFor="author" className="block text-sm font-medium text-foreground mb-2">
-                      Your Name (optional)
-                    </label>
-                    <input
-                      type="text"
-                      id="author"
-                      value={authorName}
-                      onChange={(e) => setAuthorName(e.target.value)}
-                      placeholder="Anonymous"
-                      className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="comment" className="block text-sm font-medium text-foreground mb-2">
-                      Your Question or Comment
-                    </label>
-                    <Textarea
-                      id="comment"
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      placeholder="Ask a question or share your thoughts..."
-                      rows={4}
-                      className="resize-none"
-                    />
-                  </div>
-                  <Button type="submit" className="gap-2">
-                    <Send className="h-4 w-4" />
-                    Post Comment
-                  </Button>
-                </form>
-
-                {/* Display Comments */}
-                {comments.length > 0 && (
-                  <div className="space-y-4">
-                    {comments.map((comment) => (
-                      <div key={comment.id} className="bg-card rounded-xl p-5 shadow-soft">
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                            <span className="text-primary font-semibold text-sm">
-                              {comment.author.charAt(0).toUpperCase()}
-                            </span>
-                          </div>
-                          <div>
-                            <p className="font-semibold text-foreground">{comment.author}</p>
-                            <p className="text-xs text-muted-foreground">{comment.date}</p>
-                          </div>
-                        </div>
-                        <p className="text-muted-foreground">{comment.content}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                
+                <Button asChild size="lg" className="gap-2">
+                  <a href={`mailto:tlaracy@travelonly.com?subject=Question about ${review.destination}, ${review.country}`}>
+                    <Mail className="h-5 w-5" />
+                    Send Me an Email
+                  </a>
+                </Button>
               </div>
             </div>
 
@@ -545,19 +467,6 @@ const DestinationReview = () => {
                   </div>
                 </div>
 
-                <div className="mt-8">
-                  <Button 
-                    className="w-full"
-                    asChild
-                  >
-                    <a href="mailto:tlaracy@travelonly.com?subject=Let's Plan My Trip">
-                      Ready to Go? Let's Plan
-                    </a>
-                  </Button>
-                  <p className="text-xs text-muted-foreground text-center mt-2">
-                    No pressure—just here to help when you're ready
-                  </p>
-                </div>
               </div>
             </div>
           </div>
