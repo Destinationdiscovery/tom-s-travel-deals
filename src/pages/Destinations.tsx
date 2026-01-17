@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import cubaImg from "@/assets/deal-cuba.jpg";
 import curacaoImg from "@/assets/curacao-hero.avif";
 import mexicoImg from "@/assets/mexico-hero.webp";
+import vegasImg from "@/assets/vegas-gallery-1.jpg";
 
 interface Destination {
   slug: string;
@@ -56,6 +57,18 @@ const destinations: Destination[] = [
     dateVisited: "November 2024",
     hasVideo: false,
     tags: ["Villa", "Luxury", "Beach", "Privacy"],
+  },
+  {
+    slug: "vegas-bellagio",
+    image: vegasImg,
+    destination: "Bellagio",
+    country: "Las Vegas, USA",
+    region: "North America",
+    teaser: "After more than 30 trips to Vegas and stays all over the Strip, Bellagio is still the resort I come back to the most. It's upscale without feeling stuffy, perfectly located, and consistently delivers the full Vegas experience.",
+    rating: 4.5,
+    dateVisited: "February 2025",
+    hasVideo: false,
+    tags: ["Casino", "Luxury", "City", "Iconic"],
   },
 ];
 

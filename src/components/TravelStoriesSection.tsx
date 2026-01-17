@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import cubaImg from "@/assets/deal-cuba.jpg";
 import curacaoImg from "@/assets/curacao-hero.avif";
 import mexicoImg from "@/assets/mexico-hero.webp";
+import vegasImg from "@/assets/vegas-gallery-1.jpg";
 
 interface DestinationPreview {
   slug: string;
@@ -45,6 +46,16 @@ const destinations: DestinationPreview[] = [
     teaser: "A luxury private villa with an infinity pool that offered space, privacy, and easy access to some of Curaçao's best beaches.",
     rating: 5,
     dateVisited: "November 2024",
+    hasVideo: false,
+  },
+  {
+    slug: "vegas-bellagio",
+    image: vegasImg,
+    destination: "Bellagio",
+    country: "Las Vegas, USA",
+    teaser: "After more than 30 trips to Vegas and stays all over the Strip, Bellagio is still the resort I come back to the most.",
+    rating: 4.5,
+    dateVisited: "February 2025",
     hasVideo: false,
   },
 ];

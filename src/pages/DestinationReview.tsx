@@ -58,6 +58,11 @@ import mexicoGallery19 from "@/assets/mexico-gallery-19.jpg";
 import mexicoGallery20 from "@/assets/mexico-gallery-20.jpg";
 import mexicoGallery21 from "@/assets/mexico-gallery-21.jpg";
 import mexicoGallery22 from "@/assets/mexico-gallery-22.jpg";
+import vegasImg from "@/assets/vegas-gallery-1.jpg";
+import vegasGallery1 from "@/assets/vegas-gallery-1.jpg";
+import vegasGallery2 from "@/assets/vegas-gallery-2.jpg";
+import vegasGallery3 from "@/assets/vegas-gallery-3.webp";
+import vegasGallery4 from "@/assets/vegas-gallery-4.webp";
 
 interface ReviewData {
   slug: string;
@@ -213,6 +218,40 @@ const reviews: Record<string, ReviewData> = {
     ],
     bestFor: ["Couples traveling together", "Travelers who want space and privacy", "Independent travelers who enjoy exploring", "Beach hoppers", "Those who prefer flexibility over an all-inclusive experience"],
     gallery: [curacaoImg, curacaoGallery1, curacaoGallery2, curacaoGallery3, curacaoGallery4, curacaoGallery5, curacaoGallery6, curacaoGallery7, curacaoGallery8, curacaoGallery9, curacaoGallery10, curacaoGallery11, curacaoGallery12, curacaoGallery13],
+  },
+  "vegas-bellagio": {
+    slug: "vegas-bellagio",
+    image: vegasImg,
+    destination: "Bellagio",
+    country: "Las Vegas, USA",
+    dateVisited: "February 2025",
+    duration: "Multiple trips (30+)",
+    rating: 4.5,
+    ratings: {
+      accommodations: 4.3,
+      food: 3.5,
+      activities: 5,
+      value: 4,
+    },
+    summary: "After more than 30 trips to Vegas and stays all over the Strip, Bellagio is still the resort I come back to the most. It's upscale without feeling stuffy, perfectly located, and consistently delivers the full Vegas experience.",
+    fullReview: [
+      "I've been to Vegas around 30 times, and I've stayed at a lot of different resorts over the years, including Wynn, Aria, Treasure Island, and Harrah's. Bellagio is the one we keep choosing again and again.",
+      "It's one of the more upscale resorts on the Strip, and it feels that way the moment you walk in. Everything is grand and polished, from the lobby to the massive casino floor. The gambling area is big, lively, and classic Vegas without feeling chaotic.",
+      "The rooms are a big reason we like it so much. They're spacious, well laid out, and clearly a step above a standard hotel room. On this trip, we had a fountain-view room, which was worth it for us. Being able to watch the fountain show from the room never really gets old, and despite being right in the middle of the Strip, the rooms are very well insulated. Once the door is closed, it's quiet enough to actually relax and sleep.",
+      "Location-wise, I don't think it gets better. Bellagio sits right in the middle of the Strip, which makes a huge difference when you're walking a lot. You can head north or south without committing to a massive trek every time you leave the hotel. After this many trips, that convenience matters more than flashy extras.",
+      "Food in Vegas has become very expensive, and as Canadians, the exchange rate makes it sting even more. We try to balance things out by mixing lower-cost options like Raising Cane's and pizza with mid-range restaurants. We don't really do high-end dining here, mostly because it just doesn't fit our budget, and honestly, Vegas still offers plenty of solid food without going ultra-luxury.",
+      "One thing Bellagio really shines at is comps and rewards, especially if you gamble. It's part of MGM Resorts International, and that matters. Your players card works across six or seven MGM resorts, which adds up quickly. My wife and I are slot players, and we both use cards tied to one account so our play stacks together. After a single trip, that's often enough to start getting offers like four free nights, food credits, and free play. Over time, it really pays off.",
+      "Overall, Vegas still delivers exactly what we go there for, and Bellagio remains our favorite base to experience it. It's not cheap, but for us, the location, comfort, and rewards system make it worth it."
+    ],
+    tips: [
+      "If you gamble at MGM resorts, always get a players card. It works across multiple properties and adds up fast.",
+      "Charge food to your room at MGM properties. It counts toward your overall resort spend and helps with comps.",
+      "Fountain-view rooms are worth it if you plan to spend time in your room and enjoy quieter nights.",
+      "Balance food costs. Mix fast-casual spots with mid-range restaurants to keep spending under control.",
+      "Bellagio's central location saves your legs. Over a few days, those shorter walks really add up."
+    ],
+    bestFor: ["Slot players and casino gamblers", "Couples looking for upscale comfort", "Repeat Vegas visitors who value location", "Those who want MGM rewards and comps", "Travelers who appreciate classic Vegas elegance"],
+    gallery: [vegasGallery1, vegasGallery2, vegasGallery3, vegasGallery4],
   },
 };
 
