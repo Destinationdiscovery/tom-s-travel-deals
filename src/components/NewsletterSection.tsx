@@ -4,7 +4,7 @@ import heroImage from "@/assets/curacao-hero.avif";
 
 const NewsletterSection = () => {
   return (
-    <section id="newsletter" className="py-24 relative overflow-hidden">
+    <section id="newsletter" className="py-12 relative overflow-hidden">
       {/* Background Image with Overlay */}
       <div className="absolute inset-0">
         <img 
