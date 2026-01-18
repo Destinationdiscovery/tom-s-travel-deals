@@ -62,6 +62,11 @@ import vegasGallery1 from "@/assets/vegas-gallery-1.jpg";
 import vegasGallery2 from "@/assets/vegas-gallery-2.jpg";
 import vegasGallery3 from "@/assets/vegas-gallery-3.webp";
 import vegasGallery4 from "@/assets/vegas-gallery-4.webp";
+import cruiseHeroImg from "@/assets/cruise-hero.jpg";
+import cruiseGallery1 from "@/assets/cruise-gallery-1.jpg";
+import cruiseGallery2 from "@/assets/cruise-gallery-2.jpg";
+import cruiseGallery3 from "@/assets/cruise-gallery-3.webp";
+import cruiseGallery4 from "@/assets/cruise-gallery-4.jpg";
 
 interface ReviewData {
   slug: string;
@@ -80,6 +85,11 @@ interface ReviewData {
     beach?: number;
     service?: number;
     pools?: number;
+    cabins?: number;
+    dining?: number;
+    entertainment?: number;
+    ease?: number;
+    excursions?: number;
   };
   summary: string;
   fullReview: string[];
@@ -251,6 +261,52 @@ const reviews: Record<string, ReviewData> = {
     ],
     bestFor: ["Slot players and casino gamblers", "Couples looking for upscale comfort", "Repeat Vegas visitors who value location", "Those who want MGM rewards and comps", "Travelers who appreciate classic Vegas elegance"],
     gallery: [vegasGallery1, vegasGallery2, vegasGallery3, vegasGallery4],
+  },
+  "cruise-experience": {
+    slug: "cruise-experience",
+    image: cruiseHeroImg,
+    destination: "Cruising as a Travel Experience",
+    country: "Caribbean & Alaska",
+    dateVisited: "15+ years of cruising",
+    duration: "Multiple cruises",
+    rating: 4.0,
+    ratings: {
+      cabins: 3.5,
+      dining: 4.0,
+      entertainment: 4.5,
+      value: 4.0,
+      ease: 3.8,
+      excursions: 4.6,
+    },
+    summary: "After more than 15 years of cruising in the Caribbean and Alaska, cruising still stands out as one of the easiest ways to travel if you plan it properly and know what to expect.",
+    fullReview: [
+      "I've been cruising for over 15 years across western and eastern Caribbean itineraries as well as Alaska, and it's become a travel style I'm very comfortable with. It's not perfect, but when you understand how cruising works and plan around its limitations, it offers a strong balance of value, convenience, and variety.",
+      "Cabins are usually the biggest adjustment, especially for first-time cruisers. We typically book standard balcony or oceanview rooms. They're comfortable and efficiently laid out, but they are small compared to hotel rooms. Storage is limited, which you really notice after a few days. One thing that helps a lot is bringing your own storage solutions. We always use an over-the-door hanging shoe rack or cubby that hangs on the closet door. It keeps small items organized and makes the room feel far more livable. Having a balcony is worth it for us, especially in Alaska, where the scenery becomes part of the experience.",
+      "Food has consistently been solid across our cruises. All meals are included in the base fare except for some specialty restaurants, which makes budgeting easier day to day. The quality is dependable rather than exceptional. One important thing to note is that alcohol and pop are not included. If you enjoy having a few drinks, it's usually worth looking for sales where drink packages, Wi-Fi, and gratuities are prepaid. These are almost always cheaper when purchased ahead of time rather than onboard.",
+      "Activities and entertainment are one of cruising's strongest points. There is always something going on, from shows and live music to trivia, pools, and onboard events. One of the things we like most about cruising is that you can be as active as you want or as relaxed as you want. Some days are packed, and others are completely laid back. There's genuinely something for everyone.",
+      "Value for money is generally strong if you book smart. When you consider accommodations, food, entertainment, and transportation between destinations, cruises still compare well to land-based trips. Prices have gone up over the years, but good value is still there if you take advantage of promotions and bundled extras.",
+      "Ease and convenience is a mixed experience. Once you're onboard, everything is simple and contained in one place. The challenging parts are embarkation, disembarkation, and port days, which involve lines, schedules, and waiting. To reduce stress, we almost always fly in the day before departure. It avoids issues with flight delays or cancellations and gives us a chance to enjoy the departure city and start the vacation early.",
+      "Destinations and excursions are a major highlight, especially if you do your research ahead of time. Cruises give you a snapshot of multiple destinations, but time in port is limited. We always recommend booking excursions through the ship. If a ship-sponsored excursion runs late, the ship has to wait for you. If you book independently and something goes wrong, the ship can leave without you. Alaska really stands out for scenery and unique experiences, while Caribbean cruises shine for variety and ease.",
+      "Safety is also worth mentioning. Even though ships feel safe and controlled, it's still important to use common sense. We avoid wandering back to the cabin alone late at night and stay aware of our surroundings, just as we would anywhere else.",
+      "Overall, cruising continues to work well for us. It's structured without feeling rigid, social without being overwhelming, and flexible enough to suit different moods and travel styles.",
+    ],
+    tips: [
+      "Book ship-sponsored excursions to avoid the risk of being left behind.",
+      "Bring extra storage like over-the-door shoe racks or cubbies for small cabins.",
+      "Look for prepaid bundles that include drinks, Wi-Fi, or gratuities.",
+      "Fly in the day before departure to reduce stress.",
+      "If you drink alcohol or pop, pre-buy drink packages as they're usually cheaper before boarding.",
+    ],
+    bestFor: [
+      "Travelers who want structure with flexibility",
+      "Couples and repeat travelers",
+      "People who like built-in entertainment",
+      "Those who enjoy visiting multiple destinations easily",
+      "Travelers who value convenience and predictable costs",
+      "Scenic-focused trips like Alaska",
+      "People who want to be as active or as relaxed as they choose",
+    ],
+    gallery: [cruiseHeroImg, cruiseGallery1, cruiseGallery2, cruiseGallery3, cruiseGallery4],
   },
 };
 
