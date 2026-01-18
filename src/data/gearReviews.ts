@@ -14,6 +14,9 @@ import gearWaterHammockPacking from "@/assets/gear-water-hammock-packing.jpg";
 import gearThermacellMain from "@/assets/gear-thermacell-main.jpg";
 import gearThermacellProduct from "@/assets/gear-thermacell-product.jpg";
 import gearThermacellZone from "@/assets/gear-thermacell-zone.jpg";
+import gearShoeOrganizerMain from "@/assets/gear-shoe-organizer-main.jpg";
+import gearShoeOrganizerBathroom from "@/assets/gear-shoe-organizer-bathroom.png";
+import gearShoeOrganizerProduct from "@/assets/gear-shoe-organizer-product.jpg";
 
 export interface GearReview {
   id: string;
@@ -267,6 +270,53 @@ export const gearReviews: GearReview[] = [
     amazonLink: "https://amzn.to/4jHDXf7",
     bestFor: ["Tropical destinations", "Evening outdoor dining", "Resort patios and balconies", "Mosquito-heavy areas"],
     gallery: [gearThermacellMain, gearThermacellProduct, gearThermacellZone]
+  },
+  {
+    id: "6",
+    slug: "cruise-cabin-shoe-organizer",
+    name: "Large 24 Pocket Shoe Organizer",
+    brand: "ZOBER",
+    category: "Accessories",
+    image: gearShoeOrganizerMain,
+    rating: 4.9,
+    ratings: {
+      buildQuality: 4.8,
+      portability: 5,
+      value: 5,
+      easeOfUse: 5,
+      durability: 4.8,
+    },
+    testedOn: "2 cruises",
+    price: "$",
+    excerpt: "This is one of those simple items that quietly solves a big cruise problem. If you've ever felt cramped in a cruise cabin, this organizer makes a noticeable difference.",
+    pros: [
+      "Uses vertical space that would otherwise go to waste",
+      "Keeps small items visible and easy to access",
+      "Folds flat and takes up almost no suitcase space",
+      "Good build quality and durability after 2 cruises",
+      "Great value for the price"
+    ],
+    cons: [
+      "None noted - does exactly what it's supposed to do"
+    ],
+    fullReview: [
+      "Cruise cabins don't give you much storage, especially when it comes to small, everyday items. That's why this large 24 pocket shoe organizer has become something I pack on every cruise without thinking twice.",
+      "We use it to store shoes and flip flops, but it really shines with all the smaller stuff that usually ends up scattered around the room. Sunscreen, headphones, chargers, hats, sunglasses, and other grab-and-go items all get their own pocket. Everything is visible, easy to access, and not taking up drawer or counter space.",
+      "We usually hang it on the back of the main cabin door, but it works just as well on any door that makes sense for your layout. Cruise cabins are tight, and this uses vertical space that would otherwise go to waste. It keeps the room feeling organized and less cluttered, especially over a longer sailing.",
+      "From a packing standpoint, it's effortless. The organizer folds down flat and goes right into our main suitcase without taking up much space at all. Once onboard, it takes seconds to hang and start using.",
+      "After two cruises, durability hasn't been an issue at all. The stitching and pockets have held up well, and nothing about it feels flimsy. For the price, the build quality and usefulness are hard to beat.",
+      "Honestly, I don't have any real downsides to point out. It's lightweight, easy to use, and does exactly what it's supposed to do. It's one of those items you don't realize you need until you've used it once, and then you won't cruise without it again."
+    ],
+    tips: [
+      "Hang it on the back of the main cabin door for the easiest access",
+      "Use it for small items, not just shoes - chargers, sunscreen, and sunglasses fit perfectly",
+      "Pack it flat in your suitcase - it takes up almost no room",
+      "It's especially useful on longer cruises where clutter builds up fast",
+      "Great for anyone booking a standard balcony or oceanview cabin with limited storage"
+    ],
+    amazonLink: "https://amzn.to/3NopEQt",
+    bestFor: ["Cruise travelers", "Standard balcony or oceanview cabin bookings", "Longer cruises where clutter builds up", "Anyone looking to maximize cabin storage", "Travelers who like to stay organized"],
+    gallery: [gearShoeOrganizerMain, gearShoeOrganizerBathroom, gearShoeOrganizerProduct]
   }
 ];
 
