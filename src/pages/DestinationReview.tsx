@@ -479,9 +479,9 @@ const DestinationReview = () => {
                 </p>
                 
                 <Button asChild size="lg" className="gap-2">
-                  <a href={`mailto:tlaracy@travelonly.com?subject=Question about ${review.destination}, ${review.country}`}>
+                  <a href="https://form.jotform.com/260065315910247" target="_blank" rel="noopener noreferrer">
                     <Mail className="h-5 w-5" />
-                    Send Me an Email
+                    Send Me a Message
                   </a>
                 </Button>
               </div>

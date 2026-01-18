@@ -55,11 +55,13 @@ const Footer = () => {
             <h4 className="font-semibold text-background mb-4">Get in Touch</h4>
             <div className="flex flex-col gap-3">
               <a 
-                href="mailto:tlaracy@travelonly.com" 
+                href="https://form.jotform.com/260065315910247" 
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors text-sm"
               >
                 <Mail className="h-4 w-4" />
-                tlaracy@travelonly.com
+                Contact Form
               </a>
               <a 
                 href="tel:519-771-2534" 
