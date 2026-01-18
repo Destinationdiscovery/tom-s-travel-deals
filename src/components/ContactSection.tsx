@@ -1,31 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Phone, Mail, MessageSquare, Send } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
 
 const ContactSection = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    message: "",
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
-      toast.error("Please fill in all fields");
-      return;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      toast.error("Please enter a valid email");
-      return;
-    }
-    toast.success("Message sent! I'll get back to you within 24 hours.");
-    setFormData({ name: "", email: "", message: "" });
-  };
-
   return (
     <section id="contact" className="py-24 bg-muted">
       <div className="container mx-auto px-4">
@@ -56,15 +32,20 @@ const ContactSection = () => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+              <a 
+                href="https://form.jotform.com/260065315910247"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-4 group"
+              >
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                   <Mail className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Email me</p>
-                  <p className="font-semibold text-foreground">Contact for email</p>
+                  <p className="text-sm text-muted-foreground">Send a message</p>
+                  <p className="font-semibold text-foreground group-hover:text-primary transition-colors">Contact Form</p>
                 </div>
-              </div>
+              </a>
 
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -79,54 +60,19 @@ const ContactSection = () => {
           </div>
 
           {/* Contact Form */}
-          <div className="bg-card rounded-3xl p-8 md:p-10 shadow-elevated">
-            <h3 className="font-display text-2xl font-bold text-card-foreground mb-6">
+          <div className="bg-card rounded-3xl p-8 md:p-10 shadow-elevated flex flex-col items-center justify-center text-center">
+            <h3 className="font-display text-2xl font-bold text-card-foreground mb-4">
               Send a Message
             </h3>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-card-foreground mb-2">
-                  Your Name
-                </label>
-                <Input
-                  type="text"
-                  placeholder="John Doe"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="h-12"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-card-foreground mb-2">
-                  Email Address
-                </label>
-                <Input
-                  type="email"
-                  placeholder="john@example.com"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="h-12"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-card-foreground mb-2">
-                  How can I help you?
-                </label>
-                <Textarea
-                  placeholder="Tell me about your dream vacation..."
-                  value={formData.message}
-                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  rows={4}
-                />
-              </div>
-
-              <Button variant="default" size="lg" type="submit" className="w-full gap-2">
+            <p className="text-muted-foreground mb-8">
+              Click below to open my contact form and I'll get back to you within 24 hours.
+            </p>
+            <Button asChild variant="default" size="lg" className="gap-2">
+              <a href="https://form.jotform.com/260065315910247" target="_blank" rel="noopener noreferrer">
                 <Send className="h-5 w-5" />
-                Send Message
-              </Button>
-            </form>
+                Open Contact Form
+              </a>
+            </Button>
           </div>
         </div>
       </div>
