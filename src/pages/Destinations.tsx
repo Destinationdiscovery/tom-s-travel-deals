@@ -7,6 +7,7 @@ import cubaImg from "@/assets/deal-cuba.jpg";
 import curacaoImg from "@/assets/curacao-hero.avif";
 import mexicoImg from "@/assets/mexico-hero.webp";
 import vegasImg from "@/assets/vegas-gallery-1.jpg";
+import cruiseImg from "@/assets/cruise-hero.jpg";
 
 interface Destination {
   slug: string;
@@ -69,6 +70,18 @@ const destinations: Destination[] = [
     dateVisited: "February 2025",
     hasVideo: false,
     tags: ["Casino", "Luxury", "City", "Iconic"],
+  },
+  {
+    slug: "cruise-experience",
+    image: cruiseImg,
+    destination: "Cruising as a Travel Experience",
+    country: "Caribbean & Alaska",
+    region: "Multiple",
+    teaser: "After more than 15 years of cruising in the Caribbean and Alaska, cruising still stands out as one of the easiest ways to travel if you plan it properly and know what to expect.",
+    rating: 4.0,
+    dateVisited: "15+ years experience",
+    hasVideo: false,
+    tags: ["Cruise", "Caribbean", "Alaska", "Multi-destination"],
   },
 ];
 
