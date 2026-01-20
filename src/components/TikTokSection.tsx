@@ -21,17 +21,25 @@ const TikTokSection = () => {
   useEffect(() => {
     // Load TikTok embed script
     const existingScript = document.querySelector('script[src="https://www.tiktok.com/embed.js"]');
-    if (!existingScript) {
-      const script = document.createElement("script");
-      script.src = "https://www.tiktok.com/embed.js";
-      script.async = true;
-      document.body.appendChild(script);
-    } else {
-      // If script already exists, trigger re-render of embeds
-      if (window.tiktokEmbed) {
-        window.tiktokEmbed.reload();
-      }
+    
+    if (existingScript) {
+      // Remove existing script to force reload
+      existingScript.remove();
     }
+    
+    // Add fresh script - TikTok will process all blockquotes on load
+    const script = document.createElement("script");
+    script.src = "https://www.tiktok.com/embed.js";
+    script.async = true;
+    document.body.appendChild(script);
+    
+    return () => {
+      // Cleanup on unmount
+      const scriptToRemove = document.querySelector('script[src="https://www.tiktok.com/embed.js"]');
+      if (scriptToRemove) {
+        scriptToRemove.remove();
+      }
+    };
   }, []);
 
   return (
@@ -110,13 +118,5 @@ const TikTokSection = () => {
   );
 };
 
-// Extend window type for TikTok embed
-declare global {
-  interface Window {
-    tiktokEmbed?: {
-      reload: () => void;
-    };
-  }
-}
 
 export default TikTokSection;
