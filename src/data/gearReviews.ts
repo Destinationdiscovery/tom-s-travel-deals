@@ -17,6 +17,9 @@ import gearThermacellZone from "@/assets/gear-thermacell-zone.jpg";
 import gearShoeOrganizerMain from "@/assets/gear-shoe-organizer-main.jpg";
 import gearShoeOrganizerBathroom from "@/assets/gear-shoe-organizer-bathroom.png";
 import gearShoeOrganizerProduct from "@/assets/gear-shoe-organizer-product.jpg";
+import gearLiquidIvMain from "@/assets/gear-liquid-iv-main.jpg";
+import gearLiquidIvPacket from "@/assets/gear-liquid-iv-packet.jpg";
+import gearLiquidIvImpact from "@/assets/gear-liquid-iv-impact.jpg";
 
 export interface GearReview {
   id: string;
@@ -317,6 +320,53 @@ export const gearReviews: GearReview[] = [
     amazonLink: "https://amzn.to/3NopEQt",
     bestFor: ["Cruise travelers", "Standard balcony or oceanview cabin bookings", "Longer cruises where clutter builds up", "Anyone looking to maximize cabin storage", "Travelers who like to stay organized"],
     gallery: [gearShoeOrganizerMain, gearShoeOrganizerBathroom, gearShoeOrganizerProduct]
+  },
+  {
+    id: "7",
+    slug: "liquid-iv-sugar-free-electrolyte",
+    name: "Sugar-Free Electrolyte Drink Mix",
+    brand: "Liquid I.V.",
+    category: "Accessories",
+    image: gearLiquidIvMain,
+    rating: 4.8,
+    ratings: {
+      buildQuality: 5,
+      portability: 5,
+      value: 4.6,
+      easeOfUse: 5,
+      durability: 4.5,
+    },
+    testedOn: "Cuba (2025), Curaçao (2025), Europe",
+    price: "$$",
+    excerpt: "A simple, sugar-free way to stay properly hydrated on hot, busy trips. It's not cheap, but it's one of the few travel consumables I consistently pack.",
+    pros: [
+      "Extremely effective for staying hydrated on hot, busy trips",
+      "Single-serve packets take up almost no space",
+      "Mixes quickly with water anywhere - hotel, airport, or beach",
+      "Better taste than most sugar-free electrolyte options",
+      "Helpful before flights to reduce swelling and fatigue"
+    ],
+    cons: [
+      "Not inexpensive, especially for daily use on longer trips",
+      "Some flavors are stronger than others"
+    ],
+    fullReview: [
+      "I've used Liquid I.V. Sugar-Free on multiple trips now, including Cuba, Curaçao, and parts of Europe, and it's become one of those small travel items that makes a noticeable difference. On hot trips especially, or trips where days are long and busy, staying properly hydrated is harder than it sounds. This helped bridge that gap.",
+      "I usually take one packet a day while on beach vacations or high-heat trips. I'll mix it with water in the morning or early afternoon, and it's been especially helpful on days with a lot of sun, walking, and yes, drinking and heavier meals. I've also started using it before flights so I'm better hydrated going into the plane, which for me helps reduce that heavy, swollen-leg feeling on longer travel days.",
+      "The single-serve packets are extremely convenient. They take up almost no space, are easy to pack, and mix quickly with water whether you're in a hotel room, airport, or on the beach. Taste-wise, for a sugar-free electrolyte mix, it's better than most. Some flavors are stronger than others, but overall it's easy to drink consistently, which matters if you're actually going to use it every day.",
+      "One thing I didn't expect was how useful it can be if you're dealing with a stomach bug while traveling. Being able to hydrate properly without forcing food has real value, especially in destinations where that's not uncommon.",
+      "The main downside is price. It's not inexpensive, especially if you use it daily over a longer trip. That said, for me the convenience, effectiveness, and how much better I feel on hot or travel-heavy days makes it worth packing."
+    ],
+    tips: [
+      "Best for hot and tropical trips - this really shines in places like the Caribbean where heat, sun, and long days can catch up with you fast",
+      "Best for busy itineraries - if your trips involve lots of walking, excursions, or long days out, one packet a day helps keep energy and hydration steady",
+      "Great before flights - use it pre-flight to go into the plane already hydrated, which helps with leg swelling and that worn-out travel feeling",
+      "Pack a few extra - they take up almost no space, so always bring more than you think you'll need",
+      "Worth it, but not cheap - use it strategically on trips where hydration really matters rather than every single day at home"
+    ],
+    amazonLink: "https://amzn.to/4sR3lTB",
+    bestFor: ["Hot and tropical trips", "Busy itineraries", "Pre-flight hydration", "Beach vacations"],
+    gallery: [gearLiquidIvMain, gearLiquidIvPacket, gearLiquidIvImpact]
   }
 ];
 
