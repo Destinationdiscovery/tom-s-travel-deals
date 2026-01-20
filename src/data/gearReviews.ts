@@ -280,7 +280,7 @@ export const gearReviews: GearReview[] = [
     name: "Large 24 Pocket Shoe Organizer",
     brand: "ZOBER",
     category: "Accessories",
-    image: gearShoeOrganizerMain,
+    image: gearShoeOrganizerProduct,
     rating: 4.9,
     ratings: {
       buildQuality: 4.8,
