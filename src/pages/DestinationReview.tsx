@@ -2,7 +2,9 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useParams, Link } from "react-router-dom";
-import { Star, ArrowLeft, Calendar, MapPin, Heart, Share2, MessageCircle, Mail } from "lucide-react";
+import { Star, ArrowLeft, Calendar, MapPin, Heart, Share2 } from "lucide-react";
+
+import CommentsSection from "@/components/comments/CommentsSection";
 
 import { Button } from "@/components/ui/button";
 import cubaImg from "@/assets/deal-cuba.jpg";
@@ -468,23 +470,7 @@ const DestinationReview = () => {
                 </div>
               )}
 
-              {/* Questions & Comments Section */}
-              <div className="mt-16 pt-12 border-t border-border">
-                <div className="flex items-center gap-3 mb-4">
-                  <MessageCircle className="h-6 w-6 text-primary" />
-                  <h2 className="font-display text-2xl font-bold text-foreground">Questions & Comments</h2>
-                </div>
-                <p className="text-muted-foreground mb-6">
-                  Have a question about this destination or want to share your own experience? I'd love to hear from you!
-                </p>
-                
-                <Button asChild size="lg" className="gap-2">
-                  <a href="https://form.jotform.com/260065315910247" target="_blank" rel="noopener noreferrer">
-                    <Mail className="h-5 w-5" />
-                    Send Me a Message
-                  </a>
-                </Button>
-              </div>
+              {slug && <CommentsSection pageType="destination" pageSlug={slug} />}
             </div>
 
             {/* Sidebar */}

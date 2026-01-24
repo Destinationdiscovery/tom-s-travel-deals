@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { gearReviews } from "@/data/gearReviews";
 import heroBeach from "@/assets/hero-beach.jpg";
+import CommentsSection from "@/components/comments/CommentsSection";
 const GearReview = () => {
   const { slug } = useParams<{ slug: string }>();
   const gear = gearReviews.find((g) => g.slug === slug);
@@ -259,6 +260,8 @@ const GearReview = () => {
                   </div>
                 </section>
               )}
+
+              {slug && <CommentsSection pageType="gear" pageSlug={slug} />}
             </div>
 
             {/* Sidebar */}
