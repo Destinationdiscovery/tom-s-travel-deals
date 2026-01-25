@@ -1,4 +1,4 @@
-
+import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useParams, Link } from "react-router-dom";
@@ -7,6 +7,7 @@ import { Star, ArrowLeft, Calendar, MapPin, Heart, Share2 } from "lucide-react";
 import CommentsSection from "@/components/comments/CommentsSection";
 
 import { Button } from "@/components/ui/button";
+import { ImageLightbox } from "@/components/ui/image-lightbox";
 import cubaImg from "@/assets/deal-cuba.jpg";
 import cubaGallery1 from "@/assets/cuba-gallery-1.jpg";
 import cubaGallery2 from "@/assets/cuba-gallery-2.jpg";
@@ -315,6 +316,8 @@ const reviews: Record<string, ReviewData> = {
 const DestinationReview = () => {
   const { slug } = useParams<{ slug: string }>();
   const review = slug ? reviews[slug] : null;
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   if (!review) {
     return (
@@ -455,18 +458,28 @@ const DestinationReview = () => {
                   <h2 className="font-display text-2xl font-bold text-foreground">Photo Gallery</h2>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {review.gallery.map((image, index) => (
-                      <div 
+                      <button 
                         key={index} 
-                        className="aspect-[4/3] rounded-xl overflow-hidden"
+                        onClick={() => {
+                          setLightboxIndex(index);
+                          setLightboxOpen(true);
+                        }}
+                        className="aspect-[4/3] rounded-xl overflow-hidden cursor-pointer"
                       >
                         <img 
                           src={image} 
                           alt={`${review.destination} gallery image ${index + 1}`}
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                         />
-                      </div>
+                      </button>
                     ))}
                   </div>
+                  <ImageLightbox 
+                    images={review.gallery}
+                    initialIndex={lightboxIndex}
+                    isOpen={lightboxOpen}
+                    onClose={() => setLightboxOpen(false)}
+                  />
                 </div>
               )}
 
