@@ -1,7 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Button } from "@/components/ui/button";
-import { Phone, Mail, Globe, MessageSquare, Send } from "lucide-react";
+import { Phone, Mail, Globe, MessageSquare, Award, MapPin, Heart, Star } from "lucide-react";
+import heroBeach from "@/assets/hero-beach.jpg";
 
 const Contact = () => {
   return (
@@ -41,9 +41,7 @@ const Contact = () => {
                   </a>
 
                   <a 
-                    href="https://form.jotform.com/260065315910247" 
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href="mailto:tlaracy@travelonly.com?subject=Inquiry from Tom Travel Treasures" 
                     className="flex items-center gap-4 group"
                   >
                     <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
@@ -51,7 +49,7 @@ const Contact = () => {
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Send a message</p>
-                      <p className="font-semibold text-foreground group-hover:text-primary transition-colors">Contact Form</p>
+                      <p className="font-semibold text-foreground group-hover:text-primary transition-colors">tlaracy@travelonly.com</p>
                     </div>
                   </a>
 
@@ -82,20 +80,41 @@ const Contact = () => {
                 </div>
               </div>
 
-              {/* Contact Form */}
-              <div className="bg-card rounded-3xl p-8 md:p-10 shadow-elevated flex flex-col items-center justify-center text-center">
-                <h3 className="font-display text-2xl font-bold text-card-foreground mb-4">
-                  Send a Message
-                </h3>
-                <p className="text-muted-foreground mb-8">
-                  Click below to open my contact form and I'll get back to you within 24 hours.
-                </p>
-                <Button asChild variant="default" size="lg" className="gap-2">
-                  <a href="https://form.jotform.com/260065315910247" target="_blank" rel="noopener noreferrer">
-                    <Send className="h-5 w-5" />
-                    Open Contact Form
-                  </a>
-                </Button>
+              {/* Why Book With Tom Section */}
+              <div className="relative rounded-3xl overflow-hidden shadow-elevated h-full min-h-[400px]">
+                {/* Background Image */}
+                <img 
+                  src={heroBeach} 
+                  alt="Beautiful tropical beach destination" 
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+                {/* Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-black/30" />
+                
+                {/* Content */}
+                <div className="relative h-full p-8 md:p-10 flex flex-col justify-end text-white">
+                  <h3 className="font-display text-2xl md:text-3xl font-bold mb-6">
+                    Why Book With Tom?
+                  </h3>
+                  <ul className="space-y-4">
+                    <li className="flex items-center gap-3">
+                      <Award className="h-5 w-5 text-primary flex-shrink-0" />
+                      <span>10+ years of travel consulting experience</span>
+                    </li>
+                    <li className="flex items-center gap-3">
+                      <MapPin className="h-5 w-5 text-primary flex-shrink-0" />
+                      <span>Personally visited every destination I recommend</span>
+                    </li>
+                    <li className="flex items-center gap-3">
+                      <Heart className="h-5 w-5 text-primary flex-shrink-0" />
+                      <span>Honest reviews with no hidden agendas</span>
+                    </li>
+                    <li className="flex items-center gap-3">
+                      <Star className="h-5 w-5 text-primary flex-shrink-0" />
+                      <span>Personalized itineraries tailored to you</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>

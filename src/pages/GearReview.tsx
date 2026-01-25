@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { ImageLightbox } from "@/components/ui/image-lightbox";
 import { gearReviews } from "@/data/gearReviews";
 import heroBeach from "@/assets/hero-beach.jpg";
 import CommentsSection from "@/components/comments/CommentsSection";
@@ -14,6 +15,7 @@ const GearReview = () => {
   const { slug } = useParams<{ slug: string }>();
   const gear = gearReviews.find((g) => g.slug === slug);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   if (!gear) {
     return (
@@ -196,8 +198,11 @@ const GearReview = () => {
                     {gallery.map((image, index) => (
                       <button
                         key={index}
-                        onClick={() => setSelectedImage(index)}
-                        className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${
+                        onClick={() => {
+                          setSelectedImage(index);
+                          setLightboxOpen(true);
+                        }}
+                        className={`aspect-square rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
                           selectedImage === index 
                             ? "border-primary ring-2 ring-primary/20" 
                             : "border-transparent hover:border-primary/50"
@@ -211,6 +216,12 @@ const GearReview = () => {
                       </button>
                     ))}
                   </div>
+                  <ImageLightbox 
+                    images={gallery}
+                    initialIndex={selectedImage}
+                    isOpen={lightboxOpen}
+                    onClose={() => setLightboxOpen(false)}
+                  />
                 </section>
               )}
 
