@@ -1,7 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { getArticleBySlug, getRelatedArticles } from "@/data/compassArticles";
+import { getArticleBySlug, getRelatedArticles, ContentBlock } from "@/data/compassArticles";
 import { ArrowLeft, ArrowRight, Clock, User } from "lucide-react";
 import CommentsSection from "@/components/comments/CommentsSection";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,39 @@ const CompassArticle = () => {
       </div>
     );
   }
+
+  const renderContentBlock = (block: ContentBlock, index: number) => {
+    switch (block.type) {
+      case "heading":
+        return (
+          <h2 key={index} className="font-display text-xl md:text-2xl font-semibold text-foreground mt-8 mb-4">
+            {block.value}
+          </h2>
+        );
+      case "image":
+        return (
+          <figure key={index} className="my-8">
+            <img
+              src={block.value}
+              alt={block.caption || "Article image"}
+              className="w-full rounded-xl shadow-soft"
+            />
+            {block.caption && (
+              <figcaption className="text-sm text-muted-foreground mt-3 text-center italic">
+                {block.caption}
+              </figcaption>
+            )}
+          </figure>
+        );
+      case "text":
+      default:
+        return (
+          <p key={index} className="text-foreground/90 leading-relaxed mb-6">
+            {block.value}
+          </p>
+        );
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -94,11 +127,17 @@ const CompassArticle = () => {
             {/* Article Body */}
             <div className="bg-card rounded-2xl shadow-soft p-8 md:p-12">
               <div className="prose prose-lg max-w-none">
-                {article.content.map((paragraph, index) => (
-                  <p key={index} className="text-foreground/90 leading-relaxed mb-6 last:mb-0">
-                    {paragraph}
-                  </p>
-                ))}
+                {article.richContent && article.richContent.length > 0 ? (
+                  // Render rich content with images and headings
+                  article.richContent.map((block, index) => renderContentBlock(block, index))
+                ) : (
+                  // Fallback to simple text paragraphs
+                  article.content.map((paragraph, index) => (
+                    <p key={index} className="text-foreground/90 leading-relaxed mb-6 last:mb-0">
+                      {paragraph}
+                    </p>
+                  ))
+                )}
               </div>
 
             </div>

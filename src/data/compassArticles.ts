@@ -1,9 +1,19 @@
 import packingImg from "@/assets/curacao-gallery-6.webp";
-import guidesImg from "@/assets/deal-santorini.jpg";
+import japanHeroImg from "@/assets/japan-tokyo-skyline.jpg";
+import japanCherryImg from "@/assets/japan-cherry-blossoms.webp";
+import japanShrineImg from "@/assets/japan-fushimi-inari.jpg";
+import japanRyokanImg from "@/assets/japan-ryokan.png";
+import japanAnimeImg from "@/assets/japan-anime-street.webp";
 import budgetImg from "@/assets/deal-cruise.jpg";
 import insuranceImg from "@/assets/deal-alps.jpg";
 import timingImg from "@/assets/deal-maldives.jpg";
 import vegasStripImg from "@/assets/vegas-strip-hero.jpg";
+
+export interface ContentBlock {
+  type: "text" | "image" | "heading";
+  value: string;
+  caption?: string;
+}
 
 export interface CompassArticle {
   id: number;
@@ -17,6 +27,7 @@ export interface CompassArticle {
   datePublished: string;
   readTime: string;
   content: string[];
+  richContent?: ContentBlock[];
 }
 
 export const compassArticles: CompassArticle[] = [
@@ -46,26 +57,43 @@ export const compassArticles: CompassArticle[] = [
   },
   {
     id: 2,
-    slug: "destination-guides-where-to-go-next",
-    title: "Destination Guides: Where to Go Next",
-    category: "Guides",
-    categoryColor: "bg-emerald-500",
-    image: guidesImg,
-    excerpt: "Curated recommendations for every type of traveler, from romantic getaways to family adventures.",
+    slug: "japan-top-destination-canadians-2026",
+    title: "Why Japan Is the #1 Destination Canadians Are Booking for 2026 (And How to Go on a Budget)",
+    category: "Destinations",
+    categoryColor: "bg-rose-500",
+    image: japanHeroImg,
+    excerpt: "Japan is exploding as the number one trending international destination for Canadians heading into 2026. Here's why and how to make it affordable.",
     author: "Tom Laracy",
-    datePublished: "December 8, 2024",
-    readTime: "7 min read",
-    content: [
-      "Choosing where to travel next is one of the most exciting parts of trip planning, but it can also feel overwhelming. With so many incredible destinations in the world, how do you narrow it down? After years of matching travelers with their perfect trips, I have learned that the best destination depends less on what is trending and more on what you actually want from your vacation.",
-      "For couples seeking romance, I consistently recommend Santorini, the Maldives, and the Amalfi Coast. These destinations offer a combination of stunning scenery, intimate dining experiences, and accommodations designed for two. Santorini in particular delivers incredible sunsets, walkable villages, and a pace of life that encourages lingering over meals and conversation.",
-      "Families have different needs, and the best family destinations balance activities for all ages with logistics that do not exhaust parents. The Caribbean islands, particularly Aruba and Turks and Caicos, offer calm, shallow waters for young children, resorts with kids clubs, and enough variety to keep teenagers engaged. Cruises also work exceptionally well for families, as they handle the logistics while offering something for everyone.",
-      "Adventure seekers should look beyond the obvious. Costa Rica remains a favorite for its combination of wildlife, rainforests, and activities from zip-lining to surfing. New Zealand offers world-class hiking and landscapes that feel otherworldly. For something closer to home, Utah's national parks provide dramatic terrain and outdoor challenges without the long flight.",
-      "Budget-conscious travelers often ask me where they can get the most value. Portugal consistently ranks among my top recommendations, offering excellent food, historic cities, and beautiful coastline at prices well below Western European averages. Mexico beyond the resort zones, particularly Oaxaca and Mexico City, delivers incredible culture and cuisine at a fraction of what you would spend in Europe.",
-      "Timing your trip matters as much as choosing the destination. Shoulder seasons, the periods just before and after peak tourist months, often provide the best combination of good weather, lower prices, and fewer crowds. September and early October work beautifully for the Mediterranean. April and May are ideal for the Caribbean before hurricane season peaks.",
-      "Consider your travel style honestly. Some people want to explore actively every day. Others need true downtime to recharge. There is no right answer, but booking a trip that conflicts with your natural pace leads to frustration. A packed itinerary sounds exciting in planning but can feel exhausting in practice.",
-      "Do not overlook the value of returning to places you love. There is something deeply satisfying about revisiting a destination with familiarity, trying that restaurant you missed last time, or exploring a neighborhood you only glimpsed before. Not every trip needs to be somewhere new.",
-      "When clients feel stuck, I ask them to describe their ideal day on vacation in detail. What are you eating? Where are you? What does the pace feel like? The answers reveal more about where they should go than any destination guide ever could.",
-      "The world has no shortage of remarkable places to visit. The key is matching the destination to who you are and what you need right now. That is where thoughtful travel planning makes all the difference."
+    datePublished: "January 26, 2025",
+    readTime: "10 min read",
+    content: [],
+    richContent: [
+      { type: "text", value: "Japan is exploding as the number one trending international destination for Canadians heading into 2026, according to fresh Skyscanner data released in January. Searches and bookings from Canada are surging, driven by a combo of cultural immersion, pop culture buzz including anime and K-culture crossover, stunning seasonal events, and crucially a still-favorable yen exchange rate making it feel like a steal compared to traditional spots like the US or Europe." },
+      { type: "text", value: "This shift ties into broader trends. With some Canadians eyeing alternatives to US travel due to costs, tensions, or preferences, Japan offers high-value, meaningful trips. Think purpose-driven experiences like wellness, food discovery, or book-inspired journeys. Reports highlight Japan's mix of ancient traditions and modern vibes, from futuristic Tokyo to serene temples, as a big draw, plus easier access via direct flights and strong value for money." },
+      { type: "heading", value: "Why Japan Is Surging for Canadians Right Now" },
+      { type: "text", value: "Skyscanner's data confirms Japan leads or ranks highly in 2026 search spikes for Canadians, with average round-trip flights to Tokyo around CAD $1,183, often lower on deals, putting it in the top 10 cheapest destinations globally that year. Social media virality around cherry blossoms, Disney comparisons cheaper than Florida, and anime/Ghibli effects are fueling this." },
+      { type: "image", value: japanAnimeImg, caption: "Japan's anime culture and modern city vibes are a major draw for Canadian travelers" },
+      { type: "text", value: "The weaker yen remains a major advantage. With the rate hovering around 114-115 JPY per CAD as of mid-January 2026, Canadians are getting more bang for their buck on food, stays, and shopping. Konbini meals under CAD $5 and high-quality experiences at lower costs than pre-2022 make the trip feel incredibly accessible." },
+      { type: "text", value: "Cultural and pop appeal cannot be overstated. Immersive trends like glowcations, fan voyages for sumo and local sports, and set-jetting to real-life anime locations fit Japan perfectly. Travel advisors note the massive anime and K-culture effect boosting spots like Hiroshima for history plus food and Nagoya for Ghibli Park." },
+      { type: "heading", value: "Direct Flights from Toronto" },
+      { type: "text", value: "Air Canada operates non-stop flights to Tokyo, both Haneda and Narita airports, with multiple weekly departures. Flight times are around 14 hours direct. Other carriers like ANA, JAL, United, or Cathay offer competitive one-stop options. Current round-trips hover between CAD $957 to $1,318. Check Google Flights, Skyscanner, or Air Canada's site for real-time deals, and shoulder seasons dip even lower." },
+      { type: "heading", value: "Cherry Blossom Season Planning for Sakura 2026" },
+      { type: "image", value: japanCherryImg, caption: "Peak cherry blossom season transforms Japan into a pink paradise" },
+      { type: "text", value: "Peak season runs late March to early April in central areas like Tokyo, Kyoto, and Osaka. Forecasts point to slightly earlier blooms due to warmer trends. Full bloom lasts about one week, so plan 10 to 14 days to catch the front moving north." },
+      { type: "text", value: "In Tokyo, bloom starts around March 20 with full bloom around March 27. Ueno Park hosts festivals with lanterns. In Kyoto and Osaka, bloom starts around March 25 with full bloom in early April. Iconic spots include the Philosopher's Path and various castles. Book early because hotels spike, but off-peak shoulder weeks save big. Use apps like Sakura Navi for daily forecasts." },
+      { type: "heading", value: "Budget Tips for Canadians: Maximize the Weak Yen" },
+      { type: "text", value: "Japan remains affordable in 2026. Expect CAD $200 to $400 per day per person for mid-range travel, or lower on budget. Here is the breakdown:" },
+      { type: "text", value: "Flights run CAD $957 to $1,500 round-trip. Hunt deals via Air Canada Vacations packages. For accommodation, hostels and capsule hotels cost CAD $40 to $80 per night, while ryokans or Airbnbs run CAD $100 to $200. Book early for sakura season." },
+      { type: "image", value: japanRyokanImg, caption: "Traditional ryokan stays offer authentic Japanese hospitality at reasonable prices" },
+      { type: "text", value: "Food is where Japan shines for budget travelers. Konbini meals and onigiri cost CAD $5 to $10 per meal. Ramen and sushi sets run CAD $10 to $20. Skip tourist traps and local izakayas are much cheaper. For transport, consider a JR Pass if visiting multiple cities, or regional passes. IC cards like Suica or Pasmo make metro travel easy. Walking is free and cities are incredibly walkable." },
+      { type: "text", value: "Savings hacks include shopping at 100-yen shops for essentials, visiting free parks and shrines, eating convenience store meals, and avoiding peak weekends. Note that tax-free shopping shifts in November 2026 with refunds at airport only. A total 10 to 14 day trip runs CAD $3,000 to $6,000 per person including flights and mid-range everything, cheaper than many European trips now." },
+      { type: "heading", value: "Must-Do Cultural Experiences" },
+      { type: "image", value: japanShrineImg, caption: "Fushimi Inari Shrine in Kyoto is one of Japan's most iconic cultural sites" },
+      { type: "text", value: "Top experiences include a tea ceremony with matcha and sweets often with modern twists, kimono or yukata rental plus a stroll through historic districts, sumo stable visits or tournaments though tickets book fast, and onsen/ryokan stays for ultimate relaxation." },
+      { type: "text", value: "For pop culture fans, must-visits include Akihabara, Ghibli Park in Nagoya, and teamLab exhibits. Food immersion through local supermarkets, street eats, and kaiseki dinners is essential. Consider zen meditation or calligraphy workshops. During sakura season, hanami picnics under the cherry blossoms are a quintessential experience." },
+      { type: "heading", value: "Visa and Entry for Canadians" },
+      { type: "text", value: "No visa is needed for tourism or business up to 90 days. Just bring a valid passport and carry it at all times since a photocopy will not cut it. From late 2026, watch for JESTA, an electronic authorization system with about a CAD $40 fee being phased in. No major changes otherwise. Super straightforward entry for Canadians." },
+      { type: "text", value: "Japan in 2026 offers Canadians the perfect combination of cultural depth, modern excitement, seasonal beauty, and genuine value. Whether you are chasing cherry blossoms, exploring anime hotspots, or seeking traditional experiences, now is an exceptional time to book. The yen advantage will not last forever, so planning ahead pays off." }
     ]
   },
   {
