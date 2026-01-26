@@ -46,26 +46,31 @@ export default function CommentsSection({
   pageType: PageType;
 }) {
   const qc = useQueryClient();
-  const { user, sendMagicLink, signOut, loading: authLoading } = useAuth();
+  const { user, isAdmin, sendMagicLink, signOut, loading: authLoading } = useAuth();
 
   const [email, setEmail] = useState("");
   const [newComment, setNewComment] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState("");
 
-  const queryKey = useMemo(() => ["comments", pageType, pageSlug], [pageType, pageSlug]);
+  const queryKey = useMemo(() => ["comments", pageType, pageSlug, isAdmin], [pageType, pageSlug, isAdmin]);
 
   const commentsQuery = useQuery({
     queryKey,
     queryFn: async (): Promise<CommentRow[]> => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("comments")
         .select("id,page_slug,page_type,user_id,content,created_at,is_hidden")
         .eq("page_slug", pageSlug)
         .eq("page_type", pageType)
-        .eq("is_hidden", false)
         .order("created_at", { ascending: true });
 
+      // Admin sees all comments; regular users see only visible
+      if (!isAdmin) {
+        query = query.eq("is_hidden", false);
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
       return (data ?? []) as CommentRow[];
     },
@@ -128,6 +133,27 @@ export default function CommentsSection({
     onError: (err: any) => {
       toast({
         title: "Could not delete comment",
+        description: err?.message ?? "Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const toggleHiddenMutation = useMutation({
+    mutationFn: async ({ id, hide }: { id: string; hide: boolean }) => {
+      if (!user || !isAdmin) throw new Error("Not authorized");
+      const { error } = await supabase
+        .from("comments")
+        .update({ is_hidden: hide })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey });
+    },
+    onError: (err: any) => {
+      toast({
+        title: "Could not update comment visibility",
         description: err?.message ?? "Please try again.",
         variant: "destructive",
       });
@@ -226,9 +252,10 @@ export default function CommentsSection({
             const isMine = Boolean(user?.id) && c.user_id === user!.id;
             const authorLabel = isMine ? "You" : "Traveler";
             const isEditing = editingId === c.id;
+            const canEditDelete = isMine || isAdmin;
 
             return (
-              <Card key={c.id}>
+              <Card key={c.id} className={c.is_hidden ? "opacity-60 border-dashed" : ""}>
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
@@ -237,6 +264,11 @@ export default function CommentsSection({
                         <p className="text-xs text-muted-foreground">
                           {formatDistanceToNowStrict(new Date(c.created_at), { addSuffix: true })}
                         </p>
+                        {c.is_hidden && (
+                          <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded">
+                            Hidden
+                          </span>
+                        )}
                       </div>
 
                       {!isEditing ? (
@@ -268,19 +300,38 @@ export default function CommentsSection({
                       )}
                     </div>
 
-                    {isMine && !isEditing && (
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setEditingId(c.id);
-                            setEditDraft(c.content);
-                          }}
-                        >
-                          Edit
-                        </Button>
+                    {canEditDelete && !isEditing && (
+                      <div className="flex gap-2 flex-shrink-0">
+                        {/* Admin moderation: Hide/Unhide */}
+                        {isAdmin && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => toggleHiddenMutation.mutate({ 
+                              id: c.id, 
+                              hide: !c.is_hidden 
+                            })}
+                            disabled={toggleHiddenMutation.isPending}
+                          >
+                            {c.is_hidden ? "Unhide" : "Hide"}
+                          </Button>
+                        )}
 
+                        {/* Edit button - only for own comments */}
+                        {isMine && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setEditingId(c.id);
+                              setEditDraft(c.content);
+                            }}
+                          >
+                            Edit
+                          </Button>
+                        )}
+
+                        {/* Delete button */}
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button variant="destructive" size="sm">
@@ -291,7 +342,7 @@ export default function CommentsSection({
                             <AlertDialogHeader>
                               <AlertDialogTitle>Delete comment?</AlertDialogTitle>
                               <AlertDialogDescription>
-                                This can’t be undone.
+                                This can't be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>

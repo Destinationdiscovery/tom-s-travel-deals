@@ -2,10 +2,13 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from "
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabaseClient";
 
+const ADMIN_USER_ID = "f4b1009b-e47a-496e-87ae-d310df7f938e";
+
 type AuthContextValue = {
   session: Session | null;
   user: User | null;
   loading: boolean;
+  isAdmin: boolean;
   sendMagicLink: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
 };
@@ -40,6 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       session,
       user: session?.user ?? null,
       loading,
+      isAdmin: session?.user?.id === ADMIN_USER_ID,
       sendMagicLink: async (email: string) => {
         const { error } = await supabase.auth.signInWithOtp({
           email,
