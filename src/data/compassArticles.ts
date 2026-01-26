@@ -64,7 +64,7 @@ export const compassArticles: CompassArticle[] = [
     image: japanHeroImg,
     excerpt: "Japan is exploding as the number one trending international destination for Canadians heading into 2026. Here's why and how to make it affordable.",
     author: "Tom Laracy",
-    datePublished: "January 26, 2025",
+    datePublished: "January 26, 2026",
     readTime: "10 min read",
     content: [],
     richContent: [
@@ -177,7 +177,7 @@ export const compassArticles: CompassArticle[] = [
     image: vegasStripImg,
     excerpt: "A few downtown Las Vegas casinos are accepting Canadian dollars at par, but is it really worth changing your travel plans for?",
     author: "Tom Laracy",
-    datePublished: "January 26, 2025",
+    datePublished: "January 26, 2026",
     readTime: "7 min read",
     content: [
       "Every summer or so, a Vegas deal pops up that gets Canadians talking again. This year, it is the Canadian at-par offer in downtown Las Vegas, where a few casinos are accepting Canadian dollars at face value instead of U.S. dollars.",
