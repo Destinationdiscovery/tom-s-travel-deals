@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { getArticleBySlug, getRelatedArticles } from "@/data/compassArticles";
 import { ArrowLeft, ArrowRight, Clock, User } from "lucide-react";
+import CommentsSection from "@/components/comments/CommentsSection";
 import { Button } from "@/components/ui/button";
 
 const CompassArticle = () => {
@@ -100,27 +101,11 @@ const CompassArticle = () => {
                 ))}
               </div>
 
-              {/* CTA */}
-              <div className="mt-12 pt-8 border-t border-border">
-                <div className="bg-primary/5 rounded-xl p-6 text-center">
-                  <h3 className="font-display text-xl font-semibold text-foreground mb-2">
-                    Ready to Plan Your Trip?
-                  </h3>
-                  <p className="text-muted-foreground mb-4">
-                    Let me help you put this advice into action with a personalized travel plan.
-                  </p>
-                  <a
-                    href="https://form.jotform.com/tlaracy/ready-to-plan-your-trip"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Button size="lg">
-                      Start Planning
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </a>
-                </div>
-              </div>
+            </div>
+
+            {/* Comments Section */}
+            <div className="mt-8">
+              <CommentsSection pageSlug={slug!} pageType="compass" />
             </div>
           </article>
         </div>

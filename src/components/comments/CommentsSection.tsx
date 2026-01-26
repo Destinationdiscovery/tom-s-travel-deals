@@ -23,7 +23,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-type PageType = "destination" | "gear";
+type PageType = "destination" | "gear" | "compass";
 
 type CommentRow = {
   id: string;
