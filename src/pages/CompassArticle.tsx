@@ -104,7 +104,10 @@ const CompassArticle = () => {
             </div>
 
             {/* Comments Section */}
-            <div className="mt-8">
+            <div className="bg-card rounded-2xl shadow-soft p-8 md:p-12 mt-8">
+              <h3 className="font-display text-xl font-semibold text-foreground mb-6">
+                Questions or Thoughts on This Article?
+              </h3>
               <CommentsSection pageSlug={slug!} pageType="compass" />
             </div>
           </article>
