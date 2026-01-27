@@ -1,83 +1,76 @@
 
-## Replace "Best Times to Visit" Article with Snowbirds Skipping US Article
+
+## Replace "Essential Packing Tips" Article with 2026 Travel Trends Article
 
 ### Overview
-Replace Compass article ID 5 ("Best Times to Visit Popular Destinations") with the new comprehensive article about why Canadian snowbirds are skipping the US in 2026 and where they're going instead. The article will use the richContent format with images dispersed throughout, following the same pattern used for the Japan article.
+Replace Compass article ID 1 ("Essential Packing Tips for Beach Destinations") with the new comprehensive article about 2026 travel trends covering Whycations, Glowcations, and Microvacations. The article will use the richContent format with images dispersed throughout, following the same pattern used for the Japan and Snowbird articles.
 
 ---
 
 ### Image Assignments
 
-| Image File | Placement | Caption |
-|-----------|-----------|---------|
-| photo-507525428034.jpeg (beach sunset) | Hero image | (none - used as main article image) |
-| pexels-210182.jpeg (city traffic) | After intro, before "Where Canadians Are Heading" | Border crossings and rising costs are pushing Canadians to reconsider their winter travel plans |
-| pexels-1483053.jpeg (Caribbean aerial) | In "Where Canadians Are Heading Instead" section | Mexico and Caribbean destinations offer stunning beaches and better value for Canadian travelers |
-| pexels-258154.jpeg (resort pool) | After Caribbean discussion | All-inclusive resorts provide exceptional value with everything bundled into one price |
-| pexels-417074.jpeg (Banff mountains) | In domestic Canada section | Banff and the Canadian Rockies offer a winter escape without crossing borders |
-| pexels-1486222.jpeg (Times Square) | In "Comparing Deals" section | Traditional US destinations like New York are feeling the pinch as Canadians look elsewhere |
-| photo-1519046904884.jpeg (beach with palm) | Near end/CTA section | White sand beaches in Mexico and the Caribbean are welcoming Canadian travelers |
+| Image File | New Filename | Placement | Caption |
+|-----------|--------------|-----------|---------|
+| 20240809_195834-scaled.jpg | trends-yoga-mountain.jpg | Hero image | (none - used as main article image) |
+| solo-vacations-colorado-ranch-vista-verde.webp | trends-cozy-retreat.webp | After intro, in "Why now" section | Whycations prioritize meaningful experiences like quiet reflection and reconnection |
+| e61b7ffc-d0a7-431e-aafb-c6ff68dcfff3.jpg | trends-wellness-villa.jpg | In "Glowcations" section | Wellness-focused stays combine relaxation with self-care in stunning settings |
+| Biophilic-Design-Elements...jpg | trends-wellness-aesthetic.jpg | After Microvacations explanation | The glowcation trend blends beauty rituals with nature-inspired wellness |
+| 53maxzyhoglzhgcgpac2.jpg | trends-luxury-retreat.jpg | In "How Canadians Can Book" section | Spa retreats and wellness escapes offer purpose-driven travel experiences |
 
 ---
 
 ### Article Updates
 
-**ID**: 5 (unchanged)
+**ID**: 1 (unchanged)
 
-**New Slug**: `why-canadians-skipping-us-2026`
+**New Slug**: `2026-travel-trends-whycations-glowcations-microvacations`
 
-**New Title**: "Why Snowbirds and Canadians Are Skipping the US More in 2026 (And Where They're Going Instead)"
+**New Title**: "2026 Travel Trends: Purpose-Driven Whycations, Glowcations & Microvacations - How Canadians Can Jump In"
 
-**Category**: Change from "Timing" to "Guides"
+**Category**: Change from "Packing" to "Guides"
 
-**Category Color**: Keep "bg-teal-500" or update to match Guides
+**Category Color**: "bg-teal-500"
 
 **Date Published**: "January 27, 2026"
 
-**Read Time**: "8 min read"
+**Read Time**: "7 min read"
 
-**Excerpt**: "Data shows Canadian travel to the US is down sharply. Here's why snowbirds are rethinking their winter escapes and the destinations offering better value."
+**Excerpt**: "Hilton, Conde Nast, and Expedia highlight the rise of intentional travel. Here's what Whycations, Glowcations, and Microvacations mean for Canadian travelers."
 
 ---
 
 ### Content Structure (richContent array)
 
-1. **Text** - Opening paragraph about Statistics Canada data, 23.6% drop
-2. **Text** - Factors driving the trend (political tensions, weak dollar, border rules)
-3. **Image** - City traffic photo with caption about border hassles
-4. **Text** - Not about staying home, redirecting to welcoming spots
-5. **Heading** - "Where Canadians Are Heading Instead"
-6. **Image** - Caribbean aerial photo
-7. **Text** - Mexico and Caribbean leading (Playa del Carmen, Puerto Vallarta, Punta Cana, Costa Rica)
-8. **Image** - Resort pool photo with all-inclusive caption
-9. **Text** - Domestic Canada booming (BC, Alberta Rockies, Banff)
-10. **Image** - Banff mountains photo
-11. **Text** - Other spots (Portugal Algarve, Belize)
-12. **Heading** - "Comparing Deals: US vs. Mexico/Caribbean/Canada"
-13. **Image** - Times Square photo
-14. **Text** - US still has appeal but costs add up, insurance doubled
-15. **Text** - Mexico/Caribbean packages value breakdown (CAD $1,500-$2,500/week)
-16. **Text** - Domestic options win on ease (Banff, Vancouver packages)
-17. **Text** - Bottom line on value comparison
-18. **Heading** - "A Travel Agent's Perspective"
-19. **Image** - Beach with palm tree
-20. **Text** - Personal perspective as Ontario travel agent
-21. **Text** - Call to action for comments and reaching out
+1. **Text** - Opening paragraph about 2026 being year of intentional travel, citing Hilton/Conde Nast/Expedia
+2. **Text** - Why now: travelers craving purpose over volume, emotional drivers
+3. **Image** - Cozy retreat/fireplace image with caption about meaningful experiences
+4. **Heading** - "The Top Trends Explained"
+5. **Text** - Whycations: Purpose-driven trips explanation
+6. **Image** - Wellness villa image with caption about wellness stays
+7. **Text** - Glowcations: Wellness meets beauty explanation
+8. **Image** - Wellness aesthetic image with caption about beauty rituals
+9. **Text** - Microvacations: Short, far-flung escapes explanation
+10. **Heading** - "How Canadians Can Book These Trends"
+11. **Image** - Luxury retreat canopy bed image with caption about spa retreats
+12. **Text** - Wellness retreats in Canada (Niagara, Banff, Fairmont)
+13. **Text** - Microvacations with direct YYZ flights
+14. **Text** - Start small suggestion (weekend wellness, Caribbean glowcation)
+15. **Heading** - "A Travel Agent's Take"
+16. **Text** - Toronto travel agent perspective on meaningful options
+17. **Text** - Call to action for comments and reaching out
 
 ---
 
-### Files to Modify
+### Files to Modify/Create
 
 | File | Action |
 |------|--------|
-| src/assets/snowbird-beach-sunset.jpg | Copy from user-uploads |
-| src/assets/snowbird-traffic.jpg | Copy from user-uploads |
-| src/assets/snowbird-caribbean-aerial.jpg | Copy from user-uploads |
-| src/assets/snowbird-resort-pool.jpg | Copy from user-uploads |
-| src/assets/snowbird-banff.jpg | Copy from user-uploads |
-| src/assets/snowbird-times-square.jpg | Copy from user-uploads |
-| src/assets/snowbird-palm-beach.jpg | Copy from user-uploads |
-| src/data/compassArticles.ts | Add image imports, replace article ID 5 content with richContent structure |
+| src/assets/trends-yoga-mountain.jpg | Copy from user-uploads (hero) |
+| src/assets/trends-cozy-retreat.webp | Copy from user-uploads |
+| src/assets/trends-wellness-villa.jpg | Copy from user-uploads |
+| src/assets/trends-wellness-aesthetic.jpg | Copy from user-uploads |
+| src/assets/trends-luxury-retreat.jpg | Copy from user-uploads |
+| src/data/compassArticles.ts | Add image imports, replace article ID 1 content with richContent structure |
 
 ---
 
@@ -85,11 +78,12 @@ Replace Compass article ID 5 ("Best Times to Visit Popular Destinations") with t
 
 The existing `ContentBlock` type already supports `text`, `image`, and `heading` types, and the `CompassArticle.tsx` page already has the `renderContentBlock` function to handle richContent. No rendering changes are needed.
 
-The article will follow the same pattern as the Japan article (ID 2), using `richContent` array instead of the plain `content` array, with images interspersed between text blocks using appropriate headings to organize sections.
+The article will follow the same pattern as the Japan and Snowbird articles, using `richContent` array instead of the plain `content` array, with images interspersed between text blocks using appropriate headings to organize sections.
 
-The typo "TOntario" in the original content will be corrected to "Ontario" during implementation.
+The original article's hero image import (`packingImg`) will be replaced with the new yoga mountain image import.
 
 ---
 
 ### Result
-The Compass section will have a timely, relevant article about Canadian travel trends for 2026, with professional imagery dispersed throughout to create a polished, magazine-style reading experience matching the Japan article.
+The Compass section will have a timely article about 2026's biggest travel trends with professional imagery dispersed throughout, matching the magazine-style reading experience of the Japan and Snowbird articles.
+
