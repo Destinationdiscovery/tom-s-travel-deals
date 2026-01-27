@@ -10,7 +10,11 @@ import japanCherryImg from "@/assets/japan-cherry-blossoms.webp";
 import japanShrineImg from "@/assets/japan-fushimi-inari.jpg";
 import japanRyokanImg from "@/assets/japan-ryokan.png";
 import japanAnimeImg from "@/assets/japan-anime-street.webp";
-import budgetImg from "@/assets/deal-cruise.jpg";
+// Canada Boom article images
+import canadaBoomHeroImg from "@/assets/canada-boom-banff-street.jpg";
+import canadaBoomWinterImg from "@/assets/canada-boom-banff-winter.jpg";
+import canadaBoomLakeLouiseImg from "@/assets/canada-boom-lake-louise.jpg";
+import canadaBoomRockiesImg from "@/assets/canada-boom-rockies-winter.jpg";
 import insuranceImg from "@/assets/deal-alps.jpg";
 import vegasStripImg from "@/assets/vegas-strip-hero.jpg";
 // Snowbird article images
@@ -118,26 +122,38 @@ export const compassArticles: CompassArticle[] = [
   },
   {
     id: 3,
-    slug: "budget-travel-hacks-that-work",
-    title: "Budget Travel Hacks That Actually Work",
-    category: "Budget",
-    categoryColor: "bg-amber-500",
-    image: budgetImg,
-    excerpt: "Smart strategies to stretch your travel budget without sacrificing comfort or experience.",
+    slug: "domestic-canada-boom-banff-lake-louise-2026",
+    title: "Domestic Canada Boom: Banff, Lake Louise, and Why More Canadians Are Staying Home in 2026",
+    category: "Guides",
+    categoryColor: "bg-teal-500",
+    image: canadaBoomHeroImg,
+    excerpt: "With shifting attitudes toward U.S. travel and a desire for meaningful escapes, destinations like Banff and Lake Louise are seeing renewed interest across all seasons.",
     author: "Tom Laracy",
-    datePublished: "November 28, 2024",
-    readTime: "6 min read",
-    content: [
-      "Everyone wants to travel more while spending less, and the internet is full of advice on how to do it. The problem is that much of that advice is outdated, impractical, or requires a level of flexibility that most travelers simply do not have. After years of helping clients maximize their travel budgets, I want to share the strategies that actually work.",
-      "Timing is the most powerful lever you have. Flying midweek, typically Tuesday through Thursday, almost always costs less than weekend departures. Traveling during shoulder season saves money on flights, accommodations, and activities while often providing a better overall experience with fewer crowds.",
-      "Flexibility with dates makes a significant difference. If you can shift your trip by even a few days, fare comparison tools will show you the cheapest options within a date range. Sometimes a Wednesday departure instead of Saturday saves hundreds of dollars per person.",
-      "Book flights and hotels separately rather than as a package. This takes more time but usually yields better prices and more options. The exception is all-inclusive resorts, where packages genuinely offer value by bundling food, drinks, and activities.",
-      "Loyalty programs are not just for frequent travelers. Sign up for airline and hotel programs even if you only travel once or twice a year. Points accumulate, status can come with perks like free breakfast or room upgrades, and member rates often beat public prices.",
-      "Credit card points, when used strategically, can dramatically reduce travel costs. Cards with travel rewards and sign-up bonuses can fund entire trips. The key is paying off balances in full each month. Interest charges would quickly erase any rewards benefit.",
-      "Avoid hidden costs by reading the fine print. Resort fees, baggage charges, and foreign transaction fees add up quickly. Budget for these in advance rather than being surprised at checkout. Some destinations also have departure taxes that must be paid in cash at the airport.",
-      "Eat like a local. Restaurant meals in tourist areas are typically overpriced and often mediocre. Venture a few blocks away, find where residents eat, and you will save money while having better food. Markets and grocery stores also offer affordable options for breakfasts and picnic lunches.",
-      "Do not underestimate the value of a good travel consultant. While we do charge fees or earn commissions, we often have access to rates, upgrades, and amenities that more than offset our costs. We also save you time and catch potential problems before they become expensive mistakes.",
-      "The goal is not to travel as cheaply as possible but to get maximum value from what you spend. Sometimes the budget option is the right choice. Other times, spending a bit more on location or quality of accommodation transforms the entire trip. Knowing where to save and where to splurge is the real skill."
+    datePublished: "January 27, 2026",
+    readTime: "8 min read",
+    content: [],
+    richContent: [
+      { type: "text", value: "2026 is shaping up to be a breakout year for domestic travel in Canada. With fewer Canadians heading south and more looking closer to home, destinations like Banff and Lake Louise are seeing renewed interest across all seasons. Between shifting attitudes toward U.S. travel, rising costs abroad, and a desire for meaningful escapes without border hassles, staying in Canada suddenly feels like the smart and satisfying choice." },
+      { type: "text", value: "Domestic trips are no longer the backup plan. They're the main event. Scenic landscapes, improved rail and air connections, and strong value for money are pulling Canadians toward iconic mountain towns, cultural cities, and winter-friendly destinations that feel both familiar and fresh." },
+      { type: "heading", value: "Why Domestic Travel Is Booming in 2026" },
+      { type: "text", value: "Several factors are driving this shift. U.S. travel demand from Canada has softened, influenced by cost concerns, currency differences, and changing snowbird habits. At the same time, Canada's own destinations are topping global \"best places\" lists for scenery and experience. Travelling at home also removes passport stress, currency swings, and surprise fees, which matters more than ever." },
+      { type: "text", value: "Reports across the travel industry show Canadians prioritizing ease, flexibility, and value. A trip to Banff or Lake Louise offers jaw-dropping scenery without international logistics, while cities like Vancouver and Quebec City combine culture, food, and walkability with short flight times." },
+      { type: "heading", value: "Why Banff and Lake Louise Are Leading the Pack" },
+      { type: "image", value: canadaBoomWinterImg, caption: "Banff's charming downtown comes alive in winter with snow-capped peaks as the backdrop" },
+      { type: "text", value: "Banff and Lake Louise continue to dominate domestic travel wish lists, especially for winter and shoulder seasons. Snow-covered peaks, frozen lakes, and cozy alpine towns create a dramatic before-and-after contrast that plays perfectly on social media and TikTok. Winter isn't a downside here; it's the draw." },
+      { type: "text", value: "Activities go far beyond skiing. Visitors are booking snowshoeing, ice walks, frozen lake skating, sleigh rides, and spa days with mountain views. Winter prices are often more approachable than peak summer, making these destinations surprisingly affordable for Canadians who plan smart." },
+      { type: "image", value: canadaBoomLakeLouiseImg, caption: "Lake Louise transforms into a natural skating rink, drawing visitors for unforgettable winter experiences" },
+      { type: "text", value: "Train travel is also having a moment. Rail journeys through the Rockies turn the trip itself into part of the experience, appealing to travelers who want slower, scenic travel without driving mountain roads." },
+      { type: "heading", value: "Family-Friendly and March Break Alternatives" },
+      { type: "text", value: "For families, domestic travel is filling the gap left by pricier U.S. theme park trips. A Banff or Lake Louise winter escape offers snow play, tubing, wildlife viewing, and family-oriented resorts without long lines or extreme crowds." },
+      { type: "text", value: "March Break is a sweet spot. While some families still head south, others are choosing winter festivals, ski schools, and indoor-outdoor activity mixes in the Rockies or Quebec. Quebec City, in particular, feels like Europe without the transatlantic flight, especially in winter when the old town shines." },
+      { type: "heading", value: "How Canadians Are Booking Smarter" },
+      { type: "text", value: "Canadians are leaning into bundled travel. Train-and-hotel packages, flight deals, and off-peak stays are making domestic trips easier to budget. Shorter stays are also popular, with long weekends delivering a full reset without burning vacation days." },
+      { type: "text", value: "The mindset has shifted from \"once in a lifetime\" to \"easy to repeat.\" Travelers are happy to return to favorite places in different seasons, getting more value and deeper experiences over time." },
+      { type: "heading", value: "The Big Takeaway for 2026" },
+      { type: "image", value: canadaBoomRockiesImg, caption: "The Canadian Rockies offer dramatic winter scenery that rivals any international destination" },
+      { type: "text", value: "Canada isn't just a fallback option this year. It's where Canadians genuinely want to be. From the drama of Banff and Lake Louise to the culture of Vancouver and Quebec City, staying domestic offers beauty, simplicity, and strong value in a year when those things matter more than ever." },
+      { type: "text", value: "As an Ontario travel agent, I'm seeing more clients choose Canadian destinations for winter getaways, March Break trips, and even milestone vacations. If you're thinking about exploring Banff, Lake Louise, or another Canadian gem in 2026, now is the time to plan while availability and pricing are still working in your favour." }
     ]
   },
   {
