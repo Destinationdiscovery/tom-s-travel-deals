@@ -88,7 +88,7 @@ export const gearReviews: GearReview[] = [
       "Most modern electronics (phones, tablets, Bluetooth speakers) are dual-voltage, so this adapter is all you need",
       "For hair dryers or straighteners, you'll need a voltage converter - this adapter alone won't work"
     ],
-    amazonLink: "https://amzn.to/4qLP5K8",
+    amazonLink: "https://geni.us/hFIL",
     bestFor: ["North American travelers", "International travelers", "Budget-conscious travelers"],
     gallery: [gearAdapterMain, gearAdapterAngles, gearAdapterDevices]
   },
@@ -134,7 +134,7 @@ export const gearReviews: GearReview[] = [
       "For shorter trips, packing cubes help you fit everything into a carry-on",
       "Pull cubes out and place them directly into a closet or dresser for longer stays"
     ],
-    amazonLink: "https://amzn.to/49NivBR",
+    amazonLink: "https://geni.us/YTJJyS",
     bestFor: ["Travelers who like to stay organized", "Trips of one week or longer", "Carry-on travelers"],
     gallery: [gearPackingCubesMain, gearPackingCubesSet, gearPackingCubesFeatures]
   },
@@ -179,7 +179,7 @@ export const gearReviews: GearReview[] = [
       "Keep it in your carry-on for easy access during flights",
       "The tight hinge will loosen slightly after a few uses"
     ],
-    amazonLink: "https://amzn.to/4szOXix",
+    amazonLink: "https://geni.us/TCcAi",
     bestFor: ["Long-haul travelers", "Flights without seatback screens", "Budget travelers"],
     gallery: [gearPhoneHolderMain, gearPhoneHolderAngles, gearPhoneHolderUses]
   },
@@ -224,7 +224,7 @@ export const gearReviews: GearReview[] = [
       "Great for ocean use in calm conditions",
       "Takes up virtually no space - easy to bring on any beach trip"
     ],
-    amazonLink: "https://amzn.to/4jAiR2a",
+    amazonLink: "https://geni.us/vKZqeB",
     bestFor: ["Beach vacations", "Couples who enjoy floating", "Travelers who want to pack light"],
     gallery: [gearWaterHammockMain, gearWaterHammockFeatures, gearWaterHammockDimensions, gearWaterHammockPacking]
   },
@@ -270,7 +270,7 @@ export const gearReviews: GearReview[] = [
       "Worth packing even if space is tight if you're traveling somewhere tropical",
       "Recharge it fully before heading out for the evening so it runs worry-free"
     ],
-    amazonLink: "https://amzn.to/4jHDXf7",
+    amazonLink: "https://geni.us/PF6Rl",
     bestFor: ["Tropical destinations", "Evening outdoor dining", "Resort patios and balconies", "Mosquito-heavy areas"],
     gallery: [gearThermacellMain, gearThermacellProduct, gearThermacellZone]
   },
@@ -317,7 +317,7 @@ export const gearReviews: GearReview[] = [
       "It's especially useful on longer cruises where clutter builds up fast",
       "Great for anyone booking a standard balcony or oceanview cabin with limited storage"
     ],
-    amazonLink: "https://amzn.to/3NopEQt",
+    amazonLink: "https://geni.us/nUWzay",
     bestFor: ["Cruise travelers", "Standard balcony or oceanview cabin bookings", "Longer cruises where clutter builds up", "Anyone looking to maximize cabin storage", "Travelers who like to stay organized"],
     gallery: [gearShoeOrganizerMain, gearShoeOrganizerBathroom, gearShoeOrganizerProduct]
   },
@@ -364,7 +364,7 @@ export const gearReviews: GearReview[] = [
       "Pack a few extra - they take up almost no space, so always bring more than you think you'll need",
       "Worth it, but not cheap - use it strategically on trips where hydration really matters rather than every single day at home"
     ],
-    amazonLink: "https://amzn.to/4sR3lTB",
+    amazonLink: "https://geni.us/Ai1BQg0",
     bestFor: ["Hot and tropical trips", "Busy itineraries", "Pre-flight hydration", "Beach vacations"],
     gallery: [gearLiquidIvMain, gearLiquidIvPacket, gearLiquidIvImpact]
   }
