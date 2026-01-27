@@ -1,4 +1,10 @@
-import packingImg from "@/assets/curacao-gallery-6.webp";
+// 2026 Travel Trends article images
+import trendsHeroImg from "@/assets/trends-yoga-mountain.jpg";
+import trendsCozyRetreatImg from "@/assets/trends-cozy-retreat.webp";
+import trendsWellnessVillaImg from "@/assets/trends-wellness-villa.jpg";
+import trendsWellnessAestheticImg from "@/assets/trends-wellness-aesthetic.jpg";
+import trendsLuxuryRetreatImg from "@/assets/trends-luxury-retreat.jpg";
+// Japan article images
 import japanHeroImg from "@/assets/japan-tokyo-skyline.jpg";
 import japanCherryImg from "@/assets/japan-cherry-blossoms.webp";
 import japanShrineImg from "@/assets/japan-fushimi-inari.jpg";
@@ -39,26 +45,34 @@ export interface CompassArticle {
 export const compassArticles: CompassArticle[] = [
   {
     id: 1,
-    slug: "essential-packing-tips-beach-destinations",
-    title: "Essential Packing Tips for Beach Destinations",
-    category: "Packing",
-    categoryColor: "bg-blue-500",
-    image: packingImg,
-    excerpt: "Master the art of packing light while having everything you need for sun, sand, and adventure.",
+    slug: "2026-travel-trends-whycations-glowcations-microvacations",
+    title: "2026 Travel Trends: Purpose-Driven Whycations, Glowcations & Microvacations - How Canadians Can Jump In",
+    category: "Guides",
+    categoryColor: "bg-teal-500",
+    image: trendsHeroImg,
+    excerpt: "Hilton, Conde Nast, and Expedia highlight the rise of intentional travel. Here's what Whycations, Glowcations, and Microvacations mean for Canadian travelers.",
     author: "Tom Laracy",
-    datePublished: "December 15, 2024",
-    readTime: "6 min read",
-    content: [
-      "After more than a decade of helping travelers prepare for beach getaways, I have seen just about every packing mistake in the book. From overstuffed suitcases that attract extra fees to forgotten essentials that derail the first day of vacation, the difference between a smooth trip and a stressful one often comes down to how you pack.",
-      "The first rule I share with every client is this: pack for the trip you are actually taking, not the one you imagine. Most beach destinations have shops, pharmacies, and markets. You do not need to bring enough sunscreen for a small army or pack outfits for scenarios that will never happen.",
-      "Start with a carry-on mindset, even if you plan to check a bag. This forces you to prioritize. For a week-long beach trip, I recommend three to four versatile outfits that can mix and match, two swimsuits so one can dry while you wear the other, a light cover-up that works for beach bars and casual dinners, and one slightly nicer outfit for an evening out.",
-      "Fabrics matter more than people realize. Cotton wrinkles and holds moisture. Synthetic blends dry quickly and resist wrinkles, making them ideal for tropical climates. Linen looks great but requires ironing, which most travelers would rather skip on vacation.",
-      "Your beach bag essentials should include reef-safe sunscreen, a quality pair of sunglasses with UV protection, a wide-brimmed hat that can fold without losing its shape, and a dry bag for your phone and valuables. These items get daily use and are worth investing in before your trip.",
-      "Electronics require some planning. Bring a portable charger for long beach days, a waterproof phone case if you plan to snorkel or kayak, and check whether your destination uses different outlets. A universal adapter takes up almost no space and solves potential charging headaches.",
-      "Toiletries are where most travelers overpack. Hotels provide basics, and anything you forget can be purchased locally, often at reasonable prices. Decant your must-haves into travel-sized containers and leave full bottles at home.",
-      "One tip that has saved my clients countless times: pack a small first aid kit with basics like bandages, pain relievers, antihistamines, and any prescription medications. Pharmacies exist everywhere, but having essentials on hand prevents a minor issue from eating into your beach time.",
-      "Finally, leave room in your bag. You will buy things. Souvenirs, local crafts, that perfect beach dress you found at a market. Starting with a bit of empty space means you will not face a packing crisis on your return trip.",
-      "The goal is to arrive relaxed and ready to enjoy yourself, not exhausted from wrestling with luggage. Pack smart, pack light, and let the destination be the focus of your trip."
+    datePublished: "January 27, 2026",
+    readTime: "7 min read",
+    content: [],
+    richContent: [
+      { type: "text", value: "2026 is shaping up to be the year of intentional travel for Canadians. Big reports from Hilton, Condé Nast Traveler, and Expedia highlight a shift toward trips with real meaning. Travelers are moving away from bucket-list checks and toward experiences that recharge, reconnect, or inspire. Hilton calls this the rise of \"Whycations,\" where the \"why\" comes before the \"where.\" Glowcations blend wellness with beauty routines, and microvacations pack big impact into short escapes. These trends fit perfectly with Canadian travelers seeking balance after busy years." },
+      { type: "text", value: "Why now? Global reports show travelers craving purpose over volume. Hilton's 2026 Trends Report points to emotional drivers like recharging or family connection. Condé Nast notes a focus on mindful wellness and quieter escapes. Expedia's Unpack '26 emphasizes immersive, personal trips. For Canadians, this means more intentional getaways from Toronto, with easier access to wellness spots and quick flights." },
+      { type: "image", value: trendsCozyRetreatImg, caption: "Whycations prioritize meaningful experiences like quiet reflection and reconnection" },
+      { type: "heading", value: "The Top Trends Explained" },
+      { type: "text", value: "Whycations: Purpose-Driven Trips. These start with a goal, like reconnecting with loved ones, finding inner peace, or personal growth. Think family multi-generational trips or solo retreats for reflection. Hilton highlights how travelers prioritize comfort, control, and connection." },
+      { type: "image", value: trendsWellnessVillaImg, caption: "Wellness-focused stays combine relaxation with self-care in stunning settings" },
+      { type: "text", value: "Glowcations: Wellness Meets Beauty. Combine spa treatments, skincare rituals, and relaxation. These trips focus on feeling good inside and out, with yoga, facials, and nature immersion. They're popular for \"glow\" results from healthy living and self-care." },
+      { type: "image", value: trendsWellnessAestheticImg, caption: "The glowcation trend blends beauty rituals with nature-inspired wellness" },
+      { type: "text", value: "Microvacations: Short, Far-Flung Escapes. Quick 3 to 5 day trips deliver big refreshment without long time off. Far-flung spots or nearby hidden gems offer high impact. Expedia notes rising demand for bite-sized adventures that fit busy schedules." },
+      { type: "heading", value: "How Canadians Can Book These Trends" },
+      { type: "image", value: trendsLuxuryRetreatImg, caption: "Spa retreats and wellness escapes offer purpose-driven travel experiences" },
+      { type: "text", value: "Wellness retreats are easy to find in Canada. Niagara-on-the-Lake or Banff offer yoga, spa, and nature experiences. Look at places like Fairmont or local retreats for purpose-driven stays. For glowcations, book spa packages in Toronto or fly to Mexico/Caribbean for all-inclusive wellness." },
+      { type: "text", value: "Microvacations work well with direct flights from YYZ. Quick trips to Montreal, Vancouver, or even New York deliver culture and relaxation. Use Air Canada Vacations or Expedia for bundles." },
+      { type: "text", value: "Start small: A weekend wellness escape in Ontario or a short Caribbean glowcation. These trends are affordable and flexible, perfect for Ontario travelers." },
+      { type: "heading", value: "A Travel Agent's Take" },
+      { type: "text", value: "As a Toronto travel agent, I see clients loving these meaningful options. They fit busy lives and deliver real value. If you're ready for a Whycation, glowcation, or microvacation in 2026, now is the time to plan." },
+      { type: "text", value: "Which trend excites you most? Drop a comment or reach out for help booking your intentional trip from Ontario. Safe travels!" }
     ]
   },
   {
