@@ -6,9 +6,15 @@ import japanRyokanImg from "@/assets/japan-ryokan.png";
 import japanAnimeImg from "@/assets/japan-anime-street.webp";
 import budgetImg from "@/assets/deal-cruise.jpg";
 import insuranceImg from "@/assets/deal-alps.jpg";
-import timingImg from "@/assets/deal-maldives.jpg";
 import vegasStripImg from "@/assets/vegas-strip-hero.jpg";
-
+// Snowbird article images
+import snowbirdHeroImg from "@/assets/snowbird-beach-sunset.jpg";
+import snowbirdTrafficImg from "@/assets/snowbird-traffic.jpg";
+import snowbirdCaribbeanImg from "@/assets/snowbird-caribbean-aerial.jpg";
+import snowbirdResortImg from "@/assets/snowbird-resort-pool.jpg";
+import snowbirdBanffImg from "@/assets/snowbird-banff.jpg";
+import snowbirdTimesSquareImg from "@/assets/snowbird-times-square.jpg";
+import snowbirdPalmBeachImg from "@/assets/snowbird-palm-beach.jpg";
 export interface ContentBlock {
   type: "text" | "image" | "heading";
   value: string;
@@ -146,26 +152,38 @@ export const compassArticles: CompassArticle[] = [
   },
   {
     id: 5,
-    slug: "best-times-to-visit-popular-destinations",
-    title: "Best Times to Visit Popular Destinations",
-    category: "Timing",
+    slug: "why-canadians-skipping-us-2026",
+    title: "Why Snowbirds and Canadians Are Skipping the US More in 2026 (And Where They're Going Instead)",
+    category: "Guides",
     categoryColor: "bg-teal-500",
-    image: timingImg,
-    excerpt: "Seasonal guides to help you plan the perfect trip with ideal weather and fewer crowds.",
+    image: snowbirdHeroImg,
+    excerpt: "Data shows Canadian travel to the US is down sharply. Here's why snowbirds are rethinking their winter escapes and the destinations offering better value.",
     author: "Tom Laracy",
-    datePublished: "November 5, 2024",
-    readTime: "6 min read",
-    content: [
-      "When you travel matters almost as much as where you travel. The same destination can offer completely different experiences depending on the season, and understanding these patterns helps you plan trips that align with what you actually want from your vacation.",
-      "The Caribbean draws most visitors from December through April, when weather is warm and dry and much of North America is cold. But this peak season comes with peak prices and crowds. The shoulder months of November and early December offer excellent weather at better rates, while May through early June provides good value before the heart of hurricane season.",
-      "European summer is popular for good reason. Long days, warm weather, and outdoor dining create a magical atmosphere. But July and August bring crushing crowds to major cities and tourist sites. June and September deliver similar weather with significantly fewer visitors and lower prices. October remains pleasant in Southern Europe while offering fall colors in the north.",
-      "The Maldives follows monsoon patterns. December through April is dry season with calm seas and excellent visibility for diving and snorkeling. The wet season from May to November brings lower prices and fewer tourists, though some resorts close and water activities can be limited. Shoulder months offer a balance of good conditions and reasonable rates.",
-      "Hawaii works year-round, but timing affects your experience. Winter brings larger surf to north shores and whale watching season, while summer offers calmer waters for snorkeling. The weeks around Christmas and spring break are the busiest and most expensive. September and October tend to be the quietest months with good weather.",
-      "Japan has distinct seasonal draws. Cherry blossom season in late March through early April is magical but extremely crowded and expensive. Fall foliage in November offers similar beauty with somewhat fewer visitors. Summer is hot and humid but brings festivals throughout the country. Winter is ideal for skiing and visiting onsen hot springs.",
-      "Australia's seasons are reversed from the Northern Hemisphere. Their summer, December through February, is prime time for beaches but also brings heat and crowds. Shoulder seasons in spring, September through November, and fall, March through May, often provide the best overall conditions for exploring diverse regions.",
-      "Cruises have their own timing considerations. Alaska season runs May through September, with late June through August offering the warmest weather. Mediterranean cruises are popular April through October, with shoulder months providing better value. Caribbean cruise prices vary significantly by season, with summer often the most affordable time.",
-      "Beyond weather, consider local events and holidays. Traveling during a major festival can be an incredible experience but requires booking far in advance. Traveling during local holidays may mean closed businesses and limited services. Research what will be happening during your travel dates.",
-      "The perfect time to visit any destination depends on your priorities. Do you want the best weather regardless of cost and crowds? Or would you prefer lower prices and fewer tourists with the trade-off of less predictable conditions? There are no wrong answers, only different approaches to the same wonderful problem of deciding when to explore the world."
+    datePublished: "January 27, 2026",
+    readTime: "8 min read",
+    content: [],
+    richContent: [
+      { type: "text", value: "Canada's snowbirds and winter travelers are making a big shift in 2026. Data from Statistics Canada and industry surveys shows a sharp drop in return trips from the US, with November 2025 numbers down 23.6 percent compared to the previous year. This marks months of steady declines in Canadian visits south of the border. Snowbirds, who traditionally head to Florida, Arizona, and other sunny US states to escape Ontario winters, are rethinking their plans. Allianz Canada's reports highlight this change, noting the US is no longer the top winter destination for Canadians. Shifting insurance needs and travel patterns are reshaping how older travelers plan their escapes." },
+      { type: "text", value: "Why now? Several factors are driving this trend. Political tensions, including comments from US leadership about tariffs and relations with Canada, have left many feeling unwelcome or uneasy. A weaker Canadian dollar makes US trips more expensive, with higher costs for everything from accommodations to healthcare. New border rules, like registration requirements for longer stays, add hassle and scrutiny. Economic uncertainty and rising insurance premiums for US trips push people to look elsewhere. Surveys from groups like the Canadian Snowbird Association show declines of 12 to 27 percent in US-bound plans compared to recent years. Many are choosing patriotism, affordability, or simpler travel over tradition." },
+      { type: "image", value: snowbirdTrafficImg, caption: "Border crossings and rising costs are pushing Canadians to reconsider their winter travel plans" },
+      { type: "text", value: "This is not about staying home entirely. Snowbirds are redirecting to warmer spots that feel more welcoming and budget-friendly. Allianz notes a rise in flexible insurance demand as people explore new risks in these alternatives." },
+      { type: "heading", value: "Where Canadians Are Heading Instead" },
+      { type: "image", value: snowbirdCaribbeanImg, caption: "Mexico and Caribbean destinations offer stunning beaches and better value for Canadian travelers" },
+      { type: "text", value: "Mexico and the Caribbean lead the pack as top alternatives. Places like Playa del Carmen, Puerto Vallarta, and the Riviera Maya in Mexico offer stunning beaches, vibrant expat communities, and a lower cost of living. The Dominican Republic, with spots like Punta Cana, delivers all-inclusive resorts and Caribbean vibes at great value. Costa Rica stands out for nature lovers, with rainforests, beaches, and reliable healthcare. These destinations often have direct flights from Toronto and favorable exchange rates that stretch dollars further." },
+      { type: "image", value: snowbirdResortImg, caption: "All-inclusive resorts provide exceptional value with everything bundled into one price" },
+      { type: "text", value: "Domestic Canada is booming too. More people opt for stays in British Columbia, Alberta's Rockies like Banff, or even warmer pockets in Ontario and Quebec. Train packages, cozy resorts, and family-friendly winter activities provide escape without crossing borders. This keeps money in Canada and avoids any international hassles." },
+      { type: "image", value: snowbirdBanffImg, caption: "Banff and the Canadian Rockies offer a winter escape without crossing borders" },
+      { type: "text", value: "Other emerging spots include Portugal's Algarve for mild winters and European charm, or Central American options like Belize for affordability and laid-back living." },
+      { type: "heading", value: "Comparing Deals: US vs. Mexico/Caribbean/Canada" },
+      { type: "image", value: snowbirdTimesSquareImg, caption: "Traditional US destinations like New York are feeling the pinch as Canadians look elsewhere" },
+      { type: "text", value: "US trips still have appeal for some, with familiar spots and direct drives or flights. But costs add up fast. A month in Florida might hit higher with expensive rentals, groceries, and insurance that has nearly doubled for some. Border waits and rules create stress." },
+      { type: "text", value: "Mexico and Caribbean packages shine on value. All-inclusive resorts in Punta Cana or Cancun often start under CAD $1,500 to $2,500 per person for a week or more, including flights from YYZ. Sunwing, Air Canada Vacations, and others run clearance sales with family deals to Cuba, the Dominican Republic, and Mexico under $1,000 to $2,000 pp. Direct flights keep it simple." },
+      { type: "text", value: "Domestic options win on ease. Banff or Vancouver packages bundle flights, hotels, and activities for less than many US equivalents, especially with no currency exchange pain. Costco Travel, Red Tag, and Expedia offer strong bundles." },
+      { type: "text", value: "Bottom line: Many find better bang for the buck outside the US right now. A shorter stay in Costa Rica or extended time in Mexico can cost less than a full Florida winter while delivering sun, relaxation, and peace of mind." },
+      { type: "heading", value: "A Travel Agent's Perspective" },
+      { type: "image", value: snowbirdPalmBeachImg, caption: "White sand beaches in Mexico and the Caribbean are welcoming Canadian travelers" },
+      { type: "text", value: "As an Ontario travel agent, I see this shift firsthand. Clients want warm escapes without the headaches. If you're a snowbird rethinking the US or exploring new spots, now is prime time to book before peak season fills up. Mexico and Caribbean deals are strong, and domestic getaways offer cozy alternatives." },
+      { type: "text", value: "What changed for you this year? Drop a comment if you're skipping the US or share your favorite alternative. Reach out if you need help planning your 2026 winter escape from Ontario. Safe travels!" }
     ]
   },
   {
