@@ -52,7 +52,7 @@ export const gearReviews: GearReview[] = [
   {
     id: "1",
     slug: "travel-converter-cuba-europe",
-    name: "Universal Travel Adapter",
+    name: "The Thing You Forget Until Your Phone Is Dead",
     brand: "Fortuna Mille",
     category: "Tech",
     image: gearAdapterMain,
@@ -95,7 +95,7 @@ export const gearReviews: GearReview[] = [
   {
     id: "2",
     slug: "packing-cubes",
-    name: "Packing Cubes",
+    name: "The Secret to Carry-On Travel Without Losing Your Mind",
     brand: "BAGAIL",
     category: "Luggage",
     image: gearPackingCubesMain,
@@ -141,7 +141,7 @@ export const gearReviews: GearReview[] = [
   {
     id: "3",
     slug: "airplane-phone-holder-mount",
-    name: "Airplane Phone Holder Mount",
+    name: "This Made Economy Class Slightly More Bearable",
     brand: "NOZEWOWA",
     category: "Tech",
     image: gearPhoneHolderMain,
@@ -186,7 +186,7 @@ export const gearReviews: GearReview[] = [
   {
     id: "4",
     slug: "inflatable-water-hammock",
-    name: "Inflatable Water Hammock",
+    name: "Peak Vacation Laziness, Achieved",
     brand: "Aqua",
     category: "Beach & Pool",
     image: gearWaterHammockMain,
@@ -231,7 +231,7 @@ export const gearReviews: GearReview[] = [
   {
     id: "5",
     slug: "thermacell-patio-shield-mosquito-repellent",
-    name: "Thermacell Patio Shield Mosquito Repellent",
+    name: "I'm Finally Winning the War Against Mosquitoes",
     brand: "Thermacell",
     category: "Accessories",
     image: gearThermacellMain,
@@ -277,7 +277,7 @@ export const gearReviews: GearReview[] = [
   {
     id: "6",
     slug: "cruise-cabin-shoe-organizer",
-    name: "Large 24 Pocket Shoe Organizer",
+    name: "Hotel Room Chaos, Solved",
     brand: "ZOBER",
     category: "Accessories",
     image: gearShoeOrganizerProduct,
@@ -324,7 +324,7 @@ export const gearReviews: GearReview[] = [
   {
     id: "7",
     slug: "liquid-iv-sugar-free-electrolyte",
-    name: "Sugar-Free Electrolyte Drink Mix",
+    name: "How I Beat Travel Dehydration Without Drinking Sugar Water",
     brand: "Liquid I.V.",
     category: "Accessories",
     image: gearLiquidIvMain,
