@@ -71,7 +71,7 @@ export const compassArticles: CompassArticle[] = [
       { type: "text", value: "Microvacations work well with direct flights from YYZ. Quick trips to Montreal, Vancouver, or even New York deliver culture and relaxation. Use Air Canada Vacations or Expedia for bundles." },
       { type: "text", value: "Start small: A weekend wellness escape in Ontario or a short Caribbean glowcation. These trends are affordable and flexible, perfect for Ontario travelers." },
       { type: "heading", value: "A Travel Agent's Take" },
-      { type: "text", value: "As a Toronto travel agent, I see clients loving these meaningful options. They fit busy lives and deliver real value. If you're ready for a Whycation, glowcation, or microvacation in 2026, now is the time to plan." },
+      { type: "text", value: "As an Ontario travel agent, I see clients loving these meaningful options. They fit busy lives and deliver real value. If you're ready for a Whycation, glowcation, or microvacation in 2026, now is the time to plan." },
       { type: "text", value: "Which trend excites you most? Drop a comment or reach out for help booking your intentional trip from Ontario. Safe travels!" }
     ]
   },
