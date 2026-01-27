@@ -1,23 +1,23 @@
 
 
-## Update Gear Review Titles
+## Update Gear Amazon Affiliate Links
 
 ### Overview
-Update all seven gear review titles in the `gearReviews.ts` file to use more engaging, personality-driven headlines that better capture the real-world value of each product.
+Replace all seven Amazon affiliate links in the gear reviews with new Geni.us short links for better tracking and management.
 
 ---
 
-### Title Changes
+### Link Changes
 
-| Current Title | New Title |
-|--------------|-----------|
-| Sugar-Free Electrolyte Drink Mix | How I Beat Travel Dehydration Without Drinking Sugar Water |
-| Inflatable Water Hammock | Peak Vacation Laziness, Achieved |
-| Thermacell Patio Shield Mosquito Repellent | I'm Finally Winning the War Against Mosquitoes |
-| Large 24 Pocket Shoe Organizer | Hotel Room Chaos, Solved |
-| Universal Travel Adapter | The Thing You Forget Until Your Phone Is Dead |
-| Packing Cubes | The Secret to Carry-On Travel Without Losing Your Mind |
-| Airplane Phone Holder Mount | This Made Economy Class Slightly More Bearable |
+| Product | Current Link | New Link |
+|---------|-------------|----------|
+| Travel Adapter | amzn.to/4qLP5K8 | geni.us/hFIL |
+| Packing Cubes | amzn.to/49NivBR | geni.us/YTJJyS |
+| Phone Holder | amzn.to/4szOXix | geni.us/TCcAi |
+| Inflatable Hammock | amzn.to/4jAiR2a | geni.us/vKZqeB |
+| Thermacell Mosquito | amzn.to/4jHDXf7 | geni.us/PF6Rl |
+| Shoe Organizer | amzn.to/3NopEQt | geni.us/nUWzay |
+| Liquid IV | amzn.to/4sR3lTB | geni.us/Ai1BQg0 |
 
 ---
 
@@ -25,21 +25,19 @@ Update all seven gear review titles in the `gearReviews.ts` file to use more eng
 
 | File | Action |
 |------|--------|
-| `src/data/gearReviews.ts` | Update the `name` field for all 7 gear review objects |
+| `src/data/gearReviews.ts` | Update the `amazonLink` field for all 7 gear review objects |
 
 ---
 
-### Technical Details
+### Where Links Appear
 
-Each gear review object has a `name` property that displays as the main title on:
-- The Gear page grid cards
-- Individual gear review pages
-- Any related items sections
-
-The `brand` field will remain unchanged, so visitors still see the product brand alongside the new editorial-style titles.
+The `amazonLink` field is used in the following places:
+- **Gear review page** - Main Amazon CTA card after "My Experience" section
+- **Gear review page** - Sidebar "Buy on Amazon" button
+- Both locations include the affiliate disclaimer
 
 ---
 
 ### Result
-The gear section will have more engaging, blog-style titles that match the conversational tone of the rest of the site, making the reviews feel more personal and less like a product catalog.
+All gear review Amazon buttons will redirect through the new Geni.us tracking links, providing better analytics and link management while maintaining the same user experience.
 
