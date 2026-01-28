@@ -25,6 +25,12 @@ import snowbirdResortImg from "@/assets/snowbird-resort-pool.jpg";
 import snowbirdBanffImg from "@/assets/snowbird-banff.jpg";
 import snowbirdTimesSquareImg from "@/assets/snowbird-times-square.jpg";
 import snowbirdPalmBeachImg from "@/assets/snowbird-palm-beach.jpg";
+// Group Travel article images
+import groupTravelHeroImg from "@/assets/group-travel-hero.png";
+import groupTravelFamilyImg from "@/assets/group-travel-family.jpg";
+import groupTravelWeddingImg from "@/assets/group-travel-wedding.webp";
+import groupTravelTeamImg from "@/assets/group-travel-team.jpg";
+import groupTravelBeachImg from "@/assets/group-travel-beach.webp";
 export interface ContentBlock {
   type: "text" | "image" | "heading";
   value: string;
@@ -245,6 +251,46 @@ export const compassArticles: CompassArticle[] = [
       "It simplifies budgeting and can shave a noticeable amount off your overall spend, especially over several days. It is just not something I would chase or let dictate where I travel.",
       "For me, this falls firmly into the nice if it lines up category. I would not plan a Vegas trip around it, and I would not book downtown just for the currency angle. But if I were already going, already staying at one of these properties, and already planning to spend time on the casino floor, I would take advantage of it without hesitation.",
       "The Canadian at-par deal in Las Vegas is a real offer with real savings, but its impact is narrower than the headlines suggest. It is limited to three downtown casinos, runs only through August 31, and is unlikely to convince Canadians who were not already planning a Vegas trip. For the right traveler, at the right time, it is a solid bonus. For everyone else, it is more of an interesting footnote than a reason to book a flight."
+    ]
+  },
+  {
+    id: 7,
+    slug: "group-travel-2026-who-uses-it-why-booming",
+    title: "Group Travel in 2026: Who Uses It, Why It's Booming, and How It Fits Canadian Travelers",
+    category: "Guides",
+    categoryColor: "bg-teal-500",
+    image: groupTravelHeroImg,
+    excerpt: "Group travel is making a strong comeback in 2026. From friends reunions to destination weddings, here's who's booking and why it works for Ontario travelers.",
+    author: "Tom Laracy",
+    datePublished: "January 28, 2026",
+    readTime: "10 min read",
+    content: [],
+    richContent: [
+      { type: "text", value: "Group travel is making a strong comeback in 2026, with the global market growing steadily. Reports show the sector valued around USD 168 to 369 billion in recent years, heading toward USD 295 to 689 billion by 2033 with CAGRs of 5.8 to 7.2 percent. This surge comes from people craving shared experiences after years of isolation, plus easier planning through apps and tour operators." },
+      { type: "text", value: "For Canadians, especially from Ontario, group trips offer affordable, meaningful escapes amid rising costs and shifting preferences away from solo or fully independent travel. Whether it's a friends reunion, family milestone, or corporate retreat, group travel delivers connection and value." },
+      { type: "heading", value: "Who Uses Group Travel?" },
+      { type: "text", value: "Group travel appeals to a wide range of people, but key segments stand out in 2026. Friends and Social Groups lead the charge, with many adults, including millennials and Gen X, choosing group trips to reconnect. Surveys show over a third feel stuck in social ruts, and trips with friends rank as more meaningful than family or partner vacations for some. Friend reunions and \"group therapy\" style getaways are hot, often in villas, yachts, or destinations like the Caribbean or Europe." },
+      { type: "text", value: "Families and Multi-Generational Groups are surging post-pandemic, with families prioritizing quality time. Multi-gen trips are up significantly, with bookings for groups over five growing fast. Parents seek digital detoxes for kids, while grandparents join for shared memories. These often include all-inclusive resorts, cruises, or domestic spots like Niagara or Banff." },
+      { type: "image", value: groupTravelFamilyImg, caption: "Multi-generational trips are surging as families prioritize quality time together" },
+      { type: "text", value: "Corporate and Incentive Groups remain a major segment. Businesses invest in team-building, conferences, and rewards. Corporate travel spending nears or exceeds a trillion dollars in related areas, with groups using retreats or incentive trips to boost collaboration and morale. Bleisure extensions blend work and play, making these trips feel more personal." },
+      { type: "text", value: "Weddings and Celebrations drive significant demand. Destination weddings and intimate events are popular, with couples customizing trips for parties. Villas in Mykonos or alpine resorts are top picks. These create shared occasions for friends and family without the host hassle of organizing everything at home." },
+      { type: "image", value: groupTravelWeddingImg, caption: "Destination weddings create shared occasions for friends and family without the host hassle" },
+      { type: "text", value: "Special Interest and Educational Groups round out the mix. Adventure enthusiasts, wellness seekers, religious pilgrims, or study tours form affinity groups. Smaller, interest-based trips focusing on wellness, hobbies, or learning are replacing large standard tours." },
+      { type: "heading", value: "Why People Choose Group Travel Over Solo or Independent Trips" },
+      { type: "image", value: groupTravelTeamImg, caption: "Shared adventures and team activities build deeper connections and lasting memories" },
+      { type: "text", value: "Shared Costs and Convenience make luxury accessible. Splitting expenses across a group lowers per-person rates significantly. Packages include flights, hotels, transport, and activities at bundled prices. Planning is simpler with operators handling logistics, so nobody in the group has to play travel agent." },
+      { type: "text", value: "Safety and Support matter, especially for women or first-time travelers. Groups provide security and companionship. You travel \"solo but not alone,\" with built-in friends and guides who know the destination." },
+      { type: "text", value: "Bonding and Meaningful Experiences are at the heart of group travel. Traveling together builds connections through shared adventures, laughs, and memories. It's ideal for reconnecting after separations or strengthening relationships that don't get enough attention in daily life." },
+      { type: "text", value: "Less Stress, More Fun is a big draw. No compromising on every detail or spending hours researching. Fixed itineraries suit busy people, while some flexibility allows personal time. Wellness, adventure, or cultural immersion feels amplified when experienced together. Value for Money improves too, with group-size deals offering perks like private transfers or exclusive access." },
+      { type: "heading", value: "The Practical Side of Group Travel – Especially for Larger Groups" },
+      { type: "text", value: "When groups hit 10 people or more, things get more complex. In my experience helping Ontario clients plan these trips, managing availability, room blocks, and details for that many people on your own can be challenging. Individuals booking flights, vacations, or cruises usually handle up to about 6 people per reservation, but larger groups often need special handling. These bigger groups typically must be booked more than 60 days before departure to secure space, and trying to piece it together yourself risks running into no availability for parts of the trip, like the return flight or hotel rooms." },
+      { type: "text", value: "Working with a travel agent makes this smoother. Everything goes under one booking number, so availability is checked with suppliers upfront, and the whole group stays together. This avoids surprises and keeps things coordinated." },
+      { type: "text", value: "For example, with Sunwing vacations that I book frequently, group rates are usually the same or better than posted prices at the time of quote, and you can lock in that rate from quote to final booking. Perks often include free block seating on the plane, one free checked bag and carry-on per person, free private shuttle transfers for the group, and even a free room value every 8th person (pre-tax). These extras add up and make the trip feel more special without extra cost." },
+      { type: "text", value: "Maintaining communication, tracking payments, and handling changes for 10 or more people takes a lot of effort. Having someone experienced manage it takes the burden off the group organizer, whether it's a wedding couple, corporate planner, or family leader. It lets everyone focus on enjoying the time together instead of logistics." },
+      { type: "heading", value: "A Travel Agent's Perspective" },
+      { type: "image", value: groupTravelBeachImg, caption: "Group travel delivers connection, savings, and adventure without the solo hassle" },
+      { type: "text", value: "For Canadians in Ontario, group travel fits well with trends like domestic booms or affordable international packages from YYZ. Operators like G Adventures or Air Canada Vacations offer tailored group options, from Eastern Canada tours to wellness retreats. As an Ontario travel agent, I see how these trips create lasting memories while keeping things practical and affordable." },
+      { type: "text", value: "What's your next group trip idea? Drop a comment or reach out for help planning from Ontario. Safe travels!" }
     ]
   }
 ];
