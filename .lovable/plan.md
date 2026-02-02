@@ -1,18 +1,14 @@
 
 
-## Fix Hero Image - Show Full Palm Tree
+## Fix Hero Image - Show Full Branded Image
 
 ### The Problem
-The palm tree in the hero image is being cut off because:
-1. The header is fixed at the top (`fixed top-0`) with a height of approximately 72px
-2. The hero section starts at the very top of the page (under the header)
-3. The background image is positioned at `bg-center`, which centers the image vertically - cutting off the top portion where the palm tree logo sits
+The tagline "Honest Reviews, Tested Gear & Travel Insights" at the bottom of the hero image is being cut off because:
+1. `bg-cover` scales the image to cover the entire container, which crops parts of the image
+2. `bg-top` prioritizes the top of the image, causing the bottom to be cropped
 
 ### The Solution
-Adjust the hero section to:
-1. Add top padding equal to the header height so the content area starts below the header
-2. Change the background position from `bg-center` to `bg-top` so the top of the image (with the palm tree) is always visible
-3. Increase the minimum height to accommodate the full image display
+Change the background sizing from `bg-cover` to `bg-contain` so the entire branded image fits within the hero section without any cropping. This ensures both the palm tree logo at the top AND the tagline at the bottom are fully visible.
 
 ---
 
@@ -22,26 +18,27 @@ Adjust the hero section to:
 
 | Property | Current | Updated |
 |----------|---------|---------|
-| Section classes | `min-h-[60vh]` | `min-h-[70vh] pt-20` (add header spacing + more height) |
-| Background position | `bg-center` | `bg-top` (show top of image where palm tree is) |
+| Background size | `bg-cover` | `bg-contain` (fit entire image without cropping) |
+| Background position | `bg-top` | `bg-center` (center the contained image) |
+| Background color | None | `bg-[#e8f4f8]` (light blue/teal to match image edges) |
 
 Updated code:
 ```tsx
-<section className="relative min-h-[70vh] pt-20 flex items-center justify-center overflow-hidden">
+<section className="relative min-h-[70vh] pt-20 flex items-center justify-center overflow-hidden bg-[#e8f4f8]">
   {/* Background Image */}
   <div 
-    className="absolute inset-0 bg-cover bg-top bg-no-repeat"
+    className="absolute inset-0 bg-contain bg-center bg-no-repeat"
     style={{ backgroundImage: `url(${heroImage})` }}
   />
 ```
 
 Key changes:
-- `pt-20` (80px padding-top) - accounts for the fixed header height so the hero content area starts below the navigation
-- `bg-top` instead of `bg-center` - ensures the top of the image (palm tree and logo) is always visible
-- `min-h-[70vh]` - slightly more height to give the branded image more room to breathe
+- `bg-contain` instead of `bg-cover` - ensures the entire image is visible without cropping
+- `bg-center` - centers the image within the container
+- `bg-[#e8f4f8]` on the section - adds a light blue/teal background color that matches the soft tones in the hero image, so any empty space around the contained image blends seamlessly
 
 ---
 
 ### Result
-The full TripReviews.ca branded image will be visible, with the palm tree logo and tagline properly displayed below the navigation header.
+The full TripReviews.ca branded image will be visible, with both the palm tree logo at the top AND the tagline "Honest Reviews, Tested Gear & Travel Insights" at the bottom properly displayed.
 
