@@ -1,4 +1,4 @@
-import { Star, ExternalLink } from "lucide-react";
+import { Star, ExternalLink, MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,8 +11,12 @@ import {
   CarouselNext,
 } from "@/components/ui/carousel";
 import { gearReviews } from "@/data/gearReviews";
+import { useCommentCounts } from "@/hooks/useCommentCounts";
 
 const GearReviewsSection = () => {
+  const slugs = gearReviews.map(g => g.slug);
+  const { data: commentCounts = {} } = useCommentCounts("gear", slugs);
+
   return (
     <section className="py-12 bg-muted/30">
       <div className="container mx-auto px-4">
@@ -74,8 +78,12 @@ const GearReviewsSection = () => {
                         <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
                           {gear.excerpt}
                         </p>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
                           <span className="bg-muted px-2 py-1 rounded">Tested: {gear.testedOn}</span>
+                          <div className="flex items-center gap-1">
+                            <MessageCircle className="h-3.5 w-3.5" />
+                            <span>{commentCounts[gear.slug] || 0}</span>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
