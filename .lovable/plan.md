@@ -1,96 +1,60 @@
 
 
-## Replace Hero Image and Update Tagline
+## Remove Redundant Hero Text Overlay
 
 ### Overview
-Replace the current hero image with the uploaded TripReviews.ca branded image, update the hero tagline to match the image ("Honest Reviews, Tested Gear & Travel Insights"), and remove any "deals" references from the site's meta tags and descriptions.
+Remove the headline and tagline text from the hero section since the new TripReviews.ca branded image already contains this branding. The overlaid text is redundant and obscures the clean design of the branded hero image.
 
 ---
 
-### Changes Summary
+### Current State
+The hero section displays:
+- **H1 headline**: "Let's Discover the World" + "Together"
+- **Tagline**: "Honest Reviews, Tested Gear & Travel Insights"
+- **Scroll indicator**: Animated scroll hint at bottom
 
-| Component | Current | Updated |
-|-----------|---------|---------|
-| Hero Image | `mexico-gallery-22.jpg` (beach scene) | `hero-beach.jpg` (TripReviews.ca branded image) |
-| Hero Headline | "Let's Discover the World Together" | Keep as-is (branding element) |
-| Hero Tagline | "With over a decade of experience as a travel consultant, I share real experiences, honest reviews, and destination insights to help you plan your perfect trip." | "Honest Reviews, Tested Gear & Travel Insights" |
-| Page Title | "Tom Laracy Travel \| Travelonly Agent - Exclusive Vacation Deals" | "TripReviews.ca \| Honest Reviews, Tested Gear & Travel Insights" |
-| Meta Description | References "Exclusive last-minute deals, group getaways..." | "Honest destination reviews, tested travel gear, and expert insights from an Ontario travel consultant. Plan your perfect trip with real experiences and advice." |
-| OG Description | "Exclusive vacation deals, last-minute getaways..." | "Honest destination reviews, tested travel gear, and expert insights to help you plan your perfect trip." |
+These text elements overlay on top of the branded hero image, which already contains the TripReviews.ca logo, tagline, and visual branding.
 
----
-
-### Files to Modify
-
-| File | Changes |
-|------|---------|
-| `src/assets/hero-beach.jpg` | Copy uploaded image to replace/rename as new hero |
-| `src/components/HeroSection.tsx` | Update image import and tagline text |
-| `index.html` | Update page title, meta description, and OG description to remove "deals" references |
+### After Change
+- Remove the entire text content block (headline + tagline)
+- Keep the background image with its light overlay
+- Keep the scroll indicator for visual continuity
+- The branded image speaks for itself
 
 ---
 
-### Detailed Changes
+### File to Modify
 
-**1. Asset Copy**
-- Copy `user-uploads://image.jpg` to `src/assets/hero-tripreviews.jpg`
+**src/components/HeroSection.tsx**
 
-**2. HeroSection.tsx Updates**
-
-Update the import and tagline:
+Remove the content div containing the h1 and p elements (lines 15-27):
 
 ```text
-// Import change
-import heroImage from "@/assets/hero-tripreviews.jpg";
+Remove this block:
+      {/* Content */}
+      <div className="relative z-10 container mx-auto px-4 py-24 text-center">
+        <div className="max-w-3xl mx-auto space-y-6 animate-fade-up">
+          <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold text-primary-foreground leading-tight">
+            Let's Discover the World
+            <span className="block text-gradient">Together</span>
+          </h1>
 
-// Tagline change (currently lines 23-25)
-From: "With over a decade of experience as a travel consultant, I share real experiences, honest reviews, and destination insights to help you plan your perfect trip."
-
-To: "Honest Reviews, Tested Gear & Travel Insights"
+          <p className="text-lg md:text-xl text-primary-foreground/80 max-w-2xl mx-auto font-body">
+            Honest Reviews, Tested Gear & Travel Insights
+          </p>
+        </div>
+      </div>
 ```
 
-The dark overlay will need adjustment since this new image has a light/soft background with palm tree silhouettes. The overlay can be softened or removed to let the branded aesthetic show through.
-
-**3. index.html Meta Tag Updates**
+Also remove the dark overlay gradient since we want the branded image to display clearly without any darkening:
 
 ```text
-Line 23 (title):
-From: "Tom Laracy Travel | Travelonly Agent - Exclusive Vacation Deals"
-To:   "TripReviews.ca | Honest Reviews, Tested Gear & Travel Insights"
-
-Line 24 (description):
-From: "Book your dream vacation with Tom Laracy, your dedicated Travelonly agent. Exclusive last-minute deals, group getaways, and personalized travel planning."
-To:   "Honest destination reviews, tested travel gear, and expert insights from an Ontario travel consultant. Plan your perfect trip with real experiences and advice."
-
-Line 28 (og:description):
-From: "Exclusive vacation deals, last-minute getaways, and group travel packages. Let me plan your perfect escape."
-To:   "Honest destination reviews, tested travel gear, and expert insights to help you plan your perfect trip."
+Remove:
+<div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/30" />
 ```
-
----
-
-### Hero Overlay Adjustment
-
-The current overlay (`bg-gradient-to-b from-black/60 via-black/45 to-black/70`) was designed for a darker beach photo. Since the new branded image has a soft, light aesthetic with palm trees, the overlay will be adjusted to be much lighter or translucent to preserve the branded look while keeping the text readable.
-
-Suggested new overlay:
-```text
-bg-gradient-to-b from-black/20 via-transparent to-black/30
-```
-
----
-
-### Note on Future Theming
-
-The uploaded image features:
-- **Primary color**: Teal/turquoise palm tree icon (#2EB8A6 approximately)
-- **Text color**: Dark/black for strong contrast
-- **Background**: Soft, light beach with palm silhouettes
-
-For now, we'll just implement the hero image and text changes as requested. A full color theme refresh to match this aesthetic (adjusting the teal accent colors throughout) can be done as a follow-up.
 
 ---
 
 ### Result
-Visitors will see the new TripReviews.ca branded hero image with the clean tagline "Honest Reviews, Tested Gear & Travel Insights." The page title and social media previews will no longer reference "deals" and will focus on the honest reviews/travel insights positioning.
+The hero section will display the clean TripReviews.ca branded image as intended, with the palm tree logo, site name, and tagline visible as part of the image design. The scroll indicator remains to guide users down the page.
 
