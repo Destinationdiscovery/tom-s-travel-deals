@@ -1,4 +1,4 @@
-import heroImage from "@/assets/mexico-gallery-22.jpg";
+import heroImage from "@/assets/hero-tripreviews.jpg";
 
 const HeroSection = () => {
 
@@ -9,7 +9,7 @@ const HeroSection = () => {
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${heroImage})` }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/45 to-black/70" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/30" />
       </div>
 
       {/* Content */}
@@ -21,7 +21,7 @@ const HeroSection = () => {
           </h1>
 
           <p className="text-lg md:text-xl text-primary-foreground/80 max-w-2xl mx-auto font-body">
-            With over a decade of experience as a travel consultant, I share real experiences, honest reviews, and destination insights to help you plan your perfect trip.
+            Honest Reviews, Tested Gear & Travel Insights
           </p>
         </div>
       </div>
