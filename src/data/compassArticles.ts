@@ -36,6 +36,11 @@ import westjetPlaneHeroImg from "@/assets/westjet-plane-hero.avif";
 import westjetEconomyCabinImg from "@/assets/westjet-economy-cabin.jpeg";
 import westjetLegroomImg from "@/assets/westjet-legroom.jpg";
 import westjetSeatsWindowImg from "@/assets/westjet-seats-window.jpg";
+// Trevi Fountain Fee article images
+import treviFountainHeroImg from "@/assets/trevi-fountain-hero.avif";
+import treviFountainCrowdsImg from "@/assets/trevi-fountain-crowds.jpg";
+import treviFountainSculpturesImg from "@/assets/trevi-fountain-sculptures.jpg";
+import treviFountainEveningImg from "@/assets/trevi-fountain-evening.jpg";
 export interface ContentBlock {
   type: "text" | "image" | "heading";
   value: string;
@@ -333,6 +338,48 @@ export const compassArticles: CompassArticle[] = [
       { type: "heading", value: "A Travel Agent's Perspective" },
       { type: "text", value: "As an Ontario travel agent, I see comfort complaints pop up all the time, especially on budget carriers. If you're thinking about a winter getaway or family trip, now is a great time to plan." },
       { type: "text", value: "What's your next trip idea? Drop a comment or reach out for help planning from Ontario. Safe travels!" }
+    ]
+  },
+  {
+    id: 9,
+    slug: "rome-trevi-fountain-fee-genius-or-ripoff",
+    title: "Rome Just Charged 2 Euros to See the Trevi Fountain: Is This Genius or a Total Rip-Off?",
+    category: "News",
+    categoryColor: "bg-amber-500",
+    image: treviFountainHeroImg,
+    excerpt: "Rome rolled out a 2-euro fee for close-up Trevi Fountain access. Here's how it works, why they did it, and tips for your Italy trip from Ontario.",
+    author: "Tom Laracy",
+    datePublished: "February 2, 2026",
+    readTime: "5 min read",
+    content: [],
+    richContent: [
+      { type: "text", value: "Hey everyone, if you've got Italy on your bucket list, especially that classic moment tossing a coin into the Trevi Fountain for good luck and a return trip to Rome, things just changed a bit. As of February 2, 2026, Rome rolled out a small 2-euro fee (around $3 CAD) for tourists and non-residents to get right up close to the fountain's basin and steps during daytime hours." },
+      { type: "text", value: "The surrounding piazza still offers free views of this stunning 18th-century Baroque masterpiece, and after 10 p.m., access opens up for everyone without any charge." },
+      { type: "heading", value: "Why the Fee?" },
+      { type: "text", value: "The city introduced this to help manage the huge crowds – the Trevi sees about 30,000 visitors on an average day, spiking to 70,000 on busy weekends, and over 9-10 million people a year." },
+      { type: "image", value: treviFountainCrowdsImg, caption: "The Trevi sees about 30,000 visitors on an average day, spiking to 70,000 on busy weekends" },
+      { type: "text", value: "It's part of broader efforts in Rome (and places like the Pantheon and Venice) to handle overtourism, improve flow, and fund upkeep and preservation of these historic sites." },
+      { type: "text", value: "Officials estimate the fee could bring in around 6.5 million euros annually, with funds going back into maintenance and better visitor experiences." },
+      { type: "heading", value: "How It Works Now" },
+      { type: "text", value: "Fee amount: 2 euros per person (paid online in advance, on-site, or via tourist points)." },
+      { type: "text", value: "When it applies: From 11:30 a.m. to 10 p.m. on Mondays and Fridays; 9 a.m. to 10 p.m. on other days (last admission around 9 p.m.)." },
+      { type: "image", value: treviFountainSculpturesImg, caption: "The 18th-century Baroque masterpiece is one of Rome's most iconic landmarks" },
+      { type: "text", value: "What you get: Timed access to the inner area by the water for photos, coin tosses, and that up-close experience (often with less chaos thanks to controlled entry)." },
+      { type: "text", value: "Exemptions: Rome residents, people with disabilities (plus one companion), and children under 6 (some sources note under 5) are free." },
+      { type: "text", value: "Free options: View from the upper piazza anytime, or get close after 10 p.m. when barriers lift." },
+      { type: "text", value: "How to prepare: Book timed slots online ahead if possible (similar to other Rome sites), especially for peak season." },
+      { type: "heading", value: "Early Feedback" },
+      { type: "text", value: "Early feedback from visitors includes positive notes on easier access and better photo opportunities with fewer crowds pushing in. One tourist mentioned it felt comfortable and worth the small cost for a smoother visit." },
+      { type: "heading", value: "Practical Tips for Your Rome Trip" },
+      { type: "image", value: treviFountainEveningImg, caption: "After 10 p.m., access opens up for everyone without any charge" },
+      { type: "text", value: "Arrive early morning or late afternoon for lighter crowds even with the fee." },
+      { type: "text", value: "Stick to the classic coin toss: over your left shoulder with your right hand to ensure you return to Rome." },
+      { type: "text", value: "Combine with nearby gems like the Spanish Steps or a gelato stroll." },
+      { type: "text", value: "Consider shoulder seasons (spring or fall) when lines are shorter overall." },
+      { type: "text", value: "Check if your visit qualifies for any exemptions or bundles with city passes." },
+      { type: "heading", value: "A Travel Agent's Perspective" },
+      { type: "text", value: "As an Ontario travel agent, I see this firsthand with clients heading to Europe from YYZ. Planning ahead makes a big difference here – we can check flight options on Air Canada or bundle with Sunwing vacation packages, plus help coordinate timed entries and other Rome must-sees. For groups of 10+, we lock in rates and handle details to keep things stress-free." },
+      { type: "text", value: "This is one more update in how popular European spots are adapting to record tourism numbers. Have you been to the Trevi Fountain before or after the change? Would you pay the small fee for closer access, or stick to the free view from afar? Share your thoughts below!" }
     ]
   }
 ];
