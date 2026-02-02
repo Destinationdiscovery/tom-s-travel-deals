@@ -5,12 +5,16 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { compassArticles } from "@/data/compassArticles";
 import { Button } from "@/components/ui/button";
+import { useCommentCounts } from "@/hooks/useCommentCounts";
 
 const CompassSection = () => {
+  const slugs = compassArticles.map(a => a.slug);
+  const { data: commentCounts = {} } = useCommentCounts("compass", slugs);
+
   return (
     <section id="compass" className="py-12 bg-warm-gradient">
       <div className="container mx-auto px-4">
@@ -69,10 +73,16 @@ const CompassSection = () => {
                     <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
                       {article.excerpt}
                     </p>
-                    <span className="inline-flex items-center gap-2 text-primary font-medium text-sm group/link">
-                      Read More 
-                      <ArrowRight className="h-4 w-4 transition-transform group-hover/link:translate-x-1" />
-                    </span>
+                    <div className="flex items-center justify-between">
+                      <span className="inline-flex items-center gap-2 text-primary font-medium text-sm group/link">
+                        Read More 
+                        <ArrowRight className="h-4 w-4 transition-transform group-hover/link:translate-x-1" />
+                      </span>
+                      <div className="flex items-center gap-1 text-muted-foreground text-xs">
+                        <MessageCircle className="h-3.5 w-3.5" />
+                        <span>{commentCounts[article.slug] || 0}</span>
+                      </div>
+                    </div>
                   </div>
                 </Link>
               </CarouselItem>

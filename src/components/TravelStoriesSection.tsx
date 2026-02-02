@@ -1,4 +1,4 @@
-import { Star, ArrowRight, Play } from "lucide-react";
+import { Star, ArrowRight, Play, MessageCircle } from "lucide-react";
 import { Button } from "./ui/button";
 import { Link } from "react-router-dom";
 import {
@@ -8,6 +8,7 @@ import {
   CarouselPrevious,
   CarouselNext,
 } from "@/components/ui/carousel";
+import { useCommentCounts } from "@/hooks/useCommentCounts";
 import cubaImg from "@/assets/deal-cuba.jpg";
 import curacaoImg from "@/assets/curacao-hero.avif";
 import mexicoImg from "@/assets/mexico-hero.webp";
@@ -79,6 +80,9 @@ const destinations: DestinationPreview[] = [
 ];
 
 const TravelStoriesSection = () => {
+  const slugs = destinations.map(d => d.slug);
+  const { data: commentCounts = {} } = useCommentCounts("destination", slugs);
+
   return (
     <section id="destinations" className="py-12 bg-background">
       <div className="container mx-auto px-4">
@@ -150,6 +154,10 @@ const TravelStoriesSection = () => {
                             <span className="text-sm font-medium text-foreground ml-1">{dest.rating}</span>
                           </div>
                           <span className="text-xs text-muted-foreground">{dest.dateVisited}</span>
+                          <div className="flex items-center gap-1 text-muted-foreground">
+                            <MessageCircle className="h-3.5 w-3.5" />
+                            <span className="text-xs">{commentCounts[dest.slug] || 0}</span>
+                          </div>
                         </div>
 
                         <p className="text-muted-foreground text-sm line-clamp-3">
