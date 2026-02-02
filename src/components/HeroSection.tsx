@@ -8,23 +8,7 @@ const HeroSection = () => {
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${heroImage})` }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/30" />
-      </div>
-
-      {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 py-24 text-center">
-        <div className="max-w-3xl mx-auto space-y-6 animate-fade-up">
-          <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold text-primary-foreground leading-tight">
-            Let's Discover the World
-            <span className="block text-gradient">Together</span>
-          </h1>
-
-          <p className="text-lg md:text-xl text-primary-foreground/80 max-w-2xl mx-auto font-body">
-            Honest Reviews, Tested Gear & Travel Insights
-          </p>
-        </div>
-      </div>
+      />
 
       {/* Scroll Indicator */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-float">
