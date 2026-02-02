@@ -1,60 +1,47 @@
 
 
-## Remove Redundant Hero Text Overlay
+## Fix Hero Image - Show Full Palm Tree
 
-### Overview
-Remove the headline and tagline text from the hero section since the new TripReviews.ca branded image already contains this branding. The overlaid text is redundant and obscures the clean design of the branded hero image.
+### The Problem
+The palm tree in the hero image is being cut off because:
+1. The header is fixed at the top (`fixed top-0`) with a height of approximately 72px
+2. The hero section starts at the very top of the page (under the header)
+3. The background image is positioned at `bg-center`, which centers the image vertically - cutting off the top portion where the palm tree logo sits
 
----
-
-### Current State
-The hero section displays:
-- **H1 headline**: "Let's Discover the World" + "Together"
-- **Tagline**: "Honest Reviews, Tested Gear & Travel Insights"
-- **Scroll indicator**: Animated scroll hint at bottom
-
-These text elements overlay on top of the branded hero image, which already contains the TripReviews.ca logo, tagline, and visual branding.
-
-### After Change
-- Remove the entire text content block (headline + tagline)
-- Keep the background image with its light overlay
-- Keep the scroll indicator for visual continuity
-- The branded image speaks for itself
+### The Solution
+Adjust the hero section to:
+1. Add top padding equal to the header height so the content area starts below the header
+2. Change the background position from `bg-center` to `bg-top` so the top of the image (with the palm tree) is always visible
+3. Increase the minimum height to accommodate the full image display
 
 ---
 
-### File to Modify
+### Technical Changes
 
-**src/components/HeroSection.tsx**
+**File: `src/components/HeroSection.tsx`**
 
-Remove the content div containing the h1 and p elements (lines 15-27):
+| Property | Current | Updated |
+|----------|---------|---------|
+| Section classes | `min-h-[60vh]` | `min-h-[70vh] pt-20` (add header spacing + more height) |
+| Background position | `bg-center` | `bg-top` (show top of image where palm tree is) |
 
-```text
-Remove this block:
-      {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 py-24 text-center">
-        <div className="max-w-3xl mx-auto space-y-6 animate-fade-up">
-          <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold text-primary-foreground leading-tight">
-            Let's Discover the World
-            <span className="block text-gradient">Together</span>
-          </h1>
-
-          <p className="text-lg md:text-xl text-primary-foreground/80 max-w-2xl mx-auto font-body">
-            Honest Reviews, Tested Gear & Travel Insights
-          </p>
-        </div>
-      </div>
+Updated code:
+```tsx
+<section className="relative min-h-[70vh] pt-20 flex items-center justify-center overflow-hidden">
+  {/* Background Image */}
+  <div 
+    className="absolute inset-0 bg-cover bg-top bg-no-repeat"
+    style={{ backgroundImage: `url(${heroImage})` }}
+  />
 ```
 
-Also remove the dark overlay gradient since we want the branded image to display clearly without any darkening:
-
-```text
-Remove:
-<div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/30" />
-```
+Key changes:
+- `pt-20` (80px padding-top) - accounts for the fixed header height so the hero content area starts below the navigation
+- `bg-top` instead of `bg-center` - ensures the top of the image (palm tree and logo) is always visible
+- `min-h-[70vh]` - slightly more height to give the branded image more room to breathe
 
 ---
 
 ### Result
-The hero section will display the clean TripReviews.ca branded image as intended, with the palm tree logo, site name, and tagline visible as part of the image design. The scroll indicator remains to guide users down the page.
+The full TripReviews.ca branded image will be visible, with the palm tree logo and tagline properly displayed below the navigation header.
 
