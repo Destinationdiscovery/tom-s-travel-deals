@@ -34,7 +34,9 @@ const CompassSection = () => {
           className="w-full"
         >
           <CarouselContent className="-ml-4">
-            {compassArticles.map((article, index) => (
+            {[...compassArticles]
+              .sort((a, b) => new Date(b.datePublished).getTime() - new Date(a.datePublished).getTime())
+              .map((article, index) => (
               <CarouselItem 
                 key={article.id} 
                 className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3"
