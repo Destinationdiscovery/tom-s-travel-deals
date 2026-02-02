@@ -1,12 +1,11 @@
 import heroImage from "@/assets/hero-tripreviews.jpg";
 
 const HeroSection = () => {
-
   return (
-    <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-[70vh] pt-20 flex items-center justify-center overflow-hidden">
       {/* Background Image */}
       <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        className="absolute inset-0 bg-cover bg-top bg-no-repeat"
         style={{ backgroundImage: `url(${heroImage})` }}
       />
 
