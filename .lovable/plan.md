@@ -1,14 +1,18 @@
 
 
-## Fix Hero Image - Show Full Branded Image
+## Fix Hero Image - Full Width Coverage Without Cropping
 
 ### The Problem
-The tagline "Honest Reviews, Tested Gear & Travel Insights" at the bottom of the hero image is being cut off because:
-1. `bg-cover` scales the image to cover the entire container, which crops parts of the image
-2. `bg-top` prioritizes the top of the image, causing the bottom to be cropped
+The current CSS background approach forces a trade-off:
+- `bg-cover` → fills the screen but crops the logo/tagline
+- `bg-contain` → shows everything but leaves gaps on the sides
 
 ### The Solution
-Change the background sizing from `bg-cover` to `bg-contain` so the entire branded image fits within the hero section without any cropping. This ensures both the palm tree logo at the top AND the tagline at the bottom are fully visible.
+Switch from a CSS background image to an actual `<img>` element. This gives us full control:
+- The image stretches to **100% width** of the viewport
+- The height **automatically adjusts** based on the image's aspect ratio
+- **Nothing gets cropped** - the entire branded image is always visible
+- Works perfectly on both desktop and mobile
 
 ---
 
@@ -16,29 +20,46 @@ Change the background sizing from `bg-cover` to `bg-contain` so the entire brand
 
 **File: `src/components/HeroSection.tsx`**
 
-| Property | Current | Updated |
-|----------|---------|---------|
-| Background size | `bg-cover` | `bg-contain` (fit entire image without cropping) |
-| Background position | `bg-top` | `bg-center` (center the contained image) |
-| Background color | None | `bg-[#e8f4f8]` (light blue/teal to match image edges) |
+Replace the background `div` with an `<img>` element:
 
-Updated code:
 ```tsx
-<section className="relative min-h-[70vh] pt-20 flex items-center justify-center overflow-hidden bg-[#e8f4f8]">
-  {/* Background Image */}
-  <div 
-    className="absolute inset-0 bg-contain bg-center bg-no-repeat"
-    style={{ backgroundImage: `url(${heroImage})` }}
-  />
+import heroImage from "@/assets/hero-tripreviews.jpg";
+
+const HeroSection = () => {
+  return (
+    <section className="relative pt-20 bg-[#e8f4f8]">
+      {/* Hero Image - Full Width */}
+      <img 
+        src={heroImage}
+        alt="TripReviews.ca - Honest Reviews, Tested Gear & Travel Insights"
+        className="w-full h-auto"
+      />
+
+      {/* Scroll Indicator */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-float">
+        <div className="w-6 h-10 rounded-full border-2 border-gray-400/50 flex justify-center">
+          <div className="w-1 h-3 bg-gray-400/50 rounded-full mt-2 animate-pulse" />
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default HeroSection;
 ```
 
-Key changes:
-- `bg-contain` instead of `bg-cover` - ensures the entire image is visible without cropping
-- `bg-center` - centers the image within the container
-- `bg-[#e8f4f8]` on the section - adds a light blue/teal background color that matches the soft tones in the hero image, so any empty space around the contained image blends seamlessly
+### Key Changes
 
----
+| What | Before | After |
+|------|--------|-------|
+| Image method | CSS `background-image` | `<img>` element |
+| Width | Constrained by container | `w-full` (100% viewport width) |
+| Height | Fixed `min-h-[70vh]` | `h-auto` (respects aspect ratio) |
+| Cropping | Yes (with `bg-cover`) | No - full image always visible |
 
 ### Result
-The full TripReviews.ca branded image will be visible, with both the palm tree logo at the top AND the tagline "Honest Reviews, Tested Gear & Travel Insights" at the bottom properly displayed.
+- **Desktop**: Image spans full width, height adjusts naturally
+- **Mobile**: Image spans full width, height adjusts naturally
+- **No cropping**: Palm tree logo AND tagline always visible
+- **One change, done right**: No more back-and-forth adjustments
 
