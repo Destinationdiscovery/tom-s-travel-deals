@@ -31,6 +31,11 @@ import groupTravelFamilyImg from "@/assets/group-travel-family.jpg";
 import groupTravelWeddingImg from "@/assets/group-travel-wedding.webp";
 import groupTravelTeamImg from "@/assets/group-travel-team.jpg";
 import groupTravelBeachImg from "@/assets/group-travel-beach.webp";
+// WestJet Seat Squeeze article images
+import westjetPlaneHeroImg from "@/assets/westjet-plane-hero.avif";
+import westjetEconomyCabinImg from "@/assets/westjet-economy-cabin.jpeg";
+import westjetLegroomImg from "@/assets/westjet-legroom.jpg";
+import westjetSeatsWindowImg from "@/assets/westjet-seats-window.jpg";
 export interface ContentBlock {
   type: "text" | "image" | "heading";
   value: string;
@@ -291,6 +296,43 @@ export const compassArticles: CompassArticle[] = [
       { type: "image", value: groupTravelBeachImg, caption: "Group travel delivers connection, savings, and adventure without the solo hassle" },
       { type: "text", value: "For Canadians in Ontario, group travel fits well with trends like domestic booms or affordable international packages from YYZ. Operators like G Adventures or Air Canada Vacations offer tailored group options, from Eastern Canada tours to wellness retreats. As an Ontario travel agent, I see how these trips create lasting memories while keeping things practical and affordable." },
       { type: "text", value: "What's your next group trip idea? Drop a comment or reach out for help planning from Ontario. Safe travels!" }
+    ]
+  },
+  {
+    id: 8,
+    slug: "westjet-seat-squeeze-passengers-said-no",
+    title: "WestJet Tried to Squeeze in More Seats for Cheaper Fares... But Passengers Said No Way!",
+    category: "News",
+    categoryColor: "bg-amber-500",
+    image: westjetPlaneHeroImg,
+    excerpt: "WestJet's experiment with tighter seats grabbed headlines in early 2026. Here's what happened, why passengers pushed back, and tips for your next booking.",
+    author: "Tom Laracy",
+    datePublished: "January 29, 2026",
+    readTime: "6 min read",
+    content: [],
+    richContent: [
+      { type: "text", value: "As an Ontario travel agent, I see how much comfort matters on flights, especially for those longer sun getaways from YYZ. WestJet's recent experiment with tighter seats grabbed headlines in early 2026, and it's a story that hits home for so many Canadian travellers." },
+      { type: "heading", value: "What Happened with WestJet's Seats" },
+      { type: "text", value: "Late last year, WestJet reconfigured some of their Boeing 737 planes (mostly the MAX 8s and 737-8s) to add an extra row of seats in economy. They reduced the seat pitch (the space between rows) to as low as 28 inches in many spots, down from the usual 30-31 inches. This bumped the total seats from about 174 to 180 on those aircraft. The idea was to pack in more passengers per flight, spread costs around, and help keep base fares lower in a competitive market." },
+      { type: "image", value: westjetEconomyCabinImg, caption: "WestJet reduced seat pitch to 28 inches to add more passengers per flight" },
+      { type: "text", value: "WestJet's CEO even said it was about trying \"seat pitches popular with many airlines around the globe\" to offer more affordable options. Sounds logical on paper, right? But for real people flying, it felt like the opposite." },
+      { type: "heading", value: "The Passenger Pushback" },
+      { type: "text", value: "Passengers quickly pushed back. Viral videos and social media posts showed knees jammed against seatbacks, complaints about non-reclinable seats in the denser rows, and just general discomfort. The feedback was loud and fast, with forums, TikTok, and reviews lighting up about the cramped feel." },
+      { type: "text", value: "Families, taller travellers, and anyone who likes a bit of room to stretch out were vocal. Cabin crew chimed in too, mentioning it made their jobs harder in tighter spaces." },
+      { type: "image", value: westjetLegroomImg, caption: "Extended Comfort seats offer extra legroom for travelers who prioritize space" },
+      { type: "heading", value: "WestJet's Reversal" },
+      { type: "text", value: "By mid-January 2026, WestJet listened. They announced a full reversal on the densified part: they'd remove that extra row of seats (dropping back to 174), restore the prior standard pitch (at least 30 inches in economy), and get rid of any fixed non-reclinable seats. The change needs safety certification from regulators, but they committed to rolling it out as quickly as possible across the affected planes (around 21-22 aircraft)." },
+      { type: "text", value: "CEO Alexis von Hoensbroech called it a response to guest feedback, saying some ideas just \"don't meet expectations.\"" },
+      { type: "text", value: "This move probably cost them millions in lost capacity and reconfiguration work, but it shows how fast passenger voices can change airline plans. For Ontario travellers heading to sun spots or domestic routes, it's good news if you're on a WestJet flight soon – more legroom means a happier trip, especially on those 3-5 hour hauls." },
+      { type: "heading", value: "Practical Tips for Your Next WestJet Booking" },
+      { type: "image", value: westjetSeatsWindowImg, caption: "Checking seat maps early helps you avoid denser configurations during the transition" },
+      { type: "text", value: "Check seat maps early when choosing flights – avoid the denser configs if they're still in rotation during the transition." },
+      { type: "text", value: "If legroom is a must, look at their \"Extended Comfort\" seats (extra pitch for a fee) or premium options." },
+      { type: "text", value: "For families or groups, chat with an agent – we can help lock in better seats or alternatives on Sunwing/Air Canada Vacations where space feels more generous." },
+      { type: "text", value: "Keep an eye on reviews and updates – airlines tweak things often, and feedback like this drives changes." },
+      { type: "heading", value: "A Travel Agent's Perspective" },
+      { type: "text", value: "As an Ontario travel agent, I see comfort complaints pop up all the time, especially on budget carriers. If you're thinking about a winter getaway or family trip, now is a great time to plan." },
+      { type: "text", value: "What's your next trip idea? Drop a comment or reach out for help planning from Ontario. Safe travels!" }
     ]
   }
 ];
