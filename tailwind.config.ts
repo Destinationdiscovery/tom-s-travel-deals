@@ -19,6 +19,7 @@ export default {
       },
       colors: {
         border: "hsl(var(--border))",
+        navy: "hsl(var(--navy))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
