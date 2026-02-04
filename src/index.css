@@ -36,6 +36,8 @@
 
     --radius: 0.75rem;
 
+    --navy: 210 40% 23%;
+
     /* Custom tokens */
     --gradient-hero: linear-gradient(135deg, hsl(205 85% 45% / 0.9), hsl(195 50% 60% / 0.8));
     --gradient-cool: linear-gradient(180deg, hsl(210 20% 98%), hsl(210 25% 95%));
