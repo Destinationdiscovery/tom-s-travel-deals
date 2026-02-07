@@ -14,7 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      cached_reviews: {
+        Row: {
+          created_at: string
+          id: string
+          location: string | null
+          property_name: string
+          property_type: string | null
+          review_data: Json
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          location?: string | null
+          property_name: string
+          property_type?: string | null
+          review_data: Json
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          location?: string | null
+          property_name?: string
+          property_type?: string | null
+          review_data?: Json
+          slug?: string
+        }
+        Relationships: []
+      }
+      search_suggestions: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          property_type: string | null
+          search_count: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          property_type?: string | null
+          search_count?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          property_type?: string | null
+          search_count?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
