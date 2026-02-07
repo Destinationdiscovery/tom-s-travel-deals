@@ -1,8 +1,40 @@
+import { useState, useRef } from "react";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroBackground from "@/assets/hero-beach.jpg";
+import { useSearchSuggestions } from "@/hooks/useSearchSuggestions";
 
-const HeroSection = () => {
+interface HeroSectionProps {
+  onSearch: (propertyName: string) => void;
+  isSearching?: boolean;
+}
+
+const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
+  const [query, setQuery] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const { suggestions } = useSearchSuggestions(query);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleSearch = () => {
+    const trimmed = query.trim();
+    if (trimmed.length >= 2) {
+      setShowSuggestions(false);
+      onSearch(trimmed);
+    }
+  };
+
+  const handleSuggestionClick = (name: string) => {
+    setQuery(name);
+    setShowSuggestions(false);
+    onSearch(name);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
+
   return (
     <section className="relative min-h-screen flex items-center justify-center pt-20">
       {/* Background Image */}
@@ -17,11 +49,6 @@ const HeroSection = () => {
 
       {/* Content */}
       <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
-        {/* Site Name */}
-        <p className="text-white/80 text-sm tracking-[0.3em] uppercase mb-8 font-medium">
-          TripReviews.ca
-        </p>
-
         {/* Main Headline */}
         <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight">
           <span className="text-sky-300">REVIEW.</span>{" "}
@@ -35,21 +62,53 @@ const HeroSection = () => {
         </p>
 
         {/* Search Bar */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 max-w-xl mx-auto">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 max-w-xl mx-auto relative">
           <div className="relative flex-1">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <input
+              ref={inputRef}
               type="text"
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setShowSuggestions(true);
+              }}
+              onFocus={() => query.trim().length >= 2 && setShowSuggestions(true)}
+              onKeyDown={handleKeyDown}
               placeholder="Search destinations, hotels, or experiences"
               className="w-full h-12 pl-12 pr-4 rounded-lg bg-white/95 backdrop-blur-sm text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-2 focus:ring-sky-300 shadow-lg"
-              readOnly
             />
+
+            {/* Suggestions Dropdown */}
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-elevated border border-border overflow-hidden z-20">
+                {suggestions.map((s) => (
+                  <button
+                    key={s.id}
+                    onMouseDown={() => handleSuggestionClick(s.name)}
+                    className="w-full text-left px-4 py-3 hover:bg-muted/50 transition-colors flex items-center gap-3 text-sm"
+                  >
+                    <Search className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    <div>
+                      <span className="text-foreground font-medium">{s.name}</span>
+                      {s.property_type && (
+                        <span className="text-muted-foreground ml-2 text-xs capitalize">
+                          {s.property_type}
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           <Button
             size="lg"
-            className="h-12 px-8 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg shadow-lg whitespace-nowrap"
+            onClick={handleSearch}
+            disabled={isSearching || query.trim().length < 2}
+            className="h-12 px-8 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg shadow-lg whitespace-nowrap disabled:opacity-50"
           >
-            Explore reviews
+            {isSearching ? "Searching..." : "Explore reviews"}
           </Button>
         </div>
       </div>
