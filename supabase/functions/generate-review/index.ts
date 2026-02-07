@@ -48,9 +48,22 @@ serve(async (req) => {
     if (cached) {
       console.log("Cache hit for:", trimmedName);
       // Increment search count
-      await supabase.rpc("increment_search_count_fn", { search_name: trimmedName }).catch(() => {
-        // Fallback: direct upsert
-      });
+      try {
+        const { data: existing } = await supabase
+          .from("search_suggestions")
+          .select("id, search_count")
+          .ilike("name", trimmedName)
+          .maybeSingle();
+
+        if (existing) {
+          await supabase
+            .from("search_suggestions")
+            .update({ search_count: (existing.search_count || 0) + 1 })
+            .eq("id", existing.id);
+        }
+      } catch (e) {
+        console.error("Failed to increment search count:", e);
+      }
       return new Response(JSON.stringify({ review: cached }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -180,26 +193,31 @@ Make the review feel authentic and balanced - mention both positives and negativ
       // Still return the review even if caching fails
     }
 
-    // Upsert search suggestion
-    const { error: suggestError } = await supabase
-      .from("search_suggestions")
-      .upsert(
-        {
-          name: reviewData.propertyName || trimmedName,
-          property_type: reviewData.propertyType,
-          search_count: 1,
-        },
-        { onConflict: "name", ignoreDuplicates: false }
-      )
-      .select();
-
-    // If upsert failed due to unique constraint, try updating search_count
-    if (suggestError) {
-      console.log("Upsert suggestion fallback, incrementing count");
-      await supabase
+    // Save search suggestion (compatible with case-insensitive unique index)
+    try {
+      const suggestionName = reviewData.propertyName || trimmedName;
+      const { data: existingSuggestion } = await supabase
         .from("search_suggestions")
-        .update({ search_count: 1 })
-        .ilike("name", reviewData.propertyName || trimmedName);
+        .select("id, search_count")
+        .ilike("name", suggestionName)
+        .maybeSingle();
+
+      if (existingSuggestion) {
+        await supabase
+          .from("search_suggestions")
+          .update({ search_count: (existingSuggestion.search_count || 0) + 1 })
+          .eq("id", existingSuggestion.id);
+      } else {
+        await supabase
+          .from("search_suggestions")
+          .insert({
+            name: suggestionName,
+            property_type: reviewData.propertyType,
+            search_count: 1,
+          });
+      }
+    } catch (e) {
+      console.error("Failed to save search suggestion:", e);
     }
 
     const result = savedReview || {
