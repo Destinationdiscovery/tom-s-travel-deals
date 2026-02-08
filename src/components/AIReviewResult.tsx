@@ -173,6 +173,29 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview }: AIReviewResul
               {/* Affiliate Links */}
               <AffiliateLinks propertyName={data.propertyName || review.property_name} />
 
+              {/* Location Map */}
+              {(data.propertyName || data.location) && (
+                <div className="bg-card rounded-2xl p-6 shadow-soft">
+                  <h3 className="font-display text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+                    <MapPin className="h-5 w-5 text-primary" />
+                    Location
+                  </h3>
+                  <div className="rounded-xl overflow-hidden border border-border">
+                    <iframe
+                      title="Destination map"
+                      width="100%"
+                      height="250"
+                      style={{ border: 0 }}
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      src={`https://maps.google.com/maps?q=${encodeURIComponent(
+                        [data.propertyName, data.location].filter(Boolean).join(" ")
+                      )}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
+                    />
+                  </div>
+                </div>
+              )}
+
               {/* New Review Button */}
               {onNewReview && (
                 <div className="flex justify-center pt-4">
@@ -223,28 +246,6 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview }: AIReviewResul
                 )}
               </div>
 
-              {/* Location Map */}
-              {(data.propertyName || data.location) && (
-                <div className="bg-card rounded-2xl p-6 shadow-soft">
-                  <h3 className="font-display text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-                    <MapPin className="h-5 w-5 text-primary" />
-                    Location
-                  </h3>
-                  <div className="rounded-xl overflow-hidden border border-border">
-                    <iframe
-                      title="Destination map"
-                      width="100%"
-                      height="250"
-                      style={{ border: 0 }}
-                      loading="lazy"
-                      referrerPolicy="no-referrer-when-downgrade"
-                      src={`https://maps.google.com/maps?q=${encodeURIComponent(
-                        [data.propertyName, data.location].filter(Boolean).join(" ")
-                      )}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
-                    />
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
