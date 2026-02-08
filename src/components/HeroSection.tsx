@@ -3,6 +3,15 @@ import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroBackground from "@/assets/hero-beach.jpg";
 import { useSearchSuggestions } from "@/hooks/useSearchSuggestions";
+import { Link } from "react-router-dom";
+
+const heroNavLinks = [
+  { to: "/destinations", label: "My Reviews" },
+  { to: "/gear", label: "Gear Reviews" },
+  { to: "/compass", label: "Travel Blog" },
+  { to: "/about", label: "About" },
+  { to: "/contact", label: "Contact" },
+];
 
 interface HeroSectionProps {
   onSearch: (propertyName: string) => void;
@@ -115,6 +124,20 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
             {isSearching ? "Searching..." : "Explore reviews"}
           </Button>
         </div>
+      </div>
+
+      {/* Hero Navigation Links */}
+      <div className="absolute bottom-20 left-1/2 -translate-x-1/2 hidden md:flex items-center gap-8">
+        <div className="absolute -top-4 left-0 right-0 h-px bg-white/15" />
+        {heroNavLinks.map((link) => (
+          <Link
+            key={link.to}
+            to={link.to}
+            className="text-white/50 hover:text-white/80 transition-colors text-sm font-medium"
+          >
+            {link.label}
+          </Link>
+        ))}
       </div>
 
       {/* Scroll Indicator */}
