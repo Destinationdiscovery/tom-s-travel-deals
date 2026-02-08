@@ -1,55 +1,50 @@
 
 
-## Fix Autocomplete: Seed Data + Search Cached Reviews
+## Replace Static Suggestions with Google Places Autocomplete
 
-### Root Cause
+### What Changes
 
-The autocomplete is technically working -- it queries the database and returns results. But the `search_suggestions` table is nearly empty (only 1 test entry: "Four Seasons Resort Maui at Wailea"). When you type "bella" or "be", there are no matching entries, so nothing appears.
+Instead of querying a small database table for autocomplete, the search bar will call **Google's Places Autocomplete API** in real-time. When you type "bell", you'll instantly see "Bellagio Las Vegas", "Bellaggio Italy", "Bell Tower Hotel" and dozens of other real places worldwide -- not just 20 hand-picked entries.
 
-This happened because the edge function was crashing before the fix, so no searches ever got saved to the suggestions table.
+### How It Works
 
-### Solution (Two Parts)
+1. User starts typing in the search bar (2+ characters)
+2. A backend function calls Google Places Autocomplete API with the query
+3. Results come back instantly showing real hotels, resorts, destinations
+4. User picks a suggestion (or types their own), then clicks "Explore reviews" to generate the AI review via Perplexity (existing flow, unchanged)
 
-**1. Seed the database with popular destinations**
+### What You'll Need
 
-Run a migration to pre-populate `search_suggestions` with ~20 popular hotels, resorts, and destinations so autocomplete has data to show immediately.
-
-Examples: Bellagio Las Vegas, Sandals Royal Caribbean, Atlantis Paradise Island, Four Seasons Bora Bora, Hotel & Spa & Resort Cancun, Ritz-Carlton Maui, etc.
-
-**2. Also search cached_reviews as a fallback**
-
-Update the `useSearchSuggestions` hook to query both `search_suggestions` AND `cached_reviews` tables. This way, any property that has already been reviewed will also appear in autocomplete, even if it wasn't saved to suggestions due to the earlier bug.
+A **Google Places API key** from the Google Cloud Console. Google offers $200/month free credit which covers roughly 11,000-28,000 autocomplete requests -- more than enough for a travel blog.
 
 ### Changes
 
 | Action | File / Resource | What Changes |
 |--------|----------------|--------------|
-| Migration | Database | Insert ~20 popular destination/hotel names into `search_suggestions` |
-| Modify | `src/hooks/useSearchSuggestions.ts` | Add a parallel query to `cached_reviews` table, merge and deduplicate results from both tables |
+| New secret | Backend | Store `GOOGLE_PLACES_API_KEY` securely |
+| New function | `supabase/functions/places-autocomplete/index.ts` | Edge function that proxies Google Places Autocomplete requests, filtering for travel-relevant place types (hotels, resorts, landmarks, cities) |
+| Update config | `supabase/config.toml` | Register the new function with `verify_jwt = false` |
+| Rewrite | `src/hooks/useSearchSuggestions.ts` | Call the new edge function instead of querying the database; fall back to database results if the API call fails |
+| Minor update | `src/components/HeroSection.tsx` | Update the suggestion display to show the richer data from Google (e.g., secondary text like city/country) |
 
-### Technical Detail
+### Technical Details
 
-The updated `useSearchSuggestions` hook will:
+**Edge Function** (`places-autocomplete/index.ts`):
+- Receives `{ input: "bell" }` from the frontend
+- Calls `https://places.googleapis.com/v1/places:autocomplete` (new Google Places API)
+- Filters by `includedPrimaryTypes` for lodging, tourist attractions, and localities
+- Returns an array of `{ placeId, mainText, secondaryText }` suggestions
+- Wrapped in try/catch with proper CORS headers
 
-```text
-User types "bell" (>= 2 chars)
-    |
-    v
-Two parallel queries fire (debounced 300ms):
-  1. search_suggestions WHERE name ILIKE '%bell%' ORDER BY search_count DESC LIMIT 6
-  2. cached_reviews WHERE property_name ILIKE '%bell%' LIMIT 6
-    |
-    v
-Merge results, deduplicate by lowercase name, cap at 6
-    |
-    v
-Show dropdown: "Bellagio Las Vegas" (hotel), etc.
-```
+**Updated Hook** (`useSearchSuggestions.ts`):
+- Calls the edge function via `supabase.functions.invoke("places-autocomplete", { body: { input: query } })`
+- 300ms debounce (same as current)
+- Falls back to querying `search_suggestions` + `cached_reviews` tables if the API call fails
+- Returns unified suggestion objects for the dropdown
 
-The seeded data will include a mix of:
-- Popular Las Vegas hotels (Bellagio, Venetian, Wynn, Caesars Palace)
-- Caribbean resorts (Sandals, Atlantis, Beaches)
-- Luxury destinations (Four Seasons Bora Bora, Ritz-Carlton, Aman Tokyo)
-- Popular destinations (Cancun, Maldives, Santorini, Bali)
+**Suggestion Dropdown** (`HeroSection.tsx`):
+- Shows the place name (main text) prominently
+- Shows location context (secondary text like "Las Vegas, NV, USA") in smaller text below
+- Existing click-to-search behavior remains the same
 
-This ensures that from day one, users will see suggestions as they type.
+The existing review generation flow (Perplexity AI) and caching logic are completely unchanged -- this only upgrades the autocomplete/typeahead experience.
