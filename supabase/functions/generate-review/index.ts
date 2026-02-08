@@ -16,6 +16,47 @@ function slugify(text: string): string {
     .trim();
 }
 
+async function fetchPlacePhotos(placeName: string): Promise<string[]> {
+  const apiKey = Deno.env.get("GOOGLE_PLACES_API_KEY");
+  if (!apiKey) {
+    console.log("No Google Places API key configured, skipping photos");
+    return [];
+  }
+
+  try {
+    const response = await fetch("https://places.googleapis.com/v1/places:searchText", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": apiKey,
+        "X-Goog-FieldMask": "places.photos",
+      },
+      body: JSON.stringify({
+        textQuery: placeName,
+        maxResultCount: 1,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error("Google Places search error:", response.status, await response.text());
+      return [];
+    }
+
+    const data = await response.json();
+    const place = data.places?.[0];
+    if (!place?.photos || place.photos.length === 0) {
+      console.log("No photos found for:", placeName);
+      return [];
+    }
+
+    // Get up to 6 photo resource names
+    return place.photos.slice(0, 6).map((photo: { name: string }) => photo.name);
+  } catch (e) {
+    console.error("Failed to fetch place photos:", e);
+    return [];
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -33,7 +74,6 @@ serve(async (req) => {
     const trimmedName = propertyName.trim();
     const slug = slugify(trimmedName);
 
-    // Create Supabase client with service role for writes
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -47,7 +87,6 @@ serve(async (req) => {
 
     if (cached) {
       console.log("Cache hit for:", trimmedName);
-      // Increment search count
       try {
         const { data: existing } = await supabase
           .from("search_suggestions")
@@ -112,30 +151,53 @@ Return your response as valid JSON with this exact structure (no markdown, no co
     "Tag 2",
     "Tag 3",
     "Tag 4"
+  ],
+  "thingsToDo": [
+    {
+      "name": "Name of activity or attraction nearby",
+      "description": "1-2 sentence description of the activity based on real traveler recommendations",
+      "category": "Adventure" or "Dining" or "Culture" or "Nature" or "Shopping" or "Nightlife" or "Relaxation" or "Sightseeing"
+    },
+    {
+      "name": "Second activity",
+      "description": "Description...",
+      "category": "Category"
+    },
+    {
+      "name": "Third activity",
+      "description": "Description...",
+      "category": "Category"
+    }
   ]
 }
 
 Important: For the ratings object, use category names that are most relevant to this type of property. For hotels/resorts use Rooms, Food, Service, Location, Value. For cruises use Cabins, Dining, Entertainment, Excursions, Value. For destinations/attractions adapt categories accordingly. Always include exactly 5 rating categories.
 
+For thingsToDo, include exactly 3 popular activities, attractions, or experiences near the property that real travelers recommend. Use specific names (not generic descriptions).
+
 Make the review feel authentic and balanced - mention both positives and negatives that real travelers have noted. Include specific details like room types, restaurant names, or nearby attractions when possible.`;
 
     console.log("Calling Perplexity for:", trimmedName);
 
-    const perplexityResponse = await fetch("https://api.perplexity.ai/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${perplexityKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "sonar",
-        messages: [
-          { role: "system", content: "You are a travel review expert. Always respond with valid JSON only, no markdown formatting." },
-          { role: "user", content: prompt },
-        ],
-        temperature: 0.3,
+    // Fetch Perplexity review and Google Places photos in parallel
+    const [perplexityResponse, photoReferences] = await Promise.all([
+      fetch("https://api.perplexity.ai/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${perplexityKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "sonar",
+          messages: [
+            { role: "system", content: "You are a travel review expert. Always respond with valid JSON only, no markdown formatting." },
+            { role: "user", content: prompt },
+          ],
+          temperature: 0.3,
+        }),
       }),
-    });
+      fetchPlacePhotos(trimmedName),
+    ]);
 
     if (!perplexityResponse.ok) {
       const errText = await perplexityResponse.text();
@@ -157,10 +219,8 @@ Make the review feel authentic and balanced - mention both positives and negativ
       );
     }
 
-    // Parse the JSON from Perplexity's response
     let reviewData;
     try {
-      // Try to extract JSON from potential markdown code blocks
       const jsonMatch = rawContent.match(/```(?:json)?\s*([\s\S]*?)```/);
       const jsonStr = jsonMatch ? jsonMatch[1].trim() : rawContent.trim();
       reviewData = JSON.parse(jsonStr);
@@ -172,8 +232,9 @@ Make the review feel authentic and balanced - mention both positives and negativ
       );
     }
 
-    // Add citations to the review data
+    // Attach citations and photo references
     reviewData.citations = citations;
+    reviewData.photoReferences = photoReferences;
 
     // Save to cached_reviews
     const { data: savedReview, error: saveError } = await supabase
@@ -190,10 +251,9 @@ Make the review feel authentic and balanced - mention both positives and negativ
 
     if (saveError) {
       console.error("Error saving to cache:", saveError);
-      // Still return the review even if caching fails
     }
 
-    // Save search suggestion (compatible with case-insensitive unique index)
+    // Save search suggestion
     try {
       const suggestionName = reviewData.propertyName || trimmedName;
       const { data: existingSuggestion } = await supabase
