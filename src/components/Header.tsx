@@ -24,7 +24,7 @@ const Header = () => {
         <Link to="/" className="flex items-center gap-2">
           <Compass className="h-8 w-8 text-primary" />
           <div>
-            <h1 className="font-display text-xl font-bold text-foreground">TripReviews</h1>
+            <h1 className="font-display text-xl font-bold text-foreground">ReviewThenGo</h1>
             <p className="text-xs text-muted-foreground">Honest Reviews & Travel Insights</p>
           </div>
         </Link>
