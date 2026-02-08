@@ -1,26 +1,27 @@
 
 
-## Move the Location Map Next to the Booking Links
+## Fix: Affiliate Links Should Open Blank (No Pre-Populated Destination)
 
 ### The Problem
 
-The Location Map card is currently in the right sidebar alongside the Rating Breakdown and Best For cards. Even though sticky was removed, the sidebar layout still causes scrolling issues with the map moving independently.
+When clicking the Expedia or VRBO booking button after reviewing a Niagara Falls hotel, Expedia landed on "Batumi, Adjara, Georgia" — a completely unrelated destination. The property name is being passed as a search destination, but Expedia's search engine interprets it unpredictably.
 
 ### The Fix
 
-Move the Location Map out of the sidebar and into the main content column, placing it right next to (below) the Affiliate/Booking links. This keeps everything the user scrolls through in a single column flow.
+Remove the destination pre-population from both affiliate links entirely. The buttons will send users to a clean Expedia Hotels page and VRBO homepage so they can search on their own terms. This prevents any wrong destination from ever appearing.
 
 ### File Change
 
-**`src/components/AIReviewResult.tsx`**
+**`src/components/AffiliateLinks.tsx`**
 
-1. **Remove** the Location Map block (lines 226-247) from the sidebar `<div>` on the right
-2. **Insert** that same Location Map block into the main content column (left side), directly after the `<AffiliateLinks>` component (after line 174) and before the "New Review" button
+Update the two `buildUrl` functions to link to clean pages without any destination parameter:
 
-The sidebar will then only contain the Rating Breakdown and Best For cards -- no more scrolling map issue. The map will sit naturally in the main content flow right beside the booking buttons.
+| Affiliate | Current Link Target | New Link Target |
+|-----------|-------------------|-----------------|
+| **Expedia** | `expedia.ca/Hotel-Search?destination=<propertyName>` | `expedia.ca/Hotels` (clean hotel search page) |
+| **VRBO** | `vrbo.com/search?destination=<propertyName>` | `vrbo.com` (clean homepage) |
 
-| Section | Before | After |
-|---------|--------|-------|
-| Main content (left) | Tips → Affiliate Links → New Review button | Tips → Affiliate Links → **Location Map** → New Review button |
-| Sidebar (right) | Rating Breakdown + Best For + Location Map | Rating Breakdown + Best For only |
+Both links will still go through the CJ Affiliate tracking URLs (the `anrdoezrs.net` and `jdoqocy.com` click trackers with PID and AID) so commission tracking is preserved. The only change is removing the `destination=` query parameter from the nested URLs.
+
+The `propertyName` prop can also be removed from the component since it's no longer used, along with the corresponding prop in `AIReviewResult.tsx` where it's passed in.
 
