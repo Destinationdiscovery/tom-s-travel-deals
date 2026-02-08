@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 export interface SearchSuggestion {
   id: string;
   name: string;
+  secondaryText?: string;
   property_type: string | null;
   search_count: number;
 }
@@ -21,9 +22,28 @@ export function useSearchSuggestions(query: string) {
     const timer = setTimeout(async () => {
       setIsLoading(true);
       try {
-        const searchTerm = `%${query.trim()}%`;
+        // Try Google Places first
+        const { data, error } = await supabase.functions.invoke(
+          "places-autocomplete",
+          { body: { input: query.trim() } },
+        );
 
-        // Query both tables in parallel
+        if (!error && data?.suggestions?.length > 0) {
+          const mapped: SearchSuggestion[] = data.suggestions.map(
+            (s: { placeId: string; mainText: string; secondaryText: string }) => ({
+              id: s.placeId,
+              name: s.mainText,
+              secondaryText: s.secondaryText,
+              property_type: null,
+              search_count: 0,
+            }),
+          );
+          setSuggestions(mapped);
+          return;
+        }
+
+        // Fallback: query local database tables
+        const searchTerm = `%${query.trim()}%`;
         const [suggestionsRes, reviewsRes] = await Promise.all([
           supabase
             .from("search_suggestions")
@@ -38,7 +58,6 @@ export function useSearchSuggestions(query: string) {
             .limit(6),
         ]);
 
-        // Start with search_suggestions results
         const merged: SearchSuggestion[] = [];
         const seenNames = new Set<string>();
 
@@ -52,7 +71,6 @@ export function useSearchSuggestions(query: string) {
           }
         }
 
-        // Add cached_reviews results that aren't already present
         if (reviewsRes.data) {
           for (const r of reviewsRes.data) {
             const key = r.property_name.toLowerCase();

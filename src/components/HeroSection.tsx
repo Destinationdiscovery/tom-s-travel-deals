@@ -89,13 +89,17 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
                     className="w-full text-left px-4 py-3 hover:bg-muted/50 transition-colors flex items-center gap-3 text-sm"
                   >
                     <Search className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                    <div>
+                    <div className="flex flex-col">
                       <span className="text-foreground font-medium">{s.name}</span>
-                      {s.property_type && (
-                        <span className="text-muted-foreground ml-2 text-xs capitalize">
+                      {s.secondaryText ? (
+                        <span className="text-muted-foreground text-xs">
+                          {s.secondaryText}
+                        </span>
+                      ) : s.property_type ? (
+                        <span className="text-muted-foreground text-xs capitalize">
                           {s.property_type}
                         </span>
-                      )}
+                      ) : null}
                     </div>
                   </button>
                 ))}
