@@ -35,20 +35,20 @@ const Header = () => {
             to="/destinations"
             className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
           >
-            Destinations
+            My Reviews
           </Link>
           <Link 
             to="/gear"
             className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
           >
-            Gear Discovery
+            Gear Reviews
           </Link>
-          <button 
-            onClick={() => scrollToSection("compass")}
+          <Link 
+            to="/compass"
             className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
           >
-            The Compass
-          </button>
+            Travel Blog
+          </Link>
           <Link 
             to="/about"
             className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
@@ -81,21 +81,22 @@ const Header = () => {
               className="text-left text-sm font-medium text-muted-foreground hover:text-primary transition-colors py-2"
               onClick={() => setIsMenuOpen(false)}
             >
-              Destinations
+              My Reviews
             </Link>
             <Link 
               to="/gear"
               className="text-left text-sm font-medium text-muted-foreground hover:text-primary transition-colors py-2"
               onClick={() => setIsMenuOpen(false)}
             >
-              Gear Discovery
+              Gear Reviews
             </Link>
-            <button 
-              onClick={() => scrollToSection("compass")}
+            <Link 
+              to="/compass"
               className="text-left text-sm font-medium text-muted-foreground hover:text-primary transition-colors py-2"
+              onClick={() => setIsMenuOpen(false)}
             >
-              The Compass
-            </button>
+              Travel Blog
+            </Link>
             <Link 
               to="/about"
               className="text-left text-sm font-medium text-muted-foreground hover:text-primary transition-colors py-2"

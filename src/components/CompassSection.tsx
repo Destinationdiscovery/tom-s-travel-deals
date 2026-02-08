@@ -23,7 +23,7 @@ const CompassSection = () => {
             Travel Intel
           </span>
           <h2 className="font-display text-3xl md:text-5xl font-bold text-navy mb-4">
-            The Compass
+            Travel Blog
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             Insider tips and travel wisdom from over a decade of experience as a travel consultant.

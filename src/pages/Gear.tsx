@@ -23,7 +23,7 @@ const Gear = () => {
         <section className="py-16 bg-muted/30">
           <div className="container mx-auto px-4 text-center">
             <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-4">
-              Travel Gear Discovery
+              Gear Reviews
             </h1>
             <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
               Items I've personally used and tested while traveling. Honest, expert reviews from a travel consultant who's been there.

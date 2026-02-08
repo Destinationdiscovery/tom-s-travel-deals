@@ -94,7 +94,7 @@ const Destinations = () => {
         <section className="py-16 bg-warm-gradient">
           <div className="container mx-auto px-4 text-center">
             <h1 className="font-display text-4xl md:text-6xl font-bold text-foreground mb-4">
-              Destination Reviews
+              My Reviews
             </h1>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
               Real stories from real travels. Every destination here, I've walked those streets, 

@@ -25,7 +25,7 @@ const Compass = () => {
             Travel Intel
           </span>
           <h1 className="font-display text-4xl md:text-6xl font-bold text-foreground mb-6">
-            The Compass
+            Travel Blog
           </h1>
           <p className="text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto">
             Insider tips and travel wisdom from over a decade of experience as a travel consultant. 

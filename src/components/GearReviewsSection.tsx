@@ -22,7 +22,7 @@ const GearReviewsSection = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-8">
           <h2 className="font-display text-3xl md:text-4xl font-bold text-navy mb-4">
-            Travel Gear Discovery
+            Gear Reviews
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Items I've personally used and tested while traveling. Honest reviews from a travel consultant who's been there.
