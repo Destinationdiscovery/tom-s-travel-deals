@@ -1,32 +1,51 @@
 
 
-## Replace Citations with an Interactive Map
+## Update Affiliate Links with CJ Tracking
 
 ### What Changes
 
-The "Sources" list of citation links at the bottom of each AI review will be removed and replaced with an embedded Google Map showing a red pin at the destination's location. This uses the existing review data -- no new API calls or keys needed.
+1. **Remove Hotels.com** entirely from the affiliate links until tracking is set up
+2. **Wire up CJ tracking** for Expedia and VRBO so clicks are properly tracked
+3. **Pre-populate search** so clicking "Expedia" for a "Hilton Niagara" review takes the user directly to that property's search results on Expedia
+4. **Rename "Expedia.ca" to "Expedia"**
 
-### How It Works
+### How the Tracking URLs Work
 
-The review already contains `propertyName` (e.g., "Bellagio") and `location` (e.g., "Las Vegas, NV, USA") from Perplexity. We combine these into a search query and embed a Google Maps iframe that automatically places a red pin at the right spot.
+Each link will route through CJ's tracking domain, then redirect the user to the affiliate site with the property name already filled in as a search query.
 
-No additional API key is needed -- the Google Maps embed iframe works without a key (same method as the "Share > Embed a map" feature on Google Maps).
+For example, if the property is "Hilton Niagara Falls":
 
-### Changes
+- **Expedia**: `https://www.anrdoezrs.net/click-101645364-15575474?url=https://www.expedia.ca/Hotel-Search?destination=Hilton+Niagara+Falls`
+- **VRBO**: `https://www.jdoqocy.com/click-101645364-10697641?url=https://www.vrbo.com/search?destination=Hilton+Niagara+Falls`
+
+### File Changes
 
 | File | What Changes |
 |------|-------------|
-| `src/components/AIReviewResult.tsx` | Remove the Citations section (lines 171-189). Add a new "Location" map card in the sidebar, below the Ratings Breakdown card, with an embedded Google Maps iframe showing a red pin at the destination. |
+| `src/components/AffiliateLinks.tsx` | Remove Hotels.com entry. Update Expedia name to "Expedia". Update both Expedia and VRBO `buildUrl` functions to wrap destination URLs with CJ tracking links using the provided PIDs and AIDs. |
 
-### Details
+### Technical Details
 
-**Map Embed**: A rounded card in the sidebar with a heading "Location" and an interactive Google Maps iframe. The iframe uses:
+The `affiliates` array will go from three entries to two. Each entry's `buildUrl` function will:
+
+1. Build the destination URL (e.g., `https://www.expedia.ca/Hotel-Search?destination=Hilton+Niagara+Falls`)
+2. Wrap it in the CJ tracking URL with `encodeURIComponent`
+
+Updated affiliate config:
+
+```text
+Expedia:
+  CJ domain: anrdoezrs.net
+  PID: 101645364
+  AID: 15575474
+  Destination pattern: https://www.expedia.ca/Hotel-Search?destination={query}
+
+VRBO:
+  CJ domain: jdoqocy.com
+  PID: 101645364
+  AID: 10697641
+  Destination pattern: https://www.vrbo.com/search?destination={query}
 ```
-https://maps.google.com/maps?q={propertyName}+{location}&z=13&output=embed
-```
 
-**Placement**: Below the "Rating Breakdown" card in the right sidebar -- keeps the main content area clean and puts the map where it's contextually useful alongside ratings and "Best For" tags.
+The button colors and styling remain unchanged. The disclaimer text at the bottom stays as-is.
 
-**Styling**: Rounded corners, shadow, same card style as the ratings breakdown. The map will be roughly 250px tall with a subtle border.
-
-**Fallback**: If neither `propertyName` nor `location` exist (unlikely), the map card simply won't render.
