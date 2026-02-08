@@ -1,49 +1,58 @@
 
 
-## Rebrand Header, Footer, and About Page
+## Rename Navigation Links and Page Titles
 
 ### Overview
 
-Replace "Tom Laracy" with "TripReviews" in the site-wide header and footer, and rewrite the About page with the new copy you provided. The compass article author names will stay as "Tom Laracy" since those are editorial bylines, not branding.
+Rename three navigation items in the toolbar and update the matching page titles. Also fix "The Compass" / "Travel Blog" to navigate directly to the page instead of scrolling on the homepage.
 
-### Changes
+### Changes Summary
+
+| Current Name | New Name | Nav Link Behavior |
+|---|---|---|
+| Destinations | My Reviews | Links to `/destinations` (unchanged) |
+| Gear Discovery | Gear Reviews | Links to `/gear` (unchanged) |
+| The Compass | Travel Blog | **Changed from scroll-to-section to direct link to `/compass`** |
+
+### Detailed Changes
 
 #### 1. Header (`src/components/Header.tsx`)
-- Change the logo text from "Tom Laracy" to "TripReviews"
-- Change the subtitle from "Travel Consultant Est. 2011" to "Honest Reviews & Travel Insights"
-- Change nav link text from "About Tom" to "About" (both desktop and mobile menus)
+- "Destinations" → "My Reviews" (desktop + mobile)
+- "Gear Discovery" → "Gear Reviews" (desktop + mobile)
+- "The Compass" → "Travel Blog" (desktop + mobile)
+- Change the "Travel Blog" nav item from a `<button>` with `scrollToSection("compass")` to a `<Link to="/compass">` so it opens the page directly
 
-#### 2. Footer (`src/components/Footer.tsx`)
-- Change the brand name from "Tom Laracy" to "TripReviews"
-- Change the subtitle from "Travel Consultant Est. 2011" to "Honest Reviews & Travel Insights"
-- Change the copyright text from "Tom Laracy Travel. Travelonly Certified Agent." to "TripReviews. All rights reserved."
-- Change the nav link from "About Tom" to "About"
-- Update the description paragraph to align with the new positioning
+#### 2. Destinations Page (`src/pages/Destinations.tsx`)
+- Page title: "Destination Reviews" → "My Reviews"
 
-#### 3. About Page (`src/pages/About.tsx`)
-- Replace the heading from "Hi, I'm Tom Laracy" to "Hi, I'm Tom"
-- Replace the two body paragraphs with the new copy:
-  - "This site exists to help travelers make better decisions before they book."
-  - "TripReviews focuses on honest insights, common experiences, and real-world feedback about destinations, resorts, and travel experiences. It's not about selling. It's about clarity."
-  - "Read the reviews, understand what to expect, and go with confidence."
-- Remove the "Meet Your Travel Consultant" badge (no longer fits the tone)
-- Keep the features section and travel philosophy card as-is (they still work with the new tone)
+#### 3. Gear Page (`src/pages/Gear.tsx`)
+- Page title: "Travel Gear Discovery" → "Gear Reviews"
 
-#### 4. About Section (homepage) (`src/components/AboutSection.tsx`)
-- Same changes as the About page: update heading to "Hi, I'm Tom" and replace the paragraph text with the new copy
-- Update badge from "Meet Your Travel Guide" to something simpler or remove it
+#### 4. Compass Page (`src/pages/Compass.tsx`)
+- Page title: "The Compass" → "Travel Blog"
+
+#### 5. Footer (`src/components/Footer.tsx`)
+- "Destinations" → "My Reviews"
+- "The Compass" link text → "Travel Blog" and update the `href` from `/#compass` to `/compass` (direct page link)
+
+#### 6. Homepage Sections (cosmetic alignment)
+- **CompassSection** (`src/components/CompassSection.tsx`): Section heading "The Compass" → "Travel Blog"
+- **GearReviewsSection** (`src/components/GearReviewsSection.tsx`): Section heading "Travel Gear Discovery" → "Gear Reviews"
 
 ### What stays the same
-- Compass article author bylines remain "Tom Laracy" (editorial credit)
-- The Travelonly profile link in the footer stays (it's a useful external link)
-- Features list (20+ Countries, Passionate Advocate, Real Experiences) and Travel Philosophy card remain unchanged
+- All routes/URLs remain unchanged (`/destinations`, `/gear`, `/compass`)
+- The homepage compass section still has the `id="compass"` anchor (for any existing bookmarks)
+- Article content and data files are untouched
 
 ### Files modified
 
-| File | Change |
-|------|--------|
-| `src/components/Header.tsx` | "Tom Laracy" -> "TripReviews", subtitle update, "About Tom" -> "About" |
-| `src/components/Footer.tsx` | "Tom Laracy" -> "TripReviews", subtitle, copyright, nav link, description |
-| `src/pages/About.tsx` | New heading and body copy |
-| `src/components/AboutSection.tsx` | Same heading and body copy updates |
+| File | Changes |
+|------|---------|
+| `src/components/Header.tsx` | Rename 3 nav labels, convert Compass button to Link |
+| `src/components/Footer.tsx` | Rename 2 link labels, update Compass href |
+| `src/pages/Destinations.tsx` | Page title update |
+| `src/pages/Gear.tsx` | Page title update |
+| `src/pages/Compass.tsx` | Page title update |
+| `src/components/CompassSection.tsx` | Section heading update |
+| `src/components/GearReviewsSection.tsx` | Section heading update |
 
