@@ -7,25 +7,16 @@ interface AffiliateLinksProps {
 
 const affiliates = [
   {
-    name: "Expedia.ca",
-    baseUrl: "https://www.expedia.ca/Hotel-Search",
+    name: "Expedia",
     buildUrl: (query: string) =>
-      `https://www.expedia.ca/Hotel-Search?destination=${encodeURIComponent(query)}`,
+      `https://www.anrdoezrs.net/click-101645364-15575474?url=${encodeURIComponent(`https://www.expedia.ca/Hotel-Search?destination=${encodeURIComponent(query)}`)}`,
     color: "bg-[hsl(45,100%,51%)] hover:bg-[hsl(45,100%,45%)] text-[hsl(215,25%,15%)]",
   },
   {
     name: "VRBO",
-    baseUrl: "https://www.vrbo.com/search",
     buildUrl: (query: string) =>
-      `https://www.vrbo.com/search?destination=${encodeURIComponent(query)}`,
+      `https://www.jdoqocy.com/click-101645364-10697641?url=${encodeURIComponent(`https://www.vrbo.com/search?destination=${encodeURIComponent(query)}`)}`,
     color: "bg-[hsl(205,85%,45%)] hover:bg-[hsl(205,85%,38%)] text-white",
-  },
-  {
-    name: "Hotels.com",
-    baseUrl: "https://www.hotels.com/search.do",
-    buildUrl: (query: string) =>
-      `https://www.hotels.com/search.do?q-destination=${encodeURIComponent(query)}`,
-    color: "bg-[hsl(0,72%,51%)] hover:bg-[hsl(0,72%,44%)] text-white",
   },
 ];
 
