@@ -24,8 +24,8 @@ const Header = () => {
         <Link to="/" className="flex items-center gap-2">
           <Compass className="h-8 w-8 text-primary" />
           <div>
-            <h1 className="font-display text-xl font-bold text-foreground">Tom Laracy</h1>
-            <p className="text-xs text-muted-foreground">Travel Consultant Est. 2011</p>
+            <h1 className="font-display text-xl font-bold text-foreground">TripReviews</h1>
+            <p className="text-xs text-muted-foreground">Honest Reviews & Travel Insights</p>
           </div>
         </Link>
 
@@ -53,7 +53,7 @@ const Header = () => {
             to="/about"
             className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
           >
-            About Tom
+            About
           </Link>
           <Link 
             to="/contact"
@@ -101,7 +101,7 @@ const Header = () => {
               className="text-left text-sm font-medium text-muted-foreground hover:text-primary transition-colors py-2"
               onClick={() => setIsMenuOpen(false)}
             >
-              About Tom
+              About
             </Link>
             <Link 
               to="/contact"

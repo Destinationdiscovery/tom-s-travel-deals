@@ -35,21 +35,18 @@ const AboutSection = () => {
           {/* Content */}
           <div className="space-y-8">
             <div>
-              <span className="inline-block px-4 py-2 rounded-full bg-secondary/20 text-secondary text-sm font-medium mb-4">
-                Meet Your Travel Guide
-              </span>
               <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-6">
-                Hi, I'm <span className="text-gradient">Tom Laracy</span>
+                Hi, I'm <span className="text-gradient">Tom</span>
               </h2>
               <p className="text-muted-foreground text-lg leading-relaxed mb-4">
-                I'm not just a travel agent—I'm a fellow traveler who believes the best recommendations 
-                come from real experiences. Every destination I share, I've walked those beaches, 
-                tasted that food, and captured those sunsets myself.
+                This site exists to help travelers make better decisions before they book.
+              </p>
+              <p className="text-muted-foreground text-lg leading-relaxed mb-4">
+                TripReviews focuses on honest insights, common experiences, and real-world feedback 
+                about destinations, resorts, and travel experiences. It's not about selling. It's about clarity.
               </p>
               <p className="text-muted-foreground text-lg leading-relaxed">
-                Through this community, I want to inspire you to explore, share honest insights 
-                that help you travel smarter, and connect with others who share the wanderlust. 
-                When you're ready to book, I'm here to help make it happen.
+                Read the reviews, understand what to expect, and go with confidence.
               </p>
             </div>
 
