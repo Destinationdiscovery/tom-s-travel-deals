@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
-import { Star, MapPin, Sparkles } from "lucide-react";
+import { Star, MapPin, Sparkles, Search } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import AffiliateLinks from "@/components/AffiliateLinks";
 import type { CachedReview } from "@/hooks/useGenerateReview";
 
@@ -8,6 +9,7 @@ interface AIReviewResultProps {
   review: CachedReview | null;
   isLoading: boolean;
   error: string | null;
+  onNewReview?: () => void;
 }
 
 const RatingBar = ({ label, value }: { label: string; value: number }) => (
@@ -49,7 +51,7 @@ const LoadingSkeleton = () => (
   </div>
 );
 
-const AIReviewResult = ({ review, isLoading, error }: AIReviewResultProps) => {
+const AIReviewResult = ({ review, isLoading, error, onNewReview }: AIReviewResultProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -168,9 +170,26 @@ const AIReviewResult = ({ review, isLoading, error }: AIReviewResultProps) => {
                 </div>
               )}
 
-
               {/* Affiliate Links */}
               <AffiliateLinks propertyName={data.propertyName || review.property_name} />
+
+              {/* New Review Button */}
+              {onNewReview && (
+                <div className="flex justify-center pt-4">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={() => {
+                      onNewReview();
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }}
+                    className="gap-2"
+                  >
+                    <Search className="h-4 w-4" />
+                    Search Another Property
+                  </Button>
+                </div>
+              )}
             </div>
 
             {/* Sidebar */}

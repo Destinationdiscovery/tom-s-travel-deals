@@ -40,7 +40,7 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
       {/* Background Image */}
       <img
         src={heroBackground}
-        alt="Tropical resort with crystal clear water"
+        alt="Overwater villa at sunset"
         className="absolute inset-0 w-full h-full object-cover"
       />
 
