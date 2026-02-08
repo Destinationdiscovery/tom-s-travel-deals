@@ -1,22 +1,26 @@
 
+## Add Muted Navigation Links to Bottom of Hero Section
 
-## Update Google Places API Key
+Add a subtle row of text-only navigation links at the bottom of the hero image, matching the muted, understated aesthetic of your site rather than drawing attention like flashy buttons.
 
-A quick one-step change: replace the currently stored API key with your new one.
+### What will change
 
-### What will happen
+**File: `src/components/HeroSection.tsx`**
 
-1. Update the `GOOGLE_PLACES_API_KEY` secret stored in your backend with the new key you provided
-2. Test the places autocomplete function to confirm the 403 error is resolved
-3. Test the generate-review function to confirm photo fetching works
+A horizontal row of navigation links will be added just above the scroll indicator at the bottom of the hero section. The links will include: **My Reviews**, **Gear Reviews**, **Travel Blog**, **About**, and **Contact** -- matching the same destinations as the header nav.
 
-### Important security note
+### Visual style
 
-Your API key is now visible in this chat. After confirming it works, you should consider rotating it later if you share this chat with anyone. For now, the key will be securely stored as a backend secret and never exposed in your frontend code.
+- Plain text links (no buttons, no borders, no backgrounds)
+- Uses `white/50` text color with a subtle hover to `white/80` -- blending naturally into the dark overlay of the hero image
+- Small font size (`text-sm`) with medium weight and generous spacing between links
+- A thin `white/15` separator line above the links to subtly delineate them from the hero content
+- On mobile, the links will be hidden since the hamburger menu already serves that purpose
 
-### Technical Details
+### Technical details
 
-- Tool used: `add_secret` to update `GOOGLE_PLACES_API_KEY` with value `AIzaSyAQM4tiDA5CwsYxVRx4JdnS_HfuG3BjEeU`
-- Then call `places-autocomplete` edge function with a test query to verify it returns suggestions instead of a 403 error
-- Then call `generate-review` to verify photos are fetched successfully
-
+- Import `Link` from `react-router-dom`
+- Add a `div` positioned absolutely at the bottom of the hero (above the existing scroll indicator), containing the five navigation links
+- Links array: `[{to: "/destinations", label: "My Reviews"}, {to: "/gear", label: "Gear Reviews"}, {to: "/compass", label: "Travel Blog"}, {to: "/about", label: "About"}, {to: "/contact", label: "Contact"}]`
+- Classes: `hidden md:flex` to hide on mobile, `text-white/50 hover:text-white/80 transition-colors text-sm font-medium` for the muted styling
+- The row sits at `bottom-20` to remain above the scroll indicator at `bottom-8`
