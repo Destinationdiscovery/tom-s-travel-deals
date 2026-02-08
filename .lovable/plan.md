@@ -1,26 +1,31 @@
 
-## Add Muted Navigation Links to Bottom of Hero Section
 
-Add a subtle row of text-only navigation links at the bottom of the hero image, matching the muted, understated aesthetic of your site rather than drawing attention like flashy buttons.
+## Update Review Label to Reflect Real Sources
+
+A small but meaningful copy change to the review header so visitors understand these reviews are sourced from real traveler experiences, not invented by AI.
 
 ### What will change
 
-**File: `src/components/HeroSection.tsx`**
+**File: `src/components/AIReviewResult.tsx`**
 
-A horizontal row of navigation links will be added just above the scroll indicator at the bottom of the hero section. The links will include: **My Reviews**, **Gear Reviews**, **Travel Blog**, **About**, and **Contact** -- matching the same destinations as the header nav.
+The current label that reads **"AI-Generated Review"** (line 112) will be replaced with something like:
 
-### Visual style
+**"Compiled from Real Traveler Reviews"**
 
-- Plain text links (no buttons, no borders, no backgrounds)
-- Uses `white/50` text color with a subtle hover to `white/80` -- blending naturally into the dark overlay of the hero image
-- Small font size (`text-sm`) with medium weight and generous spacing between links
-- A thin `white/15` separator line above the links to subtly delineate them from the hero content
-- On mobile, the links will be hidden since the hamburger menu already serves that purpose
+Along with a short subtitle line beneath it explaining the methodology, for example:
+
+*"Curated from verified reviews across multiple travel platforms"*
+
+This gives visitors confidence that the content reflects genuine, current experiences from real people -- while still being transparent that AI is used to compile and summarize them.
+
+### Visual approach
+
+- The sparkle icon stays to keep the visual identity, but the label text changes to emphasize real sources
+- A brief muted-text subtitle is added directly below the label to provide more context
+- No layout changes -- just updated copy and one extra line of text
 
 ### Technical details
 
-- Import `Link` from `react-router-dom`
-- Add a `div` positioned absolutely at the bottom of the hero (above the existing scroll indicator), containing the five navigation links
-- Links array: `[{to: "/destinations", label: "My Reviews"}, {to: "/gear", label: "Gear Reviews"}, {to: "/compass", label: "Travel Blog"}, {to: "/about", label: "About"}, {to: "/contact", label: "Contact"}]`
-- Classes: `hidden md:flex` to hide on mobile, `text-white/50 hover:text-white/80 transition-colors text-sm font-medium` for the muted styling
-- The row sits at `bottom-20` to remain above the scroll indicator at `bottom-8`
+- **Line 112**: Change `AI-Generated Review` to `Compiled from Real Traveler Reviews`
+- **After line 113**: Add a `<p>` element with classes `text-xs text-muted-foreground` containing the subtitle text, e.g., *"AI-curated summary drawn from hundreds of verified reviews across top travel platforms"*
+- No new imports or components needed
