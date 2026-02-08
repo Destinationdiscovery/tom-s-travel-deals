@@ -1,4 +1,4 @@
-import { Compass, Heart, Mail, Phone, ExternalLink } from "lucide-react";
+import { Compass, Heart, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Footer = () => {
@@ -7,7 +7,7 @@ const Footer = () => {
   return (
     <footer className="bg-foreground py-16">
       <div className="container mx-auto px-4">
-        <div className="grid md:grid-cols-4 gap-12 mb-12">
+        <div className="grid md:grid-cols-3 gap-12 mb-12">
           {/* Brand */}
           <div className="md:col-span-2">
             <div className="flex items-center gap-2 mb-4">
@@ -43,34 +43,9 @@ const Footer = () => {
               <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors text-sm">
                 About
               </Link>
-              <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                Contact
-              </Link>
             </nav>
           </div>
 
-          {/* Contact */}
-          <div>
-            <h4 className="font-semibold text-background mb-4">Get in Touch</h4>
-            <div className="flex flex-col gap-3">
-              <a 
-                href="https://form.jotform.com/260065315910247" 
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors text-sm"
-              >
-                <Mail className="h-4 w-4" />
-                Contact Form
-              </a>
-              <a 
-                href="tel:519-771-2534" 
-                className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors text-sm"
-              >
-                <Phone className="h-4 w-4" />
-                519-771-2534
-              </a>
-            </div>
-          </div>
         </div>
 
         <div className="border-t border-muted-foreground/20 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
