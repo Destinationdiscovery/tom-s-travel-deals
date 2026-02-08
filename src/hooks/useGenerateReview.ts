@@ -1,6 +1,12 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
+export interface ThingToDo {
+  name: string;
+  description: string;
+  category: string;
+}
+
 export interface ReviewData {
   propertyName: string;
   location: string;
@@ -12,6 +18,8 @@ export interface ReviewData {
   tips: string[];
   bestFor: string[];
   citations?: string[];
+  thingsToDo?: ThingToDo[];
+  photoReferences?: string[];
 }
 
 export interface CachedReview {

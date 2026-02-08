@@ -1,8 +1,10 @@
-import { useEffect, useRef } from "react";
-import { Star, MapPin, Sparkles, Search } from "lucide-react";
+import { useEffect, useRef, useMemo } from "react";
+import { Star, MapPin, Sparkles, Search, Camera } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import AffiliateLinks from "@/components/AffiliateLinks";
+import PhotoGallery from "@/components/review/PhotoGallery";
+import ThingsToDoSection from "@/components/review/ThingsToDoSection";
 import type { CachedReview } from "@/hooks/useGenerateReview";
 
 interface AIReviewResultProps {
@@ -29,22 +31,23 @@ const RatingBar = ({ label, value }: { label: string; value: number }) => (
 
 const LoadingSkeleton = () => (
   <div className="container mx-auto px-4 py-12 animate-fade-in">
-    <div className="max-w-5xl mx-auto space-y-8">
+    <div className="max-w-6xl mx-auto space-y-8">
       <div className="flex items-center gap-3 mb-4">
         <Sparkles className="h-5 w-5 text-primary animate-pulse" />
         <span className="text-sm text-muted-foreground">Generating your AI review...</span>
       </div>
       <Skeleton className="h-10 w-3/4" />
       <Skeleton className="h-5 w-1/3" />
-      <div className="grid lg:grid-cols-3 gap-12">
+      <div className="grid lg:grid-cols-3 gap-10">
         <div className="lg:col-span-2 space-y-6">
           <Skeleton className="h-40 w-full rounded-2xl" />
-          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-48 w-full rounded-2xl" />
           <Skeleton className="h-24 w-full" />
           <Skeleton className="h-24 w-full" />
         </div>
         <div className="space-y-4">
           <Skeleton className="h-64 w-full rounded-2xl" />
+          <Skeleton className="h-48 w-full rounded-2xl" />
         </div>
       </div>
     </div>
@@ -53,6 +56,11 @@ const LoadingSkeleton = () => (
 
 const AIReviewResult = ({ review, isLoading, error, onNewReview }: AIReviewResultProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const functionUrl = useMemo(() => {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    return supabaseUrl ? `${supabaseUrl}/functions/v1/place-photos` : "";
+  }, []);
 
   useEffect(() => {
     if ((review || isLoading) && containerRef.current) {
@@ -90,11 +98,13 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview }: AIReviewResul
   if (!review) return null;
 
   const data = review.review_data;
+  const hasPhotos = data.photoReferences && data.photoReferences.length > 0;
+  const hasThingsToDo = data.thingsToDo && data.thingsToDo.length > 0;
 
   return (
     <div ref={containerRef} className="bg-background animate-fade-up">
       <div className="container mx-auto px-4 py-12">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center gap-2 text-primary text-sm font-medium mb-3">
@@ -112,11 +122,12 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview }: AIReviewResul
             )}
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-12">
-            {/* Main Content */}
-            <div className="lg:col-span-2 space-y-10">
-              {/* Summary Card */}
-              <div className="bg-card rounded-2xl p-8 shadow-soft">
+          {/* Two-Column Grid */}
+          <div className="grid lg:grid-cols-3 gap-10">
+            {/* LEFT COLUMN – Main Content */}
+            <div className="lg:col-span-2 flex flex-col gap-10">
+              {/* 1. Summary Card */}
+              <div className="bg-card rounded-2xl p-8 shadow-soft order-1">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="flex items-center gap-1">
                     {[...Array(5)].map((_, i) => (
@@ -139,8 +150,27 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview }: AIReviewResul
                 <p className="text-lg text-foreground leading-relaxed">{data.summary}</p>
               </div>
 
-              {/* Detailed Review */}
-              <div className="space-y-6">
+              {/* 2. Photo Gallery */}
+              {hasPhotos && (
+                <div className="bg-card rounded-2xl p-6 shadow-soft order-2">
+                  <h3 className="font-display text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+                    <Camera className="h-5 w-5 text-primary" />
+                    Photos
+                  </h3>
+                  <PhotoGallery
+                    photoReferences={data.photoReferences!}
+                    functionUrl={functionUrl}
+                  />
+                </div>
+              )}
+
+              {/* 3. Rating Breakdown (mobile only) */}
+              <div className="lg:hidden order-3">
+                <RatingsCard data={data} />
+              </div>
+
+              {/* 4. What Travelers Say */}
+              <div className="space-y-6 order-4">
                 <h3 className="font-display text-2xl font-bold text-foreground">
                   What Travelers Say
                 </h3>
@@ -151,9 +181,16 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview }: AIReviewResul
                 ))}
               </div>
 
-              {/* Tips */}
+              {/* 5. Things to Do */}
+              {hasThingsToDo && (
+                <div className="order-5">
+                  <ThingsToDoSection thingsToDo={data.thingsToDo!} />
+                </div>
+              )}
+
+              {/* 6. Travel Tips */}
               {data.tips && data.tips.length > 0 && (
-                <div className="bg-secondary/10 rounded-2xl p-8">
+                <div className="bg-secondary/10 rounded-2xl p-8 order-6">
                   <h3 className="font-display text-2xl font-bold text-foreground mb-6">
                     Travel Tips
                   </h3>
@@ -170,82 +207,39 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview }: AIReviewResul
                 </div>
               )}
 
-              {/* Affiliate Links */}
-              <AffiliateLinks />
+              {/* 7. Location Map (mobile only) */}
+              <div className="lg:hidden order-7">
+                <LocationMap data={data} />
+              </div>
 
-              {/* Location Map */}
-              {(data.propertyName || data.location) && (
-                <div className="bg-card rounded-2xl p-6 shadow-soft">
-                  <h3 className="font-display text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-                    <MapPin className="h-5 w-5 text-primary" />
-                    Location
-                  </h3>
-                  <div className="rounded-xl overflow-hidden border border-border">
-                    <iframe
-                      title="Destination map"
-                      width="100%"
-                      height="250"
-                      style={{ border: 0 }}
-                      loading="lazy"
-                      referrerPolicy="no-referrer-when-downgrade"
-                      src={`https://maps.google.com/maps?q=${encodeURIComponent(
-                        [data.propertyName, data.location].filter(Boolean).join(" ")
-                      )}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
-                    />
-                  </div>
-                </div>
-              )}
+              {/* 8. Affiliate Links (mobile only) */}
+              <div className="lg:hidden order-8">
+                <AffiliateLinks />
+              </div>
 
-              {/* New Review Button */}
+              {/* 9. New Review Button (mobile only) */}
               {onNewReview && (
-                <div className="flex justify-center pt-4">
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    onClick={() => {
-                      onNewReview();
-                      window.scrollTo({ top: 0, behavior: "smooth" });
-                    }}
-                    className="gap-2"
-                  >
-                    <Search className="h-4 w-4" />
-                    Search Another Property
-                  </Button>
+                <div className="lg:hidden flex justify-center order-9">
+                  <NewSearchButton onNewReview={onNewReview} />
                 </div>
               )}
             </div>
 
-            {/* Sidebar */}
-            <div className="space-y-8">
+            {/* RIGHT COLUMN – Sidebar (desktop only) */}
+            <div className="hidden lg:flex flex-col gap-8">
               {/* Ratings Breakdown */}
-              <div className="bg-card rounded-2xl p-6 shadow-soft">
-                <h3 className="font-display text-xl font-bold text-foreground mb-6">
-                  Rating Breakdown
-                </h3>
-                <div className="space-y-4">
-                  {data.ratings &&
-                    Object.entries(data.ratings).map(([category, rating]) => (
-                      <RatingBar key={category} label={category} value={Number(rating)} />
-                    ))}
-                </div>
+              <RatingsCard data={data} />
 
-                {data.bestFor && data.bestFor.length > 0 && (
-                  <div className="mt-8 pt-6 border-t border-border">
-                    <h4 className="font-semibold text-foreground mb-3">Best For</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {data.bestFor.map((item) => (
-                        <span
-                          key={item}
-                          className="text-sm px-3 py-1 rounded-full bg-primary/10 text-primary"
-                        >
-                          {item}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+              {/* Location Map */}
+              <LocationMap data={data} />
 
+              {/* Affiliate Links */}
+              <AffiliateLinks />
+
+              {/* New Review Button */}
+              {onNewReview && (
+                <NewSearchButton onNewReview={onNewReview} />
+              )}
             </div>
           </div>
         </div>
@@ -253,5 +247,82 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview }: AIReviewResul
     </div>
   );
 };
+
+/* ─── Sub-components ─── */
+
+function RatingsCard({ data }: { data: CachedReview["review_data"] }) {
+  return (
+    <div className="bg-card rounded-2xl p-6 shadow-soft">
+      <h3 className="font-display text-xl font-bold text-foreground mb-6">
+        Rating Breakdown
+      </h3>
+      <div className="space-y-4">
+        {data.ratings &&
+          Object.entries(data.ratings).map(([category, rating]) => (
+            <RatingBar key={category} label={category} value={Number(rating)} />
+          ))}
+      </div>
+
+      {data.bestFor && data.bestFor.length > 0 && (
+        <div className="mt-8 pt-6 border-t border-border">
+          <h4 className="font-semibold text-foreground mb-3">Best For</h4>
+          <div className="flex flex-wrap gap-2">
+            {data.bestFor.map((item) => (
+              <span
+                key={item}
+                className="text-sm px-3 py-1 rounded-full bg-primary/10 text-primary"
+              >
+                {item}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function LocationMap({ data }: { data: CachedReview["review_data"] }) {
+  if (!data.propertyName && !data.location) return null;
+
+  return (
+    <div className="bg-card rounded-2xl p-6 shadow-soft">
+      <h3 className="font-display text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+        <MapPin className="h-5 w-5 text-primary" />
+        Location
+      </h3>
+      <div className="rounded-xl overflow-hidden border border-border">
+        <iframe
+          title="Destination map"
+          width="100%"
+          height="220"
+          style={{ border: 0 }}
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+          src={`https://maps.google.com/maps?q=${encodeURIComponent(
+            [data.propertyName, data.location].filter(Boolean).join(" ")
+          )}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
+        />
+      </div>
+    </div>
+  );
+}
+
+function NewSearchButton({ onNewReview }: { onNewReview: () => void }) {
+  return (
+    <Button
+      variant="outline"
+      size="lg"
+      onClick={() => {
+        onNewReview();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }}
+      className="gap-2 w-full"
+    >
+      <Search className="h-4 w-4" />
+      Search Another Property
+    </Button>
+  );
+}
 
 export default AIReviewResult;
