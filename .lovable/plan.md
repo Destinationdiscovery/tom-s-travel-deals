@@ -1,50 +1,49 @@
 
 
-## Replace Static Suggestions with Google Places Autocomplete
+## Rebrand Header, Footer, and About Page
 
-### What Changes
+### Overview
 
-Instead of querying a small database table for autocomplete, the search bar will call **Google's Places Autocomplete API** in real-time. When you type "bell", you'll instantly see "Bellagio Las Vegas", "Bellaggio Italy", "Bell Tower Hotel" and dozens of other real places worldwide -- not just 20 hand-picked entries.
-
-### How It Works
-
-1. User starts typing in the search bar (2+ characters)
-2. A backend function calls Google Places Autocomplete API with the query
-3. Results come back instantly showing real hotels, resorts, destinations
-4. User picks a suggestion (or types their own), then clicks "Explore reviews" to generate the AI review via Perplexity (existing flow, unchanged)
-
-### What You'll Need
-
-A **Google Places API key** from the Google Cloud Console. Google offers $200/month free credit which covers roughly 11,000-28,000 autocomplete requests -- more than enough for a travel blog.
+Replace "Tom Laracy" with "TripReviews" in the site-wide header and footer, and rewrite the About page with the new copy you provided. The compass article author names will stay as "Tom Laracy" since those are editorial bylines, not branding.
 
 ### Changes
 
-| Action | File / Resource | What Changes |
-|--------|----------------|--------------|
-| New secret | Backend | Store `GOOGLE_PLACES_API_KEY` securely |
-| New function | `supabase/functions/places-autocomplete/index.ts` | Edge function that proxies Google Places Autocomplete requests, filtering for travel-relevant place types (hotels, resorts, landmarks, cities) |
-| Update config | `supabase/config.toml` | Register the new function with `verify_jwt = false` |
-| Rewrite | `src/hooks/useSearchSuggestions.ts` | Call the new edge function instead of querying the database; fall back to database results if the API call fails |
-| Minor update | `src/components/HeroSection.tsx` | Update the suggestion display to show the richer data from Google (e.g., secondary text like city/country) |
+#### 1. Header (`src/components/Header.tsx`)
+- Change the logo text from "Tom Laracy" to "TripReviews"
+- Change the subtitle from "Travel Consultant Est. 2011" to "Honest Reviews & Travel Insights"
+- Change nav link text from "About Tom" to "About" (both desktop and mobile menus)
 
-### Technical Details
+#### 2. Footer (`src/components/Footer.tsx`)
+- Change the brand name from "Tom Laracy" to "TripReviews"
+- Change the subtitle from "Travel Consultant Est. 2011" to "Honest Reviews & Travel Insights"
+- Change the copyright text from "Tom Laracy Travel. Travelonly Certified Agent." to "TripReviews. All rights reserved."
+- Change the nav link from "About Tom" to "About"
+- Update the description paragraph to align with the new positioning
 
-**Edge Function** (`places-autocomplete/index.ts`):
-- Receives `{ input: "bell" }` from the frontend
-- Calls `https://places.googleapis.com/v1/places:autocomplete` (new Google Places API)
-- Filters by `includedPrimaryTypes` for lodging, tourist attractions, and localities
-- Returns an array of `{ placeId, mainText, secondaryText }` suggestions
-- Wrapped in try/catch with proper CORS headers
+#### 3. About Page (`src/pages/About.tsx`)
+- Replace the heading from "Hi, I'm Tom Laracy" to "Hi, I'm Tom"
+- Replace the two body paragraphs with the new copy:
+  - "This site exists to help travelers make better decisions before they book."
+  - "TripReviews focuses on honest insights, common experiences, and real-world feedback about destinations, resorts, and travel experiences. It's not about selling. It's about clarity."
+  - "Read the reviews, understand what to expect, and go with confidence."
+- Remove the "Meet Your Travel Consultant" badge (no longer fits the tone)
+- Keep the features section and travel philosophy card as-is (they still work with the new tone)
 
-**Updated Hook** (`useSearchSuggestions.ts`):
-- Calls the edge function via `supabase.functions.invoke("places-autocomplete", { body: { input: query } })`
-- 300ms debounce (same as current)
-- Falls back to querying `search_suggestions` + `cached_reviews` tables if the API call fails
-- Returns unified suggestion objects for the dropdown
+#### 4. About Section (homepage) (`src/components/AboutSection.tsx`)
+- Same changes as the About page: update heading to "Hi, I'm Tom" and replace the paragraph text with the new copy
+- Update badge from "Meet Your Travel Guide" to something simpler or remove it
 
-**Suggestion Dropdown** (`HeroSection.tsx`):
-- Shows the place name (main text) prominently
-- Shows location context (secondary text like "Las Vegas, NV, USA") in smaller text below
-- Existing click-to-search behavior remains the same
+### What stays the same
+- Compass article author bylines remain "Tom Laracy" (editorial credit)
+- The Travelonly profile link in the footer stays (it's a useful external link)
+- Features list (20+ Countries, Passionate Advocate, Real Experiences) and Travel Philosophy card remain unchanged
 
-The existing review generation flow (Perplexity AI) and caching logic are completely unchanged -- this only upgrades the autocomplete/typeahead experience.
+### Files modified
+
+| File | Change |
+|------|--------|
+| `src/components/Header.tsx` | "Tom Laracy" -> "TripReviews", subtitle update, "About Tom" -> "About" |
+| `src/components/Footer.tsx` | "Tom Laracy" -> "TripReviews", subtitle, copyright, nav link, description |
+| `src/pages/About.tsx` | New heading and body copy |
+| `src/components/AboutSection.tsx` | Same heading and body copy updates |
+
