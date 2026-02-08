@@ -1,58 +1,32 @@
 
 
-## Rename Navigation Links and Page Titles
+## Replace Citations with an Interactive Map
 
-### Overview
+### What Changes
 
-Rename three navigation items in the toolbar and update the matching page titles. Also fix "The Compass" / "Travel Blog" to navigate directly to the page instead of scrolling on the homepage.
+The "Sources" list of citation links at the bottom of each AI review will be removed and replaced with an embedded Google Map showing a red pin at the destination's location. This uses the existing review data -- no new API calls or keys needed.
 
-### Changes Summary
+### How It Works
 
-| Current Name | New Name | Nav Link Behavior |
-|---|---|---|
-| Destinations | My Reviews | Links to `/destinations` (unchanged) |
-| Gear Discovery | Gear Reviews | Links to `/gear` (unchanged) |
-| The Compass | Travel Blog | **Changed from scroll-to-section to direct link to `/compass`** |
+The review already contains `propertyName` (e.g., "Bellagio") and `location` (e.g., "Las Vegas, NV, USA") from Perplexity. We combine these into a search query and embed a Google Maps iframe that automatically places a red pin at the right spot.
 
-### Detailed Changes
+No additional API key is needed -- the Google Maps embed iframe works without a key (same method as the "Share > Embed a map" feature on Google Maps).
 
-#### 1. Header (`src/components/Header.tsx`)
-- "Destinations" → "My Reviews" (desktop + mobile)
-- "Gear Discovery" → "Gear Reviews" (desktop + mobile)
-- "The Compass" → "Travel Blog" (desktop + mobile)
-- Change the "Travel Blog" nav item from a `<button>` with `scrollToSection("compass")` to a `<Link to="/compass">` so it opens the page directly
+### Changes
 
-#### 2. Destinations Page (`src/pages/Destinations.tsx`)
-- Page title: "Destination Reviews" → "My Reviews"
+| File | What Changes |
+|------|-------------|
+| `src/components/AIReviewResult.tsx` | Remove the Citations section (lines 171-189). Add a new "Location" map card in the sidebar, below the Ratings Breakdown card, with an embedded Google Maps iframe showing a red pin at the destination. |
 
-#### 3. Gear Page (`src/pages/Gear.tsx`)
-- Page title: "Travel Gear Discovery" → "Gear Reviews"
+### Details
 
-#### 4. Compass Page (`src/pages/Compass.tsx`)
-- Page title: "The Compass" → "Travel Blog"
+**Map Embed**: A rounded card in the sidebar with a heading "Location" and an interactive Google Maps iframe. The iframe uses:
+```
+https://maps.google.com/maps?q={propertyName}+{location}&z=13&output=embed
+```
 
-#### 5. Footer (`src/components/Footer.tsx`)
-- "Destinations" → "My Reviews"
-- "The Compass" link text → "Travel Blog" and update the `href` from `/#compass` to `/compass` (direct page link)
+**Placement**: Below the "Rating Breakdown" card in the right sidebar -- keeps the main content area clean and puts the map where it's contextually useful alongside ratings and "Best For" tags.
 
-#### 6. Homepage Sections (cosmetic alignment)
-- **CompassSection** (`src/components/CompassSection.tsx`): Section heading "The Compass" → "Travel Blog"
-- **GearReviewsSection** (`src/components/GearReviewsSection.tsx`): Section heading "Travel Gear Discovery" → "Gear Reviews"
+**Styling**: Rounded corners, shadow, same card style as the ratings breakdown. The map will be roughly 250px tall with a subtle border.
 
-### What stays the same
-- All routes/URLs remain unchanged (`/destinations`, `/gear`, `/compass`)
-- The homepage compass section still has the `id="compass"` anchor (for any existing bookmarks)
-- Article content and data files are untouched
-
-### Files modified
-
-| File | Changes |
-|------|---------|
-| `src/components/Header.tsx` | Rename 3 nav labels, convert Compass button to Link |
-| `src/components/Footer.tsx` | Rename 2 link labels, update Compass href |
-| `src/pages/Destinations.tsx` | Page title update |
-| `src/pages/Gear.tsx` | Page title update |
-| `src/pages/Compass.tsx` | Page title update |
-| `src/components/CompassSection.tsx` | Section heading update |
-| `src/components/GearReviewsSection.tsx` | Section heading update |
-
+**Fallback**: If neither `propertyName` nor `location` exist (unlikely), the map card simply won't render.
