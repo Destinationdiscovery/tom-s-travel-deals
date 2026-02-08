@@ -35,11 +35,11 @@ const Footer = () => {
             <h4 className="font-semibold text-background mb-4">Explore</h4>
             <nav className="flex flex-col gap-2">
               <Link to="/destinations" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                Destinations
+                My Reviews
               </Link>
-              <a href="/#compass" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                The Compass
-              </a>
+              <Link to="/compass" className="text-muted-foreground hover:text-primary transition-colors text-sm">
+                Travel Blog
+              </Link>
               <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors text-sm">
                 About
               </Link>
