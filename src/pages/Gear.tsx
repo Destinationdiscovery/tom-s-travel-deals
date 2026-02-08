@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { gearReviews, gearCategories } from "@/data/gearReviews";
+import heroImg from "@/assets/gear-packing-cubes-features.jpg";
 
 const Gear = () => {
   const [activeCategory, setActiveCategory] = useState<string>("All");
@@ -20,12 +21,14 @@ const Gear = () => {
       <Header />
       <main className="pt-20">
         {/* Hero Section */}
-        <section className="py-16 bg-muted/30">
-          <div className="container mx-auto px-4 text-center">
-            <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-4">
-              Gear Reviews
+        <section className="relative h-[40vh] min-h-[320px] flex items-center justify-center pt-20">
+          <img src={heroImg} alt="Travel packing cubes and gear" className="absolute inset-0 w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60" />
+          <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
+            <h1 className="font-display text-4xl md:text-6xl font-bold text-white mb-4">
+              <span className="text-sky-300">Gear</span> Reviews
             </h1>
-            <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+            <p className="text-white/80 max-w-2xl mx-auto text-lg">
               Items I've personally used and tested while traveling. Honest, expert reviews from a travel consultant who's been there.
             </p>
           </div>

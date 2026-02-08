@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { compassArticles } from "@/data/compassArticles";
 import { ArrowRight, Clock } from "lucide-react";
+import heroImg from "@/assets/japan-cherry-blossoms.webp";
 
 const categories = ["All", "Packing", "Guides", "Budget", "Insurance", "Timing"];
 
@@ -19,15 +20,17 @@ const Compass = () => {
       <Header />
       
       {/* Hero Section */}
-      <section className="pt-32 pb-16 bg-warm-gradient">
-        <div className="container mx-auto px-4 text-center">
-          <span className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+      <section className="relative h-[40vh] min-h-[320px] flex items-center justify-center pt-20">
+        <img src={heroImg} alt="Cherry blossoms in Japan" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60" />
+        <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
+          <span className="inline-block px-4 py-2 rounded-full bg-white/20 text-white text-sm font-medium mb-4">
             Travel Intel
           </span>
-          <h1 className="font-display text-4xl md:text-6xl font-bold text-foreground mb-6">
-            Travel Blog
+          <h1 className="font-display text-4xl md:text-6xl font-bold text-white mb-6">
+            <span className="text-sky-300">Travel</span> Blog
           </h1>
-          <p className="text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto">
+          <p className="text-white/80 text-lg md:text-xl max-w-2xl mx-auto">
             Insider tips and travel wisdom from over a decade of experience as a travel consultant. 
             Practical advice to help you travel smarter.
           </p>

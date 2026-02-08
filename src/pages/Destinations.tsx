@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import { Star, ArrowRight, Play, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import heroImg from "@/assets/snowbird-caribbean-aerial.jpg";
 import cubaImg from "@/assets/deal-cuba.jpg";
 import curacaoImg from "@/assets/curacao-hero.avif";
 import mexicoImg from "@/assets/mexico-hero.webp";
@@ -91,12 +92,14 @@ const Destinations = () => {
       <Header />
       <main className="pt-24">
         {/* Hero */}
-        <section className="py-16 bg-warm-gradient">
-          <div className="container mx-auto px-4 text-center">
-            <h1 className="font-display text-4xl md:text-6xl font-bold text-foreground mb-4">
-              My Reviews
+        <section className="relative h-[40vh] min-h-[320px] flex items-center justify-center pt-20">
+          <img src={heroImg} alt="Aerial view of a Caribbean beach" className="absolute inset-0 w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60" />
+          <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
+            <h1 className="font-display text-4xl md:text-6xl font-bold text-white mb-4">
+              <span className="text-sky-300">My</span> Reviews
             </h1>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            <p className="text-white/80 text-lg max-w-2xl mx-auto">
               Real stories from real travels. Every destination here, I've walked those streets, 
               tasted that food, and captured those moments myself.
             </p>
