@@ -13,13 +13,12 @@ const Footer = () => {
             <div className="flex items-center gap-2 mb-4">
               <Compass className="h-8 w-8 text-primary" />
               <div>
-                <h3 className="font-display text-xl font-bold text-background">Tom Laracy</h3>
-                <p className="text-xs text-muted-foreground">Travel Consultant Est. 2011</p>
+                <h3 className="font-display text-xl font-bold text-background">TripReviews</h3>
+                <p className="text-xs text-muted-foreground">Honest Reviews & Travel Insights</p>
               </div>
             </div>
             <p className="text-muted-foreground text-sm max-w-sm mb-4">
-              Sharing real travel experiences and helping fellow adventurers discover the world. 
-              When you're ready to book, I'm here to make it unforgettable.
+              Honest destination reviews, tested travel gear, and real-world insights to help you travel with confidence.
             </p>
             <a 
               href="https://tom.travelonly.com" 
@@ -42,7 +41,7 @@ const Footer = () => {
                 The Compass
               </a>
               <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                About Tom
+                About
               </Link>
               <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors text-sm">
                 Contact
@@ -82,7 +81,7 @@ const Footer = () => {
           </div>
 
           <p className="text-sm text-muted-foreground">
-            © {currentYear} Tom Laracy Travel. Travelonly Certified Agent.
+            © {currentYear} TripReviews. All rights reserved.
           </p>
         </div>
       </div>
