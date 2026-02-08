@@ -13,7 +13,7 @@ const Footer = () => {
             <div className="flex items-center gap-2 mb-4">
               <Compass className="h-8 w-8 text-primary" />
               <div>
-                <h3 className="font-display text-xl font-bold text-background">TripReviews</h3>
+                <h3 className="font-display text-xl font-bold text-background">ReviewThenGo</h3>
                 <p className="text-xs text-muted-foreground">Honest Reviews & Travel Insights</p>
               </div>
             </div>
@@ -81,7 +81,7 @@ const Footer = () => {
           </div>
 
           <p className="text-sm text-muted-foreground">
-            © {currentYear} TripReviews. All rights reserved.
+            © {currentYear} ReviewThenGo. All rights reserved.
           </p>
         </div>
       </div>

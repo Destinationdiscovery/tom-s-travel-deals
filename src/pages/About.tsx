@@ -47,7 +47,7 @@ const About = () => {
                     This site exists to help travelers make better decisions before they book.
                   </p>
                   <p className="text-muted-foreground text-lg leading-relaxed mb-4">
-                    TripReviews focuses on honest insights, common experiences, and real-world feedback 
+                    ReviewThenGo focuses on honest insights, common experiences, and real-world feedback 
                     about destinations, resorts, and travel experiences. It's not about selling. It's about clarity.
                   </p>
                   <p className="text-muted-foreground text-lg leading-relaxed">
