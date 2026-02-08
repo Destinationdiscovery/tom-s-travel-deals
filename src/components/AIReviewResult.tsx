@@ -168,26 +168,6 @@ const AIReviewResult = ({ review, isLoading, error }: AIReviewResultProps) => {
                 </div>
               )}
 
-              {/* Citations */}
-              {data.citations && data.citations.length > 0 && (
-                <div className="text-xs text-muted-foreground">
-                  <p className="font-medium mb-2">Sources:</p>
-                  <ul className="space-y-1">
-                    {data.citations.map((citation, i) => (
-                      <li key={i}>
-                        <a
-                          href={citation}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="hover:text-primary transition-colors underline"
-                        >
-                          {citation}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
 
               {/* Affiliate Links */}
               <AffiliateLinks propertyName={data.propertyName || review.property_name} />
@@ -223,6 +203,29 @@ const AIReviewResult = ({ review, isLoading, error }: AIReviewResultProps) => {
                   </div>
                 )}
               </div>
+
+              {/* Location Map */}
+              {(data.propertyName || data.location) && (
+                <div className="bg-card rounded-2xl p-6 shadow-soft">
+                  <h3 className="font-display text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+                    <MapPin className="h-5 w-5 text-primary" />
+                    Location
+                  </h3>
+                  <div className="rounded-xl overflow-hidden border border-border">
+                    <iframe
+                      title="Destination map"
+                      width="100%"
+                      height="250"
+                      style={{ border: 0 }}
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      src={`https://maps.google.com/maps?q=${encodeURIComponent(
+                        [data.propertyName, data.location].filter(Boolean).join(" ")
+                      )}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
