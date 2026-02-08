@@ -1,52 +1,30 @@
 
 
-## Update Branding for New Domain: reviewthengo.com
+## Create RTG Text Favicon
 
-Your domain setup with GoDaddy sounds good. On the code side, there are several references to the old "TripReviews.ca" branding that should be updated to match your new domain. Here's everything that needs to change:
+Replace the current palm tree favicon with a clean "RTG" text-based favicon that matches the ReviewThenGo brand.
 
-### 1. Page Title and SEO Meta Tags (`index.html`)
+### Approach
 
-- **Page title** (line 23): Change `TripReviews.ca | Honest Reviews...` to `ReviewThenGo.com | Honest Reviews, Tested Gear & Travel Insights`
-- **OG title** (line 27): Same change for social sharing previews
-- **OG image** (line 30): Currently points to a generic Lovable placeholder image (`lovable.dev/opengraph-image-p98pqg.png`) -- ideally this should be updated to a custom image for your brand, but can be addressed later
-- **Twitter image** (line 34): Same placeholder image issue
+Create an SVG favicon with the letters **RTG** -- SVG favicons are supported by all modern browsers and look sharp at any size. The styling will match your site's color palette.
 
-### 2. Header Branding (`src/components/Header.tsx`)
+### Design details
 
-- Line 27: Change `TripReviews` to `ReviewThenGo`
+- **Letters**: Bold "RTG" in a clean sans-serif font
+- **Colors**: Dark background (matching your site's dark tones, like `#1a1a2e` or similar) with white or light text -- ensures visibility on both light and dark browser tabs
+- **Shape**: Rounded square background for a polished, app-icon feel
+- **Size**: SVG scales perfectly, but we'll also keep a PNG fallback for older browsers
 
-### 3. Footer Branding (`src/components/Footer.tsx`)
+### What will change
 
-- Line 16: Change `TripReviews` to `ReviewThenGo`
-- Line 84: Change `TripReviews` to `ReviewThenGo` in the copyright line
-
-### 4. About Section (`src/components/AboutSection.tsx`)
-
-- Line 45: Change `TripReviews focuses on...` to `ReviewThenGo focuses on...`
-
-### 5. About Page (`src/pages/About.tsx`)
-
-- Line 50: Same text as above -- change `TripReviews` to `ReviewThenGo`
-
-### 6. robots.txt (`public/robots.txt`)
-
-- Add a `Sitemap` directive pointing to your new domain: `Sitemap: https://reviewthengo.com/sitemap.xml` (good SEO practice, even if sitemap generation comes later)
-
-### What you don't need to do
-
-- **DNS/domain setup**: You've already handled this in Settings and GoDaddy -- that's the main infrastructure piece
-- **SSL**: Lovable provisions this automatically once DNS propagates
-- **Redirects**: The `_redirects` file is fine as-is (it just handles SPA routing)
-
-### Summary of changes
-
-| File | What changes |
+| File | Change |
 |---|---|
-| `index.html` | Title, OG title, and image URLs |
-| `src/components/Header.tsx` | Brand name in header |
-| `src/components/Footer.tsx` | Brand name and copyright |
-| `src/components/AboutSection.tsx` | Brand name in description |
-| `src/pages/About.tsx` | Brand name in description |
-| `public/robots.txt` | Add sitemap directive |
+| `public/favicon.svg` | New SVG favicon file with RTG letters |
+| `index.html` | Update the favicon `<link>` tag to point to the new SVG file (with PNG fallback) |
 
-All straightforward text replacements -- no structural or layout changes.
+### Technical details
+
+- Create `public/favicon.svg` with an inline SVG containing a rounded rect background and "RTG" text element
+- Update `index.html` line 22: change `<link rel="icon" type="image/png" href="/favicon.png">` to `<link rel="icon" type="image/svg+xml" href="/favicon.svg">`
+- Keep the existing `/favicon.png` as a fallback reference
+
