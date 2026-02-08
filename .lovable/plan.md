@@ -1,30 +1,35 @@
 
 
-## Create RTG Text Favicon
+## Remove Contact Links from Header and Footer
 
-Replace the current palm tree favicon with a clean "RTG" text-based favicon that matches the ReviewThenGo brand.
+Hide the contact-related links from the visitor-facing site. The `/contact` route and page will remain in the code (so it can be re-enabled later), but it won't be accessible from the navigation.
 
-### Approach
+### Changes
 
-Create an SVG favicon with the letters **RTG** -- SVG favicons are supported by all modern browsers and look sharp at any size. The styling will match your site's color palette.
+**1. Header (`src/components/Header.tsx`)**
 
-### Design details
+- Remove the "Contact" link from **desktop navigation** (lines 58-63)
+- Remove the "Contact" link from **mobile navigation** (lines 107-113)
 
-- **Letters**: Bold "RTG" in a clean sans-serif font
-- **Colors**: Dark background (matching your site's dark tones, like `#1a1a2e` or similar) with white or light text -- ensures visibility on both light and dark browser tabs
-- **Shape**: Rounded square background for a polished, app-icon feel
-- **Size**: SVG scales perfectly, but we'll also keep a PNG fallback for older browsers
+**2. Footer (`src/components/Footer.tsx`)**
 
-### What will change
+- Remove the entire **"Get in Touch" column** (lines 52-73) — this is the section with the "Contact Form" and "519-771-2534" links
+- Remove the **"Contact" link** from the "Explore" quick links list (lines 46-48)
+- Update the grid from `md:grid-cols-4` to `md:grid-cols-3` since there will be one fewer column
+- Clean up unused imports (`Mail`, `Phone`) that are no longer needed
 
-| File | Change |
-|---|---|
-| `public/favicon.svg` | New SVG favicon file with RTG letters |
-| `index.html` | Update the favicon `<link>` tag to point to the new SVG file (with PNG fallback) |
+### What stays
+
+- The `/contact` route in `App.tsx` and the `Contact.tsx` page file remain untouched — easy to bring back later
+- The `ContactSection.tsx` component file stays as-is (it's not currently rendered anywhere visible)
 
 ### Technical details
 
-- Create `public/favicon.svg` with an inline SVG containing a rounded rect background and "RTG" text element
-- Update `index.html` line 22: change `<link rel="icon" type="image/png" href="/favicon.png">` to `<link rel="icon" type="image/svg+xml" href="/favicon.svg">`
-- Keep the existing `/favicon.png` as a fallback reference
-
+| File | Lines affected | Change |
+|---|---|---|
+| `src/components/Header.tsx` | 58-63 | Remove desktop "Contact" Link |
+| `src/components/Header.tsx` | 107-113 | Remove mobile "Contact" Link |
+| `src/components/Footer.tsx` | 1 | Remove `Mail`, `Phone` from imports |
+| `src/components/Footer.tsx` | 10 | Change `md:grid-cols-4` to `md:grid-cols-3` |
+| `src/components/Footer.tsx` | 46-48 | Remove "Contact" from Explore links |
+| `src/components/Footer.tsx` | 52-73 | Remove entire "Get in Touch" column |
