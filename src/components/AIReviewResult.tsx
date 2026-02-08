@@ -171,7 +171,7 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview }: AIReviewResul
               )}
 
               {/* Affiliate Links */}
-              <AffiliateLinks propertyName={data.propertyName || review.property_name} />
+              <AffiliateLinks />
 
               {/* Location Map */}
               {(data.propertyName || data.location) && (
