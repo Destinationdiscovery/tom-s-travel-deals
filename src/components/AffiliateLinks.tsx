@@ -1,26 +1,20 @@
 import { ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-interface AffiliateLinksProps {
-  propertyName: string;
-}
-
 const affiliates = [
   {
     name: "Expedia",
-    buildUrl: (query: string) =>
-      `https://www.anrdoezrs.net/click-101645364-15575474?url=${encodeURIComponent(`https://www.expedia.ca/Hotel-Search?destination=${encodeURIComponent(query)}`)}`,
+    url: `https://www.anrdoezrs.net/click-101645364-15575474?url=${encodeURIComponent("https://www.expedia.ca/Hotels")}`,
     color: "bg-[hsl(45,100%,51%)] hover:bg-[hsl(45,100%,45%)] text-[hsl(215,25%,15%)]",
   },
   {
     name: "VRBO",
-    buildUrl: (query: string) =>
-      `https://www.jdoqocy.com/click-101645364-10697641?url=${encodeURIComponent(`https://www.vrbo.com/search?destination=${encodeURIComponent(query)}`)}`,
+    url: `https://www.jdoqocy.com/click-101645364-10697641?url=${encodeURIComponent("https://www.vrbo.com")}`,
     color: "bg-[hsl(205,85%,45%)] hover:bg-[hsl(205,85%,38%)] text-white",
   },
 ];
 
-const AffiliateLinks = ({ propertyName }: AffiliateLinksProps) => {
+const AffiliateLinks = () => {
   return (
     <div className="bg-card rounded-2xl p-6 shadow-soft">
       <h3 className="font-display text-lg font-bold text-foreground mb-4">
@@ -34,7 +28,7 @@ const AffiliateLinks = ({ propertyName }: AffiliateLinksProps) => {
             className={`${affiliate.color} font-semibold gap-2`}
           >
             <a
-              href={affiliate.buildUrl(propertyName)}
+              href={affiliate.url}
               target="_blank"
               rel="noopener noreferrer"
             >
