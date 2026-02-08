@@ -55,12 +55,6 @@ const Header = () => {
           >
             About
           </Link>
-          <Link 
-            to="/contact"
-            className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-          >
-            Contact
-          </Link>
         </nav>
 
         {/* Mobile Menu Button */}
@@ -103,13 +97,6 @@ const Header = () => {
               onClick={() => setIsMenuOpen(false)}
             >
               About
-            </Link>
-            <Link 
-              to="/contact"
-              className="text-left text-sm font-medium text-muted-foreground hover:text-primary transition-colors py-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Contact
             </Link>
           </nav>
         </div>
