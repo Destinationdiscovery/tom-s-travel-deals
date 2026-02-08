@@ -195,7 +195,7 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview }: AIReviewResul
             {/* Sidebar */}
             <div className="space-y-8">
               {/* Ratings Breakdown */}
-              <div className="bg-card rounded-2xl p-6 shadow-soft sticky top-28">
+              <div className="bg-card rounded-2xl p-6 shadow-soft">
                 <h3 className="font-display text-xl font-bold text-foreground mb-6">
                   Rating Breakdown
                 </h3>
