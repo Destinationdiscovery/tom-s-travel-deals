@@ -1,27 +1,44 @@
 
 
-## Fix: Affiliate Links Should Open Blank (No Pre-Populated Destination)
+## Geo-Targeted Affiliate Links + Hotels.com
 
-### The Problem
+### What Changes
 
-When clicking the Expedia or VRBO booking button after reviewing a Niagara Falls hotel, Expedia landed on "Batumi, Adjara, Georgia" — a completely unrelated destination. The property name is being passed as a search destination, but Expedia's search engine interprets it unpredictably.
+The booking buttons will automatically detect each visitor's country and send them to the correct regional affiliate link, so a Canadian visitor goes to Expedia Canada, a UK visitor to Expedia UK, and so on. Hotels.com will also be added as a third booking button.
 
-### The Fix
+### How Country Detection Works
 
-Remove the destination pre-population from both affiliate links entirely. The buttons will send users to a clean Expedia Hotels page and VRBO homepage so they can search on their own terms. This prevents any wrong destination from ever appearing.
+The visitor's country is detected instantly using their browser's timezone setting -- no extra loading or backend calls needed. For example:
+- Timezone `America/Toronto` or `America/Vancouver` = Canada
+- Timezone `Europe/London` = United Kingdom
+- Everything else = United States (default)
 
-### File Change
+### Link Mapping
 
-**`src/components/AffiliateLinks.tsx`**
+| Country | Expedia Link | Hotels.com Link |
+|---------|-------------|-----------------|
+| Canada | `expedia.com/affiliates/expedia-home.2FNlhXx` | `hotels.com/affiliates/hotelscom-home.JXhkPRM` |
+| USA | `expedia.com/affiliates/expedia-home.Ee1VYBn` | `hotels.com/affiliates/hotelscom-home.oSbwDt4` |
+| UK | `expedia.com/affiliates/expedia-home.Ut28wxn` | `hotels.com/affiliates/hotelscom-home.3by33jZ` |
 
-Update the two `buildUrl` functions to link to clean pages without any destination parameter:
+VRBO stays as-is with the single existing link (unless you have country-specific VRBO links to add later).
 
-| Affiliate | Current Link Target | New Link Target |
-|-----------|-------------------|-----------------|
-| **Expedia** | `expedia.ca/Hotel-Search?destination=<propertyName>` | `expedia.ca/Hotels` (clean hotel search page) |
-| **VRBO** | `vrbo.com/search?destination=<propertyName>` | `vrbo.com` (clean homepage) |
+### Button Layout
 
-Both links will still go through the CJ Affiliate tracking URLs (the `anrdoezrs.net` and `jdoqocy.com` click trackers with PID and AID) so commission tracking is preserved. The only change is removing the `destination=` query parameter from the nested URLs.
+Three buttons will appear: **Expedia**, **Hotels.com**, and **VRBO** -- each styled with their brand colors.
 
-The `propertyName` prop can also be removed from the component since it's no longer used, along with the corresponding prop in `AIReviewResult.tsx` where it's passed in.
+### Technical Details
+
+**`src/components/AffiliateLinks.tsx`** -- full rewrite of this small component:
+
+1. Add a `detectCountry()` helper that reads `Intl.DateTimeFormat().resolvedOptions().timeZone` and maps Canadian timezones (e.g., `America/Toronto`, `America/Edmonton`, `America/Vancouver`, etc.) to `"CA"`, British timezones (`Europe/London`) to `"GB"`, and everything else to `"US"`.
+
+2. Replace the static `affiliates` array with a function that returns the correct URLs based on detected country:
+   - Expedia: 3 regional CJ deep links
+   - Hotels.com (new): 3 regional CJ deep links with a red/maroon brand color
+   - VRBO: keeps the existing single CJ tracking link
+
+3. The component uses `useMemo` to detect country once and build the link list, so there's zero performance cost.
+
+No changes needed to `AIReviewResult.tsx` since the component interface stays the same (no props).
 
