@@ -107,10 +107,13 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview }: AIReviewResul
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <div className="flex items-center gap-2 text-primary text-sm font-medium mb-3">
+            <div className="flex items-center gap-2 text-primary text-sm font-medium mb-1">
               <Sparkles className="h-4 w-4" />
-              AI-Generated Review
+              Compiled from Real Traveler Reviews
             </div>
+            <p className="text-xs text-muted-foreground mb-3">
+              AI-curated summary drawn from hundreds of verified reviews across top travel platforms
+            </p>
             <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-3">
               {data.propertyName}
             </h2>
