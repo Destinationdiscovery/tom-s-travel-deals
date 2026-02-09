@@ -13,6 +13,7 @@ import CompassArticle from "./pages/CompassArticle";
 import Gear from "./pages/Gear";
 import GearReview from "./pages/GearReview";
 import About from "./pages/About";
+import Compare from "./pages/Compare";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 
@@ -35,6 +36,7 @@ const App = () => (
             <Route path="/gear" element={<Gear />} />
             <Route path="/gear/:slug" element={<GearReview />} />
             <Route path="/about" element={<About />} />
+            <Route path="/compare" element={<Compare />} />
             <Route path="/contact" element={<Contact />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
