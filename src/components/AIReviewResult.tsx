@@ -35,7 +35,7 @@ const LoadingSkeleton = () => (
     <div className="max-w-6xl mx-auto space-y-8">
       <div className="flex items-center gap-3 mb-4">
         <Sparkles className="h-5 w-5 text-primary animate-pulse" />
-        <span className="text-sm text-muted-foreground">Generating your AI review...</span>
+        <span className="text-sm text-muted-foreground">Generating your review...</span>
       </div>
       <Skeleton className="h-10 w-3/4" />
       <Skeleton className="h-5 w-1/3" />
