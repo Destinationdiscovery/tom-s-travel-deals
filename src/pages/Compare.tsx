@@ -4,6 +4,7 @@ import { ArrowLeft, Star, Trash2, Sparkles, Trophy, Loader2 } from "lucide-react
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import AffiliateLinks from "@/components/AffiliateLinks";
 import { useSavedReviews, type SavedReview } from "@/hooks/useSavedReviews";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -207,7 +208,7 @@ const Compare = () => {
                 ) : (
                   <Sparkles className="h-4 w-4" />
                 )}
-                {isComparing ? "Comparing..." : "Generate AI Verdict"}
+                {isComparing ? "Comparing..." : "Generate Verdict"}
               </Button>
               <Button variant="outline" size="lg" onClick={() => { clearAll(); setVerdict(null); }}>
                 Clear All
@@ -229,7 +230,7 @@ const Compare = () => {
                 <div className="bg-card rounded-2xl p-8 shadow-soft">
                   <div className="flex items-center gap-3 mb-4">
                     <Trophy className="h-6 w-6 text-primary" />
-                    <h2 className="font-display text-2xl font-bold text-foreground">AI Verdict</h2>
+                    <h2 className="font-display text-2xl font-bold text-foreground">ReviewThenGo Verdict</h2>
                   </div>
 
                   <div className="mb-6">
@@ -247,21 +248,26 @@ const Compare = () => {
 
                 {/* Category winners */}
                 {verdict.categoryWinners.length > 0 && (
-                  <div className="bg-card rounded-2xl p-8 shadow-soft">
+                  <div>
                     <h3 className="font-display text-xl font-bold text-foreground mb-6">
                       Category Breakdown
                     </h3>
-                    <div className="space-y-4">
+                    <div className="grid sm:grid-cols-2 gap-4">
                       {verdict.categoryWinners.map((cw) => (
-                        <div key={cw.category} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 pb-4 border-b border-border last:border-0 last:pb-0">
-                          <span className="font-medium text-foreground min-w-[120px]">{cw.category}</span>
-                          <span className="text-sm text-primary font-medium">{cw.winner}</span>
-                          <span className="text-sm text-muted-foreground flex-1">{cw.reason}</span>
+                        <div key={cw.category} className="bg-card rounded-2xl p-6 shadow-soft">
+                          <h4 className="font-display font-bold text-foreground mb-2">{cw.category}</h4>
+                          <span className="inline-block text-xs font-semibold px-3 py-1 rounded-full bg-primary/10 text-primary mb-3">
+                            {cw.winner}
+                          </span>
+                          <p className="text-sm text-muted-foreground leading-relaxed">{cw.reason}</p>
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
+
+                {/* Affiliate Links */}
+                <AffiliateLinks />
               </div>
             )}
           </>
