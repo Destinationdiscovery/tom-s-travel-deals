@@ -3,6 +3,7 @@ import { Star, MapPin, Sparkles, Search, Camera } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import AffiliateLinks from "@/components/AffiliateLinks";
+import SaveReviewButton from "@/components/SaveReviewButton";
 import PhotoGallery from "@/components/review/PhotoGallery";
 import ThingsToDoSection from "@/components/review/ThingsToDoSection";
 import type { CachedReview } from "@/hooks/useGenerateReview";
@@ -220,12 +221,11 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview }: AIReviewResul
                 <AffiliateLinks />
               </div>
 
-              {/* 9. New Review Button (mobile only) */}
-              {onNewReview && (
-                <div className="lg:hidden flex justify-center order-9">
-                  <NewSearchButton onNewReview={onNewReview} />
-                </div>
-              )}
+              {/* 9. Save & New Review Buttons (mobile only) */}
+              <div className="lg:hidden flex flex-col gap-3 order-9">
+                <SaveReviewButton review={review} />
+                {onNewReview && <NewSearchButton onNewReview={onNewReview} />}
+              </div>
             </div>
 
             {/* RIGHT COLUMN – Sidebar (desktop only) */}
@@ -238,6 +238,9 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview }: AIReviewResul
 
               {/* Affiliate Links */}
               <AffiliateLinks />
+
+              {/* Save to Compare */}
+              <SaveReviewButton review={review} />
 
               {/* New Review Button */}
               {onNewReview && (

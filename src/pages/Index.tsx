@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import AIReviewResult from "@/components/AIReviewResult";
+import ComparisonFloatingBadge from "@/components/ComparisonFloatingBadge";
 import Footer from "@/components/Footer";
 import { useGenerateReview } from "@/hooks/useGenerateReview";
 
@@ -14,6 +15,7 @@ const Index = () => {
         <HeroSection onSearch={generateReview} isSearching={isLoading} />
         <AIReviewResult review={review} isLoading={isLoading} error={error} onNewReview={clearReview} />
       </main>
+      <ComparisonFloatingBadge />
       <Footer />
     </div>
   );
