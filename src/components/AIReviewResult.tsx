@@ -2,10 +2,11 @@ import { useEffect, useRef, useMemo } from "react";
 import { Star, MapPin, Sparkles, Search, Camera, Compass } from "lucide-react";
 import ReviewLoadingStages from "@/components/ReviewLoadingStages";
 import { Button } from "@/components/ui/button";
-import AffiliateLinks, { EXPEDIA_LINKS, HOTELS_LINKS, VRBO_LINK, detectCountry } from "@/components/AffiliateLinks";
+import AffiliateLinks, { buildDeepLinks, detectCountry } from "@/components/AffiliateLinks";
 import SaveReviewButton from "@/components/SaveReviewButton";
 import PhotoGallery from "@/components/review/PhotoGallery";
 import ThingsToDoSection from "@/components/review/ThingsToDoSection";
+import EmailCapture from "@/components/review/EmailCapture";
 import type { CachedReview } from "@/hooks/useGenerateReview";
 
 interface AIReviewResultProps {
@@ -136,6 +137,9 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview, onReviewReady }
                 <p className="text-lg text-foreground leading-relaxed">{data.summary}</p>
               </div>
 
+              {/* 1.5 Compare Prices Row */}
+              <ComparePricesRow propertyName={data.propertyName} />
+
               {/* 2. Photo Gallery */}
               {hasPhotos && (
                 <div className="bg-card rounded-2xl p-6 shadow-soft order-2">
@@ -170,7 +174,7 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview, onReviewReady }
               {/* 5. Things to Do */}
               {hasThingsToDo && (
                 <div className="order-5">
-                  <ThingsToDoSection thingsToDo={data.thingsToDo!} functionUrl={functionUrl} />
+                  <ThingsToDoSection thingsToDo={data.thingsToDo!} functionUrl={functionUrl} propertyName={data.propertyName} />
                 </div>
               )}
 
@@ -195,7 +199,12 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview, onReviewReady }
 
               {/* 6b. Plan Your Trip CTA */}
               <div className="order-[6.5]">
-                <PlanYourTripCTA />
+                <PlanYourTripCTA propertyName={data.propertyName} />
+              </div>
+
+              {/* 6c. Email Capture */}
+              <div className="order-[6.75]">
+                <EmailCapture sourceSlug={review.slug} />
               </div>
 
               {/* 7. Location Map (mobile only) */}
@@ -205,7 +214,7 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview, onReviewReady }
 
               {/* 8. Affiliate Links (mobile only) */}
               <div className="lg:hidden order-8">
-                <AffiliateLinks />
+                <AffiliateLinks propertyName={data.propertyName} />
               </div>
 
               {/* 9. Save & New Review Buttons (mobile only) */}
@@ -224,7 +233,7 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview, onReviewReady }
               <LocationMap data={data} />
 
               {/* Affiliate Links */}
-              <AffiliateLinks />
+              <AffiliateLinks propertyName={data.propertyName} />
 
               {/* Save to Compare */}
               <SaveReviewButton review={review} />
@@ -318,13 +327,16 @@ function NewSearchButton({ onNewReview }: { onNewReview: () => void }) {
   );
 }
 
-function PlanYourTripCTA() {
-  const country = useMemo(() => detectCountry(), []);
-  const links = [
-    { name: "Expedia", url: EXPEDIA_LINKS[country] },
-    { name: "Hotels.com", url: HOTELS_LINKS[country] },
-    { name: "VRBO", url: VRBO_LINK },
-  ];
+function PlanYourTripCTA({ propertyName }: { propertyName?: string }) {
+  const links = useMemo(() => {
+    const country = detectCountry();
+    const deep = buildDeepLinks(country, propertyName);
+    return [
+      { name: "Expedia", url: deep.expedia },
+      { name: "Hotels.com", url: deep.hotels },
+      { name: "VRBO", url: deep.vrbo },
+    ];
+  }, [propertyName]);
 
   return (
     <div className="rounded-2xl border-l-4 border-primary bg-primary/5 p-6">
@@ -355,6 +367,37 @@ function PlanYourTripCTA() {
       <p className="text-xs text-muted-foreground mt-3">
         Links may earn us a commission at no extra cost to you.
       </p>
+    </div>
+  );
+}
+
+function ComparePricesRow({ propertyName }: { propertyName?: string }) {
+  const links = useMemo(() => {
+    const country = detectCountry();
+    const deep = buildDeepLinks(country, propertyName);
+    return [
+      { name: "Expedia", url: deep.expedia },
+      { name: "Hotels.com", url: deep.hotels },
+      { name: "VRBO", url: deep.vrbo },
+    ];
+  }, [propertyName]);
+
+  return (
+    <div className="flex items-center justify-center gap-6 rounded-xl bg-muted/50 px-4 py-3 order-[1.5]">
+      <span className="text-xs text-muted-foreground font-medium">Compare prices:</span>
+      {links.map((link, i) => (
+        <span key={link.name} className="flex items-center gap-3">
+          <a
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs font-medium text-primary hover:underline"
+          >
+            {link.name}
+          </a>
+          {i < links.length - 1 && <span className="text-border text-xs">|</span>}
+        </span>
+      ))}
     </div>
   );
 }
