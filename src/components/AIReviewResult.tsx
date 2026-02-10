@@ -6,7 +6,7 @@ import AffiliateLinks, { buildDeepLinks, detectCountry } from "@/components/Affi
 import SaveReviewButton from "@/components/SaveReviewButton";
 import PhotoGallery from "@/components/review/PhotoGallery";
 import ThingsToDoSection from "@/components/review/ThingsToDoSection";
-import EmailCapture from "@/components/review/EmailCapture";
+
 import type { CachedReview } from "@/hooks/useGenerateReview";
 
 interface AIReviewResultProps {
@@ -202,10 +202,6 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview, onReviewReady }
                 <PlanYourTripCTA propertyName={data.propertyName} />
               </div>
 
-              {/* 6c. Email Capture */}
-              <div className="order-[6.75]">
-                <EmailCapture sourceSlug={review.slug} />
-              </div>
 
               {/* 7. Location Map (mobile only) */}
               <div className="lg:hidden order-7">

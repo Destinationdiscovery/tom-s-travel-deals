@@ -44,6 +44,27 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          newsletter_opt_in: boolean
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id: string
+          newsletter_opt_in?: boolean
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          newsletter_opt_in?: boolean
+        }
+        Relationships: []
+      }
       search_suggestions: {
         Row: {
           created_at: string
@@ -116,6 +137,75 @@ export type Database = {
           id?: string
           intel_type?: string
           result_data?: Json
+        }
+        Relationships: []
+      }
+      user_review_history: {
+        Row: {
+          id: string
+          location: string | null
+          property_name: string
+          slug: string
+          user_id: string
+          viewed_at: string
+        }
+        Insert: {
+          id?: string
+          location?: string | null
+          property_name: string
+          slug: string
+          user_id: string
+          viewed_at?: string
+        }
+        Update: {
+          id?: string
+          location?: string | null
+          property_name?: string
+          slug?: string
+          user_id?: string
+          viewed_at?: string
+        }
+        Relationships: []
+      }
+      user_saved_reviews: {
+        Row: {
+          best_for: string[]
+          created_at: string
+          id: string
+          location: string | null
+          overall_rating: number
+          property_name: string
+          ratings: Json
+          slug: string
+          summary: string
+          trip_name: string | null
+          user_id: string
+        }
+        Insert: {
+          best_for?: string[]
+          created_at?: string
+          id?: string
+          location?: string | null
+          overall_rating: number
+          property_name: string
+          ratings?: Json
+          slug: string
+          summary?: string
+          trip_name?: string | null
+          user_id: string
+        }
+        Update: {
+          best_for?: string[]
+          created_at?: string
+          id?: string
+          location?: string | null
+          overall_rating?: number
+          property_name?: string
+          ratings?: Json
+          slug?: string
+          summary?: string
+          trip_name?: string | null
+          user_id?: string
         }
         Relationships: []
       }
