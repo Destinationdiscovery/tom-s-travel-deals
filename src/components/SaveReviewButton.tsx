@@ -1,25 +1,34 @@
+import { useState } from "react";
 import { Bookmark, BookmarkCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { useSavedReviews, type SavedReview } from "@/hooks/useSavedReviews";
 import type { CachedReview } from "@/hooks/useGenerateReview";
+import AuthModal from "@/components/auth/AuthModal";
 
 interface SaveReviewButtonProps {
   review: CachedReview;
 }
 
 const SaveReviewButton = ({ review }: SaveReviewButtonProps) => {
-  const { addReview, removeReview, isSaved, canAddMore, count } = useSavedReviews();
+  const { addReview, removeReview, isSaved, canAddMore, count, isAuthenticated } = useSavedReviews();
   const { toast } = useToast();
+  const [authOpen, setAuthOpen] = useState(false);
 
   const saved = isSaved(review.slug);
   const atLimit = !canAddMore && !saved;
 
-  const handleClick = () => {
+  const handleClick = async () => {
     if (saved) {
-      removeReview(review.slug);
+      await removeReview(review.slug);
       toast({ title: "Removed from comparison", description: `${review.review_data.propertyName} removed.` });
+      return;
+    }
+
+    // If anonymous and at limit, prompt sign-in
+    if (atLimit && !isAuthenticated) {
+      setAuthOpen(true);
       return;
     }
 
@@ -34,11 +43,13 @@ const SaveReviewButton = ({ review }: SaveReviewButtonProps) => {
       savedAt: new Date().toISOString(),
     };
 
-    const added = addReview(payload);
+    const added = await addReview(payload);
     if (added) {
       toast({
         title: "Saved for comparison!",
-        description: `${count + 1}/5 — Compare when you're ready.`,
+        description: isAuthenticated
+          ? `${count + 1} saved — Compare when you're ready.`
+          : `${count + 1}/5 — Sign in for unlimited saves.`,
       });
     } else {
       toast({
@@ -54,26 +65,33 @@ const SaveReviewButton = ({ review }: SaveReviewButtonProps) => {
       variant={saved ? "default" : "outline"}
       size="lg"
       onClick={handleClick}
-      disabled={atLimit}
+      disabled={false}
       className="gap-2 w-full"
     >
       {saved ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
-      {saved ? "Saved" : "Save to Compare"}
+      {saved ? "Saved" : atLimit && !isAuthenticated ? "Sign in to Save More" : "Save to Compare"}
     </Button>
   );
 
-  if (atLimit) {
-    return (
-      <Tooltip>
-        <TooltipTrigger asChild>{button}</TooltipTrigger>
-        <TooltipContent>
-          <p>You've saved 5 reviews. Remove one to add another.</p>
-        </TooltipContent>
-      </Tooltip>
-    );
-  }
-
-  return button;
+  return (
+    <>
+      {atLimit && isAuthenticated ? (
+        <Tooltip>
+          <TooltipTrigger asChild>{button}</TooltipTrigger>
+          <TooltipContent>
+            <p>You've saved 5 reviews. Remove one to add another.</p>
+          </TooltipContent>
+        </Tooltip>
+      ) : (
+        button
+      )}
+      <AuthModal
+        open={authOpen}
+        onOpenChange={setAuthOpen}
+        promptMessage="Sign in to save unlimited reviews, track your history, and organize trip lists."
+      />
+    </>
+  );
 };
 
 export default SaveReviewButton;

@@ -7,6 +7,7 @@ import ComparisonFloatingBadge from "@/components/ComparisonFloatingBadge";
 import Footer from "@/components/Footer";
 import type { CachedReview } from "@/hooks/useGenerateReview";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useReviewHistory } from "@/hooks/useReviewHistory";
 
 const AIReview = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -47,6 +48,9 @@ const AIReview = () => {
 
     fetchReview();
   }, [slug]);
+
+  // Track review history for logged-in users
+  useReviewHistory(review?.slug, review?.property_name, review?.location);
 
   useEffect(() => {
     if (review) {
