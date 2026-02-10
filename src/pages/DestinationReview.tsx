@@ -490,7 +490,7 @@ const DestinationReview = () => {
             <div className="space-y-8">
               {/* Ratings Breakdown */}
               <div className="bg-card rounded-2xl p-6 shadow-soft sticky top-28">
-                <h3 className="font-display text-xl font-bold text-foreground mb-6">Rating Breakdown</h3>
+                <h3 className="font-display text-2xl font-bold text-foreground mb-6">Rating Breakdown</h3>
                 <div className="space-y-4">
                   {Object.entries(review.ratings).map(([category, rating]) => (
                     <div key={category} className="space-y-2">

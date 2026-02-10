@@ -157,7 +157,7 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview }: AIReviewResul
               {/* 2. Photo Gallery */}
               {hasPhotos && (
                 <div className="bg-card rounded-2xl p-6 shadow-soft order-2">
-                  <h3 className="font-display text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+                  <h3 className="font-display text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
                     <Camera className="h-5 w-5 text-primary" />
                     Photos
                   </h3>
@@ -259,7 +259,7 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview }: AIReviewResul
 function RatingsCard({ data }: { data: CachedReview["review_data"] }) {
   return (
     <div className="bg-card rounded-2xl p-6 shadow-soft">
-      <h3 className="font-display text-xl font-bold text-foreground mb-6">
+      <h3 className="font-display text-2xl font-bold text-foreground mb-6">
         Rating Breakdown
       </h3>
       <div className="space-y-4">
@@ -293,7 +293,7 @@ function LocationMap({ data }: { data: CachedReview["review_data"] }) {
 
   return (
     <div className="bg-card rounded-2xl p-6 shadow-soft">
-      <h3 className="font-display text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+      <h3 className="font-display text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
         <MapPin className="h-5 w-5 text-primary" />
         Location
       </h3>

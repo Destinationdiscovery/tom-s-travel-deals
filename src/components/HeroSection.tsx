@@ -60,8 +60,8 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
         {/* Main Headline */}
         <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight">
           <span className="text-sky-300">REVIEW</span>{" "}
-          <span className="text-white/90">THEN</span>{" "}
-          <span className="text-white font-black">GO</span>
+          <span className="text-amber-400">THEN</span>{" "}
+          <span className="text-emerald-400 font-black">GO</span>
         </h1>
 
         {/* Tagline */}
