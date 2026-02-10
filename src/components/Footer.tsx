@@ -13,18 +13,18 @@ const Footer = () => {
             <div className="flex items-center gap-2 mb-4">
               <Compass className="h-8 w-8 text-primary" />
               <div>
-                <h3 className="font-display text-2xl font-bold"><span className="text-sky-300">Review</span><span className="text-background">ThenGo</span></h3>
-                <p className="text-xs text-muted-foreground">Honest Reviews & Travel Insights</p>
+                <h3 className="font-display text-3xl font-bold"><span className="text-sky-300">Review</span><span className="text-amber-400">Then</span><span className="text-emerald-400">Go</span></h3>
+                <p className="text-sm text-muted-foreground">Honest Reviews & Travel Insights</p>
               </div>
             </div>
-            <p className="text-muted-foreground text-base max-w-sm mb-4">
+            <p className="text-muted-foreground text-lg max-w-sm mb-4">
               Honest destination reviews, tested travel gear, and real-world insights to help you travel with confidence.
             </p>
             <a 
               href="https://tom.travelonly.com" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-primary hover:text-primary/80 transition-colors text-sm"
+              className="inline-flex items-center gap-2 text-primary hover:text-primary/80 transition-colors text-base"
             >
               Visit my Travelonly profile <ExternalLink className="h-4 w-4" />
             </a>
@@ -34,13 +34,13 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold text-background mb-4">Explore</h4>
             <nav className="flex flex-col gap-2">
-              <Link to="/destinations" className="text-muted-foreground hover:text-primary transition-colors text-base">
+              <Link to="/destinations" className="text-muted-foreground hover:text-primary transition-colors text-lg">
                 My Reviews
               </Link>
-              <Link to="/compass" className="text-muted-foreground hover:text-primary transition-colors text-base">
+              <Link to="/compass" className="text-muted-foreground hover:text-primary transition-colors text-lg">
                 Travel Blog
               </Link>
-              <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors text-base">
+              <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors text-lg">
                 About
               </Link>
             </nav>
@@ -49,13 +49,13 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-muted-foreground/20 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+          <div className="flex items-center gap-1 text-base text-muted-foreground">
             <span>Made with</span>
             <Heart className="h-4 w-4 text-primary fill-primary" />
             <span>for travelers everywhere</span>
           </div>
 
-          <p className="text-sm text-muted-foreground">
+          <p className="text-base text-muted-foreground">
             © {currentYear} ReviewThenGo. All rights reserved.
           </p>
         </div>
