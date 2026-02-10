@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -11,6 +11,10 @@ const categories = ["All", "Packing", "Guides", "Budget", "Insurance", "Timing"]
 const Compass = () => {
   const [activeCategory, setActiveCategory] = useState("All");
 
+  useEffect(() => {
+    document.title = "Travel Blog - ReviewThenGo";
+    return () => { document.title = "ReviewThenGo.com | Honest Reviews, Tested Gear & Travel Insights"; };
+  }, []);
   const filteredArticles = activeCategory === "All" 
     ? compassArticles 
     : compassArticles.filter(article => article.category === activeCategory);

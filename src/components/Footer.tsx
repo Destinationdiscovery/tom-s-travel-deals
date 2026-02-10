@@ -14,7 +14,7 @@ const Footer = () => {
               <Compass className="h-8 w-8 text-primary" />
               <div>
                 <h3 className="font-display text-3xl font-bold"><span className="text-sky-300">Review</span><span className="text-amber-400">Then</span><span className="text-emerald-400">Go</span></h3>
-                <p className="text-sm text-muted-foreground">Honest Reviews & Travel Insights</p>
+                <p className="text-sm text-muted-foreground">Real Traveller Reviews and Insights</p>
               </div>
             </div>
             <p className="text-muted-foreground text-lg max-w-sm mb-4">
@@ -39,6 +39,12 @@ const Footer = () => {
               </Link>
               <Link to="/compass" className="text-muted-foreground hover:text-primary transition-colors text-lg">
                 Travel Blog
+              </Link>
+              <Link to="/gear" className="text-muted-foreground hover:text-primary transition-colors text-lg">
+                Gear Reviews
+              </Link>
+              <Link to="/travel-intel" className="text-muted-foreground hover:text-primary transition-colors text-lg">
+                Travel Intel
               </Link>
               <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors text-lg">
                 About

@@ -1,9 +1,15 @@
+import { useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Phone, Mail, Globe, MessageSquare, Award, MapPin, Heart, Star } from "lucide-react";
 import heroBeach from "@/assets/hero-beach.jpg";
 
 const Contact = () => {
+  useEffect(() => {
+    document.title = "Contact - ReviewThenGo";
+    return () => { document.title = "ReviewThenGo.com | Honest Reviews, Tested Gear & Travel Insights"; };
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -41,7 +47,7 @@ const Contact = () => {
                   </a>
 
                   <a 
-                    href="mailto:tlaracy@travelonly.com?subject=Inquiry from Tom Travel Treasures" 
+                    href="mailto:tlaracy@travelonly.com?subject=Inquiry from ReviewThenGo" 
                     className="flex items-center gap-4 group"
                   >
                     <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">

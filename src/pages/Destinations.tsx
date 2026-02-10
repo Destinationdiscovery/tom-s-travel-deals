@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Star, ArrowRight, Play, Filter } from "lucide-react";
@@ -87,6 +88,11 @@ const destinations: Destination[] = [
 ];
 
 const Destinations = () => {
+  useEffect(() => {
+    document.title = "Destination Reviews - ReviewThenGo";
+    return () => { document.title = "ReviewThenGo.com | Honest Reviews, Tested Gear & Travel Insights"; };
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
