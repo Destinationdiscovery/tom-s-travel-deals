@@ -11,6 +11,7 @@ export interface GearItem {
   reason: string;
   category: string;
   amazonUrl: string;
+  imageUrl?: string;
 }
 
 export interface GearIntelData {

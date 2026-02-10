@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Star, Loader2, ExternalLink, Search, ArrowLeft, Sparkles, ThumbsUp, ThumbsDown, CheckCircle } from "lucide-react";
+import { Star, Loader2, ExternalLink, Search, ArrowLeft, Sparkles, ThumbsUp, ThumbsDown, CheckCircle, Package } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
@@ -44,40 +44,51 @@ const categoryColors: Record<string, string> = {
 };
 
 /* ─── Packing Result Card ─── */
-const PackingResultCard = ({ item, onReview }: { item: GearItem; onReview: (name: string) => void }) => (
-  <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 group border-border/50 bg-card">
-    <CardContent className="p-5">
-      <Badge className={`mb-3 border-0 ${categoryColors[item.category] || "bg-primary/10 text-primary"}`}>
-        {item.category}
-      </Badge>
-      <p className="text-xs text-muted-foreground mb-1">{item.brand}</p>
-      <h3 className="font-semibold text-foreground mb-2 text-base">{item.name}</h3>
-      <p className="text-sm text-muted-foreground mb-4">{item.reason}</p>
-      <div className="flex items-center justify-between gap-2 mb-3">
-        <span className="text-sm font-medium text-foreground">{item.priceRange}</span>
+const PackingResultCard = ({ item, onReview }: { item: GearItem; onReview: (name: string) => void }) => {
+  const [imgError, setImgError] = useState(false);
+
+  return (
+    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 group border-border/50 bg-card">
+      {/* Product Image */}
+      <div className="aspect-[4/3] bg-muted relative overflow-hidden">
+        {item.imageUrl && !imgError ? (
+          <img
+            src={item.imageUrl}
+            alt={item.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            onError={() => setImgError(true)}
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-muted">
+            <Package className="h-12 w-12 text-muted-foreground/30" />
+          </div>
+        )}
+        <Badge className={`absolute top-3 left-3 border-0 ${categoryColors[item.category] || "bg-primary/10 text-primary"}`}>
+          {item.category}
+        </Badge>
       </div>
-      <div className="flex flex-col sm:flex-row gap-2">
-        <a
-          href={item.amazonUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex-1"
-        >
-          <Button variant="outline" size="sm" className="w-full gap-1.5">
-            Get it on Amazon <ExternalLink className="h-3.5 w-3.5" />
+      <CardContent className="p-5">
+        <p className="text-xs text-muted-foreground mb-1">{item.brand}</p>
+        <h3 className="font-semibold text-foreground mb-2 text-base line-clamp-2">{item.name}</h3>
+        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{item.reason}</p>
+        <div className="flex items-center justify-between gap-2 mb-3">
+          <span className="text-sm font-medium text-foreground">{item.priceRange}</span>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <a href={item.amazonUrl} target="_blank" rel="noopener noreferrer" className="flex-1">
+            <Button variant="outline" size="sm" className="w-full gap-1.5">
+              Get it on Amazon <ExternalLink className="h-3.5 w-3.5" />
+            </Button>
+          </a>
+          <Button size="sm" onClick={() => onReview(item.name)} className="flex-1 gap-1.5">
+            <Sparkles className="h-3.5 w-3.5" /> Review This
           </Button>
-        </a>
-        <Button
-          size="sm"
-          onClick={() => onReview(item.name)}
-          className="flex-1 gap-1.5"
-        >
-          <Sparkles className="h-3.5 w-3.5" /> Review This
-        </Button>
-      </div>
-    </CardContent>
-  </Card>
-);
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
 
 /* ─── Rating Bar ─── */
 const RatingBar = ({ label, value }: { label: string; value: number }) => (
@@ -340,30 +351,24 @@ const Gear = () => {
               <span className="text-sky-300">Travel</span> Gear
             </h1>
             <p className="text-white/80 max-w-2xl mx-auto text-lg mb-8">
-              Tell us where you're going — we'll tell you what to pack.
+              Tell us where you're going, we'll tell you what to pack.
             </p>
 
             {/* Search Bar */}
-            <div className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <div className="max-w-2xl mx-auto">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   placeholder="e.g. 7 day all inclusive in Mexico, backpacking Japan..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                  className="pl-10 bg-white/95 dark:bg-card/95 border-0 h-12 text-foreground"
+                  className="pl-12 pr-4 bg-white/95 dark:bg-card/95 border-0 h-14 text-foreground text-base rounded-xl"
                 />
+                {loading && (
+                  <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 animate-spin text-primary" />
+                )}
               </div>
-              <Button
-                onClick={handleSearch}
-                disabled={loading || searchQuery.trim().length < 2}
-                size="lg"
-                className="whitespace-nowrap h-12"
-              >
-                {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Search className="h-4 w-4 mr-2" />}
-                What Should I Pack?
-              </Button>
             </div>
           </div>
         </section>
