@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.subscribe]
 verify_jwt = false
+
+[functions.travel-gear-intel]
+verify_jwt = false

@@ -24,7 +24,7 @@ const Header = () => {
     { to: "/gear", label: "Gear Reviews" },
     { to: "/compass", label: "Travel Blog" },
     { to: "/about", label: "About" },
-    { to: "/travel-intel", label: "Travel Intel" },
+    { to: "/travel-intel", label: "Know Before You Go" },
   ];
 
   return (
