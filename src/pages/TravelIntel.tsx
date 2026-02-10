@@ -169,7 +169,7 @@ const TravelIntel = () => {
   const [activeTab, setActiveTab] = useState<IntelType>("requirements");
 
   useEffect(() => {
-    document.title = "Travel Intel - ReviewThenGo";
+    document.title = "Know Before You Go - ReviewThenGo";
     return () => { document.title = "ReviewThenGo.com | Honest Reviews, Tested Gear & Travel Insights"; };
   }, []);
   // Form states
@@ -196,7 +196,7 @@ const TravelIntel = () => {
           <div className="flex items-center justify-center gap-3 mb-4">
             <Globe className="h-8 w-8 text-sky-300" />
           </div>
-          <h1 className="font-display text-4xl md:text-5xl font-bold text-white mb-3">Travel Intel</h1>
+          <h1 className="font-display text-4xl md:text-5xl font-bold text-white mb-3">Know Before You Go</h1>
           <p className="text-white/80 text-lg max-w-lg mx-auto">Visa requirements, safety advisories, and destination news — powered by real-time data.</p>
         </div>
       </section>
