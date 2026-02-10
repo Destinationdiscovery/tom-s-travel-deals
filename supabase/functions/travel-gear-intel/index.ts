@@ -122,7 +122,7 @@ IMPORTANT RULES:
 - NEVER include non-purchasable items like passports, travel insurance, cash/currency, visas, documents, or tickets.
 - Only recommend physical products that can be purchased on Amazon.
 - For each category, find a real, specific product with brand and model name.
-- Include a real product image URL from a reputable source (Amazon, manufacturer website, or major retailer). The URL must end in .jpg, .png, or .webp and be a direct image link.
+- For imageUrl: Search for this exact product on Amazon or the manufacturer's official website. Find the ACTUAL product listing image URL. It MUST be a real, working, direct link to a .jpg, .png, or .webp image file. Look for URLs from domains like: images-na.ssl-images-amazon.com, m.media-amazon.com, i5.walmartimg.com, target.scene7.com, or the brand's own website. DO NOT make up or guess image URLs.
 
 Return your response as valid JSON only (no markdown, no code blocks):
 
@@ -134,7 +134,7 @@ Return your response as valid JSON only (no markdown, no code blocks):
       "priceRange": "$XX - $XX",
       "reason": "Why this specific product is the best choice for this trip (1-2 sentences)",
       "category": "Category like Packing, Tech, Comfort, Safety, Health, Clothing, Beach, etc.",
-      "imageUrl": "https://direct-image-url.jpg"
+      "imageUrl": "https://actual-product-image-url.jpg"
     }
   ]
 }
@@ -144,6 +144,8 @@ Be specific with product names. Example: "Osprey Farpoint 40 Travel Backpack" no
   review: (query) =>
     `You are a travel gear reviewer. Research "${query}" thoroughly using Amazon reviews, expert reviews, YouTube reviews, and travel blogs.
 
+IMPORTANT: For imageUrl, search for the actual product listing on Amazon or the manufacturer's website and find the real product image URL. It must be a direct link to an image file (.jpg, .png, .webp) from a real domain like images-na.ssl-images-amazon.com, m.media-amazon.com, or the brand's website. DO NOT make up URLs.
+
 Return your response as valid JSON only (no markdown, no code blocks):
 
 {
@@ -151,6 +153,7 @@ Return your response as valid JSON only (no markdown, no code blocks):
   "brand": "Brand Name",
   "priceRange": "$XX - $XX",
   "overallRating": 4.2,
+  "imageUrl": "https://actual-product-image-url.jpg",
   "ratings": {
     "Durability": 4.5,
     "Value": 3.8,
@@ -267,9 +270,9 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "sonar",
+        model: "sonar-pro",
         messages: [
-          { role: "system", content: "You are a travel gear expert. Always respond with valid JSON only, no markdown formatting. NEVER recommend non-purchasable items like passports, insurance, cash, visas, or documents." },
+          { role: "system", content: "You are a travel gear expert. Always respond with valid JSON only, no markdown formatting. NEVER recommend non-purchasable items like passports, insurance, cash, visas, or documents. When providing imageUrl fields, you MUST find real, working image URLs from actual product listings. Never fabricate or guess image URLs." },
           { role: "user", content: prompt },
         ],
         temperature: 0.2,
@@ -307,6 +310,28 @@ serve(async (req) => {
         JSON.stringify({ error: "Failed to parse response. Please try again." }),
         { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
+    }
+
+    // Validate image URLs
+    const isValidImageUrl = (url: unknown): boolean => {
+      if (!url || typeof url !== "string") return false;
+      if (!url.startsWith("https://")) return false;
+      // Check for known image hosting domains or image file extensions
+      const validHosts = ["amazon", "ssl-images-amazon", "m.media-amazon", "walmartimg", "target.scene7", "rei.com", "osprey", "yeti", "samsonite", "anker"];
+      const hasValidHost = validHosts.some((h) => url.includes(h));
+      const hasImageExt = /\.(jpg|jpeg|png|webp|gif)(\?|$)/i.test(url);
+      return hasValidHost || hasImageExt;
+    };
+
+    if (type === "must-haves" && Array.isArray(resultData.items)) {
+      resultData.items = (resultData.items as Record<string, unknown>[]).map((item) => ({
+        ...item,
+        imageUrl: isValidImageUrl(item.imageUrl) ? item.imageUrl : null,
+      }));
+    } else if (type === "review") {
+      if (!isValidImageUrl(resultData.imageUrl)) {
+        resultData.imageUrl = null;
+      }
     }
 
     resultData.citations = citations;
