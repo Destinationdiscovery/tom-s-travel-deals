@@ -1,61 +1,72 @@
 
 
-## Animated Promotional Slideshow for ReviewThenGo
+## Interactive Site Demo Promo
 
-Build a cinematic animated slideshow component using your existing travel photos, with smooth Ken Burns-style transitions, branded text overlays, and your tri-color identity. It will serve two purposes:
-
-1. **On-site**: Plays as an optional intro on the homepage (with a "Skip" button), shown once per session
-2. **For socials**: A dedicated `/promo` page where you can screen-record the animation for Instagram/TikTok/YouTube
+Replace the current destination photo slideshow with a scripted walkthrough that showcases what ReviewThenGo actually does. The entire thing is a self-contained animation — no real API calls, all fake data.
 
 ---
 
-### What it will look like
+### What the viewer will see (sequence)
 
-A fullscreen, auto-playing sequence of ~8-10 of your best destination photos, each displayed for ~4 seconds with:
+1. **Hero reveal** (~2s) -- The hero section fades in with the "REVIEW THEN GO" branding and search bar, exactly matching the real site
+2. **Typing animation** (~3s) -- A cursor appears in the search bar and types "Sandals Royal Barbados" one character at a time
+3. **Suggestions dropdown** (~1.5s) -- Fake autocomplete suggestions slide in (e.g., "Sandals Royal Barbados", "Sandals Montego Bay", "Sandals Grenada")
+4. **Selection + search** (~1s) -- The first suggestion highlights and gets "clicked", the button changes to "Searching..."
+5. **Loading stages** (~5s) -- A miniature version of the ReviewLoadingStages component plays through all 5 stages with the progress bar filling up
+6. **Review result reveal** (~4s) -- A mock review card slides up showing property name, 4.5-star rating, summary text, rating bars, and photo thumbnails
+7. **Branding finale** (~3s) -- Everything fades to black, the "REVIEW THEN GO" logo animates in with the tagline "Know what to expect before you go."
 
-- Slow zoom-in (Ken Burns effect) on each photo
-- Crossfade transitions between slides
-- Animated text overlays per slide (e.g., "Cuba", "Mexico", "Curacao", "Japan", "Canada")
-- Your "REVIEW THEN GO" branding with the sky/amber/emerald colors animated in at the end
-- Tagline: "Know what to expect before you go."
-- Final slide fades into the normal hero/search section
+Total duration: ~20 seconds
 
 ---
 
-### Files to create/modify
+### Technical approach
+
+**Single new component**: `src/components/PromoDemoWalkthrough.tsx`
+
+This replaces the content inside `PromoSlideshow.tsx`. The component uses a linear state machine driven by `useEffect` timers:
+
+```text
+State flow:
+HERO_REVEAL -> TYPING -> SUGGESTIONS -> SELECT -> LOADING -> REVIEW -> BRANDING -> (loop or finish)
+```
+
+Each state triggers the next after a set delay. All UI is rendered inline (not using the real HeroSection or ReviewLoadingStages) to keep it self-contained and avoid side effects.
+
+**Key animations:**
+- Typing effect: `setInterval` adding one character every 80ms to a displayed string
+- Suggestions: opacity + translateY transition
+- Loading stages: reuses the same visual design as `ReviewLoadingStages` but with hardcoded faster timings
+- Review card: slide-up with opacity transition
+- All transitions use Tailwind classes + inline style opacity/transforms
+
+**Mock data (hardcoded):**
+- Search query: "Sandals Royal Barbados"
+- Suggestions: 3 fake results
+- Review: property name, 4.5 rating, short summary, 4 rating categories, "Best For" tags
+- No real images needed for the review mock — uses colored placeholder blocks or existing assets
+
+---
+
+### Files to modify
 
 | Action | File | Purpose |
 |--------|------|---------|
-| Create | `src/components/PromoSlideshow.tsx` | The animated slideshow component with Ken Burns zoom, crossfade, text overlays, skip button, and auto-advance logic |
-| Create | `src/pages/Promo.tsx` | Standalone fullscreen page at `/promo` for screen recording the slideshow for socials |
-| Modify | `src/pages/Index.tsx` | Show the slideshow once per session before the hero (uses sessionStorage to track if already seen) |
-| Modify | `src/App.tsx` | Add `/promo` route |
-| Modify | `tailwind.config.ts` | Add `ken-burns` and `crossfade` keyframe animations |
+| Create | `src/components/PromoDemoWalkthrough.tsx` | The scripted demo animation component |
+| Modify | `src/components/PromoSlideshow.tsx` | Replace photo slideshow content with the new demo walkthrough |
+| Modify | `src/pages/Promo.tsx` | Keep working with the updated PromoSlideshow (no changes needed if props stay the same) |
+
+No new dependencies. No Tailwind config changes needed — existing animations cover everything.
 
 ---
 
-### Slide sequence (using existing assets)
+### How it differs from the current slideshow
 
-1. `hero-beach.jpg` -- "Discover Paradise"
-2. `cuba-gallery-1.jpg` -- "Cuba"
-3. `mexico-hero.webp` -- "Mexico"
-4. `curacao-hero.avif` -- "Curacao"
-5. `japan-fushimi-inari.jpg` -- "Japan"
-6. `canada-boom-lake-louise.jpg` -- "Canada"
-7. `cruise-hero.jpg` -- "Cruises"
-8. `vegas-strip-hero.jpg` -- "Las Vegas"
-9. Final branded slide with "REVIEW THEN GO" logo animation and tagline
+| Current | New |
+|---------|-----|
+| Cycles through 8 destination photos | Simulates a real user journey |
+| Shows destination names as text overlays | Shows the actual site UI (search bar, loading, review) |
+| ~35 seconds total | ~20 seconds total |
+| Showcases destinations | Showcases the product/feature |
 
----
-
-### Technical details
-
-- **Ken Burns effect**: CSS keyframe that scales from `scale(1)` to `scale(1.15)` over 4 seconds
-- **Crossfade**: Opacity transitions between stacked absolutely-positioned images
-- **Text animations**: Each destination name fades up with `animate-slide-up`, then fades out before the next slide
-- **Skip button**: Fixed "Skip" button in the corner that immediately transitions to the homepage
-- **Session tracking**: `sessionStorage.setItem('promo-seen', 'true')` so it only plays once per browser session
-- **Promo page**: The `/promo` route plays the same slideshow in a loop without the skip button, perfect for screen recording
-- **Performance**: Images are lazy-loaded and preloaded in sequence to avoid jarring transitions
-- **Mobile-friendly**: All animations use CSS transforms (GPU-accelerated) and the layout adapts to any screen size
-
+The homepage intro and `/promo` social recording route both continue to work the same way (once per session on homepage, looping on `/promo`).
