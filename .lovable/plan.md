@@ -1,50 +1,78 @@
 
 
-## Interactive Site Demo Promo
+## Enhanced Promo Walkthrough: Full Review + Compare Feature
 
-Replace the current destination photo slideshow with a scripted walkthrough that showcases what ReviewThenGo actually does. The entire thing is a self-contained animation — no real API calls, all fake data.
-
----
-
-### What the viewer will see (sequence)
-
-1. **Hero reveal** (~2s) -- The hero section fades in with the "REVIEW THEN GO" branding and search bar, exactly matching the real site
-2. **Typing animation** (~3s) -- A cursor appears in the search bar and types "Sandals Royal Barbados" one character at a time
-3. **Suggestions dropdown** (~1.5s) -- Fake autocomplete suggestions slide in (e.g., "Sandals Royal Barbados", "Sandals Montego Bay", "Sandals Grenada")
-4. **Selection + search** (~1s) -- The first suggestion highlights and gets "clicked", the button changes to "Searching..."
-5. **Loading stages** (~5s) -- A miniature version of the ReviewLoadingStages component plays through all 5 stages with the progress bar filling up
-6. **Review result reveal** (~4s) -- A mock review card slides up showing property name, 4.5-star rating, summary text, rating bars, and photo thumbnails
-7. **Branding finale** (~3s) -- Everything fades to black, the "REVIEW THEN GO" logo animates in with the tagline "Know what to expect before you go."
-
-Total duration: ~20 seconds
+Expand the REVIEW stage and add a new COMPARE stage to the walkthrough, making the demo richer and more representative of the actual site experience.
 
 ---
 
-### Technical approach
-
-**Single new component**: `src/components/PromoDemoWalkthrough.tsx`
-
-This replaces the content inside `PromoSlideshow.tsx`. The component uses a linear state machine driven by `useEffect` timers:
+### Updated stage flow
 
 ```text
-State flow:
-HERO_REVEAL -> TYPING -> SUGGESTIONS -> SELECT -> LOADING -> REVIEW -> BRANDING -> (loop or finish)
+HERO_REVEAL -> TYPING -> SUGGESTIONS -> SELECT -> LOADING -> REVIEW -> SAVE_ACTION -> COMPARE -> BRANDING
 ```
 
-Each state triggers the next after a set delay. All UI is rendered inline (not using the real HeroSection or ReviewLoadingStages) to keep it self-contained and avoid side effects.
+Two new stages are added between REVIEW and BRANDING:
 
-**Key animations:**
-- Typing effect: `setInterval` adding one character every 80ms to a displayed string
-- Suggestions: opacity + translateY transition
-- Loading stages: reuses the same visual design as `ReviewLoadingStages` but with hardcoded faster timings
-- Review card: slide-up with opacity transition
-- All transitions use Tailwind classes + inline style opacity/transforms
+- **SAVE_ACTION** (~2s): A "Save to Compare" button animates a click, then a floating badge appears showing "2/5 saved - Compare Now"
+- **COMPARE** (~4s): A mock comparison view slides in showing two property cards side-by-side with a "ReviewThenGo Verdict" winner card
 
-**Mock data (hardcoded):**
-- Search query: "Sandals Royal Barbados"
-- Suggestions: 3 fake results
-- Review: property name, 4.5 rating, short summary, 4 rating categories, "Best For" tags
-- No real images needed for the review mock — uses colored placeholder blocks or existing assets
+---
+
+### Changes to the REVIEW stage
+
+The current review card is minimal. It will be expanded to include:
+
+1. **Photo gallery row**: A 2x3 grid of actual destination photos using existing assets (e.g., `cuba-gallery-1.jpg` through `cuba-gallery-6.jpg`) displayed as rounded thumbnail tiles
+2. **"What Travelers Say" section**: 1-2 short mock review paragraphs below the photos
+3. **Sidebar-style layout**: On desktop, show the rating breakdown + "Best For" tags in a right column (mirroring the real 2-column layout from `AIReviewResult.tsx`)
+4. **"Save to Compare" button**: Visible at the bottom of the sidebar
+
+The REVIEW stage duration increases from 4s to ~6s to give viewers time to absorb the richer content, with an auto-scroll animation that slowly scrolls the review card upward to reveal photos and ratings.
+
+---
+
+### SAVE_ACTION stage details (~2s)
+
+After the review is shown:
+- The "Save to Compare" button visually "clicks" (brief scale-down + color change to filled state showing "Saved")
+- A floating badge animates into the bottom-right corner: "2/5 saved - Compare Now" (implying a previous save)
+- After ~1.5s, the badge pulses once, then transitions to COMPARE
+
+---
+
+### COMPARE stage details (~4s)
+
+A mock comparison view slides in showing:
+- Two property cards side-by-side: "Sandals Royal Barbados" (4.5) and "Hyatt Zilara Cap Cana" (4.3)
+- Each card has: name, star rating, 3-4 rating bars, and "Best For" tags
+- Below the cards: A "ReviewThenGo Verdict" banner with a trophy icon, the winner name highlighted in primary color, and a one-line recommendation
+- After ~3.5s, everything fades to black transitioning into the existing BRANDING finale
+
+---
+
+### Mock data additions
+
+```text
+Second property (for compare):
+  Name: Hyatt Zilara Cap Cana
+  Location: Punta Cana, Dominican Republic
+  Overall: 4.3
+  Ratings: Location 4.7, Service 4.4, Amenities 4.2, Value 4.0
+  Best For: Adults Only, Beach, Relaxation
+```
+
+---
+
+### Photos for the review gallery
+
+Use these existing assets as mock gallery thumbnails (no API calls):
+- `cuba-gallery-1.jpg`
+- `cuba-gallery-2.jpg`
+- `cuba-gallery-3.jpg`
+- `cuba-gallery-4.jpg`
+- `cuba-gallery-5.jpg`
+- `cuba-gallery-6.jpg`
 
 ---
 
@@ -52,21 +80,24 @@ Each state triggers the next after a set delay. All UI is rendered inline (not u
 
 | Action | File | Purpose |
 |--------|------|---------|
-| Create | `src/components/PromoDemoWalkthrough.tsx` | The scripted demo animation component |
-| Modify | `src/components/PromoSlideshow.tsx` | Replace photo slideshow content with the new demo walkthrough |
-| Modify | `src/pages/Promo.tsx` | Keep working with the updated PromoSlideshow (no changes needed if props stay the same) |
+| Modify | `src/components/PromoDemoWalkthrough.tsx` | Add photo gallery to review, add SAVE_ACTION and COMPARE stages, add mock second property data, add auto-scroll effect on review |
 
-No new dependencies. No Tailwind config changes needed — existing animations cover everything.
+No new files needed. No dependency changes.
 
 ---
 
-### How it differs from the current slideshow
+### Timing summary
 
-| Current | New |
-|---------|-----|
-| Cycles through 8 destination photos | Simulates a real user journey |
-| Shows destination names as text overlays | Shows the actual site UI (search bar, loading, review) |
-| ~35 seconds total | ~20 seconds total |
-| Showcases destinations | Showcases the product/feature |
+| Stage | Duration | What happens |
+|-------|----------|--------------|
+| HERO_REVEAL | 2s | Brand + search bar fade in |
+| TYPING | ~2.5s | Types "Sandals Royal Barbados" |
+| SUGGESTIONS | 1.5s | Dropdown appears |
+| SELECT | 1s | First item highlights, button says "Searching..." |
+| LOADING | ~4s | Progress bar + 5 loading stages |
+| REVIEW | 6s | Full review card with photos, ratings, paragraphs, auto-scroll |
+| SAVE_ACTION | 2s | Save button clicks, floating badge appears |
+| COMPARE | 4s | Two cards + verdict banner |
+| BRANDING | 3.5s | Logo + tagline fade in |
+| **Total** | **~26.5s** | |
 
-The homepage intro and `/promo` social recording route both continue to work the same way (once per session on homepage, looping on `/promo`).
