@@ -16,7 +16,7 @@ function slugify(text: string): string {
     .trim();
 }
 
-async function fetchPlacePhotos(placeName: string): Promise<string[]> {
+async function fetchPlacePhotos(placeName: string, maxPhotos = 6): Promise<string[]> {
   const apiKey = Deno.env.get("GOOGLE_PLACES_API_KEY");
   if (!apiKey) {
     console.log("No Google Places API key configured, skipping photos");
@@ -49,8 +49,7 @@ async function fetchPlacePhotos(placeName: string): Promise<string[]> {
       return [];
     }
 
-    // Get up to 6 photo resource names
-    return place.photos.slice(0, 6).map((photo: { name: string }) => photo.name);
+    return place.photos.slice(0, maxPhotos).map((photo: { name: string }) => photo.name);
   } catch (e) {
     console.error("Failed to fetch place photos:", e);
     return [];
@@ -156,24 +155,27 @@ Return your response as valid JSON with this exact structure (no markdown, no co
     {
       "name": "Name of activity or attraction nearby",
       "description": "1-2 sentence description of the activity based on real traveler recommendations",
-      "category": "Adventure" or "Dining" or "Culture" or "Nature" or "Shopping" or "Nightlife" or "Relaxation" or "Sightseeing"
+      "category": "Adventure" or "Dining" or "Culture" or "Nature" or "Shopping" or "Nightlife" or "Relaxation" or "Sightseeing",
+      "rating": number between 1 and 5 (one decimal, based on real reviews)
     },
     {
       "name": "Second activity",
       "description": "Description...",
-      "category": "Category"
+      "category": "Category",
+      "rating": number
     },
     {
       "name": "Third activity",
       "description": "Description...",
-      "category": "Category"
+      "category": "Category",
+      "rating": number
     }
   ]
 }
 
 Important: For the ratings object, use category names that are most relevant to this type of property. For hotels/resorts use Rooms, Food, Service, Location, Value. For cruises use Cabins, Dining, Entertainment, Excursions, Value. For destinations/attractions adapt categories accordingly. Always include exactly 5 rating categories.
 
-For thingsToDo, include exactly 3 popular activities, attractions, or experiences near the property that real travelers recommend. Use specific names (not generic descriptions).
+For thingsToDo, include exactly 3 popular activities, attractions, or experiences near the property that real travelers recommend. Use specific names (not generic descriptions). Include a rating for each based on aggregated real traveler reviews.
 
 Make the review feel authentic and balanced - mention both positives and negatives that real travelers have noted. Include specific details like room types, restaurant names, or nearby attractions when possible.`;
 
@@ -235,6 +237,18 @@ Make the review feel authentic and balanced - mention both positives and negativ
     // Attach citations and photo references
     reviewData.citations = citations;
     reviewData.photoReferences = photoReferences;
+
+    // Fetch a Google Places photo for each activity
+    if (reviewData.thingsToDo && Array.isArray(reviewData.thingsToDo) && reviewData.location) {
+      const activityPhotoPromises = reviewData.thingsToDo.slice(0, 3).map(
+        (activity: { name: string }) =>
+          fetchPlacePhotos(`${activity.name} ${reviewData.location}`, 1)
+      );
+      const activityPhotos = await Promise.all(activityPhotoPromises);
+      reviewData.thingsToDo.forEach((activity: { photoReference?: string }, i: number) => {
+        activity.photoReference = activityPhotos[i]?.[0] || undefined;
+      });
+    }
 
     // Save to cached_reviews
     const { data: savedReview, error: saveError } = await supabase

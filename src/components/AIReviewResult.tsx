@@ -88,13 +88,6 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview, onReviewReady }
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <div className="flex items-center gap-2 text-primary text-sm font-medium mb-1">
-              <Sparkles className="h-4 w-4" />
-              Compiled from Real Traveler Reviews
-            </div>
-            <p className="text-xs text-muted-foreground mb-3">
-              AI-curated summary drawn from hundreds of verified reviews across top travel platforms
-            </p>
             <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-3">
               {data.propertyName}
             </h2>
@@ -112,24 +105,33 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview, onReviewReady }
             <div className="lg:col-span-2 flex flex-col gap-10">
               {/* 1. Summary Card */}
               <div className="bg-card rounded-2xl p-8 shadow-soft order-1">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="flex items-center gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-5 w-5 ${
-                          i < Math.floor(data.overallRating)
-                            ? "text-accent fill-accent"
-                            : i < data.overallRating
-                            ? "text-accent fill-accent opacity-50"
-                            : "text-muted-foreground"
-                        }`}
-                      />
-                    ))}
-                    <span className="text-lg font-bold text-foreground ml-2">
-                      {data.overallRating}
-                    </span>
+                <div className="mb-6">
+                  <div className="flex items-center gap-4 flex-wrap">
+                    <div className="flex items-center gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`h-5 w-5 ${
+                            i < Math.floor(data.overallRating)
+                              ? "text-accent fill-accent"
+                              : i < data.overallRating
+                              ? "text-accent fill-accent opacity-50"
+                              : "text-muted-foreground"
+                          }`}
+                        />
+                      ))}
+                      <span className="text-lg font-bold text-foreground ml-2">
+                        {data.overallRating}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-primary text-sm font-medium">
+                      <Sparkles className="h-3.5 w-3.5" />
+                      Compiled from Real Traveler Reviews
+                    </div>
                   </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    AI-curated summary drawn from hundreds of verified reviews across top travel platforms
+                  </p>
                 </div>
                 <p className="text-lg text-foreground leading-relaxed">{data.summary}</p>
               </div>
@@ -168,7 +170,7 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview, onReviewReady }
               {/* 5. Things to Do */}
               {hasThingsToDo && (
                 <div className="order-5">
-                  <ThingsToDoSection thingsToDo={data.thingsToDo!} />
+                  <ThingsToDoSection thingsToDo={data.thingsToDo!} functionUrl={functionUrl} />
                 </div>
               )}
 
