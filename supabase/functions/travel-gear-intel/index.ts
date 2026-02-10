@@ -302,7 +302,11 @@ serve(async (req) => {
     let resultData: Record<string, unknown>;
     try {
       const jsonMatch = rawContent.match(/```(?:json)?\s*([\s\S]*?)```/);
-      const jsonStr = jsonMatch ? jsonMatch[1].trim() : rawContent.trim();
+      let jsonStr = jsonMatch ? jsonMatch[1].trim() : rawContent.trim();
+      // Fix common LLM JSON issues: missing opening quotes on keys
+      jsonStr = jsonStr.replace(/,\s*\n\s*([a-zA-Z_][a-zA-Z0-9_]*)"/g, ',\n      "$1"');
+      // Fix unquoted keys at start of object
+      jsonStr = jsonStr.replace(/{\s*\n\s*([a-zA-Z_][a-zA-Z0-9_]*)"/g, '{\n      "$1"');
       resultData = JSON.parse(jsonStr);
     } catch {
       console.error("Failed to parse Perplexity response:", rawContent);
