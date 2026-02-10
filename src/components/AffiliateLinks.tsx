@@ -38,36 +38,58 @@ export const HOTELS_LINKS: Record<CountryCode, string> = {
   GB: "https://www.hotels.com/affiliates/hotelscom-home.3by33jZ",
 };
 
-export const VRBO_LINK = "https://www.jdoqocy.com/click-101645364-10697641?url=" + encodeURIComponent("https://www.vrbo.com");
+const VRBO_CJ_BASE = "https://www.jdoqocy.com/click-101645364-10697641?url=";
 
-function buildAffiliates(country: CountryCode) {
-  return [
-    {
-      name: "Expedia",
-      url: EXPEDIA_LINKS[country],
-      tagline: "Bundle hotel + flight for savings",
-      color: "border-[hsl(45,100%,51%)]/30 hover:border-[hsl(45,100%,51%)]",
-      accent: "text-[hsl(45,100%,45%)]",
-    },
-    {
-      name: "Hotels.com",
-      url: HOTELS_LINKS[country],
-      tagline: "Earn a free night every 10 stays",
-      color: "border-[hsl(0,70%,40%)]/30 hover:border-[hsl(0,70%,40%)]",
-      accent: "text-[hsl(0,70%,40%)]",
-    },
-    {
-      name: "VRBO",
-      url: VRBO_LINK,
-      tagline: "Best for groups & longer stays",
-      color: "border-[hsl(205,85%,45%)]/30 hover:border-[hsl(205,85%,45%)]",
-      accent: "text-[hsl(205,85%,45%)]",
-    },
-  ];
+export const VRBO_LINK = VRBO_CJ_BASE + encodeURIComponent("https://www.vrbo.com");
+
+export function buildDeepLinks(country: CountryCode, propertyName?: string) {
+  if (!propertyName) {
+    return {
+      expedia: EXPEDIA_LINKS[country],
+      hotels: HOTELS_LINKS[country],
+      vrbo: VRBO_LINK,
+    };
+  }
+  const q = encodeURIComponent(propertyName);
+  return {
+    expedia: EXPEDIA_LINKS[country] + `&destination=${q}`,
+    hotels: HOTELS_LINKS[country] + `&q-destination=${q}`,
+    vrbo: VRBO_CJ_BASE + encodeURIComponent(`https://www.vrbo.com/search?query=${propertyName}`),
+  };
 }
 
-const AffiliateLinks = () => {
-  const affiliates = useMemo(() => buildAffiliates(detectCountry()), []);
+interface AffiliateLinksProps {
+  propertyName?: string;
+}
+
+const AffiliateLinks = ({ propertyName }: AffiliateLinksProps) => {
+  const affiliates = useMemo(() => {
+    const country = detectCountry();
+    const links = buildDeepLinks(country, propertyName);
+    return [
+      {
+        name: "Expedia",
+        url: links.expedia,
+        tagline: "Bundle hotel + flight for savings",
+        color: "border-[hsl(45,100%,51%)]/30 hover:border-[hsl(45,100%,51%)]",
+        accent: "text-[hsl(45,100%,45%)]",
+      },
+      {
+        name: "Hotels.com",
+        url: links.hotels,
+        tagline: "Earn a free night every 10 stays",
+        color: "border-[hsl(0,70%,40%)]/30 hover:border-[hsl(0,70%,40%)]",
+        accent: "text-[hsl(0,70%,40%)]",
+      },
+      {
+        name: "VRBO",
+        url: links.vrbo,
+        tagline: "Best for groups & longer stays",
+        color: "border-[hsl(205,85%,45%)]/30 hover:border-[hsl(205,85%,45%)]",
+        accent: "text-[hsl(205,85%,45%)]",
+      },
+    ];
+  }, [propertyName]);
 
   return (
     <div className="bg-card rounded-2xl p-6 shadow-soft">

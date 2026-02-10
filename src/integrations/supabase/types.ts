@@ -68,6 +68,27 @@ export type Database = {
         }
         Relationships: []
       }
+      subscribers: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          source_slug: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          source_slug?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          source_slug?: string | null
+        }
+        Relationships: []
+      }
       travel_intel_cache: {
         Row: {
           cache_key: string

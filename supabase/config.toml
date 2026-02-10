@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.travel-intel]
 verify_jwt = false
+
+[functions.subscribe]
+verify_jwt = false

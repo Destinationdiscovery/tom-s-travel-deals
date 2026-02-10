@@ -1,41 +1,19 @@
 import { ExternalLink, Star } from "lucide-react";
 import type { ThingToDo } from "@/hooks/useGenerateReview";
 import { useMemo } from "react";
-
-type CountryCode = "CA" | "US" | "GB";
-
-const CANADIAN_TIMEZONES = [
-  "America/Toronto", "America/Vancouver", "America/Edmonton", "America/Winnipeg",
-  "America/Halifax", "America/St_Johns", "America/Regina", "America/Moncton",
-  "America/Iqaluit", "America/Whitehorse", "America/Yellowknife", "America/Dawson",
-  "America/Dawson_Creek", "America/Fort_Nelson", "America/Creston", "America/Goose_Bay",
-  "America/Glace_Bay", "America/Rankin_Inlet", "America/Resolute", "America/Swift_Current",
-  "America/Cambridge_Bay", "America/Inuvik", "America/Pangnirtung", "America/Atikokan",
-  "America/Thunder_Bay", "America/Nipigon", "America/Rainy_River",
-];
-
-function detectCountry(): CountryCode {
-  try {
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    if (CANADIAN_TIMEZONES.includes(tz)) return "CA";
-    if (tz === "Europe/London") return "GB";
-  } catch { /* fallback */ }
-  return "US";
-}
-
-const EXPEDIA_LINKS: Record<CountryCode, string> = {
-  CA: "https://expedia.com/affiliates/expedia-home.2FNlhXx",
-  US: "https://expedia.com/affiliates/expedia-home.Ee1VYBn",
-  GB: "https://expedia.com/affiliates/expedia-home.Ut28wxn",
-};
+import { buildDeepLinks, detectCountry } from "@/components/AffiliateLinks";
 
 interface ThingsToDoSectionProps {
   thingsToDo: ThingToDo[];
   functionUrl?: string;
+  propertyName?: string;
 }
 
-const ThingsToDoSection = ({ thingsToDo, functionUrl }: ThingsToDoSectionProps) => {
-  const expediaLink = useMemo(() => EXPEDIA_LINKS[detectCountry()], []);
+const ThingsToDoSection = ({ thingsToDo, functionUrl, propertyName }: ThingsToDoSectionProps) => {
+  const expediaLink = useMemo(() => {
+    const country = detectCountry();
+    return buildDeepLinks(country, propertyName).expedia;
+  }, [propertyName]);
 
   if (!thingsToDo || thingsToDo.length === 0) return null;
 
