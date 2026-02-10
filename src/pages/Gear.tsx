@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Star, Loader2, ExternalLink, Search, ArrowLeft, Sparkles, ThumbsUp, ThumbsDown, CheckCircle, Package } from "lucide-react";
+import { Star, Loader2, ExternalLink, Search, ArrowLeft, Sparkles, ThumbsUp, ThumbsDown, CheckCircle, Package, MessageCircle } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,7 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useGearIntel, type GearItem, type GearReviewData } from "@/hooks/useGearIntel";
+import { gearReviews } from "@/data/gearReviews";
 import heroImg from "@/assets/gear-water-hammock-main.jpg";
 
 /* ─── Loading Component ─── */
@@ -386,52 +388,110 @@ const Gear = () => {
 
         {/* Content */}
         <div className="container mx-auto px-4 py-10">
-          {/* Loading for packing list */}
-          {loading && !packingData && <GearLoading label="Building your packing list..." />}
+          <Tabs defaultValue="ai-packing" className="w-full">
+            <div className="flex justify-center mb-8">
+              <TabsList className="grid grid-cols-2 w-full max-w-md">
+                <TabsTrigger value="ai-packing" className="gap-2">
+                  <Sparkles className="h-4 w-4" /> AI Packing List
+                </TabsTrigger>
+                <TabsTrigger value="our-reviews" className="gap-2">
+                  <MessageCircle className="h-4 w-4" /> Our Gear Reviews
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
-          {/* Loading for product review */}
-          {reviewLoading && <GearLoading label="Researching product reviews..." />}
+            <TabsContent value="ai-packing">
+              {loading && !packingData && <GearLoading label="Building your packing list..." />}
+              {reviewLoading && <GearLoading label="Researching product reviews..." />}
+              {reviewData && !reviewLoading && (
+                <ProductReviewPanel review={reviewData} onBack={clearReview} />
+              )}
+              {packingData && !reviewData && !reviewLoading && (
+                <div className="space-y-6 animate-fade-in">
+                  <div className="text-center mb-8">
+                    <h2 className="font-display text-2xl font-bold text-foreground mb-2">Your Packing List</h2>
+                    <p className="text-muted-foreground">Click "Review This" on any item for a full AI-powered product review.</p>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
+                    {packingData.items.map((item, i) => (
+                      <PackingResultCard key={i} item={item} onReview={handleReviewProduct} />
+                    ))}
+                  </div>
+                  <Citations citations={packingData.citations} />
+                  <p className="text-xs text-muted-foreground text-center mt-4">
+                    Amazon links may earn us a commission at no extra cost to you.
+                  </p>
+                </div>
+              )}
+              {!loading && !packingData && !reviewData && !reviewLoading && (
+                <div className="text-center py-16 max-w-lg mx-auto">
+                  <Search className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
+                  <h3 className="font-display text-xl font-semibold text-foreground mb-2">Where are you headed?</h3>
+                  <p className="text-muted-foreground">
+                    Describe your trip above and we'll recommend the best gear — with full AI reviews on demand.
+                  </p>
+                </div>
+              )}
+              {error && (
+                <div className="mt-6 p-4 rounded-xl bg-destructive/10 text-destructive text-sm max-w-2xl mx-auto">
+                  {error}
+                </div>
+              )}
+            </TabsContent>
 
-          {/* Product Review Panel */}
-          {reviewData && !reviewLoading && (
-            <ProductReviewPanel review={reviewData} onBack={clearReview} />
-          )}
-
-          {/* Packing Results (hide when reviewing a product) */}
-          {packingData && !reviewData && !reviewLoading && (
-            <div className="space-y-6 animate-fade-in">
+            <TabsContent value="our-reviews">
               <div className="text-center mb-8">
-                <h2 className="font-display text-2xl font-bold text-foreground mb-2">Your Packing List</h2>
-                <p className="text-muted-foreground">Click "Review This" on any item for a full AI-powered product review.</p>
+                <h2 className="font-display text-2xl font-bold text-foreground mb-2">Personally Tested Gear</h2>
+                <p className="text-muted-foreground">Every item here has been tested on real trips by our team.</p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
-                {packingData.items.map((item, i) => (
-                  <PackingResultCard key={i} item={item} onReview={handleReviewProduct} />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+                {gearReviews.map((gear) => (
+                  <Card key={gear.id} className="overflow-hidden hover:shadow-lg transition-all duration-300 group border-border/50 bg-card">
+                    <div className="aspect-[4/3] bg-muted relative overflow-hidden">
+                      <img
+                        src={gear.image}
+                        alt={gear.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        loading="lazy"
+                      />
+                      <Badge className={`absolute top-3 left-3 border-0 ${categoryColors[gear.category] || "bg-primary/10 text-primary"}`}>
+                        {gear.category}
+                      </Badge>
+                    </div>
+                    <CardContent className="p-5">
+                      <p className="text-xs text-muted-foreground mb-1">{gear.brand}</p>
+                      <h3 className="font-semibold text-foreground mb-2 text-base line-clamp-2">{gear.name}</h3>
+                      <div className="flex items-center gap-1 mb-2">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`h-3.5 w-3.5 ${
+                              i < Math.floor(gear.rating)
+                                ? "text-accent fill-accent"
+                                : i < gear.rating
+                                ? "text-accent fill-accent opacity-50"
+                                : "text-muted-foreground"
+                            }`}
+                          />
+                        ))}
+                        <span className="text-sm font-medium text-foreground ml-1">{gear.rating}</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{gear.excerpt}</p>
+                      <p className="text-xs text-muted-foreground mb-4">Tested on: {gear.testedOn}</p>
+                      <a href={gear.amazonLink} target="_blank" rel="noopener noreferrer">
+                        <Button variant="outline" size="sm" className="w-full gap-1.5">
+                          Get it on Amazon <ExternalLink className="h-3.5 w-3.5" />
+                        </Button>
+                      </a>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
-              <Citations citations={packingData.citations} />
-              <p className="text-xs text-muted-foreground text-center mt-4">
+              <p className="text-xs text-muted-foreground text-center mt-6">
                 Amazon links may earn us a commission at no extra cost to you.
               </p>
-            </div>
-          )}
-
-          {/* Empty state */}
-          {!loading && !packingData && !reviewData && !reviewLoading && (
-            <div className="text-center py-16 max-w-lg mx-auto">
-              <Search className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
-              <h3 className="font-display text-xl font-semibold text-foreground mb-2">Where are you headed?</h3>
-              <p className="text-muted-foreground">
-                Describe your trip above and we'll recommend the best gear — with full AI reviews on demand.
-              </p>
-            </div>
-          )}
-
-          {error && (
-            <div className="mt-6 p-4 rounded-xl bg-destructive/10 text-destructive text-sm max-w-2xl mx-auto">
-              {error}
-            </div>
-          )}
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
       <Footer />
