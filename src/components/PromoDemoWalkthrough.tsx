@@ -1,6 +1,9 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Search, Star, Check, Loader2, MapPin, Camera, Sparkles } from "lucide-react";
 import heroBackground from "@/assets/hero-beach.jpg";
+import PromoReviewScene from "@/components/promo/PromoReviewScene";
+import PromoCompareScene from "@/components/promo/PromoCompareScene";
+import PromoSaveBadge from "@/components/promo/PromoSaveBadge";
 
 type Stage =
   | "HERO_REVEAL"
@@ -9,6 +12,8 @@ type Stage =
   | "SELECT"
   | "LOADING"
   | "REVIEW"
+  | "SAVE_ACTION"
+  | "COMPARE"
   | "BRANDING";
 
 const SEARCH_QUERY = "Sandals Royal Barbados";
@@ -27,15 +32,6 @@ const LOADING_STAGES = [
   { label: "Compiling your review...", icon: Sparkles, duration: 0 },
 ];
 
-const RATING_BARS = [
-  { label: "Location", value: 4.8 },
-  { label: "Service", value: 4.6 },
-  { label: "Amenities", value: 4.4 },
-  { label: "Value", value: 4.2 },
-];
-
-const BEST_FOR = ["Couples", "Honeymoon", "Beach Lovers", "Luxury"];
-
 interface PromoDemoWalkthroughProps {
   onComplete: () => void;
   loop?: boolean;
@@ -48,6 +44,10 @@ const PromoDemoWalkthrough = ({ onComplete, loop = false }: PromoDemoWalkthrough
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [selectedSuggestion, setSelectedSuggestion] = useState(-1);
   const [fadingOut, setFadingOut] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [badgeVisible, setBadgeVisible] = useState(false);
+  const [badgePulsing, setBadgePulsing] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   const reset = useCallback(() => {
     setStage("HERO_REVEAL");
@@ -56,6 +56,10 @@ const PromoDemoWalkthrough = ({ onComplete, loop = false }: PromoDemoWalkthrough
     setLoadingProgress(0);
     setSelectedSuggestion(-1);
     setFadingOut(false);
+    setSaved(false);
+    setBadgeVisible(false);
+    setBadgePulsing(false);
+    setScrollProgress(0);
   }, []);
 
   // Stage machine
@@ -67,7 +71,6 @@ const PromoDemoWalkthrough = ({ onComplete, loop = false }: PromoDemoWalkthrough
         timer = setTimeout(() => setStage("TYPING"), 2000);
         break;
       case "TYPING":
-        // handled by typing effect below
         break;
       case "SUGGESTIONS":
         timer = setTimeout(() => {
@@ -79,9 +82,24 @@ const PromoDemoWalkthrough = ({ onComplete, loop = false }: PromoDemoWalkthrough
         timer = setTimeout(() => setStage("LOADING"), 1000);
         break;
       case "LOADING":
-        // handled by loading effect below
         break;
       case "REVIEW":
+        timer = setTimeout(() => setStage("SAVE_ACTION"), 6000);
+        break;
+      case "SAVE_ACTION":
+        // Animate save button click after 500ms
+        timer = setTimeout(() => {
+          setSaved(true);
+          setTimeout(() => {
+            setBadgeVisible(true);
+            setTimeout(() => {
+              setBadgePulsing(true);
+              setTimeout(() => setStage("COMPARE"), 800);
+            }, 500);
+          }, 500);
+        }, 500);
+        break;
+      case "COMPARE":
         timer = setTimeout(() => setStage("BRANDING"), 4000);
         break;
       case "BRANDING":
@@ -142,11 +160,23 @@ const PromoDemoWalkthrough = ({ onComplete, loop = false }: PromoDemoWalkthrough
     }
   }, [stage, loadingStage]);
 
-  const heroVisible = stage !== "BRANDING";
+  // Auto-scroll effect during REVIEW
+  useEffect(() => {
+    if (stage !== "REVIEW" && stage !== "SAVE_ACTION") return;
+
+    const scrollInterval = setInterval(() => {
+      setScrollProgress((p) => Math.min(p + 1.5, 200));
+    }, 50);
+
+    return () => clearInterval(scrollInterval);
+  }, [stage]);
+
+  const heroVisible = stage !== "BRANDING" && stage !== "COMPARE";
   const showTyping = stage === "TYPING" || stage === "SUGGESTIONS" || stage === "SELECT";
   const showSuggestions = stage === "SUGGESTIONS" || stage === "SELECT";
   const showLoading = stage === "LOADING";
-  const showReview = stage === "REVIEW";
+  const showReview = stage === "REVIEW" || stage === "SAVE_ACTION";
+  const showCompare = stage === "COMPARE";
   const showBranding = stage === "BRANDING";
 
   return (
@@ -168,7 +198,6 @@ const PromoDemoWalkthrough = ({ onComplete, loop = false }: PromoDemoWalkthrough
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60" />
 
         <div className="absolute inset-0 flex flex-col items-center justify-center px-4">
-          {/* Brand */}
           <h1
             className={`font-display text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight transition-all duration-700 ${
               stage === "HERO_REVEAL"
@@ -206,7 +235,6 @@ const PromoDemoWalkthrough = ({ onComplete, loop = false }: PromoDemoWalkthrough
                 )}
               </div>
 
-              {/* Suggestions dropdown */}
               {showSuggestions && (
                 <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-lg border border-border overflow-hidden z-20 animate-fade-in">
                   {SUGGESTIONS.map((s, i) => (
@@ -249,7 +277,6 @@ const PromoDemoWalkthrough = ({ onComplete, loop = false }: PromoDemoWalkthrough
       >
         <div className="max-w-2xl w-full mx-4">
           <div className="bg-card rounded-2xl p-8 shadow-lg">
-            {/* Progress bar */}
             <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary mb-8">
               <div
                 className="h-full bg-primary transition-all duration-200 rounded-full"
@@ -303,76 +330,17 @@ const PromoDemoWalkthrough = ({ onComplete, loop = false }: PromoDemoWalkthrough
       </div>
 
       {/* REVIEW SCENE */}
-      <div
-        className="absolute inset-0 flex items-start justify-center bg-background overflow-y-auto transition-opacity duration-700 pt-12 pb-12"
-        style={{ opacity: showReview ? 1 : 0, pointerEvents: showReview ? "auto" : "none" }}
-      >
-        <div
-          className={`max-w-3xl w-full mx-4 transition-all duration-700 ${
-            showReview ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
-        >
-          <div className="bg-card rounded-2xl p-6 md:p-8 shadow-lg space-y-6">
-            {/* Header */}
-            <div>
-              <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground">
-                Sandals Royal Barbados
-              </h2>
-              <p className="text-muted-foreground text-sm mt-1">All-Inclusive Resort · St. Lawrence Gap, Barbados</p>
-            </div>
+      <PromoReviewScene
+        visible={showReview}
+        saved={saved}
+        scrollProgress={scrollProgress}
+      />
 
-            {/* Rating */}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1">
-                {[1, 2, 3, 4].map((i) => (
-                  <Star key={i} className="h-5 w-5 fill-amber-400 text-amber-400" />
-                ))}
-                <Star className="h-5 w-5 fill-amber-400/50 text-amber-400" />
-              </div>
-              <span className="text-lg font-bold text-foreground">4.5</span>
-              <span className="text-sm text-muted-foreground">RTG Score</span>
-            </div>
+      {/* COMPARE SCENE */}
+      <PromoCompareScene visible={showCompare} />
 
-            {/* Summary */}
-            <p className="text-muted-foreground leading-relaxed">
-              Sandals Royal Barbados consistently impresses guests with its stunning beachfront
-              location, exceptional service, and world-class dining options. The swim-up suites
-              and rooftop pool are standout features that elevate this property above typical
-              all-inclusive resorts.
-            </p>
-
-            {/* Rating bars */}
-            <div className="grid grid-cols-2 gap-4">
-              {RATING_BARS.map((r) => (
-                <div key={r.label} className="space-y-1">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">{r.label}</span>
-                    <span className="font-medium text-foreground">{r.value}</span>
-                  </div>
-                  <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-primary rounded-full transition-all duration-1000"
-                      style={{ width: `${(r.value / 5) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Best For */}
-            <div className="flex flex-wrap gap-2">
-              {BEST_FOR.map((tag) => (
-                <span
-                  key={tag}
-                  className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* FLOATING BADGE */}
+      <PromoSaveBadge visible={badgeVisible} pulsing={badgePulsing} />
 
       {/* BRANDING FINALE */}
       <div
