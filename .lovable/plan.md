@@ -1,88 +1,137 @@
 
 
-## Implementation: Gear Overhaul + Know Before You Go Rename
+## Travel Gear Redesign: Single Search Flow with On-Demand Product Reviews
 
-Everything is ready to build. The database table and secret are already in place.
-
----
-
-### Step 1: Rename "Travel Intel" to "Know Before You Go"
-
-Three files need label updates (routes stay the same):
-
-- **Header.tsx** (line 27): Change `"Travel Intel"` to `"Know Before You Go"`
-- **HeroSection.tsx** (line 12): Change `"Travel Intel"` to `"Know Before You Go"`
-- **TravelIntel.tsx**: Update document title and hero heading text
+Remove all tabs. Replace with a single, powerful search experience that mirrors the site's review-first identity.
 
 ---
 
-### Step 2: Update GearReviewsSection
+### The Flow
 
-- **GearReviewsSection.tsx** (line 25): Change `"Gear Reviews"` to `"Travel Gear"`
-- Also update the "View All Gear Reviews" button text to "View All Travel Gear"
-
----
-
-### Step 3: Create the `travel-gear-intel` edge function
-
-**New file**: `supabase/functions/travel-gear-intel/index.ts`
-
-Follows the same pattern as `travel-intel`:
-- Accepts `{ query, type, country }` where type is `"trending"` or `"must-haves"`
-- Checks `gear_intel_cache` with 7-day TTL
-- Calls Perplexity sonar model with tailored prompts
-- Reads `AMAZON_ASSOCIATE_TAGS` secret, parses JSON, picks correct regional tag
-- Builds Amazon search URLs using correct domain (`.ca`, `.com`, `.co.uk`)
-- Caches and returns results
-
-Add `[functions.travel-gear-intel]` with `verify_jwt = false` to config.
+1. User lands on `/gear` and sees a hero with a prominent search bar
+2. User types their trip (e.g., "7 day all inclusive in Mexico")
+3. AI returns product recommendation cards -- each with an image, name, brand, price, category, reason, "Get it on Amazon" link, and a **"Review This"** button
+4. User clicks "Review This" on any product
+5. A full AI-generated product review appears inline (same style as destination reviews): RTG Score, category ratings, summary, synthesized buyer feedback, pros/cons, "Best For" tags, and "Get it on Amazon" CTA
+6. User can go back to their results and review another product
 
 ---
 
-### Step 4: Create `useGearIntel` hook
+### What Gets Removed
 
-**New file**: `src/hooks/useGearIntel.ts`
+- All three tabs (My Reviews, Trending, Must-Haves)
+- Static gear review cards and category filters
+- `/gear/:slug` route and `GearReview.tsx` page
+- Import of `gearReviews` data in `Gear.tsx`
 
-Mirrors `useTravelIntel` pattern — manages loading/error/data state, calls the edge function via `supabase.functions.invoke("travel-gear-intel", ...)`.
+### What Stays
 
----
-
-### Step 5: Rewrite Gear page
-
-**Modified file**: `src/pages/Gear.tsx`
-
-- New hero image: `gear-water-hammock-main.jpg`, title changed to "Travel Gear"
-- Three-tab layout using existing `Tabs` component:
-  - **My Reviews**: Current category filter + gear card grid (unchanged)
-  - **Trending**: Search input + AI results with Amazon affiliate buttons
-  - **Must-Haves**: Search input + AI checklist with Amazon affiliate buttons
-- Uses `detectCountry()` from `AffiliateLinks.tsx` for country detection
-- Each result card shows: product name, brand, price range, reason, "View on Amazon" button
-- Affiliate disclaimer at bottom of AI tabs
+- `GearReviewsSection.tsx` on the homepage (links to `/gear` -- can update later)
+- `gearReviews` data file (still used by homepage carousel)
+- All Amazon affiliate logic with regional tags
+- Hero section (updated copy)
 
 ---
 
-### Technical Details
+### Technical Implementation
 
-**Perplexity prompts**:
-- Trending: "What are the top 6-8 trending travel gear items for {query}?" with structured JSON response
-- Must-Haves: "What are the 8-12 must-have items for {query}?" with structured JSON response
+**1. Update the edge function (`supabase/functions/travel-gear-intel/index.ts`)**
 
-**Amazon URL construction**:
+Add a third type: `"review"`. When type is `"review"`, the Perplexity prompt asks for a full product review:
+- Product name, brand, price range
+- Overall rating (1-5)
+- Category ratings: Durability, Value, Portability, Comfort, Design (each 1-5)
+- Summary (2-3 sentences)
+- 3-4 review paragraphs synthesized from Amazon reviews and expert sources
+- Pros list (4-6 items)
+- Cons list (3-4 items)
+- "Best For" tags (3-5)
+- Citations
+
+Also update the "must-haves" prompt to request an `imageSearch` term per item (a short phrase Perplexity can use to describe the product for image display -- we'll use category-based placeholder icons as a reliable fallback since external image URLs are unreliable).
+
+Cache key: `review:{product-name-slug}`
+
+**2. Update the hook (`src/hooks/useGearIntel.ts`)**
+
+- Add `"review"` to `GearIntelType`
+- Add a new `GearReviewData` interface:
+```text
+GearReviewData {
+  productName: string
+  brand: string
+  priceRange: string
+  overallRating: number
+  ratings: { Durability: number, Value: number, Portability: number, Comfort: number, Design: number }
+  summary: string
+  reviewParagraphs: string[]
+  pros: string[]
+  cons: string[]
+  bestFor: string[]
+  citations: string[]
+  amazonUrl: string
+}
 ```
-CA: https://www.amazon.ca/s?k={encoded_name}&tag=gen80s01-20
-US: https://www.amazon.com/s?k={encoded_name}&tag=destinati0a78-20
-GB: https://www.amazon.co.uk/s?k={encoded_name}&tag=uktripreviews-21
-```
+- Add `reviewData` state and `reviewLoading` state
+- Add `fetchProductReview(productName: string)` function
 
-**Files changed**:
+**3. Rewrite the Gear page (`src/pages/Gear.tsx`)**
+
+Single-flow layout (no tabs):
+
+- **Hero**: Updated title "Travel Gear" with subtitle "Tell us where you're going -- we'll tell you what to pack"
+- **Search bar**: Single input + button, placeholder "e.g. 7 day all inclusive in Mexico, backpacking Japan..."
+- **Results grid**: 2-column card grid, each card shows:
+  - Category icon/badge (color-coded by category like Packing, Tech, Comfort, Safety)
+  - Product name + brand
+  - Price range
+  - Why it's recommended (1-2 sentences)
+  - Two action buttons: "Get it on Amazon" (affiliate link) + "Review This" (triggers AI review)
+- **Product review section**: When user clicks "Review This", a full review panel appears below the results (or replaces them with a back button), styled identically to `AIReviewResult.tsx`:
+  - Product name as header
+  - RTG Score with stars + "Compiled from Real Product Reviews" badge
+  - Rating breakdown bars (Durability, Value, Portability, Comfort, Design)
+  - Summary paragraph
+  - "What Buyers Say" sections
+  - Pros and Cons
+  - "Best For" tags
+  - "Get it on Amazon" CTA card with affiliate link
+  - Sources/citations
+  - "Back to Results" button
+- **Loading states**: Reuse the staged progress loader pattern
+- **Affiliate disclaimer** at bottom
+
+**4. Update `App.tsx`**
+
+- Remove the `/gear/:slug` route
+- Remove `GearReview` import
+
+**5. Update `GearReviewsSection.tsx` (homepage)**
+
+- Update description text to match new functionality: "Tell us where you're going and we'll recommend the best gear -- with full AI reviews on demand."
+- Keep the carousel but update card links to navigate to `/gear` with a search query param instead of `/gear/:slug`
+
+---
+
+### Files Changed
+
 | Action | File |
 |--------|------|
-| Modify | `src/components/Header.tsx` |
-| Modify | `src/components/HeroSection.tsx` |
-| Modify | `src/pages/TravelIntel.tsx` |
-| Modify | `src/components/GearReviewsSection.tsx` |
-| Modify | `src/pages/Gear.tsx` |
-| Create | `supabase/functions/travel-gear-intel/index.ts` |
-| Create | `src/hooks/useGearIntel.ts` |
+| Modify | `supabase/functions/travel-gear-intel/index.ts` -- add "review" type prompt |
+| Modify | `src/hooks/useGearIntel.ts` -- add review type, GearReviewData interface |
+| Rewrite | `src/pages/Gear.tsx` -- single search flow with inline product reviews |
+| Modify | `src/App.tsx` -- remove `/gear/:slug` route |
+| Modify | `src/components/GearReviewsSection.tsx` -- update description and card links |
+| Delete | `src/pages/GearReview.tsx` -- no longer needed |
+
+---
+
+### Open Question: Page Title
+
+The search prompt needs a catchy name. Some options to consider:
+- "Where Are You Going?"
+- "What Should I Pack?"
+- "Pack Smart"
+
+We can finalize this during implementation or you can pick one now.
 
