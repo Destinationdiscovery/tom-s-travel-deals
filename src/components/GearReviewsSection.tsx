@@ -25,7 +25,7 @@ const GearReviewsSection = () => {
             Travel Gear
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Items I've personally used and tested while traveling. Honest reviews from a travel consultant who's been there.
+            Tell us where you're going and we'll recommend the best gear — with full AI reviews on demand.
           </p>
         </div>
 
@@ -40,7 +40,7 @@ const GearReviewsSection = () => {
             <CarouselContent className="-ml-4">
               {gearReviews.map((gear) => (
                 <CarouselItem key={gear.id} className="pl-4 basis-full md:basis-1/3">
-                  <Link to={`/gear/${gear.slug}`} className="block h-full">
+                  <Link to="/gear" className="block h-full">
                     <Card className="h-full overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer border-border/50 bg-card">
                       <div className="aspect-square bg-muted relative overflow-hidden">
                         <img

@@ -19,26 +19,10 @@ function buildAmazonUrl(productName: string, country: string, tags: Record<strin
   return `${domain}/s?k=${encodeURIComponent(productName)}&tag=${tag}`;
 }
 
+const VALID_TYPES = ["must-haves", "review"] as const;
+type IntelType = (typeof VALID_TYPES)[number];
+
 const PROMPTS: Record<string, (query: string) => string> = {
-  trending: (query) =>
-    `You are a travel gear expert. Research the top 6-8 trending travel gear items for "${query}".
-
-Return your response as valid JSON only (no markdown, no code blocks):
-
-{
-  "items": [
-    {
-      "name": "Product Name",
-      "brand": "Brand Name",
-      "priceRange": "$XX - $XX",
-      "reason": "Why this is trending and useful for travelers",
-      "category": "Category like Packing, Tech, Comfort, Safety, etc."
-    }
-  ]
-}
-
-Focus on practical, currently popular items. Be specific with product names and brands.`,
-
   "must-haves": (query) =>
     `You are a travel packing expert. Research the 8-12 must-have items for "${query}".
 
@@ -51,12 +35,43 @@ Return your response as valid JSON only (no markdown, no code blocks):
       "brand": "Brand Name",
       "priceRange": "$XX - $XX",
       "reason": "Why this is essential for this type of travel",
-      "category": "Category like Packing, Tech, Comfort, Safety, etc."
+      "category": "Category like Packing, Tech, Comfort, Safety, Health, Clothing, etc."
     }
   ]
 }
 
 Focus on essential, practical items travelers shouldn't forget. Be specific with product names and brands.`,
+
+  review: (query) =>
+    `You are a travel gear reviewer. Research "${query}" thoroughly using Amazon reviews, expert reviews, YouTube reviews, and travel blogs.
+
+Return your response as valid JSON only (no markdown, no code blocks):
+
+{
+  "productName": "Full Product Name",
+  "brand": "Brand Name",
+  "priceRange": "$XX - $XX",
+  "overallRating": 4.2,
+  "ratings": {
+    "Durability": 4.5,
+    "Value": 3.8,
+    "Portability": 4.0,
+    "Comfort": 4.3,
+    "Design": 4.1
+  },
+  "summary": "A 2-3 sentence summary of the product based on real reviews.",
+  "reviewParagraphs": [
+    "Paragraph 1 about build quality and first impressions synthesized from real reviews...",
+    "Paragraph 2 about practical use and performance...",
+    "Paragraph 3 about value proposition and comparisons...",
+    "Paragraph 4 about long-term durability and reliability..."
+  ],
+  "pros": ["Pro 1", "Pro 2", "Pro 3", "Pro 4", "Pro 5"],
+  "cons": ["Con 1", "Con 2", "Con 3"],
+  "bestFor": ["Frequent flyers", "Weekend trips", "Budget travelers"]
+}
+
+All ratings must be between 1.0 and 5.0. Be honest and balanced. Synthesize from real buyer feedback.`,
 };
 
 serve(async (req) => {
@@ -67,9 +82,9 @@ serve(async (req) => {
   try {
     const { query, type, country } = await req.json();
 
-    if (!type || !["trending", "must-haves"].includes(type)) {
+    if (!type || !VALID_TYPES.includes(type)) {
       return new Response(
-        JSON.stringify({ error: "Invalid type. Must be trending or must-haves." }),
+        JSON.stringify({ error: "Invalid type. Must be must-haves or review." }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -108,14 +123,19 @@ serve(async (req) => {
 
     if (cached) {
       console.log("Cache hit for:", cacheKey);
-      const cachedResult = cached.result_data as { items?: Array<Record<string, string>> };
-      // Inject Amazon URLs with user's country
-      if (cachedResult.items) {
-        cachedResult.items = cachedResult.items.map((item: Record<string, string>) => ({
+      const cachedResult = cached.result_data as Record<string, unknown>;
+
+      if (type === "must-haves" && Array.isArray(cachedResult.items)) {
+        cachedResult.items = (cachedResult.items as Record<string, string>[]).map((item) => ({
           ...item,
           amazonUrl: buildAmazonUrl(item.name, userCountry, amazonTags),
         }));
+      } else if (type === "review") {
+        (cachedResult as Record<string, unknown>).amazonUrl = buildAmazonUrl(
+          (cachedResult.productName as string) || trimQuery, userCountry, amazonTags
+        );
       }
+
       return new Response(JSON.stringify({ data: cachedResult }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -131,7 +151,6 @@ serve(async (req) => {
     }
 
     const prompt = PROMPTS[type](query.trim());
-
     console.log("Calling Perplexity for travel-gear-intel:", cacheKey);
 
     const perplexityResponse = await fetch("https://api.perplexity.ai/chat/completions", {
@@ -170,7 +189,7 @@ serve(async (req) => {
       );
     }
 
-    let resultData: { items?: Array<Record<string, string>>; citations?: string[] };
+    let resultData: Record<string, unknown>;
     try {
       const jsonMatch = rawContent.match(/```(?:json)?\s*([\s\S]*?)```/);
       const jsonStr = jsonMatch ? jsonMatch[1].trim() : rawContent.trim();
@@ -196,11 +215,15 @@ serve(async (req) => {
       }, { onConflict: "cache_key" });
 
     // Add Amazon URLs for this user's country
-    if (resultData.items) {
-      resultData.items = resultData.items.map((item: Record<string, string>) => ({
+    if (type === "must-haves" && Array.isArray(resultData.items)) {
+      resultData.items = (resultData.items as Record<string, string>[]).map((item) => ({
         ...item,
         amazonUrl: buildAmazonUrl(item.name, userCountry, amazonTags),
       }));
+    } else if (type === "review") {
+      resultData.amazonUrl = buildAmazonUrl(
+        (resultData.productName as string) || query.trim(), userCountry, amazonTags
+      );
     }
 
     return new Response(JSON.stringify({ data: resultData }), {
