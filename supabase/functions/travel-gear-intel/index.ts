@@ -316,26 +316,37 @@ serve(async (req) => {
       );
     }
 
-    // Validate image URLs
-    const isValidImageUrl = (url: unknown): boolean => {
-      if (!url || typeof url !== "string") return false;
-      if (!url.startsWith("https://")) return false;
-      // Check for known image hosting domains or image file extensions
-      const validHosts = ["amazon", "ssl-images-amazon", "m.media-amazon", "walmartimg", "target.scene7", "rei.com", "osprey", "yeti", "samsonite", "anker"];
-      const hasValidHost = validHosts.some((h) => url.includes(h));
-      const hasImageExt = /\.(jpg|jpeg|png|webp|gif)(\?|$)/i.test(url);
-      return hasValidHost || hasImageExt;
+    // Fetch real product images via Google CSE
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    const fetchProductImage = async (productName: string): Promise<string | null> => {
+      try {
+        const res = await fetch(`${supabaseUrl}/functions/v1/product-image-search`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${supabaseAnonKey}`,
+          },
+          body: JSON.stringify({ query: productName }),
+        });
+        if (!res.ok) { await res.text(); return null; }
+        const d = await res.json();
+        return d.imageUrl || null;
+      } catch { return null; }
     };
 
     if (type === "must-haves" && Array.isArray(resultData.items)) {
-      resultData.items = (resultData.items as Record<string, unknown>[]).map((item) => ({
+      const items = resultData.items as Record<string, unknown>[];
+      const imagePromises = items.map((item) => fetchProductImage(item.name as string));
+      const images = await Promise.all(imagePromises);
+      resultData.items = items.map((item, i) => ({
         ...item,
-        imageUrl: isValidImageUrl(item.imageUrl) ? item.imageUrl : null,
+        imageUrl: images[i] || item.imageUrl || null,
       }));
     } else if (type === "review") {
-      if (!isValidImageUrl(resultData.imageUrl)) {
-        resultData.imageUrl = null;
-      }
+      const img = await fetchProductImage((resultData.productName as string) || trimQuery);
+      if (img) resultData.imageUrl = img;
     }
 
     resultData.citations = citations;

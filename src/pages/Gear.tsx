@@ -367,18 +367,23 @@ const Gear = () => {
 
             {/* Search Bar */}
             <div className="max-w-2xl mx-auto">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <Input
-                  placeholder="e.g. 7 day all inclusive in Mexico, backpacking Japan..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                  className="pl-12 pr-4 bg-white/95 dark:bg-card/95 border-0 h-14 text-foreground text-base rounded-xl"
-                />
-                {loading && (
-                  <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 animate-spin text-primary" />
-                )}
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Input
+                    placeholder="e.g. 7 day all inclusive in Mexico, backpacking Japan..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                    className="pl-12 pr-4 bg-white/95 dark:bg-card/95 border-0 h-14 text-foreground text-base rounded-xl"
+                  />
+                  {loading && (
+                    <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 animate-spin text-primary" />
+                  )}
+                </div>
+                <Button onClick={handleSearch} size="lg" className="h-14 px-6 rounded-xl" disabled={loading || searchQuery.trim().length < 2}>
+                  Search
+                </Button>
               </div>
             </div>
           </div>
@@ -386,19 +391,6 @@ const Gear = () => {
 
         {/* Content */}
         <div className="container mx-auto px-4 py-10">
-          <Tabs defaultValue="ai-packing" className="w-full">
-            <div className="flex justify-center mb-8">
-              <TabsList className="grid grid-cols-2 w-full max-w-md">
-                <TabsTrigger value="ai-packing" className="gap-2">
-                  <Sparkles className="h-4 w-4" /> AI Packing List
-                </TabsTrigger>
-                <TabsTrigger value="our-reviews" className="gap-2">
-                  <MessageCircle className="h-4 w-4" /> Our Gear Reviews
-                </TabsTrigger>
-              </TabsList>
-            </div>
-
-            <TabsContent value="ai-packing">
               {loading && !packingData && <GearLoading label="Building your packing list..." />}
               {reviewLoading && <GearLoading label="Researching product reviews..." />}
               {reviewData && !reviewLoading && (
@@ -408,7 +400,7 @@ const Gear = () => {
                 <div className="space-y-6 animate-fade-in">
                   <div className="text-center mb-8">
                     <h2 className="font-display text-2xl font-bold text-foreground mb-2">Your Packing List</h2>
-                    <p className="text-muted-foreground">Click "Review This" on any item for a full AI-powered product review.</p>
+                    <p className="text-muted-foreground">Click "Review This" on any item for a full product review based on real Amazon reviews.</p>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
                     {packingData.items.map((item, i) => (
@@ -426,7 +418,7 @@ const Gear = () => {
                   <Search className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
                   <h3 className="font-display text-xl font-semibold text-foreground mb-2">Where are you headed?</h3>
                   <p className="text-muted-foreground">
-                    Describe your trip above and we'll recommend the best gear — with full AI reviews on demand.
+                    Describe your trip above and we'll recommend the best gear with full reviews on demand.
                   </p>
                 </div>
               )}
