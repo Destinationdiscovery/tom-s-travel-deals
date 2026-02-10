@@ -44,6 +44,33 @@ export type Database = {
         }
         Relationships: []
       }
+      gear_intel_cache: {
+        Row: {
+          cache_key: string
+          created_at: string
+          id: string
+          intel_type: string
+          query: string
+          result_data: Json
+        }
+        Insert: {
+          cache_key: string
+          created_at?: string
+          id?: string
+          intel_type: string
+          query: string
+          result_data: Json
+        }
+        Update: {
+          cache_key?: string
+          created_at?: string
+          id?: string
+          intel_type?: string
+          query?: string
+          result_data?: Json
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
