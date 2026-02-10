@@ -1,72 +1,91 @@
 
 
-## Phase 1: Subtitle, Name Updates, Affiliate Links & Dynamic SEO Titles
+## Phase 2: Footer Centering, JSON-LD Structured Data, Sitemap & Robots.txt
 
-### Changes Overview
+### Part 1: Center the Footer Content
 
-#### 1. Subtitle Update
-Change "Honest Reviews & Travel Insights" to "Real Traveller Reviews and Insights" in:
-- `src/components/Header.tsx` (line 28)
-- `src/components/Footer.tsx` (line 17)
+The screenshot shows the footer content (brand, links, bottom bar) is left-aligned and looks unbalanced. Changes:
 
-#### 2. Remove Last Name ("Laracy") -- Keep "Tom"
-All instances of "Tom Laracy" become just "Tom". Locations:
+- Center the entire footer grid layout so the brand section and Explore links are centered on all screen sizes
+- Center the brand logo/text, description, and Travelonly link
+- Center the Explore nav links
+- The bottom bar (Made with heart / copyright) is already centered on mobile but will be centered on desktop too
 
-| File | What Changes |
-|------|-------------|
-| `src/data/compassArticles.ts` | All 9 blog articles: `author: "Tom Laracy"` becomes `author: "Tom"` |
-| `index.html` | `<meta name="author" content="Tom Laracy">` becomes `content="Tom"` |
-| `index.html` | Keep `@TomLaracyTravel` Twitter handle as-is (it's an account name, not a display name) |
-| `src/pages/Contact.tsx` | The email `tlaracy@travelonly.com` stays as-is (it's a real email address, not a display name). The mailto subject line "Inquiry from Tom Travel Treasures" gets updated to "Inquiry from ReviewThenGo" |
+**File:** `src/components/Footer.tsx`
 
-Pages that already say just "Tom" (About, AboutSection, DestinationReview "Tom's Tips", GearReview "Tom's Tips", Contact "Why Book With Tom?") stay unchanged.
+---
 
-#### 3. Add Affiliate Links to Destination Review Sidebar
-Add the existing `AffiliateLinks` component to `src/pages/DestinationReview.tsx` sidebar, matching the same pattern already used in `AIReview.tsx`. This is the biggest monetization gap on the site -- readers finish a destination review with no way to book.
+### Part 2: JSON-LD Structured Data (Rich Snippets)
 
-#### 4. Dynamic Page Titles (SEO)
-Add `useEffect` hooks to set `document.title` on each page so Google indexes unique titles instead of the generic one from `index.html`:
+Add `<script type="application/ld+json">` blocks via `useEffect` to enable Google rich snippets (star ratings, review info in search results).
 
-| Page | Title Format |
-|------|-------------|
-| `DestinationReview.tsx` | `"{review.title} - ReviewThenGo"` |
-| `GearReview.tsx` | `"{gear.name} Review - ReviewThenGo"` |
-| `CompassArticle.tsx` | `"{article.title} - ReviewThenGo"` |
-| `AIReview.tsx` | `"{review.property_name}, {review.location} - ReviewThenGo"` |
-| `Destinations.tsx` | `"Destination Reviews - ReviewThenGo"` |
-| `Gear.tsx` | `"Gear Reviews - ReviewThenGo"` |
-| `Compass.tsx` | `"Travel Blog - ReviewThenGo"` |
-| `TravelIntel.tsx` | `"Travel Intel - ReviewThenGo"` |
-| `About.tsx` | `"About - ReviewThenGo"` |
-| `Contact.tsx` | `"Contact - ReviewThenGo"` |
+| Page | Schema Type | Key Fields |
+|------|------------|------------|
+| `DestinationReview.tsx` | `@type: Review` + `@type: Hotel` | name, rating, author "Tom", datePublished, description, image |
+| `GearReview.tsx` | `@type: Product` + `@type: Review` | name, brand, rating, author "Tom", price range, description |
+| `CompassArticle.tsx` | `@type: BlogPosting` | headline, author "Tom", datePublished, image, description |
 
-Each also resets the title on unmount so navigating back to home restores the default.
+Each schema block is injected on mount and removed on unmount to keep things clean.
 
-#### 5. Footer Navigation Update
-Add "Gear Reviews" and "Travel Intel" links to the footer's Explore section, matching existing link styles.
+**Files:** `src/pages/DestinationReview.tsx`, `src/pages/GearReview.tsx`, `src/pages/CompassArticle.tsx`
+
+---
+
+### Part 3: Sitemap.xml
+
+Create `public/sitemap.xml` listing all known static and content routes:
+
+**Static routes:**
+- `/` , `/destinations`, `/gear`, `/compass`, `/travel-intel`, `/about`, `/compare`
+
+**Destination reviews (5):**
+- `/destinations/mexico-barcelo-riviera`
+- `/destinations/cuba-vila-gale`
+- `/destinations/curacao-blue-bay`
+- `/destinations/vegas-bellagio`
+- `/destinations/cruise-experience`
+
+**Gear reviews (7):**
+- `/gear/travel-converter-cuba-europe`
+- `/gear/packing-cubes`
+- `/gear/airplane-phone-holder-mount`
+- `/gear/inflatable-water-hammock`
+- `/gear/thermacell-patio-shield-mosquito-repellent`
+- `/gear/cruise-cabin-shoe-organizer`
+- `/gear/liquid-iv-sugar-free-electrolyte`
+
+**Blog articles (9):**
+- `/compass/2026-travel-trends-whycations-glowcations-microvacations`
+- `/compass/japan-top-destination-canadians-2026`
+- `/compass/domestic-canada-boom-banff-lake-louise-2026`
+- `/compass/travel-insurance-what-you-need`
+- `/compass/why-canadians-skipping-us-2026`
+- `/compass/canadian-at-par-deal-las-vegas`
+- `/compass/group-travel-2026-who-uses-it-why-booming`
+- `/compass/westjet-seat-squeeze-passengers-said-no`
+- `/compass/rome-trevi-fountain-fee-genius-or-ripoff`
+
+All URLs will use `https://reviewthengo.lovable.app` as the base (update to custom domain if/when mapped).
+
+**File:** `public/sitemap.xml` (new)
+
+---
+
+### Part 4: Robots.txt Update
+
+The `robots.txt` already references the sitemap -- no changes needed here.
 
 ---
 
 ### Technical Details
 
-**Files modified:**
+| File | Change Type | What Changes |
+|------|------------|-------------|
+| `src/components/Footer.tsx` | Edit | Center the grid layout, text-align brand section and nav links center |
+| `src/pages/DestinationReview.tsx` | Edit | Add JSON-LD `Review` + `Hotel` schema via useEffect |
+| `src/pages/GearReview.tsx` | Edit | Add JSON-LD `Product` + `Review` schema via useEffect |
+| `src/pages/CompassArticle.tsx` | Edit | Add JSON-LD `BlogPosting` schema via useEffect |
+| `public/sitemap.xml` | New file | Full sitemap with all 28 URLs |
 
-| File | Changes |
-|------|---------|
-| `src/components/Header.tsx` | Subtitle text (line 28) |
-| `src/components/Footer.tsx` | Subtitle text (line 17), add 2 nav links (after line 45) |
-| `src/data/compassArticles.ts` | Replace all 9 `"Tom Laracy"` with `"Tom"` |
-| `index.html` | Update meta author tag (line 26), update mailto subject |
-| `src/pages/Contact.tsx` | Update mailto subject line (line 44) |
-| `src/pages/DestinationReview.tsx` | Import and add `AffiliateLinks` component to sidebar, add `useEffect` for page title |
-| `src/pages/GearReview.tsx` | Add `useEffect` for page title |
-| `src/pages/CompassArticle.tsx` | Add `useEffect` for page title |
-| `src/pages/AIReview.tsx` | Add `useEffect` for page title |
-| `src/pages/Destinations.tsx` | Add `useEffect` for page title |
-| `src/pages/Gear.tsx` | Add `useEffect` for page title |
-| `src/pages/Compass.tsx` | Add `useEffect` for page title |
-| `src/pages/TravelIntel.tsx` | Add `useEffect` for page title |
-| `src/pages/About.tsx` | Add `useEffect` for page title |
-| `src/pages/Contact.tsx` | Add `useEffect` for page title |
+**No new dependencies. No database changes.**
 
-**No new dependencies, no database changes.**
