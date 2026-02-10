@@ -1,84 +1,61 @@
 
 
-## Postmark Email Campaigns Setup
+## Animated Promotional Slideshow for ReviewThenGo
 
-This will store your Postmark API token securely and create three email automation edge functions.
+Build a cinematic animated slideshow component using your existing travel photos, with smooth Ken Burns-style transitions, branded text overlays, and your tri-color identity. It will serve two purposes:
 
----
-
-### Step 1: Store the Postmark API Token
-
-Your Postmark Server API Token will be stored as a secret called `POSTMARK_SERVER_TOKEN` so the edge functions can use it securely.
+1. **On-site**: Plays as an optional intro on the homepage (with a "Skip" button), shown once per session
+2. **For socials**: A dedicated `/promo` page where you can screen-record the animation for Instagram/TikTok/YouTube
 
 ---
 
-### Step 2: Create Edge Functions
+### What it will look like
 
-**a) Welcome Email** (`supabase/functions/send-welcome-email/index.ts`)
-- Called from the client after a user signs up (triggered on first auth state change)
-- Sends a branded "Welcome to ReviewThenGo" email via Postmark's `/email` API
-- Includes links to popular destinations on the site
-- Uses the user's email from the auth session
+A fullscreen, auto-playing sequence of ~8-10 of your best destination photos, each displayed for ~4 seconds with:
 
-**b) Weekly Digest** (`supabase/functions/send-weekly-digest/index.ts`)
-- Scheduled via a cron job (runs once per week)
-- Queries all users with `newsletter_opt_in = true`
-- Fetches the newest `cached_reviews` from the past 7 days
-- Personalizes content based on the user's `user_review_history` locations
-- Includes affiliate booking links for each featured review
-- Adds an unsubscribe link that sets `newsletter_opt_in = false`
-
-**c) Trip Reminder** (`supabase/functions/send-trip-reminder/index.ts`)
-- Scheduled via cron (every 3 days)
-- Finds users with saved trip lists who haven't visited in 7+ days
-- Sends "Still planning your [Trip Name]?" emails with affiliate links
+- Slow zoom-in (Ken Burns effect) on each photo
+- Crossfade transitions between slides
+- Animated text overlays per slide (e.g., "Cuba", "Mexico", "Curacao", "Japan", "Canada")
+- Your "REVIEW THEN GO" branding with the sky/amber/emerald colors animated in at the end
+- Tagline: "Know what to expect before you go."
+- Final slide fades into the normal hero/search section
 
 ---
 
-### Step 3: Cron Scheduling
+### Files to create/modify
 
-Set up two cron jobs using `pg_cron` and `pg_net`:
-- Weekly digest: runs every Monday at 9 AM UTC
-- Trip reminder: runs every 3 days at 10 AM UTC
-
----
-
-### Step 4: Client-Side Integration
-
-Update `AuthProvider.tsx` to call the welcome email function when a new user signs up for the first time.
+| Action | File | Purpose |
+|--------|------|---------|
+| Create | `src/components/PromoSlideshow.tsx` | The animated slideshow component with Ken Burns zoom, crossfade, text overlays, skip button, and auto-advance logic |
+| Create | `src/pages/Promo.tsx` | Standalone fullscreen page at `/promo` for screen recording the slideshow for socials |
+| Modify | `src/pages/Index.tsx` | Show the slideshow once per session before the hero (uses sessionStorage to track if already seen) |
+| Modify | `src/App.tsx` | Add `/promo` route |
+| Modify | `tailwind.config.ts` | Add `ken-burns` and `crossfade` keyframe animations |
 
 ---
 
-### Step 5: Unsubscribe Endpoint
+### Slide sequence (using existing assets)
 
-Add an unsubscribe handler (either as a new edge function or a route in the app) that toggles `newsletter_opt_in` to `false` for the user.
+1. `hero-beach.jpg` -- "Discover Paradise"
+2. `cuba-gallery-1.jpg` -- "Cuba"
+3. `mexico-hero.webp` -- "Mexico"
+4. `curacao-hero.avif` -- "Curacao"
+5. `japan-fushimi-inari.jpg` -- "Japan"
+6. `canada-boom-lake-louise.jpg` -- "Canada"
+7. `cruise-hero.jpg` -- "Cruises"
+8. `vegas-strip-hero.jpg` -- "Las Vegas"
+9. Final branded slide with "REVIEW THEN GO" logo animation and tagline
 
 ---
 
-### Technical Details
+### Technical details
 
-**Postmark API call pattern** (used in all 3 functions):
-```text
-POST https://api.postmarkapp.com/email
-Headers:
-  X-Postmark-Server-Token: <POSTMARK_SERVER_TOKEN>
-  Content-Type: application/json
-Body:
-  From: "ReviewThenGo <noreply@your-verified-domain.com>"
-  To: user@example.com
-  Subject: ...
-  HtmlBody: ...
-```
-
-**Files created/modified:**
-| Action | File |
-|--------|------|
-| Create | `supabase/functions/send-welcome-email/index.ts` |
-| Create | `supabase/functions/send-weekly-digest/index.ts` |
-| Create | `supabase/functions/send-trip-reminder/index.ts` |
-| Modify | `src/components/auth/AuthProvider.tsx` — trigger welcome email on first sign-up |
-| Modify | `supabase/config.toml` — add function entries with `verify_jwt = false` |
-| SQL | Cron job setup for weekly digest and trip reminders |
-
-**Pre-requisite question:** What is the verified sender email/domain you have set up in Postmark? (e.g., `noreply@reviewthengo.com`). This is needed for the "From" address in outgoing emails.
+- **Ken Burns effect**: CSS keyframe that scales from `scale(1)` to `scale(1.15)` over 4 seconds
+- **Crossfade**: Opacity transitions between stacked absolutely-positioned images
+- **Text animations**: Each destination name fades up with `animate-slide-up`, then fades out before the next slide
+- **Skip button**: Fixed "Skip" button in the corner that immediately transitions to the homepage
+- **Session tracking**: `sessionStorage.setItem('promo-seen', 'true')` so it only plays once per browser session
+- **Promo page**: The `/promo` route plays the same slideshow in a loop without the skip button, perfect for screen recording
+- **Performance**: Images are lazy-loaded and preloaded in sequence to avoid jarring transitions
+- **Mobile-friendly**: All animations use CSS transforms (GPU-accelerated) and the layout adapts to any screen size
 
