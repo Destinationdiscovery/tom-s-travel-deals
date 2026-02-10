@@ -13,6 +13,7 @@ interface AIReviewResultProps {
   isLoading: boolean;
   error: string | null;
   onNewReview?: () => void;
+  onReviewReady?: (slug: string) => void;
 }
 
 const RatingBar = ({ label, value }: { label: string; value: number }) => (
@@ -55,7 +56,7 @@ const LoadingSkeleton = () => (
   </div>
 );
 
-const AIReviewResult = ({ review, isLoading, error, onNewReview }: AIReviewResultProps) => {
+const AIReviewResult = ({ review, isLoading, error, onNewReview, onReviewReady }: AIReviewResultProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const functionUrl = useMemo(() => {
@@ -66,6 +67,9 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview }: AIReviewResul
   useEffect(() => {
     if ((review || isLoading) && containerRef.current) {
       containerRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    if (review && !isLoading && onReviewReady) {
+      onReviewReady(review.slug);
     }
   }, [review, isLoading]);
 

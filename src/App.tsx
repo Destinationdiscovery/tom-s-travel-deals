@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import ScrollToTop from "@/components/ScrollToTop";
 import Index from "./pages/Index";
+import AIReview from "./pages/AIReview";
 import Destinations from "./pages/Destinations";
 import DestinationReview from "./pages/DestinationReview";
 import Compass from "./pages/Compass";
@@ -29,6 +30,7 @@ const App = () => (
           <ScrollToTop />
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/review/:slug" element={<AIReview />} />
             <Route path="/destinations" element={<Destinations />} />
             <Route path="/destinations/:slug" element={<DestinationReview />} />
             <Route path="/compass" element={<Compass />} />
