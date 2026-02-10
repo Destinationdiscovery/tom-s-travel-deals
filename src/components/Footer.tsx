@@ -13,11 +13,11 @@ const Footer = () => {
             <div className="flex items-center gap-2 mb-4">
               <Compass className="h-8 w-8 text-primary" />
               <div>
-                <h3 className="font-display text-xl font-bold text-background">ReviewThenGo</h3>
+                <h3 className="font-display text-2xl font-bold"><span className="text-sky-300">Review</span><span className="text-background">ThenGo</span></h3>
                 <p className="text-xs text-muted-foreground">Honest Reviews & Travel Insights</p>
               </div>
             </div>
-            <p className="text-muted-foreground text-sm max-w-sm mb-4">
+            <p className="text-muted-foreground text-base max-w-sm mb-4">
               Honest destination reviews, tested travel gear, and real-world insights to help you travel with confidence.
             </p>
             <a 
@@ -34,13 +34,13 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold text-background mb-4">Explore</h4>
             <nav className="flex flex-col gap-2">
-              <Link to="/destinations" className="text-muted-foreground hover:text-primary transition-colors text-sm">
+              <Link to="/destinations" className="text-muted-foreground hover:text-primary transition-colors text-base">
                 My Reviews
               </Link>
-              <Link to="/compass" className="text-muted-foreground hover:text-primary transition-colors text-sm">
+              <Link to="/compass" className="text-muted-foreground hover:text-primary transition-colors text-base">
                 Travel Blog
               </Link>
-              <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors text-sm">
+              <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors text-base">
                 About
               </Link>
             </nav>
