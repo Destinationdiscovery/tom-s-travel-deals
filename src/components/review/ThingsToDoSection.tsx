@@ -1,6 +1,4 @@
-import { ExternalLink } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { ExternalLink, Star } from "lucide-react";
 import type { ThingToDo } from "@/hooks/useGenerateReview";
 import { useMemo } from "react";
 
@@ -31,22 +29,12 @@ const EXPEDIA_LINKS: Record<CountryCode, string> = {
   GB: "https://expedia.com/affiliates/expedia-home.Ut28wxn",
 };
 
-const CATEGORY_COLORS: Record<string, string> = {
-  Adventure: "bg-primary/15 text-primary",
-  Dining: "bg-accent/15 text-accent-foreground",
-  Culture: "bg-secondary/15 text-secondary-foreground",
-  Nature: "bg-primary/15 text-primary",
-  Shopping: "bg-accent/15 text-accent-foreground",
-  Nightlife: "bg-secondary/15 text-secondary-foreground",
-  Relaxation: "bg-primary/15 text-primary",
-  Sightseeing: "bg-accent/15 text-accent-foreground",
-};
-
 interface ThingsToDoSectionProps {
   thingsToDo: ThingToDo[];
+  functionUrl?: string;
 }
 
-const ThingsToDoSection = ({ thingsToDo }: ThingsToDoSectionProps) => {
+const ThingsToDoSection = ({ thingsToDo, functionUrl }: ThingsToDoSectionProps) => {
   const expediaLink = useMemo(() => EXPEDIA_LINKS[detectCountry()], []);
 
   if (!thingsToDo || thingsToDo.length === 0) return null;
@@ -57,34 +45,64 @@ const ThingsToDoSection = ({ thingsToDo }: ThingsToDoSectionProps) => {
         Things to Do Nearby
       </h3>
       <div className="grid gap-4 sm:grid-cols-3">
-        {thingsToDo.slice(0, 3).map((activity, index) => (
-          <div
-            key={index}
-            className="bg-card rounded-2xl p-5 shadow-soft flex flex-col justify-between"
-          >
-            <div>
-              <Badge
-                className={`mb-3 text-xs font-medium ${
-                  CATEGORY_COLORS[activity.category] || "bg-muted text-muted-foreground"
-                }`}
-              >
-                {activity.category}
-              </Badge>
-              <h4 className="font-display text-lg font-bold text-foreground mb-2">
-                {activity.name}
-              </h4>
-              <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                {activity.description}
-              </p>
+        {thingsToDo.slice(0, 3).map((activity, index) => {
+          const photoUrl = activity.photoReference && functionUrl
+            ? `${functionUrl}?name=${encodeURIComponent(activity.photoReference)}`
+            : null;
+
+          return (
+            <div
+              key={index}
+              className="bg-card rounded-2xl overflow-hidden shadow-soft flex flex-col"
+            >
+              {/* Photo */}
+              {photoUrl && (
+                <div className="aspect-[4/3] overflow-hidden">
+                  <img
+                    src={photoUrl}
+                    alt={activity.name}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
+              )}
+
+              <div className="p-5 flex flex-col flex-1">
+                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                  {activity.category}
+                </span>
+                <h4 className="font-display text-lg font-bold text-foreground mb-1">
+                  {activity.name}
+                </h4>
+
+                {/* Star rating */}
+                {activity.rating && (
+                  <div className="flex items-center gap-1 mb-3">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`h-3.5 w-3.5 ${
+                          i < Math.floor(activity.rating!)
+                            ? "text-accent fill-accent"
+                            : i < activity.rating!
+                            ? "text-accent fill-accent opacity-50"
+                            : "text-muted-foreground"
+                        }`}
+                      />
+                    ))}
+                    <span className="text-sm font-medium text-foreground ml-1">
+                      {activity.rating}
+                    </span>
+                  </div>
+                )}
+
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {activity.description}
+                </p>
+              </div>
             </div>
-            <Button asChild size="sm" variant="outline" className="gap-1.5 w-full">
-              <a href={expediaLink} target="_blank" rel="noopener noreferrer">
-                Find tours & tickets
-                <ExternalLink className="h-3.5 w-3.5" />
-              </a>
-            </Button>
-          </div>
-        ))}
+          );
+        })}
       </div>
       <div className="mt-4 text-center">
         <a

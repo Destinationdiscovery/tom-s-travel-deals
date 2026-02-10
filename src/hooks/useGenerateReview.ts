@@ -5,6 +5,8 @@ export interface ThingToDo {
   name: string;
   description: string;
   category: string;
+  rating?: number;
+  photoReference?: string;
 }
 
 export interface ReviewData {
