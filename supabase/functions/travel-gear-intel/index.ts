@@ -19,28 +19,127 @@ function buildAmazonUrl(productName: string, country: string, tags: Record<strin
   return `${domain}/s?k=${encodeURIComponent(productName)}&tag=${tag}`;
 }
 
+/* ─── Vacation Type Category Lists ─── */
+const VACATION_CATEGORIES: Record<string, string[]> = {
+  beach: [
+    "Carry-on suitcase", "Packing cubes", "Beach tote bag", "Reef-safe sunscreen",
+    "Polarized sunglasses", "Wide-brim sun hat", "Quick-dry swim trunks/swimsuit",
+    "Waterproof phone pouch", "Travel-size toiletry bottles", "Portable Bluetooth speaker",
+    "Mosquito repellent", "After-sun aloe vera gel", "Neck pillow for flights",
+    "Noise-cancelling earbuds", "Water shoes", "Dry bag", "Portable fan/misting fan",
+    "Luggage scale", "Travel adapter/charger", "Reusable water bottle", "Yeti insulated tumbler",
+  ],
+  cruise: [
+    "Carry-on suitcase", "Packing cubes", "Magnetic hooks for cabin walls",
+    "Over-the-door shoe organizer", "Lanyard for cruise card", "Waterproof phone pouch",
+    "Motion sickness bands/medication", "Reef-safe sunscreen", "Formal evening outfit accessories",
+    "Portable power strip", "Insulated travel tumbler", "Collapsible tote/day bag",
+    "Quick-dry towel", "Noise-cancelling earbuds", "Waterproof sandals", "Luggage tags",
+    "Travel toiletry bag", "Binoculars", "Floating waterproof speaker", "Sunglasses with strap",
+  ],
+  backpacking: [
+    "Hiking backpack (40-65L)", "Compression packing cubes", "Lightweight rain jacket",
+    "Hiking boots/shoes", "Moisture-wicking base layers", "Headlamp",
+    "Portable water filter", "First aid kit", "Trekking poles", "Quick-dry travel towel",
+    "Dry bags", "Portable power bank", "Multi-tool/knife", "Insect repellent",
+    "Sleeping bag liner", "Merino wool socks", "Sunscreen stick", "Carabiner clips",
+    "Collapsible water bottle", "Travel clothesline",
+  ],
+  ski: [
+    "Ski/snowboard bag", "Thermal base layers", "Ski socks (merino wool)",
+    "Neck gaiter/balaclava", "Hand/toe warmers", "Ski goggles", "Helmet",
+    "Waterproof ski gloves", "Lip balm with SPF", "Sunscreen (high altitude)",
+    "Boot dryer", "Packing cubes", "Thermos/insulated bottle", "Action camera mount",
+    "Ski lock", "Compression socks for travel", "Portable charger",
+    "Moisture-wicking mid-layer", "Anti-fog spray for goggles", "Travel backpack/day pack",
+  ],
+  city: [
+    "Anti-theft backpack/day bag", "Comfortable walking shoes", "Portable charger/power bank",
+    "Travel adapter", "Packing cubes", "Packable rain jacket", "Noise-cancelling headphones",
+    "Cross-body bag", "Travel wallet/RFID blocker", "Compact umbrella",
+    "Reusable water bottle", "Compression socks for flights", "Portable luggage scale",
+    "Travel-size stain remover", "Collapsible tote bag", "Eye mask and ear plugs",
+    "Portable steamer", "Phone mount/tripod", "Guidebook or travel journal", "Snack containers",
+  ],
+  camping: [
+    "Tent", "Sleeping bag", "Sleeping pad", "Camp stove", "Headlamp",
+    "Cooler/insulated bag", "Camp chairs", "Water filter/purifier", "Fire starter kit",
+    "First aid kit", "Insect repellent", "Dry bags", "Multi-tool",
+    "Solar-powered charger", "Camping hammock", "Cookware set",
+    "Bear canister/food storage", "Camp lantern", "Tarp/ground sheet", "Biodegradable soap",
+  ],
+  roadtrip: [
+    "Car phone mount", "Portable cooler", "Car charger with USB ports", "Neck pillow",
+    "Collapsible trash can for car", "First aid kit", "Portable jump starter",
+    "Tire pressure gauge", "Sunshade for windshield", "Travel mug/tumbler",
+    "Seat organizer", "Portable Bluetooth speaker", "Snack containers",
+    "Paper towels/cleaning wipes", "Flashlight", "Blanket/throw", "Luggage organizer",
+    "Dash cam", "Roadside emergency kit", "Portable power bank",
+  ],
+  business: [
+    "Carry-on spinner suitcase", "Laptop bag/briefcase", "Packing cubes",
+    "Wrinkle-release spray", "Portable steamer", "Noise-cancelling headphones",
+    "Travel adapter with USB-C", "Portable charger", "Compression socks",
+    "Eye mask", "Toiletry bag", "Garment folder", "Portable WiFi hotspot",
+    "Cable organizer", "Travel umbrella", "Shoe bags", "Neck pillow",
+    "Leather passport holder", "Business card holder", "Luggage scale",
+  ],
+};
+
+/* ─── Vacation Type Detection ─── */
+function detectVacationType(query: string): string {
+  const q = query.toLowerCase();
+  const keywords: Record<string, string[]> = {
+    beach: ["beach", "all-inclusive", "all inclusive", "resort", "tropical", "caribbean", "mexico", "cancun", "punta cana", "bahamas", "jamaica", "aruba", "curacao", "hawaii", "bali", "thailand", "costa rica", "dominican"],
+    cruise: ["cruise", "cruising", "carnival", "royal caribbean", "norwegian", "msc", "disney cruise", "ship"],
+    backpacking: ["backpack", "hiking", "trek", "hostel", "southeast asia", "trail", "adventure", "patagonia", "nepal"],
+    ski: ["ski", "snowboard", "winter sport", "slopes", "whistler", "aspen", "alps", "banff ski", "powder"],
+    city: ["city", "urban", "europe", "paris", "london", "tokyo", "new york", "nyc", "rome", "barcelona", "amsterdam", "berlin", "sightseeing", "museum"],
+    camping: ["camp", "camping", "rv", "glamping", "national park", "wilderness", "outdoor"],
+    roadtrip: ["road trip", "roadtrip", "driving", "drive", "cross country", "route 66"],
+    business: ["business", "conference", "work trip", "corporate", "meeting"],
+  };
+
+  for (const [type, words] of Object.entries(keywords)) {
+    if (words.some((w) => q.includes(w))) return type;
+  }
+  return "beach"; // default
+}
+
 const VALID_TYPES = ["must-haves", "review"] as const;
 type IntelType = (typeof VALID_TYPES)[number];
 
-const PROMPTS: Record<string, (query: string) => string> = {
-  "must-haves": (query) =>
-    `You are a travel packing expert. Research the 8-12 must-have items for "${query}".
+const PROMPTS: Record<string, (query: string, categories?: string[]) => string> = {
+  "must-haves": (query, categories) =>
+    `You are a travel packing expert. A traveler is planning: "${query}".
+
+For each of the following product categories, find the SINGLE BEST specific product (real brand and model name) to recommend. Research current Amazon bestsellers and expert reviews.
+
+Product categories to fill:
+${(categories || []).map((c, i) => `${i + 1}. ${c}`).join("\n")}
+
+IMPORTANT RULES:
+- NEVER include non-purchasable items like passports, travel insurance, cash/currency, visas, documents, or tickets.
+- Only recommend physical products that can be purchased on Amazon.
+- For each category, find a real, specific product with brand and model name.
+- Include a real product image URL from a reputable source (Amazon, manufacturer website, or major retailer). The URL must end in .jpg, .png, or .webp and be a direct image link.
 
 Return your response as valid JSON only (no markdown, no code blocks):
 
 {
   "items": [
     {
-      "name": "Product Name",
+      "name": "Specific Product Name with Model",
       "brand": "Brand Name",
       "priceRange": "$XX - $XX",
-      "reason": "Why this is essential for this type of travel",
-      "category": "Category like Packing, Tech, Comfort, Safety, Health, Clothing, etc."
+      "reason": "Why this specific product is the best choice for this trip (1-2 sentences)",
+      "category": "Category like Packing, Tech, Comfort, Safety, Health, Clothing, Beach, etc.",
+      "imageUrl": "https://direct-image-url.jpg"
     }
   ]
 }
 
-Focus on essential, practical items travelers shouldn't forget. Be specific with product names and brands.`,
+Be specific with product names. Example: "Osprey Farpoint 40 Travel Backpack" not just "Travel backpack".`,
 
   review: (query) =>
     `You are a travel gear reviewer. Research "${query}" thoroughly using Amazon reviews, expert reviews, YouTube reviews, and travel blogs.
@@ -150,7 +249,15 @@ serve(async (req) => {
       );
     }
 
-    const prompt = PROMPTS[type](query.trim());
+    // Detect vacation type and get category list for must-haves
+    let categories: string[] | undefined;
+    if (type === "must-haves") {
+      const vacationType = detectVacationType(query.trim());
+      categories = VACATION_CATEGORIES[vacationType] || VACATION_CATEGORIES.beach;
+      console.log("Detected vacation type:", vacationType, "with", categories.length, "categories");
+    }
+
+    const prompt = PROMPTS[type](query.trim(), categories);
     console.log("Calling Perplexity for travel-gear-intel:", cacheKey);
 
     const perplexityResponse = await fetch("https://api.perplexity.ai/chat/completions", {
@@ -162,7 +269,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "sonar",
         messages: [
-          { role: "system", content: "You are a travel gear expert. Always respond with valid JSON only, no markdown formatting." },
+          { role: "system", content: "You are a travel gear expert. Always respond with valid JSON only, no markdown formatting. NEVER recommend non-purchasable items like passports, insurance, cash, visas, or documents." },
           { role: "user", content: prompt },
         ],
         temperature: 0.2,
