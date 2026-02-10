@@ -1,105 +1,36 @@
 
 
-# Travel Intel: Requirements, Advisories & News
+## Fix Travel Intel Hero and Header Visibility
 
-A new `/travel-intel` page combining visa/entry requirements, travel advisories, and destination news -- all powered by the existing Perplexity API connection.
+### Problem
+1. The Travel Intel hero uses a plain CSS gradient (`from-navy to-background`) which looks washed out and gray compared to all other subpages that use full background images with dark overlays.
+2. The header logo text ("ReviewThenGo") is hard to read against the light header background -- the sky-300, amber-400, and emerald-400 colors don't have enough contrast on the light `bg-background/80` header.
 
----
+### Changes
 
-## What Gets Built
+#### 1. Travel Intel Hero -- Match Other Subpages (TravelIntel.tsx)
 
-### 1. Edge Function: `travel-intel`
+Replace the plain gradient hero with the same pattern used by Destinations, Gear, and Compass pages:
+- Use an existing dark/moody asset as the background image (e.g., `snowbird-beach-sunset.jpg` or `hero-beach.jpg` -- already in assets)
+- Add the standard dark overlay: `bg-gradient-to-b from-black/40 via-black/30 to-black/60`
+- Set the section to `relative h-[40vh] min-h-[320px]` to match sibling pages
+- Keep the Globe icon, title, and subtitle as-is -- they'll pop nicely against the dark backdrop
 
-A new backend function at `supabase/functions/travel-intel/index.ts` that accepts a JSON body with `citizenship`, `destination`, and `type` (one of `"requirements"`, `"advisories"`, or `"news"`).
+#### 2. Header Logo Contrast (Header.tsx)
 
-Each type uses a different Perplexity prompt:
+Darken the logo text colors so they're readable on the light header background:
+- Change `text-sky-300` to `text-sky-600` (Review)
+- Change `text-amber-400` to `text-amber-500` (Then)
+- Change `text-emerald-400` to `text-emerald-600` (Go)
 
-| Type | Model | Prompt Focus | Recency Filter |
-|------|-------|-------------|----------------|
-| `requirements` | `sonar` | Visa types, documents, health requirements, customs rules, local laws | None (evergreen) |
-| `advisories` | `sonar` | Government travel advisories, safety alerts, health warnings, risk level | `month` |
-| `news` | `sonar` | Latest travel news, trending stories, destination updates | `week` |
-
-All responses return structured JSON with citations from Perplexity. The function includes a simple in-database cache (`travel_intel_cache` table) with a 7-day TTL to avoid redundant API calls.
-
-**Structured output format per type:**
-
-- **Requirements**: `{ visaRequired, visaTypes[], documents[], healthRequirements[], customsRules[], localLaws[], importantNotes[] }`
-- **Advisories**: `{ advisoryLevel (1-4 with color), advisories[{ source, level, summary, details }], healthAlerts[], safetyTips[] }`
-- **News**: `{ articles[{ title, summary, source, date, category }] }`
+These darker variants maintain the branded color identity while being legible on the light backdrop.
 
 ---
 
-### 2. Database: `travel_intel_cache` table
+### Technical Details
 
-| Column | Type | Notes |
-|--------|------|-------|
-| `id` | uuid | PK, auto-generated |
-| `cache_key` | text | Unique, e.g. `"requirements:canada:cuba"` |
-| `intel_type` | text | `requirements`, `advisories`, or `news` |
-| `citizenship` | text | Nullable (only for requirements) |
-| `destination` | text | |
-| `result_data` | jsonb | Full Perplexity response |
-| `created_at` | timestamptz | Default `now()` |
+**Files modified:**
+- `src/pages/TravelIntel.tsx` -- swap hero section from CSS gradient to image + overlay pattern (lines 186-195)
+- `src/components/Header.tsx` -- update logo text color classes (line 27)
 
-RLS: public SELECT only (same pattern as `cached_reviews`). Inserts happen via service role in the edge function.
-
----
-
-### 3. Frontend: `/travel-intel` page
-
-**File:** `src/pages/TravelIntel.tsx`
-
-Layout follows the existing site patterns (Header + hero + content + Footer):
-
-- **Hero section** with a travel-themed background and the headline "Travel Intel"
-- **Three-tab interface** using existing Radix tabs: Requirements | Advisories | News
-- **Requirements tab**: Two inputs (citizenship country + destination country) and a "Check Requirements" button
-- **Advisories tab**: Single destination input and a "Check Advisories" button
-- **News tab**: Single destination input and a "Get Latest News" button
-- Results render below the form in styled cards matching the site's design system
-- Each section reuses the `ReviewLoadingStages`-style staged loading (simpler version with 2-3 stages)
-- Citations displayed as source links at the bottom of results
-
----
-
-### 4. Navigation Update
-
-Add "Travel Intel" link to both desktop and mobile nav in `Header.tsx`, and to the hero nav links in `HeroSection.tsx`.
-
----
-
-### 5. Config Update
-
-Add the new edge function to `supabase/config.toml`:
-```toml
-[functions.travel-intel]
-verify_jwt = false
-```
-
----
-
-## Files
-
-| Action | File |
-|--------|------|
-| Create | `supabase/functions/travel-intel/index.ts` |
-| Create | `src/pages/TravelIntel.tsx` |
-| Create | `src/hooks/useTravelIntel.ts` |
-| Modify | `src/App.tsx` -- add `/travel-intel` route |
-| Modify | `src/components/Header.tsx` -- add nav link |
-| Modify | `src/components/HeroSection.tsx` -- add hero nav link |
-| Modify | `supabase/config.toml` -- register function |
-| Migration | Create `travel_intel_cache` table with RLS |
-
----
-
-## Technical Details
-
-- The edge function follows the exact same pattern as `generate-review`: CORS headers, Perplexity API call, cache-first strategy, service role for DB writes
-- The `PERPLEXITY_API_KEY` secret is already configured -- no new secrets needed
-- Input validation: citizenship and destination are trimmed, length-checked (2-100 chars), and sanitized before being passed to the prompt
-- The hook (`useTravelIntel.ts`) manages loading state, error handling, and calls `supabase.functions.invoke("travel-intel", { body: ... })`
-- News results use `search_recency_filter: 'week'` to ensure freshness
-- Advisory levels are color-coded: Level 1 (green), Level 2 (yellow), Level 3 (orange), Level 4 (red)
-
+**No new files, no new dependencies, no database changes.**
