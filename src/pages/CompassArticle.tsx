@@ -19,6 +19,26 @@ const CompassArticle = () => {
     return () => { document.title = "ReviewThenGo.com | Honest Reviews, Tested Gear & Travel Insights"; };
   }, [article]);
 
+  // JSON-LD structured data for SEO
+  useEffect(() => {
+    if (!article || !slug) return;
+    const jsonLd = {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": article.title,
+      "author": { "@type": "Person", "name": article.author },
+      "datePublished": article.datePublished,
+      "image": article.image,
+      "description": article.content?.[0] || "",
+      "publisher": { "@type": "Organization", "name": "ReviewThenGo" }
+    };
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.textContent = JSON.stringify(jsonLd);
+    document.head.appendChild(script);
+    return () => { document.head.removeChild(script); };
+  }, [article, slug]);
+
   if (!article) {
     return (
       <div className="min-h-screen bg-background">
