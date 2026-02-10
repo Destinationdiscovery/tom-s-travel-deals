@@ -1,38 +1,55 @@
 
 
-## Polish Compare Page: Rebrand, Redesign Categories, Add Affiliate Links
+## Visual Polish: Hero Text, Header Branding, and Font Sizes
 
-Four changes to the Compare page and one small text fix in the review result.
+### 1. Remove periods from hero headline
 
-### 1. Remove "AI" branding
+Change `REVIEW.` `GO.` to `REVIEW` `GO` (no periods). Cleaner, more modern.
 
-| Current text | New text |
-|---|---|
-| "Generate AI Verdict" (button, line 210) | "Generate Verdict" |
-| "AI Verdict" (heading, line 232) | "ReviewThenGo Verdict" |
-| "Generating your AI review..." (AIReviewResult.tsx, line 38) | "Generating your review..." |
+**File:** `src/components/HeroSection.tsx` (lines 63-65)
 
-### 2. Redesign Category Breakdown
+### 2. Remove "Contact" from hero nav links
 
-Replace the current flat list layout (lines 254-261) with a responsive grid of individual cards. Each category gets its own rounded card containing:
-- Category name as a bold heading
-- Winner shown as a colored badge/chip
-- Reason as readable body text below
+The Contact link is still in the hero nav array (line 13) despite being removed from header/footer per branding guidelines. Remove it.
 
-This replaces the cramped single-row layout with something much easier to scan.
+**File:** `src/components/HeroSection.tsx` (line 13)
 
-### 3. Top verdict section stays as-is
+### 3. Style header brand name to match hero
 
-The overall winner card with the trophy icon, verdict text, and recommendation stays -- just with the heading renamed.
+Currently `text-xl font-bold text-foreground`. Change to use the sky-300 / white split like the hero:
+- "Review" in sky-300
+- "ThenGo" in foreground
+- Bump to `text-2xl`
+- Keep subtitle at `text-xs` — it's a tagline, not a headline
 
-### 4. Add Affiliate Links after the verdict
+**File:** `src/components/Header.tsx` (line 27)
 
-Import the existing `AffiliateLinks` component and render it at the bottom of the verdict section (after the category breakdown cards) so users can jump straight to booking.
+### 4. Increase text sizes throughout
+
+| Element | Current | New |
+|---|---|---|
+| **Header nav links** (desktop) | `text-sm` | `text-base` |
+| **Header nav links** (mobile) | `text-sm` | `text-base` |
+| **Hero tagline** ("Know what to expect...") | `text-lg md:text-xl` | `text-xl md:text-2xl` |
+| **Hero nav links** (bottom of hero) | `text-sm` | `text-base` |
+| **Hero search placeholder** | `text-sm` | `text-base` |
+| **Footer body text** | `text-sm` | `text-base` |
+| **Footer nav links** | `text-sm` | `text-base` |
+| **Footer bottom row** | `text-sm` | `text-sm` (keep — this is fine small) |
+
+**Files:** `src/components/Header.tsx`, `src/components/HeroSection.tsx`, `src/components/Footer.tsx`
+
+### 5. Footer brand name — match header style
+
+Apply the same sky-300/foreground split and size bump to the footer brand name for consistency.
+
+**File:** `src/components/Footer.tsx` (line 16)
 
 ### Files to change
 
-| File | What changes |
+| File | Changes |
 |---|---|
-| `src/pages/Compare.tsx` | (1) Button text: "Generate Verdict". (2) Heading: "ReviewThenGo Verdict". (3) Category breakdown redesigned as card grid. (4) Import and render `AffiliateLinks` after verdict. |
-| `src/components/AIReviewResult.tsx` | Line 38: "Generating your AI review..." becomes "Generating your review..." |
+| `src/components/HeroSection.tsx` | Remove periods from headline, remove Contact link, bump tagline + nav + search text sizes |
+| `src/components/Header.tsx` | Style brand name with sky-300 split, bump nav link sizes to `text-base` |
+| `src/components/Footer.tsx` | Style brand name with sky-300 split, bump body/link text to `text-base` |
 
