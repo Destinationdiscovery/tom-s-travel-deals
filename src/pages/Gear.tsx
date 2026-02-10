@@ -120,6 +120,17 @@ const ProductReviewPanel = ({
     </Button>
 
     <div className="max-w-5xl mx-auto">
+      {/* Product hero image */}
+      {review.imageUrl && (
+        <div className="mb-8 rounded-2xl overflow-hidden max-h-80 bg-muted">
+          <img
+            src={review.imageUrl}
+            alt={review.productName}
+            className="w-full h-full object-contain max-h-80"
+            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+          />
+        </div>
+      )}
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Main Column */}
         <div className="lg:col-span-2 space-y-8">

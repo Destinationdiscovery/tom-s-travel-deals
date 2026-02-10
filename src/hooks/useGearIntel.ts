@@ -24,6 +24,7 @@ export interface GearReviewData {
   brand: string;
   priceRange: string;
   overallRating: number;
+  imageUrl?: string | null;
   ratings: Record<string, number>;
   summary: string;
   reviewParagraphs: string[];
