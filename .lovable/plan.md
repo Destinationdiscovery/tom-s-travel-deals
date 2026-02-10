@@ -1,51 +1,81 @@
 
 
-## Two Changes: Better "Things to Do" Cards + Repositioned "Compiled from Real Travelers" Label
+## Deep-Link Affiliate URLs + Full Monetization Bundle
+
+Four features: deep-linked affiliate URLs, a "Compare Prices" row, an email capture component, and auto-generated SEO listicle pages.
 
 ---
 
-### Change 1: "Compiled from Real Traveler Reviews" Next to the Rating
+### 1. Deep-Link Affiliate URLs (Property-Specific Search)
 
-**Problem:** The "Compiled from Real Traveler Reviews" label sits above the property name, far from the star rating. Users may confuse the 4.1/5 rating as the resort's official rating rather than ReviewThenGo's AI-curated score.
+Instead of sending users to generic homepages, pre-populate the search with the property name so they land on relevant results.
 
-**Solution:** Move the Sparkles badge + "Compiled from Real Traveler Reviews" text inline with the star rating inside the Summary Card, right after the numeric score. Remove it from the header above the property name. Keep the subtitle text ("AI-curated summary...") as a small note below the stars.
+**How it works per platform:**
+
+- **Expedia**: Redirect to `expedia.com/Hotel-Search?destination=PROPERTY+NAME` through the existing affiliate tracking link
+- **Hotels.com**: Redirect to `hotels.com/search.do?q-destination=PROPERTY+NAME` through the existing affiliate tracking link  
+- **VRBO**: Already uses CJ deep link format -- change the encoded URL from `vrbo.com` to `vrbo.com/search?query=PROPERTY+NAME`
+
+**Files changed:**
+
+| File | Change |
+|------|--------|
+| `src/components/AffiliateLinks.tsx` | Accept optional `propertyName` prop. When provided, build deep-linked search URLs instead of homepage links. Export a helper `buildDeepLinks(country, propertyName?)` for reuse. |
+| `src/components/AIReviewResult.tsx` | Pass `data.propertyName` to `AffiliateLinks` and `PlanYourTripCTA` components |
+| `src/components/review/ThingsToDoSection.tsx` | Pass activity name to the "Explore more" link so it searches for the activity, not the property |
+
+The fallback behavior stays the same: if no `propertyName` is provided (e.g., on non-review pages), links go to the homepage as they do today.
+
+---
+
+### 2. "Compare Prices" Row After Summary Card
+
+A horizontal strip below the summary card showing all three platforms with "Check rates" links. This is the highest-visibility placement on the page.
 
 **File:** `src/components/AIReviewResult.tsx`
 
-- Remove the Sparkles/label block from the header section (lines 91-97)
-- Inside the Summary Card (line 115), after the star rating number, add: `Sparkles icon + "Compiled from Real Traveler Reviews"` inline
-- Below the star row, add the "AI-curated summary..." subtitle in small muted text
+- New sub-component `ComparePricesRow` inserted after the Summary Card (order 1.5)
+- Shows three inline items: Expedia | Hotels.com | VRBO, each with a "Check rates" text link
+- Uses the deep-linked URLs from change 1
+- Styled as a subtle horizontal bar, not a banner
 
 ---
 
-### Change 2: Redesign "Things to Do" Cards
+### 3. Email Capture Component
 
-**Problems identified:**
-- Category badges (Sightseeing, Culture, Nature) use color combos that are hard to read in some themes
-- Cards are interactive affiliate links disguised as content -- feels clickbaity
-- No visual richness (no images, no ratings)
+A lead magnet below the review to build a mailing list for future affiliate campaigns.
 
-**Solution:** Make the cards informational with a photo, a star rating, and remove the affiliate button. The "Explore more things to do" link at the bottom is sufficient for monetization.
+**New file:** `src/components/review/EmailCapture.tsx`
 
-**Backend change (edge function):** Update the Perplexity prompt to also return a `rating` (1-5, one decimal) for each thing to do. No photo from Perplexity -- we'll use a Google Places photo for each activity.
+- Heading: "Get this review as a PDF + exclusive deals"
+- Simple email input + submit button
+- Stores subscriber email in a new `subscribers` database table
+- Placed after the "Plan Your Trip" CTA (order 6.75)
 
-**Frontend changes:**
+**Database:** New `subscribers` table with columns: `id`, `email` (unique), `source_slug` (which review they signed up from), `created_at`. No RLS needed since this is a public-facing insert-only form (we'll use an edge function to prevent abuse).
 
-1. **Update `ThingToDo` interface** in `src/hooks/useGenerateReview.ts` to add `rating: number` and optional `photoReference?: string`
+**New edge function:** `supabase/functions/subscribe/index.ts` -- validates email format, inserts into `subscribers` table, returns success/error. Rate-limited by IP.
 
-2. **Update generate-review edge function** (`supabase/functions/generate-review/index.ts`):
-   - Add `"rating": number 1-5` to the thingsToDo prompt schema
-   - After getting the Perplexity response, fetch a Google Places photo for each of the 3 activities (search by activity name + location) -- reuse the existing `fetchPlacePhotos` logic but grab just 1 photo per activity
-   - Attach `photoReference` to each thingsToDo item
+---
 
-3. **Redesign cards** in `src/components/review/ThingsToDoSection.tsx`:
-   - Add a photo at the top of each card (using the place-photos function URL, same pattern as PhotoGallery)
-   - Replace the hard-to-read category Badge with a simple text label in consistent foreground color
-   - Add a small star rating row (e.g., 4.2 stars) below the activity name
-   - Remove the "Find tours & tickets" button from each card entirely
-   - Keep only the single "Explore more things to do" link at the bottom for monetization
+### 4. Auto-Generated SEO Listicle Pages
 
-4. **Pass `functionUrl`** to `ThingsToDoSection` from `AIReviewResult.tsx` so it can render photos
+Use cached review data to generate "Top Resorts in [Location]" pages that rank in search engines and drive organic traffic.
+
+**New file:** `src/pages/TopDestinations.tsx`
+
+- Route: `/top/:location` (e.g., `/top/mexico`, `/top/cancun`)
+- Queries `cached_reviews` table filtered by location
+- Renders a listicle: "Top Resorts in Mexico" with mini-cards for each cached review
+- Each card links to the full review page
+- Affiliate links woven into the page (sidebar + inline CTAs)
+
+**New file:** `src/components/TopDestinationCard.tsx`
+
+- Mini review card showing: property name, rating, one-line summary, "Read full review" link
+- "Check rates" affiliate link on each card
+
+**File:** `src/App.tsx` -- Add route for `/top/:location`
 
 ---
 
@@ -53,10 +83,16 @@
 
 | File | Change |
 |------|--------|
-| `src/components/AIReviewResult.tsx` | Move "Compiled from Real Traveler Reviews" inline with star rating in Summary Card; pass `functionUrl` prop to ThingsToDoSection |
-| `src/hooks/useGenerateReview.ts` | Add `rating` and `photoReference` to `ThingToDo` interface |
-| `supabase/functions/generate-review/index.ts` | Add `rating` to prompt; fetch 1 Google Places photo per activity after Perplexity response |
-| `src/components/review/ThingsToDoSection.tsx` | Redesign cards: add photo + star rating, remove affiliate button per card, fix category text readability |
+| `src/components/AffiliateLinks.tsx` | Accept `propertyName` prop, build deep-linked search URLs, export `buildDeepLinks` helper |
+| `src/components/AIReviewResult.tsx` | Pass `propertyName` to affiliate components, add `ComparePricesRow` after summary, add `EmailCapture` after Plan Your Trip CTA |
+| `src/components/review/ThingsToDoSection.tsx` | Use deep-linked URL for "Explore more" link |
+| `src/components/review/EmailCapture.tsx` | **New** -- email capture form component |
+| `supabase/functions/subscribe/index.ts` | **New** -- edge function for email subscription |
+| `src/pages/TopDestinations.tsx` | **New** -- auto-generated listicle page |
+| `src/components/TopDestinationCard.tsx` | **New** -- mini review card for listicle |
+| `src/App.tsx` | Add `/top/:location` route |
 
-**No new dependencies. No database schema changes.** Existing cached reviews without the new fields will still render fine (rating/photo are optional).
+**Database migration:** Create `subscribers` table.
+
+No new frontend dependencies required.
 
