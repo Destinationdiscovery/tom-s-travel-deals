@@ -1,6 +1,6 @@
 import { useEffect, useRef, useMemo } from "react";
 import { Star, MapPin, Sparkles, Search, Camera } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+import ReviewLoadingStages from "@/components/ReviewLoadingStages";
 import { Button } from "@/components/ui/button";
 import AffiliateLinks from "@/components/AffiliateLinks";
 import SaveReviewButton from "@/components/SaveReviewButton";
@@ -31,30 +31,6 @@ const RatingBar = ({ label, value }: { label: string; value: number }) => (
   </div>
 );
 
-const LoadingSkeleton = () => (
-  <div className="container mx-auto px-4 py-12 animate-fade-in">
-    <div className="max-w-6xl mx-auto space-y-8">
-      <div className="flex items-center gap-3 mb-4">
-        <Sparkles className="h-5 w-5 text-primary animate-pulse" />
-        <span className="text-sm text-muted-foreground">Generating your review...</span>
-      </div>
-      <Skeleton className="h-10 w-3/4" />
-      <Skeleton className="h-5 w-1/3" />
-      <div className="grid lg:grid-cols-3 gap-10">
-        <div className="lg:col-span-2 space-y-6">
-          <Skeleton className="h-40 w-full rounded-2xl" />
-          <Skeleton className="h-48 w-full rounded-2xl" />
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-24 w-full" />
-        </div>
-        <div className="space-y-4">
-          <Skeleton className="h-64 w-full rounded-2xl" />
-          <Skeleton className="h-48 w-full rounded-2xl" />
-        </div>
-      </div>
-    </div>
-  </div>
-);
 
 const AIReviewResult = ({ review, isLoading, error, onNewReview, onReviewReady }: AIReviewResultProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -95,7 +71,7 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview, onReviewReady }
   if (isLoading) {
     return (
       <div ref={containerRef} className="bg-background">
-        <LoadingSkeleton />
+        <ReviewLoadingStages />
       </div>
     );
   }
