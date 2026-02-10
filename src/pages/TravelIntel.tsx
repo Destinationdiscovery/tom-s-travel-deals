@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTravelIntel, type IntelType, type RequirementsData, type AdvisoriesData, type NewsData } from "@/hooks/useTravelIntel";
 import { Shield, AlertTriangle, Newspaper, FileText, Loader2, ExternalLink, Check, Heart, Scale, Globe, Info } from "lucide-react";
+import heroImg from "@/assets/snowbird-beach-sunset.jpg";
 import { Progress } from "@/components/ui/progress";
 import { useEffect } from "react";
 
@@ -184,13 +185,15 @@ const TravelIntel = () => {
       <Header />
 
       {/* Hero */}
-      <section className="pt-28 pb-12 bg-gradient-to-b from-[hsl(var(--navy))] to-background">
-        <div className="container mx-auto px-4 text-center">
+      <section className="relative h-[40vh] min-h-[320px] flex items-center justify-center">
+        <img src={heroImg} alt="Travel destination sunset" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60" />
+        <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
           <div className="flex items-center justify-center gap-3 mb-4">
             <Globe className="h-8 w-8 text-sky-300" />
           </div>
           <h1 className="font-display text-4xl md:text-5xl font-bold text-white mb-3">Travel Intel</h1>
-          <p className="text-white/70 text-lg max-w-lg mx-auto">Visa requirements, safety advisories, and destination news — powered by real-time data.</p>
+          <p className="text-white/80 text-lg max-w-lg mx-auto">Visa requirements, safety advisories, and destination news — powered by real-time data.</p>
         </div>
       </section>
 
