@@ -55,6 +55,12 @@ const Header = () => {
           >
             About
           </Link>
+          <Link 
+            to="/travel-intel"
+            className="text-lg font-medium text-muted-foreground hover:text-primary transition-colors"
+          >
+            Travel Intel
+          </Link>
         </nav>
 
         {/* Mobile Menu Button */}
@@ -97,6 +103,13 @@ const Header = () => {
               onClick={() => setIsMenuOpen(false)}
             >
               About
+            </Link>
+            <Link 
+              to="/travel-intel"
+              className="text-left text-lg font-medium text-muted-foreground hover:text-primary transition-colors py-2"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Travel Intel
             </Link>
           </nav>
         </div>

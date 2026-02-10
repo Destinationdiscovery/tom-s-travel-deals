@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.compare-reviews]
 verify_jwt = false
+
+[functions.travel-intel]
+verify_jwt = false

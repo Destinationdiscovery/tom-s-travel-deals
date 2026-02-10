@@ -68,6 +68,36 @@ export type Database = {
         }
         Relationships: []
       }
+      travel_intel_cache: {
+        Row: {
+          cache_key: string
+          citizenship: string | null
+          created_at: string
+          destination: string
+          id: string
+          intel_type: string
+          result_data: Json
+        }
+        Insert: {
+          cache_key: string
+          citizenship?: string | null
+          created_at?: string
+          destination: string
+          id?: string
+          intel_type: string
+          result_data: Json
+        }
+        Update: {
+          cache_key?: string
+          citizenship?: string | null
+          created_at?: string
+          destination?: string
+          id?: string
+          intel_type?: string
+          result_data?: Json
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
