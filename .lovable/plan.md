@@ -1,53 +1,28 @@
 
 
-## Gear Page Fixes (6 Changes)
+## Restore Tabs on the Gear Page
 
-### 1. Fix Product Images - New Approach with Google Custom Search
+The Gear page previously had two tabs letting you switch between the AI-powered packing list and your curated gear reviews. Those tabs disappeared, leaving only the AI search view. Here's how to bring them back:
 
-Perplexity cannot reliably return working image URLs. The new approach: create a dedicated `gear-product-image` edge function that uses Google Custom Search JSON API to find real product images.
+### What Changes
 
-- Uses your existing `GOOGLE_PLACES_API_KEY` (same Google Cloud project)
-- Requires one new secret: `GOOGLE_CSE_ID` (a free Programmable Search Engine ID you create at https://programmablesearchengine.google.com/)
-- The edge function takes a product name, searches Google Images, and returns the first result URL
-- Frontend calls this for each product in the packing list after results load
+**File: `src/pages/Gear.tsx`**
 
-**Flow**: Packing list loads -> for each item without an image, call the image function in parallel -> update cards as images arrive.
+1. Import the `Tabs`, `TabsList`, `TabsTrigger`, and `TabsContent` components
+2. Import the curated gear reviews data (`gearReviews` from `src/data/gearReviews.ts`) and related icons
+3. Wrap the content area (below the hero) in a `Tabs` component with two tabs:
+   - **"AI Packing List"** -- contains the current search results, loading states, and empty state
+   - **"Our Gear Reviews"** -- displays the 7 curated, personally-tested gear reviews as cards (adapter, packing cubes, phone holder, water hammock, Thermacell, shoe organizer, Liquid IV) with ratings, Amazon links, and full review details
+4. Each curated gear card will show the product image, rating stars, brand, name, excerpt, "Tested on" info, and an Amazon link button -- matching the existing card style used on the homepage carousel
 
-Also remove imageUrl from the Perplexity prompts entirely (stop asking it to hallucinate URLs).
+### Technical Details
 
-### 2. Remove Em-dash from Empty State
-
-Change the empty state text from:
-> "Describe your trip above and we'll recommend the best gear -- with full AI reviews on demand."
-
-To:
-> "Describe your trip above and we'll recommend the best gear with real Amazon reviews on demand."
-
-### 3. Change "AI reviews" to "real Amazon reviews"
-
-In the empty state and packing list description, replace references to "AI-powered product review" and "AI reviews" with "real Amazon reviews" language. In the review panel, change "Compiled from Real Product Reviews" to "Compiled from Real Amazon Reviews" and remove the sub-text about "AI-curated summary".
-
-### 4. Add Search Button to Right Side of Input
-
-Add a clickable arrow/search button inside the search input on the right side (like the reference screenshot shows). This gives users a clear way to submit besides pressing Enter.
-
-### 5. Clear Previous Results on New Search
-
-In the `fetchPackingList` function in the hook, add `setPackingData(null)` at the start so old results disappear and the loading animation shows again (same as first search).
-
-### 6. Remove Search Icon from Input
-
-Remove the `Search` icon that currently sits inside the left side of the search input in the hero section.
-
----
-
-### Technical Detail
-
-| Action | File | Change |
-|--------|------|--------|
-| Create | `supabase/functions/gear-product-image/index.ts` | New edge function: takes product name, returns image URL via Google Custom Search |
-| Modify | `supabase/functions/travel-gear-intel/index.ts` | Remove imageUrl from Perplexity prompts and validation logic |
-| Modify | `src/hooks/useGearIntel.ts` | Add `setPackingData(null)` at start of `fetchPackingList`; add image fetching logic |
-| Modify | `src/pages/Gear.tsx` | Remove Search icon from input; add submit button; update copy (em-dash, AI reviews text); remove "AI-curated" text from review panel |
-| Secret | `GOOGLE_CSE_ID` | User needs to provide a Google Programmable Search Engine ID (free) |
+| Item | Detail |
+|------|--------|
+| File modified | `src/pages/Gear.tsx` |
+| New imports | `Tabs, TabsList, TabsTrigger, TabsContent` from ui/tabs; `gearReviews` from data; `MessageCircle` icon |
+| Tab default | "AI Packing List" tab selected by default |
+| Tab placement | Centered below the hero section, above the content area |
+| Curated reviews layout | 3-column grid on desktop, 2 on tablet, 1 on mobile |
+| No new files | Everything fits in the existing page file |
 
