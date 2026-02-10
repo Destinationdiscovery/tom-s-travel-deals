@@ -79,7 +79,7 @@ const ThingsToDoSection = ({ thingsToDo }: ThingsToDoSectionProps) => {
             </div>
             <Button asChild size="sm" variant="outline" className="gap-1.5 w-full">
               <a href={expediaLink} target="_blank" rel="noopener noreferrer">
-                Book on Expedia
+                Find tours & tickets
                 <ExternalLink className="h-3.5 w-3.5" />
               </a>
             </Button>
@@ -93,7 +93,7 @@ const ThingsToDoSection = ({ thingsToDo }: ThingsToDoSectionProps) => {
           rel="noopener noreferrer"
           className="text-sm text-primary hover:underline inline-flex items-center gap-1"
         >
-          See More Activities
+          Explore more things to do
           <ExternalLink className="h-3 w-3" />
         </a>
       </div>

@@ -1,8 +1,8 @@
 import { useEffect, useRef, useMemo } from "react";
-import { Star, MapPin, Sparkles, Search, Camera } from "lucide-react";
+import { Star, MapPin, Sparkles, Search, Camera, Compass } from "lucide-react";
 import ReviewLoadingStages from "@/components/ReviewLoadingStages";
 import { Button } from "@/components/ui/button";
-import AffiliateLinks from "@/components/AffiliateLinks";
+import AffiliateLinks, { EXPEDIA_LINKS, HOTELS_LINKS, VRBO_LINK, detectCountry } from "@/components/AffiliateLinks";
 import SaveReviewButton from "@/components/SaveReviewButton";
 import PhotoGallery from "@/components/review/PhotoGallery";
 import ThingsToDoSection from "@/components/review/ThingsToDoSection";
@@ -191,6 +191,11 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview, onReviewReady }
                 </div>
               )}
 
+              {/* 6b. Plan Your Trip CTA */}
+              <div className="order-[6.5]">
+                <PlanYourTripCTA />
+              </div>
+
               {/* 7. Location Map (mobile only) */}
               <div className="lg:hidden order-7">
                 <LocationMap data={data} />
@@ -308,6 +313,47 @@ function NewSearchButton({ onNewReview }: { onNewReview: () => void }) {
       <Search className="h-4 w-4" />
       Search Another Property
     </Button>
+  );
+}
+
+function PlanYourTripCTA() {
+  const country = useMemo(() => detectCountry(), []);
+  const links = [
+    { name: "Expedia", url: EXPEDIA_LINKS[country] },
+    { name: "Hotels.com", url: HOTELS_LINKS[country] },
+    { name: "VRBO", url: VRBO_LINK },
+  ];
+
+  return (
+    <div className="rounded-2xl border-l-4 border-primary bg-primary/5 p-6">
+      <div className="flex items-center gap-2 mb-2">
+        <Compass className="h-5 w-5 text-primary" />
+        <h3 className="font-display text-lg font-bold text-foreground">Plan Your Trip</h3>
+      </div>
+      <p className="text-sm text-muted-foreground mb-4">
+        Found what you're looking for? Compare rates and book with confidence.
+      </p>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+        {links.map((link, i) => (
+          <span key={link.name} className="flex items-center gap-x-4">
+            <a
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-medium text-primary hover:underline"
+            >
+              {link.name}
+            </a>
+            {i < links.length - 1 && (
+              <span className="text-border">|</span>
+            )}
+          </span>
+        ))}
+      </div>
+      <p className="text-xs text-muted-foreground mt-3">
+        Links may earn us a commission at no extra cost to you.
+      </p>
+    </div>
   );
 }
 
