@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabaseClient";
+import { supabase } from "@/integrations/supabase/client";
 
 type PageType = "destination" | "gear" | "compass";
 
@@ -7,7 +7,7 @@ export function useCommentCounts(pageType: PageType, slugs: string[]) {
   return useQuery({
     queryKey: ["comment-counts", pageType, slugs],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("comments")
         .select("page_slug")
         .eq("page_type", pageType)

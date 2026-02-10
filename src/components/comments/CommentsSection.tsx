@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNowStrict } from "date-fns";
 import { z } from "zod";
 
-import { supabase } from "@/lib/supabaseClient";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { toast } from "@/hooks/use-toast";
 
@@ -58,7 +58,7 @@ export default function CommentsSection({
   const commentsQuery = useQuery({
     queryKey,
     queryFn: async (): Promise<CommentRow[]> => {
-      let query = supabase
+      let query = (supabase as any)
         .from("comments")
         .select("id,page_slug,page_type,user_id,content,created_at,is_hidden")
         .eq("page_slug", pageSlug)
@@ -80,7 +80,7 @@ export default function CommentsSection({
   const createMutation = useMutation({
     mutationFn: async (content: string) => {
       if (!user) throw new Error("Not signed in");
-      const { error } = await supabase.from("comments").insert({
+      const { error } = await (supabase as any).from("comments").insert({
         page_slug: pageSlug,
         page_type: pageType,
         user_id: user.id,
@@ -104,7 +104,7 @@ export default function CommentsSection({
   const updateMutation = useMutation({
     mutationFn: async ({ id, content }: { id: string; content: string }) => {
       if (!user) throw new Error("Not signed in");
-      const { error } = await supabase.from("comments").update({ content }).eq("id", id);
+      const { error } = await (supabase as any).from("comments").update({ content }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: async () => {
@@ -124,7 +124,7 @@ export default function CommentsSection({
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       if (!user) throw new Error("Not signed in");
-      const { error } = await supabase.from("comments").delete().eq("id", id);
+      const { error } = await (supabase as any).from("comments").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: async () => {
@@ -142,7 +142,7 @@ export default function CommentsSection({
   const toggleHiddenMutation = useMutation({
     mutationFn: async ({ id, hide }: { id: string; hide: boolean }) => {
       if (!user || !isAdmin) throw new Error("Not authorized");
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("comments")
         .update({ is_hidden: hide })
         .eq("id", id);
