@@ -16,6 +16,7 @@ import GearReview from "./pages/GearReview";
 import About from "./pages/About";
 import Compare from "./pages/Compare";
 import Contact from "./pages/Contact";
+import TravelIntel from "./pages/TravelIntel";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/compare" element={<Compare />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/travel-intel" element={<TravelIntel />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

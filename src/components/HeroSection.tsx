@@ -9,6 +9,7 @@ const heroNavLinks = [
   { to: "/destinations", label: "My Reviews" },
   { to: "/gear", label: "Gear Reviews" },
   { to: "/compass", label: "Travel Blog" },
+  { to: "/travel-intel", label: "Travel Intel" },
   { to: "/about", label: "About" },
 ];
 
