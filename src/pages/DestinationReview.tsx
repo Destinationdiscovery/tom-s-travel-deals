@@ -327,6 +327,34 @@ const DestinationReview = () => {
     return () => { document.title = "ReviewThenGo.com | Honest Reviews, Tested Gear & Travel Insights"; };
   }, [review]);
 
+  // JSON-LD structured data for SEO
+  useEffect(() => {
+    if (!review || !slug) return;
+    const jsonLd = {
+      "@context": "https://schema.org",
+      "@type": "Review",
+      "itemReviewed": {
+        "@type": "Hotel",
+        "name": review.destination,
+        "address": { "@type": "PostalAddress", "addressLocality": review.country }
+      },
+      "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": review.rating,
+        "bestRating": 5
+      },
+      "author": { "@type": "Person", "name": "Tom" },
+      "datePublished": review.dateVisited,
+      "description": review.summary,
+      "publisher": { "@type": "Organization", "name": "ReviewThenGo" }
+    };
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.textContent = JSON.stringify(jsonLd);
+    document.head.appendChild(script);
+    return () => { document.head.removeChild(script); };
+  }, [review, slug]);
+
   if (!review) {
     return (
       <div className="min-h-screen bg-background">

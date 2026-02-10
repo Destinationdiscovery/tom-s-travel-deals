@@ -7,9 +7,9 @@ const Footer = () => {
   return (
     <footer className="bg-foreground py-16">
       <div className="container mx-auto px-4">
-        <div className="grid md:grid-cols-3 gap-12 mb-12">
+        <div className="flex flex-col md:flex-row items-center justify-center gap-12 mb-12 text-center">
           {/* Brand */}
-          <div className="md:col-span-2">
+          <div className="flex flex-col items-center">
             <div className="flex items-center gap-2 mb-4">
               <Compass className="h-8 w-8 text-primary" />
               <div>
@@ -31,9 +31,9 @@ const Footer = () => {
           </div>
 
           {/* Quick Links */}
-          <div>
+          <div className="flex flex-col items-center">
             <h4 className="font-semibold text-background mb-4">Explore</h4>
-            <nav className="flex flex-col gap-2">
+            <nav className="flex flex-col items-center gap-2">
               <Link to="/destinations" className="text-muted-foreground hover:text-primary transition-colors text-lg">
                 My Reviews
               </Link>
@@ -54,7 +54,7 @@ const Footer = () => {
 
         </div>
 
-        <div className="border-t border-muted-foreground/20 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="border-t border-muted-foreground/20 pt-8 flex flex-col items-center gap-4 text-center">
           <div className="flex items-center gap-1 text-base text-muted-foreground">
             <span>Made with</span>
             <Heart className="h-4 w-4 text-primary fill-primary" />

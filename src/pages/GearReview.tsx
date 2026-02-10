@@ -24,6 +24,29 @@ const GearReview = () => {
     return () => { document.title = "ReviewThenGo.com | Honest Reviews, Tested Gear & Travel Insights"; };
   }, [gear]);
 
+  // JSON-LD structured data for SEO
+  useEffect(() => {
+    if (!gear || !slug) return;
+    const jsonLd = {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "name": gear.name,
+      "brand": { "@type": "Brand", "name": gear.brand },
+      "description": gear.excerpt,
+      "review": {
+        "@type": "Review",
+        "reviewRating": { "@type": "Rating", "ratingValue": gear.rating, "bestRating": 5 },
+        "author": { "@type": "Person", "name": "Tom" }
+      },
+      "offers": { "@type": "Offer", "price": gear.price, "priceCurrency": "USD", "url": gear.amazonLink }
+    };
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.textContent = JSON.stringify(jsonLd);
+    document.head.appendChild(script);
+    return () => { document.head.removeChild(script); };
+  }, [gear, slug]);
+
   if (!gear) {
     return (
       <div className="min-h-screen bg-background">
