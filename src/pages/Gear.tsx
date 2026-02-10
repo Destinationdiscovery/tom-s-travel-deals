@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
@@ -12,6 +12,10 @@ import heroImg from "@/assets/gear-packing-cubes-features.jpg";
 const Gear = () => {
   const [activeCategory, setActiveCategory] = useState<string>("All");
 
+  useEffect(() => {
+    document.title = "Gear Reviews - ReviewThenGo";
+    return () => { document.title = "ReviewThenGo.com | Honest Reviews, Tested Gear & Travel Insights"; };
+  }, []);
   const filteredGear = activeCategory === "All" 
     ? gearReviews 
     : gearReviews.filter(gear => gear.category === activeCategory);

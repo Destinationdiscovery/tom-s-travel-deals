@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useParams, Link } from "react-router-dom";
 import { Star, ArrowLeft, Calendar, MapPin, Heart, Share2 } from "lucide-react";
 
 import CommentsSection from "@/components/comments/CommentsSection";
+import AffiliateLinks from "@/components/AffiliateLinks";
 
 import { Button } from "@/components/ui/button";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
@@ -319,6 +320,13 @@ const DestinationReview = () => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
+  useEffect(() => {
+    if (review) {
+      document.title = `${review.destination}, ${review.country} - ReviewThenGo`;
+    }
+    return () => { document.title = "ReviewThenGo.com | Honest Reviews, Tested Gear & Travel Insights"; };
+  }, [review]);
+
   if (!review) {
     return (
       <div className="min-h-screen bg-background">
@@ -522,6 +530,7 @@ const DestinationReview = () => {
                   </div>
                 </div>
 
+                <AffiliateLinks />
               </div>
             </div>
           </div>

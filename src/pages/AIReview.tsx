@@ -48,6 +48,12 @@ const AIReview = () => {
     fetchReview();
   }, [slug]);
 
+  useEffect(() => {
+    if (review) {
+      document.title = `${review.property_name}${review.location ? `, ${review.location}` : ""} - ReviewThenGo`;
+    }
+    return () => { document.title = "ReviewThenGo.com | Honest Reviews, Tested Gear & Travel Insights"; };
+  }, [review]);
   const handleNewReview = () => {
     navigate("/");
   };

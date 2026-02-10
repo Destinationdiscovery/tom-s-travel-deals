@@ -168,6 +168,10 @@ const TravelIntel = () => {
   const { loading, error, requirementsData, advisoriesData, newsData, fetchIntel } = useTravelIntel();
   const [activeTab, setActiveTab] = useState<IntelType>("requirements");
 
+  useEffect(() => {
+    document.title = "Travel Intel - ReviewThenGo";
+    return () => { document.title = "ReviewThenGo.com | Honest Reviews, Tested Gear & Travel Insights"; };
+  }, []);
   // Form states
   const [reqCitizenship, setReqCitizenship] = useState("");
   const [reqDestination, setReqDestination] = useState("");

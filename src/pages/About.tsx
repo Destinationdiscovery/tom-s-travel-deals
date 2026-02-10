@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Globe, Heart, MapPin, Camera } from "lucide-react";
@@ -30,6 +31,11 @@ const travelPhilosophy = [
 ];
 
 const About = () => {
+  useEffect(() => {
+    document.title = "About - ReviewThenGo";
+    return () => { document.title = "ReviewThenGo.com | Honest Reviews, Tested Gear & Travel Insights"; };
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <Header />

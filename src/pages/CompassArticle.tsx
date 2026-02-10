@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -10,6 +11,13 @@ const CompassArticle = () => {
   const { slug } = useParams<{ slug: string }>();
   const article = slug ? getArticleBySlug(slug) : undefined;
   const relatedArticles = slug ? getRelatedArticles(slug, 3) : [];
+
+  useEffect(() => {
+    if (article) {
+      document.title = `${article.title} - ReviewThenGo`;
+    }
+    return () => { document.title = "ReviewThenGo.com | Honest Reviews, Tested Gear & Travel Insights"; };
+  }, [article]);
 
   if (!article) {
     return (

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Star, ArrowLeft, Lightbulb, ExternalLink, ShoppingCart } from "lucide-react";
 import Header from "@/components/Header";
@@ -16,6 +16,13 @@ const GearReview = () => {
   const gear = gearReviews.find((g) => g.slug === slug);
   const [selectedImage, setSelectedImage] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+
+  useEffect(() => {
+    if (gear) {
+      document.title = `${gear.name} Review - ReviewThenGo`;
+    }
+    return () => { document.title = "ReviewThenGo.com | Honest Reviews, Tested Gear & Travel Insights"; };
+  }, [gear]);
 
   if (!gear) {
     return (
