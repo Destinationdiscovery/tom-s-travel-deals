@@ -19,7 +19,7 @@ const PromoSlideshow = ({ onComplete, loop = false, showSkip = true }: PromoSlid
       {showSkip && (
         <button
           onClick={handleSkip}
-          className="fixed bottom-8 right-8 z-[60] text-white/60 hover:text-white text-sm font-medium px-4 py-2 rounded-full border border-white/20 hover:border-white/40 backdrop-blur-sm transition-all"
+          className="fixed top-8 right-8 z-[60] text-white/60 hover:text-white text-sm font-medium px-4 py-2 rounded-full border border-white/20 hover:border-white/40 backdrop-blur-sm transition-all"
         >
           Skip →
         </button>

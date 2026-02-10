@@ -84,7 +84,7 @@ const PromoDemoWalkthrough = ({ onComplete, loop = false }: PromoDemoWalkthrough
       case "LOADING":
         break;
       case "REVIEW":
-        timer = setTimeout(() => setStage("SAVE_ACTION"), 6000);
+        timer = setTimeout(() => setStage("SAVE_ACTION"), 4000);
         break;
       case "SAVE_ACTION":
         // Animate save button click after 500ms
@@ -165,7 +165,7 @@ const PromoDemoWalkthrough = ({ onComplete, loop = false }: PromoDemoWalkthrough
     if (stage !== "REVIEW" && stage !== "SAVE_ACTION") return;
 
     const scrollInterval = setInterval(() => {
-      setScrollProgress((p) => Math.min(p + 1.5, 200));
+      setScrollProgress((p) => Math.min(p + 3, 200));
     }, 50);
 
     return () => clearInterval(scrollInterval);
