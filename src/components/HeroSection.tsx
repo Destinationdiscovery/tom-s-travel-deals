@@ -10,7 +10,6 @@ const heroNavLinks = [
   { to: "/gear", label: "Gear Reviews" },
   { to: "/compass", label: "Travel Blog" },
   { to: "/about", label: "About" },
-  { to: "/contact", label: "Contact" },
 ];
 
 interface HeroSectionProps {
@@ -60,13 +59,13 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
       <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
         {/* Main Headline */}
         <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight">
-          <span className="text-sky-300">REVIEW.</span>{" "}
+          <span className="text-sky-300">REVIEW</span>{" "}
           <span className="text-white/90">THEN</span>{" "}
-          <span className="text-white font-black">GO.</span>
+          <span className="text-white font-black">GO</span>
         </h1>
 
         {/* Tagline */}
-        <p className="text-white/80 text-lg md:text-xl mb-10 font-light">
+        <p className="text-white/80 text-xl md:text-2xl mb-10 font-light">
           Know what to expect before you go.
         </p>
 
@@ -85,7 +84,7 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
               onFocus={() => query.trim().length >= 2 && setShowSuggestions(true)}
               onKeyDown={handleKeyDown}
               placeholder="Search destinations, hotels, or experiences"
-              className="w-full h-12 pl-12 pr-4 rounded-lg bg-white/95 backdrop-blur-sm text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-2 focus:ring-sky-300 shadow-lg"
+              className="w-full h-12 pl-12 pr-4 rounded-lg bg-white/95 backdrop-blur-sm text-foreground placeholder:text-muted-foreground text-base focus:outline-none focus:ring-2 focus:ring-sky-300 shadow-lg"
             />
 
             {/* Suggestions Dropdown */}
@@ -133,7 +132,7 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
           <Link
             key={link.to}
             to={link.to}
-            className="text-white/50 hover:text-white/80 transition-colors text-sm font-medium"
+            className="text-white/50 hover:text-white/80 transition-colors text-base font-medium"
           >
             {link.label}
           </Link>

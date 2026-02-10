@@ -24,7 +24,7 @@ const Header = () => {
         <Link to="/" className="flex items-center gap-2">
           <Compass className="h-8 w-8 text-primary" />
           <div>
-            <h1 className="font-display text-xl font-bold text-foreground">ReviewThenGo</h1>
+            <h1 className="font-display text-2xl font-bold"><span className="text-sky-300">Review</span><span className="text-foreground">ThenGo</span></h1>
             <p className="text-xs text-muted-foreground">Honest Reviews & Travel Insights</p>
           </div>
         </Link>
@@ -33,25 +33,25 @@ const Header = () => {
         <nav className="hidden md:flex items-center gap-8">
           <Link 
             to="/destinations"
-            className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            className="text-base font-medium text-muted-foreground hover:text-primary transition-colors"
           >
             My Reviews
           </Link>
           <Link 
             to="/gear"
-            className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            className="text-base font-medium text-muted-foreground hover:text-primary transition-colors"
           >
             Gear Reviews
           </Link>
           <Link 
             to="/compass"
-            className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            className="text-base font-medium text-muted-foreground hover:text-primary transition-colors"
           >
             Travel Blog
           </Link>
           <Link 
             to="/about"
-            className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            className="text-base font-medium text-muted-foreground hover:text-primary transition-colors"
           >
             About
           </Link>
@@ -72,28 +72,28 @@ const Header = () => {
           <nav className="container mx-auto px-4 py-4 flex flex-col gap-4">
             <Link 
               to="/destinations"
-              className="text-left text-sm font-medium text-muted-foreground hover:text-primary transition-colors py-2"
+              className="text-left text-base font-medium text-muted-foreground hover:text-primary transition-colors py-2"
               onClick={() => setIsMenuOpen(false)}
             >
               My Reviews
             </Link>
             <Link 
               to="/gear"
-              className="text-left text-sm font-medium text-muted-foreground hover:text-primary transition-colors py-2"
+              className="text-left text-base font-medium text-muted-foreground hover:text-primary transition-colors py-2"
               onClick={() => setIsMenuOpen(false)}
             >
               Gear Reviews
             </Link>
             <Link 
               to="/compass"
-              className="text-left text-sm font-medium text-muted-foreground hover:text-primary transition-colors py-2"
+              className="text-left text-base font-medium text-muted-foreground hover:text-primary transition-colors py-2"
               onClick={() => setIsMenuOpen(false)}
             >
               Travel Blog
             </Link>
             <Link 
               to="/about"
-              className="text-left text-sm font-medium text-muted-foreground hover:text-primary transition-colors py-2"
+              className="text-left text-base font-medium text-muted-foreground hover:text-primary transition-colors py-2"
               onClick={() => setIsMenuOpen(false)}
             >
               About
