@@ -169,6 +169,9 @@ Return your response as valid JSON only (no markdown, no code blocks):
 All ratings must be between 1.0 and 5.0. Be honest and balanced. Synthesize from real buyer feedback.`,
 };
 
+/* ─── Normalize helper for fuzzy keyword matching ─── */
+const normalize = (s: string) => s.toLowerCase().replace(/-/g, " ").replace(/\s+/g, " ").trim();
+
 /* ─── Image Lookup Helper ─── */
 async function attachProductImages(
   supabase: ReturnType<typeof createClient>,
@@ -182,9 +185,9 @@ async function attachProductImages(
     if (!imageRows || imageRows.length === 0) return;
 
     for (const item of items) {
-      const itemName = ((item.name as string) || "").toLowerCase();
+      const itemName = normalize((item.name as string) || "");
       const match = imageRows.find((row) =>
-        itemName.includes(row.product_keyword.toLowerCase())
+        itemName.includes(normalize(row.product_keyword))
       );
       if (match) {
         item.imageUrl = match.image_url;
@@ -206,9 +209,9 @@ async function attachSingleProductImage(
 
     if (!imageRows || imageRows.length === 0) return;
 
-    const productName = ((resultData.productName as string) || "").toLowerCase();
+    const productName = normalize((resultData.productName as string) || "");
     const match = imageRows.find((row) =>
-      productName.includes(row.product_keyword.toLowerCase())
+      productName.includes(normalize(row.product_keyword))
     );
     if (match) {
       resultData.imageUrl = match.image_url;
