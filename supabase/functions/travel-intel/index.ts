@@ -23,6 +23,8 @@ Research and provide comprehensive, current entry requirements. Return your resp
   "importantNotes": ["Any other critical information..."]
 }
 
+When mentioning any official forms, portals, government websites, or online applications, always include the full URL in parentheses immediately after the mention (e.g., "D'Viajeros travel form (https://dviajeros.mitrans.gob.cu)").
+
 Be specific, accurate, and include practical details. If visa is not required, still list any entry conditions (e.g., maximum stay, passport validity requirements).`,
 
   advisories: (_citizenship, destination) =>

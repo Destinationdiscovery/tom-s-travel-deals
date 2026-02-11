@@ -106,6 +106,26 @@ const RequirementsResult = ({ data }: { data: RequirementsData }) => (
   </div>
 );
 
+// Linkify URLs in text
+const LinkifiedText = ({ text }: { text: string }) => {
+  const urlRegex = /(https?:\/\/[^\s)]+)/g;
+  const parts = text.split(urlRegex);
+  return (
+    <span>
+      {parts.map((part, i) =>
+        urlRegex.test(part) ? (
+          <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-0.5">
+            {new URL(part).hostname.replace("www.", "")}
+            <ExternalLink className="h-3 w-3 inline" />
+          </a>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      )}
+    </span>
+  );
+};
+
 const Section = ({ icon: Icon, title, items }: { icon: React.ElementType; title: string; items: string[] }) => (
   <div className="mt-5">
     <div className="flex items-center gap-2 mb-2">
@@ -114,7 +134,7 @@ const Section = ({ icon: Icon, title, items }: { icon: React.ElementType; title:
     </div>
     <ul className="space-y-1.5 pl-6">
       {items.map((item, i) => (
-        <li key={i} className="text-sm text-muted-foreground list-disc">{item}</li>
+        <li key={i} className="text-sm text-muted-foreground list-disc"><LinkifiedText text={item} /></li>
       ))}
     </ul>
   </div>
