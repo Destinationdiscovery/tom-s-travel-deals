@@ -1,49 +1,46 @@
 
 
-# Promo Walkthrough: Better Pacing and Skip Button Visibility
+# Remove Sign-In / Registration for Now
 
-## Pacing Changes
+Remove all user-facing sign-in UI and auth prompts so there are zero barriers to entry. The AuthProvider stays in place (it's harmless and hooks like `useAuth` still need it to avoid crashes), but all visible sign-in buttons, modals, and gated pages are removed or simplified.
 
-The current total is ~7.4 seconds, which feels rushed. Here's a revised timeline that stretches to ~12 seconds -- still punchy but gives each scene enough breathing room to register:
+## Changes
 
-| Stage | Current | Proposed | Why |
-|-------|---------|----------|-----|
-| HERO_REVEAL | 1.2s | 2.0s | Let the brand name land; viewers need a moment to orient |
-| REVIEW_FLASH | 1.2s | 2.5s | The review card has photos, ratings, and text -- needs time to be read |
-| INTEL_FLASH | 1.5s | 2.5s | Three tabs cycling at 0.5s each is too fast to register; bump to ~0.7s per tab |
-| GEAR_FLASH | 1.0s | 1.5s | Slight breathing room for the product card |
-| COMPARE_FLASH | 1.0s | 1.5s | Let the verdict banner sink in |
-| BRANDING | 1.5s | 2.0s | Stronger closing beat |
-| **Total** | **~7.4s** | **~12s** | Still under 15s (ideal for Reels/TikTok) |
+### 1. Header -- Remove Sign In button and user menu
+**File:** `src/components/Header.tsx`
+- Remove the `AuthModal` import and rendering
+- Remove the `authOpen` state
+- Remove the Sign In button (desktop and mobile)
+- Remove the user dropdown menu (My Reviews, My Trips, Sign Out)
+- Keep everything else (nav links, theme toggle, mobile menu)
 
-## Skip Button Changes
+### 2. SaveReviewButton -- Remove auth gate
+**File:** `src/components/SaveReviewButton.tsx`
+- Remove the `AuthModal` import and rendering
+- Remove the `authOpen` state and sign-in prompt logic
+- Remove references to `isAuthenticated`
+- When at limit, just show a simple "Limit reached" message instead of prompting sign-in
+- Button text: just "Save to Compare" or "Saved" (no "Sign in to Save More")
 
-Currently the skip button is small, semi-transparent text with a thin border (`text-white/60`, `border-white/20`, `text-sm`). It blends into the background. Changes:
+### 3. Comments Section -- Allow anonymous commenting or remove sign-in gate
+**File:** `src/components/comments/CommentsSection.tsx`
+- Remove the "Sign in to comment" card with magic link form
+- Either hide the comment composer entirely for non-logged-in users (simplest) or allow anonymous comments
 
-- Increase text opacity to full white (`text-white`)
-- Use a solid semi-transparent background (`bg-white/15 backdrop-blur-md`)
-- Bump font size to `text-base`
-- Add slightly thicker border (`border-white/40`)
-- Add a subtle pulse or glow on first appearance so users notice it
+### 4. Routes -- Remove My Reviews and My Trips from navigation
+**File:** `src/App.tsx`
+- Keep the routes (in case someone has a bookmarked URL) but they'll just redirect or show empty state
+- No code change strictly needed here since the nav links are already removed from the Header
 
-## Technical Details
+### 5. Keep AuthProvider in place
+**File:** `src/App.tsx` -- No change
+- The AuthProvider wrapper stays so that any `useAuth()` calls in hooks like `useSavedReviews`, `useReviewHistory`, and `CommentsSection` don't crash
+- Those hooks gracefully handle `user === null` already
 
-### File: `src/components/PromoDemoWalkthrough.tsx`
-- Update stage timings in the `useEffect` switch statement:
-  - `HERO_REVEAL`: 1200 -> 2000
-  - `REVIEW_FLASH`: 1200 -> 2500
-  - `INTEL_FLASH`: 1500 -> 2500
-  - `GEAR_FLASH`: 1000 -> 1500
-  - `COMPARE_FLASH`: 1000 -> 1500
-  - `BRANDING`: 1500 -> 2000
-- Slow down the auto-scroll interval in `REVIEW_FLASH` (reduce increment from 8 to 4 per tick for smoother scrolling over the longer duration)
-
-### File: `src/components/promo/PromoIntelScene.tsx`
-- Increase tab cycling interval from 500ms to ~700ms to match the longer `INTEL_FLASH` duration
-
-### File: `src/components/PromoSlideshow.tsx`
-- Update skip button classes:
-  - From: `text-white/60 hover:text-white text-sm border-white/20 hover:border-white/40 backdrop-blur-sm`
-  - To: `text-white hover:text-white text-base font-semibold border-white/40 hover:border-white/60 bg-white/15 backdrop-blur-md shadow-lg`
-- Add an entrance animation (e.g., `animate-fade-in`) so the button draws the eye when the promo starts
+## What stays untouched
+- `AuthProvider.tsx` and `AuthModal.tsx` files remain in the codebase (just unused for now)
+- `useReviewHistory.ts` -- still works, just won't log to DB without a user
+- `useSavedReviews.ts` -- still works with localStorage for anonymous users
+- `GearAdmin.tsx` -- admin-only page, keeps its auth check
+- Routes `/my-reviews` and `/my-trips` stay registered but are inaccessible from nav
 
