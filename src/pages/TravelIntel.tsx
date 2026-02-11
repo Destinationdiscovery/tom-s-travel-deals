@@ -59,11 +59,11 @@ const Citations = ({ citations }: { citations?: string[] }) => {
   if (!citations?.length) return null;
   return (
     <div className="mt-6 pt-4 border-t border-border">
-      <p className="text-xs text-muted-foreground mb-2 font-medium">Sources</p>
+      <p className="text-sm text-muted-foreground mb-2 font-medium">Sources</p>
       <div className="flex flex-wrap gap-2">
         {citations.map((url, i) => (
-          <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
-            <ExternalLink className="h-3 w-3" />
+          <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-sm text-primary hover:underline">
+            <ExternalLink className="h-3.5 w-3.5" />
             {new URL(url).hostname.replace("www.", "")}
           </a>
         ))}
