@@ -20,8 +20,7 @@ const Header = () => {
   const { user, signOut } = useAuth();
 
   const navLinks = [
-    { to: "/destinations", label: "My Reviews" },
-    { to: "/gear", label: "Gear Reviews" },
+    { to: "/gear", label: "Travel Gear Reviews" },
     { to: "/compass", label: "Travel Blog" },
     { to: "/about", label: "About" },
     { to: "/travel-intel", label: "Know Before You Go" },
