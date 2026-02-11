@@ -1,42 +1,35 @@
 
 
-## Replace Google Custom Search with Free Image Alternative
+## Image Proxy for Gear Products
 
-The current product image approach uses Google Custom Search API (paid, currently returning 403 errors). We'll replace it with a free solution using **DuckDuckGo Instant Answer API images** combined with **direct Amazon product image URLs** constructed from search results -- but the simplest and most reliable free approach is to use the **Perplexity API itself** to search for product image URLs, since you already pay for that call.
+Create a backend edge function that fetches product images server-side, just like `place-photos` does for resort images. This bypasses hotlink protection because the request comes from your server, not the user's browser.
 
-### Approach: Use Perplexity's Built-in Search + Fallback Icons
+### How It Works
 
-Instead of making a separate API call per product for images, we'll:
+1. Perplexity already returns `imageUrl` for each gear item (Amazon thumbnails, manufacturer photos, etc.)
+2. The browser currently tries to load these URLs directly and gets blocked by hotlink protection
+3. A new `gear-image-proxy` edge function will fetch the image server-side and pipe the binary data back to the browser
+4. The frontend routes all gear product images through this proxy instead of loading them directly
 
-1. **Keep the Perplexity-generated `imageUrl`** from the AI response as-is (it sometimes works)
-2. **Remove the `product-image-search` edge function call** from `travel-gear-intel` -- no more Google CSE dependency
-3. **Add a nicer fallback UI** in the frontend when images fail to load (category-based icons instead of a blank gray box)
-4. **Clear the `gear_intel_cache` table** so stale entries without images are purged
+### Files to Create/Change
 
-This eliminates the paid Google API dependency entirely. Product images will come from Perplexity's web search (which often includes real image URLs), and when those fail, users see a clean category-themed fallback instead of broken images.
+**New: `supabase/functions/gear-image-proxy/index.ts`**
+- Accepts a `url` query parameter (the Perplexity-provided image URL)
+- Fetches the image server-side with a generic User-Agent header to avoid bot detection
+- Returns the raw image bytes with proper Content-Type and 24-hour cache headers
+- Follows the same pattern as `place-photos` (CORS headers, error handling, binary response)
+- Validates the URL to prevent abuse (only allow image content types)
 
-### Files to Change
+**Edit: `supabase/config.toml`**
+- Add `[functions.gear-image-proxy]` with `verify_jwt = false`
 
-**`supabase/functions/travel-gear-intel/index.ts`**
-- Remove the entire `fetchProductImage` function and all calls to `product-image-search`
-- Remove the image-fetching loop (lines ~319-350) that calls the Google CSE function
-- Keep the `imageUrl` field that Perplexity already returns in its JSON response
+**Edit: `src/pages/Gear.tsx`**
+- Update `PackingResultCard` to route `item.imageUrl` through the proxy: instead of `src={item.imageUrl}`, use `src={proxyUrl(item.imageUrl)}`
+- Update `ProductReviewPanel` hero image to also use the proxy
+- Add a helper function that constructs the proxy URL: ``https://iomrjljlydboniioohkv.supabase.co/functions/v1/gear-image-proxy?url=${encodeURIComponent(imageUrl)}``
+- Keep the existing category-icon fallback for cases where no image URL exists at all
 
-**`src/pages/Gear.tsx`**
-- Update the `PackingResultCard` fallback (when `imageUrl` is missing or errors) to show a styled category icon (e.g., a suitcase for Packing, a plug for Tech) instead of a plain gray box with a generic Package icon
-- Same treatment for the review detail view's product image fallback
-
-**Database: Clear stale cache**
-- Run a migration to `DELETE FROM public.gear_intel_cache;` so old entries without images are refreshed on next search
-
-**`supabase/functions/product-image-search/index.ts`**
-- This function can be deleted since it's no longer called
-
-**`supabase/config.toml`**
-- Remove the `[functions.product-image-search]` entry
-
-### Result
-- No more Google CSE costs or 403 errors
-- Images come free via Perplexity (already paid for)
-- Clean fallback UI when images are unavailable
-- Simpler architecture (one fewer edge function)
+### Why This Should Work
+- The `place-photos` function uses the exact same approach (server-side fetch, return binary) and it works perfectly for resort images
+- The server request won't have a browser `Referer` header, so Amazon/manufacturer hotlink checks won't block it
+- No new API keys or costs required -- just proxying URLs Perplexity already provides
