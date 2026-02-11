@@ -74,5 +74,12 @@ export function useTravelIntel() {
     }
   };
 
-  return { loading, error, requirementsData, advisoriesData, newsData, fetchIntel };
+  const clearAll = () => {
+    setRequirementsData(null);
+    setAdvisoriesData(null);
+    setNewsData(null);
+    setError(null);
+  };
+
+  return { loading, error, requirementsData, advisoriesData, newsData, fetchIntel, clearAll };
 }
