@@ -10,9 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { useGearIntel, type GearItem, type GearReviewData } from "@/hooks/useGearIntel";
 import heroImg from "@/assets/gear-water-hammock-main.jpg";
 
-/* ─── Image Proxy Helper ─── */
-const PROXY_BASE = `https://iomrjljlydboniioohkv.supabase.co/functions/v1/gear-image-proxy`;
-const proxyUrl = (url: string) => `${PROXY_BASE}?url=${encodeURIComponent(url)}`;
+/* Amazon CDN images (m.media-amazon.com) don't need proxying */
 
 /* ─── Loading Component ─── */
 const GearLoading = ({ label }: { label: string }) => {
@@ -73,7 +71,7 @@ const PackingResultCard = ({ item, onReview }: { item: GearItem; onReview: (name
       <div className="aspect-[4/3] bg-muted relative overflow-hidden">
         {item.imageUrl && !imgError ? (
           <img
-            src={proxyUrl(item.imageUrl)}
+            src={item.imageUrl}
             alt={item.name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             onError={() => setImgError(true)}
@@ -150,7 +148,7 @@ const ProductReviewPanel = ({
       {review.imageUrl && (
         <div className="mb-8 rounded-2xl overflow-hidden max-h-80 bg-muted">
           <img
-            src={proxyUrl(review.imageUrl)}
+            src={review.imageUrl}
             alt={review.productName}
             className="w-full h-full object-contain max-h-80"
             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
