@@ -1,15 +1,32 @@
 
 
-# Add Carry-On Luggage Image to Product Library
+# Fix Gear Product Image Matching
 
-## What
-Store the uploaded Away carry-on suitcase photo in the `gear-images` storage bucket and map it to the keyword **"carry on"** in the `gear_product_images` table.
+## Problem
+1. The keyword matching in the edge function is too strict -- "carry-on" (hyphenated) doesn't match "carry on" (spaces), so the image never attaches.
+2. No packing cubes image mapping exists in the database.
 
-## Steps
+## Changes
 
-1. **Copy the uploaded image** from `user-uploads://Screenshot_from_2026-02-10_22-14-08.png` to `src/assets/gear-carry-on.png`
-2. **Upload to storage bucket** -- use the Supabase storage API to upload the image to the `gear-images` bucket
-3. **Insert database row** -- add a record to `gear_product_images` with `product_keyword = "carry on"` and the public URL from the bucket
+### 1. Fix keyword matching in edge function (`supabase/functions/travel-gear-intel/index.ts`)
+Update `attachProductImages` and `attachSingleProductImage` to normalize both the product name and keyword before comparing -- strip hyphens and extra spaces so "carry-on" matches "carry on".
 
-This follows the "Chat Upload" workflow from the plan. Once stored, any gear search result containing "carry on" in the product name will automatically show this image.
+```
+// Before:
+itemName.includes(row.product_keyword.toLowerCase())
 
+// After: normalize by replacing hyphens with spaces
+const normalize = (s: string) => s.toLowerCase().replace(/-/g, " ");
+normalize(itemName).includes(normalize(row.product_keyword))
+```
+
+### 2. Add packing cubes image to the library
+- Upload the existing `src/assets/gear-packing-cubes-main.jpg` to the `gear-images` storage bucket
+- Insert a `gear_product_images` row mapping keyword **"packing cubes"** to the public URL
+
+### 3. Clear the cache entry
+- Delete the current cached result for "beach vacation mexico" so the next search fetches fresh results with images properly attached
+
+## Technical details
+- The normalize function will be extracted as a shared helper used by both `attachProductImages` and `attachSingleProductImage`
+- Redeploy the `travel-gear-intel` edge function after the fix
