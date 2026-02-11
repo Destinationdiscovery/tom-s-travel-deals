@@ -1,22 +1,25 @@
 
-# Fix: Auto-Scroll to Results After Search
+# Fix: Clear Previous Results When Starting a New Search
 
 ## Problem
 
-When clicking "Find Gear" (or any other search button), the search executes successfully and results render below the hero section. But since the hero takes up the full viewport height (`min-h-screen`), the results are invisible below the fold and the page never scrolls down to show them.
+The `useTravelIntel` hook stores results in three separate state variables (`requirementsData`, `advisoriesData`, `newsData`). When you search for requirements and then search for advisories, the requirements data stays in state and both render on screen.
 
 ## Solution
 
-Add auto-scroll behavior in `Index.tsx` so that after any search is triggered, the page smoothly scrolls down to the results area.
+Two small changes:
 
-## Technical Detail
+### 1. `src/hooks/useTravelIntel.ts`
 
-**File: `src/pages/Index.tsx`**
+Add a `clearAll` function that resets all three result states to `null`, and export it from the hook.
 
-1. Add a `useRef` for the results container area (a div wrapping all results below the hero)
-2. In `handleInlineSearch` and `handleSearch`, after triggering the search, scroll to that ref with a small delay (to let the loading state render first)
-3. Use `scrollIntoView({ behavior: "smooth", block: "start" })` for a smooth transition
+### 2. `src/pages/Index.tsx`
 
-The ref target will be a wrapper `<div ref={resultsRef}>` placed right after the `HeroSection` component, encompassing all the result sections (AIReviewResult, intel results, gear results, etc.).
+In `handleInlineSearch`, call `intel.clearAll()` at the top before dispatching the new search. This ensures previous intel results are wiped before new ones load.
 
-A short `setTimeout` (~100ms) ensures the loading indicator has rendered before scrolling.
+Similarly, clear gear results when doing an intel search, and clear intel results when doing a gear search -- so only one result type is ever visible.
+
+| File | Change |
+|------|--------|
+| `src/hooks/useTravelIntel.ts` | Add `clearAll()` method that sets all three data states to `null` |
+| `src/pages/Index.tsx` | Call `intel.clearAll()` and `gear.clearReview()` + clear packing data at start of `handleInlineSearch` |
