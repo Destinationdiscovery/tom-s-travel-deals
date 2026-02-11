@@ -43,11 +43,11 @@ const searchTypeConfigs: Record<SearchType, SearchTypeConfig> = {
 interface HeroSectionProps {
   onSearch: (propertyName: string) => void;
   isSearching?: boolean;
-  onNavigateSearch?: (type: SearchType, query: string) => void;
+  onInlineSearch?: (type: SearchType, query: string) => void;
   onSearchTypeChange?: () => void;
 }
 
-const HeroSection = ({ onSearch, isSearching, onNavigateSearch, onSearchTypeChange }: HeroSectionProps) => {
+const HeroSection = ({ onSearch, isSearching, onInlineSearch, onSearchTypeChange }: HeroSectionProps) => {
   const [query, setQuery] = useState("");
   const [searchType, setSearchType] = useState<SearchType>("destination");
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -86,7 +86,7 @@ const HeroSection = ({ onSearch, isSearching, onNavigateSearch, onSearchTypeChan
     if (searchType === "destination") {
       onSearch(trimmed);
     } else {
-      onNavigateSearch?.(searchType, trimmed);
+      onInlineSearch?.(searchType, trimmed);
     }
   };
 
@@ -129,8 +129,8 @@ const HeroSection = ({ onSearch, isSearching, onNavigateSearch, onSearchTypeChan
         </p>
 
         {/* Search Bar */}
-        <div className="flex flex-col gap-3 max-w-xl mx-auto">
-          {/* Search Type Selector + Input Row */}
+        <div className="max-w-xl mx-auto">
+          {/* Search Type Selector + Input + Button Row */}
           <div className="flex flex-col sm:flex-row items-stretch gap-3">
             {/* Type Selector */}
             <div className="relative" ref={dropdownRef}>
@@ -209,17 +209,17 @@ const HeroSection = ({ onSearch, isSearching, onNavigateSearch, onSearchTypeChan
                 </div>
               )}
             </div>
-          </div>
 
-          {/* Search Button */}
-          <Button
-            size="lg"
-            onClick={handleSearch}
-            disabled={isSearching || query.trim().length < 2}
-            className="h-12 px-8 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg shadow-lg whitespace-nowrap disabled:opacity-50 w-full sm:w-auto sm:self-end"
-          >
-            {isSearching && searchType === "destination" ? "Searching..." : config.buttonLabel}
-          </Button>
+            {/* Search Button */}
+            <Button
+              size="lg"
+              onClick={handleSearch}
+              disabled={isSearching || query.trim().length < 2}
+              className="h-12 px-8 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg shadow-lg whitespace-nowrap disabled:opacity-50 w-full sm:w-auto shrink-0"
+            >
+              {isSearching && searchType === "destination" ? "Searching..." : config.buttonLabel}
+            </Button>
+          </div>
         </div>
       </div>
 
