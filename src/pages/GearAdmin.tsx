@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { toast } from "@/hooks/use-toast";
@@ -13,6 +14,7 @@ interface GearImage {
   id: string;
   product_keyword: string;
   image_url: string;
+  description: string | null;
   created_at: string;
 }
 
@@ -23,6 +25,7 @@ const GearAdmin = () => {
   const [uploading, setUploading] = useState(false);
   const [keyword, setKeyword] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [description, setDescription] = useState("");
   const [filter, setFilter] = useState("");
 
   useEffect(() => {
@@ -67,12 +70,13 @@ const GearAdmin = () => {
 
       const { error: insertError } = await supabase
         .from("gear_product_images")
-        .insert({ product_keyword: keyword.trim().toLowerCase(), image_url: publicUrl.publicUrl });
+        .insert({ product_keyword: keyword.trim().toLowerCase(), image_url: publicUrl.publicUrl, description: description.trim() || null } as any);
 
       if (insertError) throw insertError;
 
       toast({ title: "Uploaded!", description: `Image mapped to "${keyword.trim()}"` });
       setKeyword("");
+      setDescription("");
       setFile(null);
       fetchImages();
     } catch (e: unknown) {
@@ -146,6 +150,12 @@ const GearAdmin = () => {
                 Upload
               </Button>
             </div>
+            <Textarea
+              placeholder="Description (optional) — e.g. Blue packing cubes set of 6"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="mt-3 min-h-[60px]"
+            />
             {file && (
               <p className="text-xs text-muted-foreground mt-2">Selected: {file.name}</p>
             )}
@@ -196,7 +206,10 @@ const GearAdmin = () => {
                 </div>
                 <CardContent className="p-3">
                   <p className="text-sm font-medium text-foreground truncate">{image.product_keyword}</p>
-                  <p className="text-xs text-muted-foreground">
+                  {image.description && (
+                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{image.description}</p>
+                  )}
+                  <p className="text-xs text-muted-foreground mt-1">
                     {new Date(image.created_at).toLocaleDateString()}
                   </p>
                 </CardContent>

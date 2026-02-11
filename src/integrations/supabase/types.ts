@@ -74,18 +74,21 @@ export type Database = {
       gear_product_images: {
         Row: {
           created_at: string
+          description: string | null
           id: string
           image_url: string
           product_keyword: string
         }
         Insert: {
           created_at?: string
+          description?: string | null
           id?: string
           image_url: string
           product_keyword: string
         }
         Update: {
           created_at?: string
+          description?: string | null
           id?: string
           image_url?: string
           product_keyword?: string
