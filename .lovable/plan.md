@@ -1,64 +1,34 @@
 
-## Fix Amazon Creators API + Clear Cards on New Search
 
-Two issues to fix: the Amazon API calls are failing due to incorrect request format, and previous results should clear when starting a new search.
+## Fix Amazon Creators API 401 Errors
 
-### Issue 1: Amazon Creators API Not Working
+### Root Cause
+The OAuth token is obtained successfully (scope fix worked), but SearchItems rejects it with 401. The Amazon Creators API uses **different Cognito endpoints per credential version**:
+- Version 2.1 (NA): `us-east-1`
+- Version 2.2 (EU): `eu-south-2`
+- Version 2.3 (FE): `us-west-2`
 
-The edge function logs show `Amazon OAuth error: 400 {"error":"invalid_scope"}`. After reviewing the official Amazon Creators API documentation, the current implementation has **four errors**:
+The code hardcodes `us-east-1`. If your credentials use a different version, the token is issued by the wrong Cognito pool and gets rejected.
 
-1. **Wrong OAuth scope** -- Code sends `scope=catalog/v1/searchItems`, but the correct scope is `creatorsapi/default`
-2. **SearchItems is a POST, not a GET** -- Code sends a GET request with query parameters, but the API expects a POST with a JSON body
-3. **Wrong API domain** -- Code uses `creatorsapi.amazon.com` but the correct base URL is `creatorsapi.amazon` (no `.com`)
-4. **Missing Version in Authorization header** -- The API requires `Authorization: Bearer TOKEN, Version VERSION`, not just `Bearer TOKEN`. A new secret `AMAZON_CREATORS_VERSION` is needed (the credential version like "2.1" for North America)
+### Changes
 
-### Issue 2: Clear Previous Cards on New Search
+**`supabase/functions/travel-gear-intel/index.ts`**
 
-Currently when you search again, the old packing list cards stay visible. The fix is to clear `packingData` immediately when a new search starts, so the loading animation shows cleanly (like the screenshot reference).
+1. **Dynamic Cognito endpoint** -- Read `AMAZON_CREATORS_VERSION` and map to the correct region:
+   ```text
+   "2.1" -> us-east-1
+   "2.2" -> eu-south-2
+   "2.3" -> us-west-2
+   ```
 
-### Files to Change
+2. **Log 401 response body** -- On search failure, log `await response.text()` so we can see Amazon's actual error message instead of just "401".
 
-**Add Secret: `AMAZON_CREATORS_VERSION`**
-- Store your credential version (e.g., "2.1" for NA, "2.2" for EU, "2.3" for FE)
+3. **Robust `AMAZON_ASSOCIATE_TAGS` parsing** -- Trim and strip BOM characters before JSON.parse to fix the recurring parse failure.
 
-**Edit: `supabase/functions/travel-gear-intel/index.ts`**
-- Fix `getAmazonOAuthToken()`:
-  - Change scope from `"catalog/v1/searchItems"` to `"creatorsapi/default"`
-- Fix `searchAmazonProduct()`:
-  - Change from GET with query params to POST with JSON body
-  - Change URL from `https://creatorsapi.amazon.com/catalog/v1/searchItems` to `https://creatorsapi.amazon/catalog/v1/searchItems`
-  - Add `Version` to the Authorization header: `Bearer ${token}, Version ${version}`
-  - Read version from `AMAZON_CREATORS_VERSION` env var (default "2.1")
-  - Request body should be: `{ keywords, partnerTag, marketplace, itemCount: 1, resources: ["images.primary.large", "itemInfo.title"] }`
-  - Add `Content-Type: application/json` header
+4. **Fallback Amazon URLs for must-haves items** -- When enrichment fails, construct a search URL with the affiliate tag (already done for `review` type, missing for individual `must-haves` items).
 
-**Edit: `src/hooks/useGearIntel.ts`**
-- In `fetchPackingList()`, add `setPackingData(null)` at the start (before `setLoading(true)`) so previous cards are immediately removed and the loading animation shows
-
-**Clear cache**
-- Run `DELETE FROM gear_intel_cache` to remove stale entries
+**Database**
+- Clear `gear_intel_cache` to force fresh API calls.
 
 **Redeploy `travel-gear-intel`**
 
-### Corrected API Call Shape
-
-```text
-OAuth Token Request:
-  POST https://creatorsapi.auth.us-east-1.amazoncognito.com/oauth2/token
-  Headers: Content-Type: application/x-www-form-urlencoded
-           Authorization: Basic base64(clientId:clientSecret)
-  Body: grant_type=client_credentials&scope=creatorsapi/default
-
-SearchItems Request:
-  POST https://creatorsapi.amazon/catalog/v1/searchItems
-  Headers: Authorization: Bearer TOKEN, Version 2.1
-           Content-Type: application/json
-           x-marketplace: www.amazon.ca
-  Body: {
-    "keywords": "Osprey Farpoint 40",
-    "partnerTag": "gen80s01-20",
-    "marketplace": "www.amazon.ca",
-    "itemCount": 1,
-    "resources": ["images.primary.large", "itemInfo.title"]
-  }
-```
