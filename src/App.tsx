@@ -13,6 +13,7 @@ import DestinationReview from "./pages/DestinationReview";
 import Compass from "./pages/Compass";
 import CompassArticle from "./pages/CompassArticle";
 import Gear from "./pages/Gear";
+import GearAdmin from "./pages/GearAdmin";
 import About from "./pages/About";
 import Compare from "./pages/Compare";
 import Contact from "./pages/Contact";
@@ -42,6 +43,7 @@ const App = () => (
               <Route path="/compass" element={<Compass />} />
               <Route path="/compass/:slug" element={<CompassArticle />} />
               <Route path="/gear" element={<Gear />} />
+              <Route path="/gear-admin" element={<GearAdmin />} />
               <Route path="/about" element={<About />} />
               <Route path="/compare" element={<Compare />} />
               <Route path="/contact" element={<Contact />} />
