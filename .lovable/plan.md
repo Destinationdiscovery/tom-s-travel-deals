@@ -1,46 +1,67 @@
 
 
-# Remove Sign-In / Registration for Now
+# Destination Search
 
-Remove all user-facing sign-in UI and auth prompts so there are zero barriers to entry. The AuthProvider stays in place (it's harmless and hooks like `useAuth` still need it to avoid crashes), but all visible sign-in buttons, modals, and gated pages are removed or simplified.
+A new page at `/search` where users type natural-language queries like "adults only resorts in Punta Cana" and get a list of matching properties. Each result has a "Review It" button that triggers the existing review generation flow.
+
+## User Flow
+
+1. User clicks "Destination Search" in the top toolbar (or hero nav)
+2. Lands on `/search` with a large search input and example query chips
+3. Types a query and hits search
+4. Gets 8-10 results as cards showing name, location, rating, description, price range, and best-for tags
+5. Clicks "Review It" on any result -- navigates to home page and auto-triggers `generate-review` for that property, landing them on `/review/{slug}`
 
 ## Changes
 
-### 1. Header -- Remove Sign In button and user menu
+### 1. New edge function
+**File:** `supabase/functions/travel-search/index.ts`
+- Calls Perplexity with a prompt optimized for returning a structured JSON list of 8-10 real properties matching the query
+- Each result: `name`, `location`, `type`, `rating`, `description`, `bestFor` tags, `priceRange`
+- Uses existing `PERPLEXITY_API_KEY` (already configured)
+
+### 2. New hook
+**File:** `src/hooks/useTravelSearch.ts`
+- Manages query, results, loading, and error state
+- Calls the `travel-search` edge function
+- Returns typed results array
+
+### 3. New page
+**File:** `src/pages/TravelSearch.tsx`
+- Header and Footer (matching existing pages)
+- Search bar with placeholder: "Try: adults only resorts in Punta Cana"
+- Example query chips below (e.g., "Beach resorts in Cancun", "Boutique hotels in Paris", "Family resorts in Jamaica")
+- Results grid (1-2-3 column responsive)
+- Each card shows: name, location, star rating, 1-2 sentence description, best-for tags, price range
+- **"Review It" button** on each card -- navigates to `/review/{slug}` after triggering review generation
+
+### 4. Header -- Add nav link
 **File:** `src/components/Header.tsx`
-- Remove the `AuthModal` import and rendering
-- Remove the `authOpen` state
-- Remove the Sign In button (desktop and mobile)
-- Remove the user dropdown menu (My Reviews, My Trips, Sign Out)
-- Keep everything else (nav links, theme toggle, mobile menu)
+- Add `{ to: "/search", label: "Destination Search" }` to the `navLinks` array (first position so it's prominent)
 
-### 2. SaveReviewButton -- Remove auth gate
-**File:** `src/components/SaveReviewButton.tsx`
-- Remove the `AuthModal` import and rendering
-- Remove the `authOpen` state and sign-in prompt logic
-- Remove references to `isAuthenticated`
-- When at limit, just show a simple "Limit reached" message instead of prompting sign-in
-- Button text: just "Save to Compare" or "Saved" (no "Sign in to Save More")
+### 5. Hero section -- Add nav link
+**File:** `src/components/HeroSection.tsx`
+- Add "Destination Search" to the `heroNavLinks` array
 
-### 3. Comments Section -- Allow anonymous commenting or remove sign-in gate
-**File:** `src/components/comments/CommentsSection.tsx`
-- Remove the "Sign in to comment" card with magic link form
-- Either hide the comment composer entirely for non-logged-in users (simplest) or allow anonymous comments
-
-### 4. Routes -- Remove My Reviews and My Trips from navigation
+### 6. Routing
 **File:** `src/App.tsx`
-- Keep the routes (in case someone has a bookmarked URL) but they'll just redirect or show empty state
-- No code change strictly needed here since the nav links are already removed from the Header
+- Add route: `<Route path="/search" element={<TravelSearch />} />`
+- Import `TravelSearch` component
 
-### 5. Keep AuthProvider in place
-**File:** `src/App.tsx` -- No change
-- The AuthProvider wrapper stays so that any `useAuth()` calls in hooks like `useSavedReviews`, `useReviewHistory`, and `CommentsSection` don't crash
-- Those hooks gracefully handle `user === null` already
+## Technical Details
 
-## What stays untouched
-- `AuthProvider.tsx` and `AuthModal.tsx` files remain in the codebase (just unused for now)
-- `useReviewHistory.ts` -- still works, just won't log to DB without a user
-- `useSavedReviews.ts` -- still works with localStorage for anonymous users
-- `GearAdmin.tsx` -- admin-only page, keeps its auth check
-- Routes `/my-reviews` and `/my-trips` stay registered but are inaccessible from nav
+### Edge function prompt strategy
+The Perplexity prompt instructs the model to search for real, currently operating properties and return structured JSON. Uses `response_format` with `json_schema` for reliable parsing, plus the existing regex-based JSON repair as a fallback.
+
+### "Review It" button behavior
+When clicked, navigates to the Index page with a query parameter (e.g., `/?search=PropertyName`). The Index page detects this parameter and auto-triggers `generateReview`. Alternatively, the search page can call `generate-review` directly and navigate to `/review/{slug}` once the review is ready -- this keeps the user on the search page with a loading state on that specific card.
+
+The second approach (call directly from search page) is cleaner:
+- User clicks "Review It"
+- That card shows a loading spinner
+- Once the review is generated, navigate to `/review/{slug}`
+- Uses the existing `useGenerateReview` hook
+
+### No caching needed
+Search results are ephemeral exploration. Individual reviews are already cached by `generate-review`.
 
