@@ -44,6 +44,7 @@ export function useGearIntel() {
   const [reviewLoading, setReviewLoading] = useState(false);
 
   const fetchPackingList = async (query: string) => {
+    setPackingData(null);
     setLoading(true);
     setError(null);
 
