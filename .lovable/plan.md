@@ -1,82 +1,49 @@
 
 
-# Redesigned Promo Walkthrough (~7-8 seconds)
+# Promo Walkthrough: Better Pacing and Skip Button Visibility
 
-## New Flow
+## Pacing Changes
 
-The promo will be a rapid-fire showcase of all major features, keeping the branded intro but making everything much snappier.
+The current total is ~7.4 seconds, which feels rushed. Here's a revised timeline that stretches to ~12 seconds -- still punchy but gives each scene enough breathing room to register:
 
-### Timeline (approximate)
+| Stage | Current | Proposed | Why |
+|-------|---------|----------|-----|
+| HERO_REVEAL | 1.2s | 2.0s | Let the brand name land; viewers need a moment to orient |
+| REVIEW_FLASH | 1.2s | 2.5s | The review card has photos, ratings, and text -- needs time to be read |
+| INTEL_FLASH | 1.5s | 2.5s | Three tabs cycling at 0.5s each is too fast to register; bump to ~0.7s per tab |
+| GEAR_FLASH | 1.0s | 1.5s | Slight breathing room for the product card |
+| COMPARE_FLASH | 1.0s | 1.5s | Let the verdict banner sink in |
+| BRANDING | 1.5s | 2.0s | Stronger closing beat |
+| **Total** | **~7.4s** | **~12s** | Still under 15s (ideal for Reels/TikTok) |
 
-| Time | Stage | Duration | What's shown |
-|------|-------|----------|-------------|
-| 0.0s | HERO_REVEAL | 1.2s | Logo animates in with tagline over beach background |
-| 1.2s | REVIEW_FLASH | 1.2s | Quick flash of a resort review card (Sandals Royal Barbados) with rating, photos, auto-scroll |
-| 2.4s | INTEL_FLASH | 1.5s | "Cuba" typed into Travel Intel search, then 3 quick tab flashes: Requirements bullet list, Advisory level badge, News headlines -- cycling through each tab ~0.5s |
-| 3.9s | GEAR_FLASH | 1.0s | A gear review card flashes in (e.g., packing cubes with star rating and verdict) |
-| 4.9s | COMPARE_FLASH | 1.0s | Side-by-side comparison cards with verdict banner |
-| 5.9s | BRANDING | 1.5s | "REVIEW THEN GO" logo + tagline fade in on black |
-| ~7.4s | Loop/End | -- | Loops or fades out |
+## Skip Button Changes
 
-Total: ~7.4 seconds
+Currently the skip button is small, semi-transparent text with a thin border (`text-white/60`, `border-white/20`, `text-sm`). It blends into the background. Changes:
 
-## New Scenes to Create
-
-### 1. PromoIntelScene (new component)
-A mock Travel Intel results panel showing:
-- A search bar with "Cuba" already typed
-- Three tabs (Requirements / Advisories / News) that auto-switch
-- Each tab shows 3-4 bullet points of mock static content
-- Styled to match the real Travel Intel page
-
-### 2. PromoGearScene (new component)  
-A mock gear review card showing:
-- Product image (using existing packing cubes asset)
-- Product name, star rating, short verdict
-- Quick fade-in, hold, fade-out
-
-## Changes to Existing Files
-
-### `PromoDemoWalkthrough.tsx` -- Full rewrite of stage machine
-- New stages: `HERO_REVEAL`, `REVIEW_FLASH`, `INTEL_FLASH`, `GEAR_FLASH`, `COMPARE_FLASH`, `BRANDING`
-- Remove the slow typing/suggestions/loading/save sequences
-- All transitions are fast cross-fades (300-400ms)
-- No typing animation, no loading stages, no save animation
-- Hero reveal is shortened to 1.2s (from 2s + typing time)
-
-### `PromoReviewScene.tsx` -- Minor tweaks
-- Remove the save button (not needed in quick flash)
-- Auto-scroll will be faster
-
-### `PromoCompareScene.tsx` -- No changes needed, just shown briefly
-
-### `PromoSaveBadge.tsx` -- No longer used in the new flow
-
-### `PromoSlideshow.tsx` -- No changes needed
+- Increase text opacity to full white (`text-white`)
+- Use a solid semi-transparent background (`bg-white/15 backdrop-blur-md`)
+- Bump font size to `text-base`
+- Add slightly thicker border (`border-white/40`)
+- Add a subtle pulse or glow on first appearance so users notice it
 
 ## Technical Details
 
-### New stage type:
-```
-type Stage =
-  | "HERO_REVEAL"
-  | "REVIEW_FLASH"
-  | "INTEL_FLASH"
-  | "GEAR_FLASH"
-  | "COMPARE_FLASH"
-  | "BRANDING";
-```
+### File: `src/components/PromoDemoWalkthrough.tsx`
+- Update stage timings in the `useEffect` switch statement:
+  - `HERO_REVEAL`: 1200 -> 2000
+  - `REVIEW_FLASH`: 1200 -> 2500
+  - `INTEL_FLASH`: 1500 -> 2500
+  - `GEAR_FLASH`: 1000 -> 1500
+  - `COMPARE_FLASH`: 1000 -> 1500
+  - `BRANDING`: 1500 -> 2000
+- Slow down the auto-scroll interval in `REVIEW_FLASH` (reduce increment from 8 to 4 per tick for smoother scrolling over the longer duration)
 
-### New files:
-- `src/components/promo/PromoIntelScene.tsx` -- Mock travel intel with tab cycling
-- `src/components/promo/PromoGearScene.tsx` -- Mock gear review card
+### File: `src/components/promo/PromoIntelScene.tsx`
+- Increase tab cycling interval from 500ms to ~700ms to match the longer `INTEL_FLASH` duration
 
-### Modified files:
-- `src/components/PromoDemoWalkthrough.tsx` -- Rewritten stage machine with fast timings
-- `src/components/promo/PromoReviewScene.tsx` -- Remove save button, speed up scroll
-
-### Assets used:
-- Existing Cuba gallery images for intel scene background feel
-- `gear-packing-cubes-main.jpg` for gear scene
-- `hero-beach.jpg` for hero (unchanged)
+### File: `src/components/PromoSlideshow.tsx`
+- Update skip button classes:
+  - From: `text-white/60 hover:text-white text-sm border-white/20 hover:border-white/40 backdrop-blur-sm`
+  - To: `text-white hover:text-white text-base font-semibold border-white/40 hover:border-white/60 bg-white/15 backdrop-blur-md shadow-lg`
+- Add an entrance animation (e.g., `animate-fade-in`) so the button draws the eye when the promo starts
 
