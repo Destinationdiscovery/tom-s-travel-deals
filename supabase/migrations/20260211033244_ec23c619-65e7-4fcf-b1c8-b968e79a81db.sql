@@ -1,0 +1,1 @@
+ALTER TABLE public.gear_product_images ADD COLUMN description text;
