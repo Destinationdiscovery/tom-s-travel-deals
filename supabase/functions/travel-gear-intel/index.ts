@@ -350,12 +350,16 @@ serve(async (req) => {
       .maybeSingle();
 
     // Parse Amazon tags
+    const DEFAULT_TAGS: Record<string, string> = { CA: "gen80s01-20", US: "destinati0a78-20", GB: "uktripreviews-21" };
     let amazonTags: Record<string, string> = {};
     try {
       const tagsStr = Deno.env.get("AMAZON_ASSOCIATE_TAGS");
       if (tagsStr) amazonTags = JSON.parse(tagsStr);
     } catch {
-      console.error("Failed to parse AMAZON_ASSOCIATE_TAGS");
+      console.error("Failed to parse AMAZON_ASSOCIATE_TAGS, using fallback tags");
+    }
+    if (Object.keys(amazonTags).length === 0) {
+      amazonTags = DEFAULT_TAGS;
     }
 
     if (cached) {
