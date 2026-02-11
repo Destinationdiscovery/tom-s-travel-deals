@@ -175,7 +175,12 @@ Return your response as valid JSON with this exact structure (no markdown, no co
 
 Important: For the ratings object, use category names that are most relevant to this type of property. For hotels/resorts use Rooms, Food, Service, Location, Value. For cruises use Cabins, Dining, Entertainment, Excursions, Value. For destinations/attractions adapt categories accordingly. Always include exactly 5 rating categories.
 
-For thingsToDo, include exactly 3 popular activities, attractions, or experiences near the property that real travelers recommend. Use specific names (not generic descriptions). Include a rating for each based on aggregated real traveler reviews.
+For thingsToDo, include exactly 3 popular activities, attractions, or experiences OUTSIDE the property that real travelers recommend. CRITICAL RULES:
+- Activities must be independent businesses, attractions, or experiences in the surrounding area -- NOT part of the hotel/resort/property itself.
+- NEVER recommend on-site amenities such as the resort's spa, pool, beach club, restaurant, gym, kids club, or any facility operated by the property.
+- Each activity should require at least a short walk or drive away from the property.
+- Use real, specific names of places (e.g., "Rick's Cafe Negril" not "local cliff jumping spot").
+- Include a rating for each based on aggregated real traveler reviews.
 
 Make the review feel authentic and balanced - mention both positives and negatives that real travelers have noted. Include specific details like room types, restaurant names, or nearby attractions when possible.`;
 
