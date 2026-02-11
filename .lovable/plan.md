@@ -1,35 +1,65 @@
 
+## Amazon Creators API Integration for Gear Product Images
 
-## Image Proxy for Gear Products
-
-Create a backend edge function that fetches product images server-side, just like `place-photos` does for resort images. This bypasses hotlink protection because the request comes from your server, not the user's browser.
+Replace the broken Perplexity image URLs with official Amazon product images using the Amazon Creators API. This also gives us real Amazon detail page links with your affiliate tag embedded, replacing the generic search URLs.
 
 ### How It Works
 
-1. Perplexity already returns `imageUrl` for each gear item (Amazon thumbnails, manufacturer photos, etc.)
-2. The browser currently tries to load these URLs directly and gets blocked by hotlink protection
-3. A new `gear-image-proxy` edge function will fetch the image server-side and pipe the binary data back to the browser
-4. The frontend routes all gear product images through this proxy instead of loading them directly
+1. Perplexity returns a list of specific product names (e.g., "Osprey Farpoint 40 Travel Backpack")
+2. After getting the Perplexity results, the edge function calls the Amazon Creators API `SearchItems` for each product name
+3. The API returns official product images hosted on `m.media-amazon.com` (no hotlink issues) and direct detail page URLs with your affiliate tag
+4. The enriched data (image + detail URL) is cached alongside the Perplexity results
 
-### Files to Create/Change
+### Authentication Flow
 
-**New: `supabase/functions/gear-image-proxy/index.ts`**
-- Accepts a `url` query parameter (the Perplexity-provided image URL)
-- Fetches the image server-side with a generic User-Agent header to avoid bot detection
-- Returns the raw image bytes with proper Content-Type and 24-hour cache headers
-- Follows the same pattern as `place-photos` (CORS headers, error handling, binary response)
-- Validates the URL to prevent abuse (only allow image content types)
+The Creators API uses OAuth 2.0 client credentials:
+- Your Credential ID and Secret are sent to Amazon Cognito to get an access token (valid 1 hour)
+- The token is cached in-memory and refreshed when expired
+- All calls go to `https://creatorsapi.amazon/catalog/v1/searchItems`
 
-**Edit: `supabase/config.toml`**
-- Add `[functions.gear-image-proxy]` with `verify_jwt = false`
+### Files to Change
+
+**Store Secrets**
+- `AMAZON_CREATORS_CLIENT_ID` -- your Credential ID
+- `AMAZON_CREATORS_CLIENT_SECRET` -- your Credential Secret
+
+**Edit: `supabase/functions/travel-gear-intel/index.ts`**
+- Add an `enrichWithAmazonImages()` function that:
+  1. Gets an OAuth token from `creatorsapi.auth.us-east-1.amazoncognito.com/oauth2/token` using client credentials grant
+  2. For each product item, calls `SearchItems` with `keywords: item.name`, `partnerTag`, `marketplace`, requesting `images.primary.large` and `itemInfo.title`
+  3. Takes the first result's primary image URL and `detailPageURL` (which already includes the affiliate tag)
+  4. Falls back gracefully if any individual product lookup fails (keeps the item, just without an image)
+- After Perplexity returns results, call `enrichWithAmazonImages()` on the items before caching
+- For "review" type, also enrich the single product with an Amazon image
+- Token is cached in a module-level variable with expiry check so it's reused across requests within the same function instance
+- The marketplace header (`x-marketplace`) and token endpoint are selected based on user country (CA -> www.amazon.ca, US -> www.amazon.com, GB -> www.amazon.co.uk)
 
 **Edit: `src/pages/Gear.tsx`**
-- Update `PackingResultCard` to route `item.imageUrl` through the proxy: instead of `src={item.imageUrl}`, use `src={proxyUrl(item.imageUrl)}`
-- Update `ProductReviewPanel` hero image to also use the proxy
-- Add a helper function that constructs the proxy URL: ``https://iomrjljlydboniioohkv.supabase.co/functions/v1/gear-image-proxy?url=${encodeURIComponent(imageUrl)}``
-- Keep the existing category-icon fallback for cases where no image URL exists at all
+- Remove the `gear-image-proxy` proxy URL helper since Amazon's `m.media-amazon.com` images don't need proxying
+- Use `item.imageUrl` directly (now pointing to official Amazon CDN)
+- Use `item.amazonUrl` directly (now a proper detail page URL with affiliate tag, not a search URL)
 
-### Why This Should Work
-- The `place-photos` function uses the exact same approach (server-side fetch, return binary) and it works perfectly for resort images
-- The server request won't have a browser `Referer` header, so Amazon/manufacturer hotlink checks won't block it
-- No new API keys or costs required -- just proxying URLs Perplexity already provides
+**Edit: `src/hooks/useGearIntel.ts`**
+- Add `detailPageUrl` to the `GearItem` interface (optional, falls back to existing `amazonUrl`)
+
+### What You Get
+
+- High-quality official Amazon product photos for every gear item
+- Direct product detail page links (instead of search page links) with your affiliate tag
+- Real product titles from Amazon to cross-reference with Perplexity recommendations
+- No more broken images -- `m.media-amazon.com` URLs are meant to be embedded
+
+### Technical Details
+
+```text
+Flow:
+User searches "beach vacation"
+  -> Edge function calls Perplexity (gets 20 product names)
+  -> Edge function gets OAuth token from Amazon Cognito
+  -> Edge function calls SearchItems for each product (batched)
+  -> Merges Amazon images + URLs into Perplexity results
+  -> Caches enriched result
+  -> Returns to frontend
+```
+
+The SearchItems API returns up to 10 items per call, so we only need 1 result per product search (set `itemCount: 1`). With 20 products, that's 20 API calls, but they can be parallelized with `Promise.allSettled` to keep latency reasonable. The results are cached for 7 days so subsequent users get instant responses.
