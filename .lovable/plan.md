@@ -1,35 +1,28 @@
 
-# Destination Search: Loading Graphic and Clear Previous Search
 
-## What Changes
+# Remove Hero Nav Links and Geni.us Gear Data
 
-### 1. Show loading stages graphic while searching
-When a search is in progress, replace the results area with a search-specific loading stages component -- similar to the existing `ReviewLoadingStages` but with search-relevant steps like "Searching destinations...", "Comparing ratings...", "Building your list...". This reuses the same visual pattern (progress bar, staged checklist, travel tip) that the review pages use.
+## Changes
 
-### 2. Clear previous results when starting a new search
-The hook already clears results at the start of `search()` (line 23-24 in the hook). The issue is that the example chips only show when `results.length === 0 && !isLoading`, so they reappear correctly. The main change is ensuring the loading graphic replaces the old results immediately when a new search starts, giving a clean visual reset.
+### 1. Remove hero navigation links from HeroSection
+**File:** `src/components/HeroSection.tsx`
+- Delete the `heroNavLinks` array (lines 8-15) and the entire bottom navigation block (lines 130-142) that renders them
+- Remove the unused `Link` import from react-router-dom
+- The scroll indicator at the bottom remains
 
-## Technical Details
+### 2. Delete personal gear review data
+**File:** `src/data/gearReviews.ts` -- **Delete entire file**
+- Contains all Geni.us links and hand-written personal reviews
+- Only imported by `GearReviewsSection.tsx` which itself is unused
 
-### New component: `src/components/SearchLoadingStages.tsx`
-A lighter variant of `ReviewLoadingStages` with search-specific stages:
-- "Searching destinations..." (Search icon, 2s)
-- "Comparing ratings and reviews..." (Star icon, 3s)  
-- "Finding the best matches..." (MapPin icon, 3s)
-- "Building your list..." (Sparkles icon, 0s -- stays active until results arrive)
+### 3. Delete GearReviewsSection component
+**File:** `src/components/GearReviewsSection.tsx` -- **Delete entire file**
+- The carousel component that displays personal gear reviews
+- Not imported anywhere in the app currently
 
-Includes the same progress bar, "Did you know?" travel tip, and animated checkmarks. Reuses `Progress` component and the same icon set.
+### What stays unchanged
+- The `/gear` page with AI-powered gear search remains fully functional
+- The "Travel Gear Reviews" link in the Header toolbar stays
+- All other navigation continues to work from the top toolbar
+- Affiliate links generated dynamically by the AI gear search (using your Amazon Associate tags) are unaffected
 
-### File: `src/pages/TravelSearch.tsx`
-- Import `SearchLoadingStages`
-- When `isLoading` is true, render `SearchLoadingStages` in place of the results grid
-- The hook already clears results/citations on new search, so the old results disappear immediately
-- Add a "New Search" or "Clear" button near the results count that resets results and shows the chips again
-
-### File: `src/hooks/useTravelSearch.ts`
-- Add a `clearResults` function that resets `results`, `citations`, and `error` to their initial state
-- Export it alongside the existing returns
-
-### Files unchanged
-- `ReviewLoadingStages.tsx` stays as-is (used for review generation)
-- Hook already clears on new search -- just adding an explicit clear function
