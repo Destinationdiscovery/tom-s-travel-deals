@@ -17,6 +17,13 @@ const MARKETPLACE_CONFIG: Record<string, { domain: string; marketplace: string }
 /* ─── Amazon Creators API OAuth Token Cache ─── */
 let cachedToken: { token: string; expiresAt: number } | null = null;
 
+/* ─── Version → Cognito region mapping ─── */
+const VERSION_REGION: Record<string, string> = {
+  "2.1": "us-east-1",
+  "2.2": "eu-south-2",
+  "2.3": "us-west-2",
+};
+
 async function getAmazonOAuthToken(): Promise<string> {
   if (cachedToken && Date.now() < cachedToken.expiresAt - 60_000) {
     return cachedToken.token;
@@ -29,7 +36,10 @@ async function getAmazonOAuthToken(): Promise<string> {
     throw new Error("Amazon Creators API credentials not configured");
   }
 
-  const tokenUrl = "https://creatorsapi.auth.us-east-1.amazoncognito.com/oauth2/token";
+  const version = Deno.env.get("AMAZON_CREATORS_VERSION") || "2.1";
+  const region = VERSION_REGION[version] || "us-east-1";
+  console.log(`Using Cognito region ${region} for version ${version}`);
+  const tokenUrl = `https://creatorsapi.auth.${region}.amazoncognito.com/oauth2/token`;
   const body = new URLSearchParams({
     grant_type: "client_credentials",
     scope: "creatorsapi/default",
@@ -87,7 +97,8 @@ async function searchAmazonProduct(
     });
 
     if (!response.ok) {
-      console.error(`Amazon search failed for "${productName}":`, response.status);
+      const errBody = await response.text();
+      console.error(`Amazon search failed for "${productName}":`, response.status, errBody);
       return null;
     }
 
@@ -133,13 +144,17 @@ async function enrichWithAmazonImages(
 
   return items.map((item, i) => {
     const result = results[i];
+    const enriched = { ...item };
     if (result.status === "fulfilled" && result.value) {
-      const enriched = { ...item };
       if (result.value.imageUrl) enriched.imageUrl = result.value.imageUrl;
       if (result.value.detailPageUrl) enriched.amazonUrl = result.value.detailPageUrl;
-      return enriched;
     }
-    return item;
+    // Fallback: construct Amazon search URL if no detail page from API
+    if (!enriched.amazonUrl) {
+      const domain = config.domain;
+      enriched.amazonUrl = `https://${domain}/s?k=${encodeURIComponent(item.name)}&tag=${tag}`;
+    }
+    return enriched;
   });
 }
 
@@ -358,10 +373,15 @@ serve(async (req) => {
     const DEFAULT_TAGS: Record<string, string> = { CA: "gen80s01-20", US: "destinati0a78-20", GB: "uktripreviews-21" };
     let amazonTags: Record<string, string> = {};
     try {
-      const tagsStr = Deno.env.get("AMAZON_ASSOCIATE_TAGS");
-      if (tagsStr) amazonTags = JSON.parse(tagsStr);
-    } catch {
-      console.error("Failed to parse AMAZON_ASSOCIATE_TAGS, using fallback tags");
+      let tagsStr = Deno.env.get("AMAZON_ASSOCIATE_TAGS");
+      if (tagsStr) {
+        // Strip BOM, trim whitespace, remove surrounding quotes
+        tagsStr = tagsStr.replace(/^\uFEFF/, "").trim().replace(/^["']|["']$/g, "");
+        amazonTags = JSON.parse(tagsStr);
+      }
+    } catch (e) {
+      const raw = Deno.env.get("AMAZON_ASSOCIATE_TAGS");
+      console.error("Failed to parse AMAZON_ASSOCIATE_TAGS, raw value:", JSON.stringify(raw), e);
     }
     if (Object.keys(amazonTags).length === 0) {
       amazonTags = DEFAULT_TAGS;
