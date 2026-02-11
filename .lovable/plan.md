@@ -1,52 +1,64 @@
 
+## Fix Amazon Creators API + Clear Cards on New Search
 
-## Fix: Amazon Creators API Images Not Loading
+Two issues to fix: the Amazon API calls are failing due to incorrect request format, and previous results should clear when starting a new search.
 
-### Root Cause
-The edge function logs show two errors:
-1. `Failed to parse AMAZON_ASSOCIATE_TAGS` — the secret value is not valid JSON
-2. `No Amazon affiliate tag for country: CA` — since parsing fails, enrichment is completely skipped
+### Issue 1: Amazon Creators API Not Working
 
-The `enrichWithAmazonImages` function has an early return (`if (!tag) return items`) when no tag is found, so the Amazon Creators API is never called at all.
+The edge function logs show `Amazon OAuth error: 400 {"error":"invalid_scope"}`. After reviewing the official Amazon Creators API documentation, the current implementation has **four errors**:
 
-### Fix Steps
+1. **Wrong OAuth scope** -- Code sends `scope=catalog/v1/searchItems`, but the correct scope is `creatorsapi/default`
+2. **SearchItems is a POST, not a GET** -- Code sends a GET request with query parameters, but the API expects a POST with a JSON body
+3. **Wrong API domain** -- Code uses `creatorsapi.amazon.com` but the correct base URL is `creatorsapi.amazon` (no `.com`)
+4. **Missing Version in Authorization header** -- The API requires `Authorization: Bearer TOKEN, Version VERSION`, not just `Bearer TOKEN`. A new secret `AMAZON_CREATORS_VERSION` is needed (the credential version like "2.1" for North America)
 
-**1. Fix the `AMAZON_ASSOCIATE_TAGS` secret**
-The secret must be valid JSON. It needs to be re-set with this exact format:
-```
-{"CA":"gen80s01-20","US":"destinati0a78-20","GB":"uktripreviews-21"}
-```
-(No extra quotes, no wrapping — just the raw JSON object)
+### Issue 2: Clear Previous Cards on New Search
 
-**2. Clear stale cache**
-Old cached results from before the API integration don't have Amazon images. Run a SQL migration to clear the `gear_intel_cache` table so fresh searches trigger the enrichment pipeline:
-```sql
-DELETE FROM gear_intel_cache;
-```
-
-**3. Add resilience — don't skip enrichment when tag is missing**
-Update `supabase/functions/travel-gear-intel/index.ts` to make the enrichment more resilient:
-- If `AMAZON_ASSOCIATE_TAGS` fails to parse, hardcode the known tags as a fallback directly in the function code so the API still gets called
-- This prevents a misconfigured secret from silently breaking all product images
+Currently when you search again, the old packing list cards stay visible. The fix is to clear `packingData` immediately when a new search starts, so the loading animation shows cleanly (like the screenshot reference).
 
 ### Files to Change
 
-**`supabase/functions/travel-gear-intel/index.ts`**
-- Add hardcoded fallback tags after the JSON parse attempt:
-  ```
-  const DEFAULT_TAGS = { CA: "gen80s01-20", US: "destinati0a78-20", GB: "uktripreviews-21" };
-  ```
-- If `amazonTags` is empty after parsing, fall back to `DEFAULT_TAGS`
-- This ensures the Amazon API is always called regardless of secret format issues
+**Add Secret: `AMAZON_CREATORS_VERSION`**
+- Store your credential version (e.g., "2.1" for NA, "2.2" for EU, "2.3" for FE)
 
-**Database migration**
-- `DELETE FROM gear_intel_cache;` to clear stale results without Amazon images
+**Edit: `supabase/functions/travel-gear-intel/index.ts`**
+- Fix `getAmazonOAuthToken()`:
+  - Change scope from `"catalog/v1/searchItems"` to `"creatorsapi/default"`
+- Fix `searchAmazonProduct()`:
+  - Change from GET with query params to POST with JSON body
+  - Change URL from `https://creatorsapi.amazon.com/catalog/v1/searchItems` to `https://creatorsapi.amazon/catalog/v1/searchItems`
+  - Add `Version` to the Authorization header: `Bearer ${token}, Version ${version}`
+  - Read version from `AMAZON_CREATORS_VERSION` env var (default "2.1")
+  - Request body should be: `{ keywords, partnerTag, marketplace, itemCount: 1, resources: ["images.primary.large", "itemInfo.title"] }`
+  - Add `Content-Type: application/json` header
 
-**Re-deploy `travel-gear-intel`**
+**Edit: `src/hooks/useGearIntel.ts`**
+- In `fetchPackingList()`, add `setPackingData(null)` at the start (before `setLoading(true)`) so previous cards are immediately removed and the loading animation shows
 
-### Expected Result
-After these changes, searching on the Gear page will:
-1. Get product names from Perplexity
-2. Successfully call the Amazon Creators API for each product
-3. Return official `m.media-amazon.com` image URLs and direct product page links
-4. Display real product photos instead of fallback category icons
+**Clear cache**
+- Run `DELETE FROM gear_intel_cache` to remove stale entries
+
+**Redeploy `travel-gear-intel`**
+
+### Corrected API Call Shape
+
+```text
+OAuth Token Request:
+  POST https://creatorsapi.auth.us-east-1.amazoncognito.com/oauth2/token
+  Headers: Content-Type: application/x-www-form-urlencoded
+           Authorization: Basic base64(clientId:clientSecret)
+  Body: grant_type=client_credentials&scope=creatorsapi/default
+
+SearchItems Request:
+  POST https://creatorsapi.amazon/catalog/v1/searchItems
+  Headers: Authorization: Bearer TOKEN, Version 2.1
+           Content-Type: application/json
+           x-marketplace: www.amazon.ca
+  Body: {
+    "keywords": "Osprey Farpoint 40",
+    "partnerTag": "gen80s01-20",
+    "marketplace": "www.amazon.ca",
+    "itemCount": 1,
+    "resources": ["images.primary.large", "itemInfo.title"]
+  }
+```
