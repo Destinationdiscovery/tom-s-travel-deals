@@ -35,19 +35,19 @@ const PromoDemoWalkthrough = ({ onComplete, loop = false }: PromoDemoWalkthrough
 
     switch (stage) {
       case "HERO_REVEAL":
-        timer = setTimeout(() => setStage("REVIEW_FLASH"), 1200);
+        timer = setTimeout(() => setStage("REVIEW_FLASH"), 2000);
         break;
       case "REVIEW_FLASH":
-        timer = setTimeout(() => setStage("INTEL_FLASH"), 1200);
+        timer = setTimeout(() => setStage("INTEL_FLASH"), 2500);
         break;
       case "INTEL_FLASH":
-        timer = setTimeout(() => setStage("GEAR_FLASH"), 1500);
+        timer = setTimeout(() => setStage("GEAR_FLASH"), 2500);
         break;
       case "GEAR_FLASH":
-        timer = setTimeout(() => setStage("COMPARE_FLASH"), 1000);
+        timer = setTimeout(() => setStage("COMPARE_FLASH"), 1500);
         break;
       case "COMPARE_FLASH":
-        timer = setTimeout(() => setStage("BRANDING"), 1000);
+        timer = setTimeout(() => setStage("BRANDING"), 1500);
         break;
       case "BRANDING":
         timer = setTimeout(() => {
@@ -57,7 +57,7 @@ const PromoDemoWalkthrough = ({ onComplete, loop = false }: PromoDemoWalkthrough
             setFadingOut(true);
             setTimeout(onComplete, 600);
           }
-        }, 1500);
+        }, 2000);
         break;
     }
 
@@ -69,7 +69,7 @@ const PromoDemoWalkthrough = ({ onComplete, loop = false }: PromoDemoWalkthrough
     if (stage !== "REVIEW_FLASH") return;
     setScrollProgress(0);
     const interval = setInterval(() => {
-      setScrollProgress((p) => Math.min(p + 8, 300));
+      setScrollProgress((p) => Math.min(p + 4, 300));
     }, 40);
     return () => clearInterval(interval);
   }, [stage]);

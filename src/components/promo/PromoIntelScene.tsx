@@ -39,7 +39,7 @@ const PromoIntelScene = ({ visible }: PromoIntelSceneProps) => {
 
     const interval = setInterval(() => {
       setActiveTab((prev) => (prev + 1) % TABS.length);
-    }, 500);
+    }, 700);
 
     return () => clearInterval(interval);
   }, [visible]);
