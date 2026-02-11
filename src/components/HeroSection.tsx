@@ -129,7 +129,7 @@ const HeroSection = ({ onSearch, isSearching, onInlineSearch, onSearchTypeChange
         </p>
 
         {/* Search Bar */}
-        <div className="max-w-xl mx-auto">
+        <div className="max-w-3xl mx-auto">
           {/* Search Type Selector + Input + Button Row */}
           <div className="flex flex-col sm:flex-row items-stretch gap-3">
             {/* Type Selector */}
