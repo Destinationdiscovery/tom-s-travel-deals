@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Star, Loader2, ExternalLink, Search, ArrowLeft, Sparkles, ThumbsUp, ThumbsDown, CheckCircle, Package } from "lucide-react";
+import { Star, Loader2, ExternalLink, Search, ArrowLeft, Sparkles, ThumbsUp, ThumbsDown, CheckCircle, Package, Luggage, Plug, Heart, Shield, Shirt, Umbrella } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
@@ -33,7 +33,7 @@ const GearLoading = ({ label }: { label: string }) => {
   );
 };
 
-/* ─── Category Colors ─── */
+/* ─── Category Colors & Icons ─── */
 const categoryColors: Record<string, string> = {
   Packing: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
   Tech: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300",
@@ -41,6 +41,22 @@ const categoryColors: Record<string, string> = {
   Safety: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
   Health: "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300",
   Clothing: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
+};
+
+const categoryIcons: Record<string, React.ElementType> = {
+  Packing: Luggage,
+  Tech: Plug,
+  Comfort: Heart,
+  Safety: Shield,
+  Health: Heart,
+  Clothing: Shirt,
+  Beach: Umbrella,
+};
+
+const getCategoryFallback = (category: string) => {
+  const Icon = categoryIcons[category] || Package;
+  const colorClass = categoryColors[category] || "bg-primary/10 text-primary";
+  return { Icon, colorClass };
 };
 
 /* ─── Packing Result Card ─── */
@@ -60,9 +76,15 @@ const PackingResultCard = ({ item, onReview }: { item: GearItem; onReview: (name
             loading="lazy"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-muted">
-            <Package className="h-12 w-12 text-muted-foreground/30" />
-          </div>
+          (() => {
+            const { Icon, colorClass } = getCategoryFallback(item.category);
+            return (
+              <div className={`w-full h-full flex flex-col items-center justify-center gap-2 ${colorClass}`}>
+                <Icon className="h-12 w-12 opacity-60" />
+                <span className="text-xs font-medium opacity-50">{item.category}</span>
+              </div>
+            );
+          })()
         )}
         <Badge className={`absolute top-3 left-3 border-0 ${categoryColors[item.category] || "bg-primary/10 text-primary"}`}>
           {item.category}

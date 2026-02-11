@@ -316,38 +316,6 @@ serve(async (req) => {
       );
     }
 
-    // Fetch real product images via Google CSE
-    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
-    const fetchProductImage = async (productName: string): Promise<string | null> => {
-      try {
-        const res = await fetch(`${supabaseUrl}/functions/v1/product-image-search`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${supabaseAnonKey}`,
-          },
-          body: JSON.stringify({ query: productName }),
-        });
-        if (!res.ok) { await res.text(); return null; }
-        const d = await res.json();
-        return d.imageUrl || null;
-      } catch { return null; }
-    };
-
-    if (type === "must-haves" && Array.isArray(resultData.items)) {
-      const items = resultData.items as Record<string, unknown>[];
-      const imagePromises = items.map((item) => fetchProductImage(item.name as string));
-      const images = await Promise.all(imagePromises);
-      resultData.items = items.map((item, i) => ({
-        ...item,
-        imageUrl: images[i] || item.imageUrl || null,
-      }));
-    } else if (type === "review") {
-      const img = await fetchProductImage((resultData.productName as string) || trimQuery);
-      if (img) resultData.imageUrl = img;
-    }
-
     resultData.citations = citations;
 
     // Cache result (without Amazon URLs since they're country-specific)

@@ -21,5 +21,3 @@ verify_jwt = false
 [functions.travel-gear-intel]
 verify_jwt = false
 
-[functions.product-image-search]
-verify_jwt = false
