@@ -62,42 +62,41 @@ const getCategoryFallback = (category: string) => {
 };
 
 /* ─── Packing Result Card ─── */
+const getPriceIndicator = (priceRange: string): { dollars: string; label: string } => {
+  const match = priceRange.match(/\d+/g);
+  if (!match) return { dollars: "$", label: priceRange };
+  const avg = match.reduce((sum, n) => sum + Number(n), 0) / match.length;
+  if (avg < 15) return { dollars: "$", label: priceRange };
+  if (avg < 35) return { dollars: "$$", label: priceRange };
+  if (avg < 75) return { dollars: "$$$", label: priceRange };
+  return { dollars: "$$$$", label: priceRange };
+};
+
 const PackingResultCard = ({ item, onReview }: { item: GearItem; onReview: (name: string) => void }) => {
-  const [imgError, setImgError] = useState(false);
+  const { dollars, label } = getPriceIndicator(item.priceRange);
+  const { Icon } = getCategoryFallback(item.category);
 
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 group border-border/50 bg-card">
-      {/* Product Image */}
-      <div className="aspect-[4/3] bg-muted relative overflow-hidden">
-        {item.imageUrl && !imgError ? (
-          <img
-            src={item.imageUrl}
-            alt={item.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            onError={() => setImgError(true)}
-            loading="lazy"
-          />
-        ) : (
-          (() => {
-            const { Icon, colorClass } = getCategoryFallback(item.category);
-            return (
-              <div className={`w-full h-full flex flex-col items-center justify-center gap-2 ${colorClass}`}>
-                <Icon className="h-12 w-12 opacity-60" />
-                <span className="text-xs font-medium opacity-50">{item.category}</span>
-              </div>
-            );
-          })()
-        )}
-        <Badge className={`absolute top-3 left-3 border-0 ${categoryColors[item.category] || "bg-primary/10 text-primary"}`}>
-          {item.category}
-        </Badge>
-      </div>
       <CardContent className="p-5">
-        <p className="text-xs text-muted-foreground mb-1">{item.brand}</p>
-        <h3 className="font-semibold text-foreground mb-2 text-base line-clamp-2">{item.name}</h3>
+        <div className="flex items-start justify-between gap-3 mb-3">
+          <div className="flex items-center gap-2.5">
+            <div className={`p-2 rounded-lg ${categoryColors[item.category] || "bg-primary/10 text-primary"}`}>
+              <Icon className="h-4 w-4" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground text-base line-clamp-2">{item.name}</h3>
+              <p className="text-xs text-muted-foreground">{item.brand}</p>
+            </div>
+          </div>
+          <Badge className={`border-0 shrink-0 ${categoryColors[item.category] || "bg-primary/10 text-primary"}`}>
+            {item.category}
+          </Badge>
+        </div>
         <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{item.reason}</p>
-        <div className="flex items-center justify-between gap-2 mb-3">
-          <span className="text-sm font-medium text-foreground">{item.priceRange}</span>
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-lg font-bold text-primary tracking-wide">{dollars}</span>
+          <span className="text-xs text-muted-foreground">{label}</span>
         </div>
         <div className="flex flex-col sm:flex-row gap-2">
           <a href={item.amazonUrl} target="_blank" rel="noopener noreferrer" className="flex-1">
