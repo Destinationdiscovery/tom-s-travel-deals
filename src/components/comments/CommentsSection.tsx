@@ -365,37 +365,9 @@ export default function CommentsSection({
         )}
       </div>
 
-      {/* Composer / Sign-in */}
-      <div className="mt-8">
-        {!user ? (
-          <Card>
-            <CardContent className="p-6 space-y-4">
-              <div>
-                <p className="font-medium text-foreground">Sign in to comment</p>
-                <p className="text-sm text-muted-foreground">
-                  We’ll email you a magic link to sign in.
-                </p>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Input
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  type="email"
-                  autoComplete="email"
-                />
-                <Button onClick={onSendMagicLink} disabled={authLoading}>
-                  Send magic link
-                </Button>
-              </div>
-
-              <p className="text-xs text-muted-foreground">
-                No anonymous commenting.
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
+      {/* Composer -- only shown when logged in */}
+      {user && (
+        <div className="mt-8">
           <Card>
             <CardContent className="p-6 space-y-3">
               <p className="font-medium text-foreground">Add a comment</p>
@@ -411,8 +383,8 @@ export default function CommentsSection({
               </div>
             </CardContent>
           </Card>
-        )}
-      </div>
+        </div>
+      )}
     </section>
   );
 }

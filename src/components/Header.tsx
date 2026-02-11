@@ -1,23 +1,11 @@
-import { Button } from "@/components/ui/button";
-import { Compass, Menu, X, User, LogOut, Bookmark, FolderOpen } from "lucide-react";
+import { Compass, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useAuth } from "@/components/auth/AuthProvider";
-import AuthModal from "@/components/auth/AuthModal";
 import ThemeToggle from "@/components/ThemeToggle";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [authOpen, setAuthOpen] = useState(false);
   const location = useLocation();
-  const { user, signOut } = useAuth();
 
   const navLinks = [
     { to: "/gear", label: "Travel Gear Reviews" },
@@ -55,36 +43,6 @@ const Header = () => {
             ))}
 
             <ThemeToggle />
-
-            {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full bg-primary/10">
-                    <User className="h-5 w-5 text-primary" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem asChild>
-                    <Link to="/my-reviews" className="flex items-center gap-2">
-                      <Bookmark className="h-4 w-4" /> My Reviews
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/my-trips" className="flex items-center gap-2">
-                      <FolderOpen className="h-4 w-4" /> My Trips
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => signOut()} className="flex items-center gap-2 text-destructive">
-                    <LogOut className="h-4 w-4" /> Sign Out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Button onClick={() => setAuthOpen(true)} variant="default" size="sm">
-                Sign In
-              </Button>
-            )}
           </nav>
 
           {/* Mobile Menu Button */}
@@ -114,29 +72,11 @@ const Header = () => {
                 </Link>
               ))}
 
-              {user ? (
-                <>
-                  <Link to="/my-reviews" className="text-left text-lg font-medium text-muted-foreground hover:text-primary transition-colors py-2" onClick={() => setIsMenuOpen(false)}>
-                    My Reviews
-                  </Link>
-                  <Link to="/my-trips" className="text-left text-lg font-medium text-muted-foreground hover:text-primary transition-colors py-2" onClick={() => setIsMenuOpen(false)}>
-                    My Trips
-                  </Link>
-                  <button onClick={() => { signOut(); setIsMenuOpen(false); }} className="text-left text-lg font-medium text-destructive py-2">
-                    Sign Out
-                  </button>
-                </>
-              ) : (
-                <Button onClick={() => { setAuthOpen(true); setIsMenuOpen(false); }} variant="default" className="w-full mt-2">
-                  Sign In
-                </Button>
-              )}
             </nav>
           </div>
         )}
       </header>
 
-      <AuthModal open={authOpen} onOpenChange={setAuthOpen} />
     </>
   );
 };
