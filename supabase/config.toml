@@ -21,3 +21,6 @@ verify_jwt = false
 [functions.travel-gear-intel]
 verify_jwt = false
 
+[functions.gear-image-proxy]
+verify_jwt = false
+
