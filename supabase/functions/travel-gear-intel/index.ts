@@ -7,174 +7,12 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-/* ─── Amazon Marketplace Config ─── */
-const MARKETPLACE_CONFIG: Record<string, { domain: string; marketplace: string }> = {
-  CA: { domain: "www.amazon.ca", marketplace: "www.amazon.ca" },
-  US: { domain: "www.amazon.com", marketplace: "www.amazon.com" },
-  GB: { domain: "www.amazon.co.uk", marketplace: "www.amazon.co.uk" },
+/* ─── Amazon Marketplace Config (for affiliate search URLs) ─── */
+const MARKETPLACE_CONFIG: Record<string, { domain: string }> = {
+  CA: { domain: "www.amazon.ca" },
+  US: { domain: "www.amazon.com" },
+  GB: { domain: "www.amazon.co.uk" },
 };
-
-/* ─── Amazon Creators API OAuth Token Cache ─── */
-let cachedToken: { token: string; expiresAt: number } | null = null;
-
-/* ─── Version → Cognito region mapping ─── */
-const VERSION_REGION: Record<string, string> = {
-  "2.1": "us-east-1",
-  "2.2": "eu-south-2",
-  "2.3": "us-west-2",
-};
-
-async function getAmazonOAuthToken(): Promise<string> {
-  if (cachedToken && Date.now() < cachedToken.expiresAt - 60_000) {
-    return cachedToken.token;
-  }
-
-  const clientId = Deno.env.get("AMAZON_CREATORS_CLIENT_ID");
-  const clientSecret = Deno.env.get("AMAZON_CREATORS_CLIENT_SECRET");
-
-  if (!clientId || !clientSecret) {
-    throw new Error("Amazon Creators API credentials not configured");
-  }
-
-  const version = Deno.env.get("AMAZON_CREATORS_VERSION") || "2.1";
-  const region = VERSION_REGION[version] || "us-east-1";
-  console.log(`Using Cognito region ${region} for version ${version}`);
-  const tokenUrl = `https://creatorsapi.auth.${region}.amazoncognito.com/oauth2/token`;
-  const body = new URLSearchParams({
-    grant_type: "client_credentials",
-    scope: "creatorsapi/default",
-  });
-
-  const response = await fetch(tokenUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      Authorization: `Basic ${btoa(`${clientId}:${clientSecret}`)}`,
-    },
-    body: body.toString(),
-  });
-
-  if (!response.ok) {
-    const errText = await response.text();
-    console.error("Amazon OAuth error:", response.status, errText);
-    throw new Error("Failed to get Amazon OAuth token");
-  }
-
-  const data = await response.json();
-  cachedToken = {
-    token: data.access_token,
-    expiresAt: Date.now() + (data.expires_in * 1000),
-  };
-
-  return cachedToken.token;
-}
-
-/* ─── Amazon Creators API: Search for a product ─── */
-async function searchAmazonProduct(
-  token: string,
-  productName: string,
-  partnerTag: string,
-  marketplace: string
-): Promise<{ imageUrl?: string; detailPageUrl?: string } | null> {
-  try {
-    const version = Deno.env.get("AMAZON_CREATORS_VERSION") || "2.1";
-    const url = "https://creatorsapi.amazon/catalog/v1/searchItems";
-
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}, Version ${version}`,
-        "Content-Type": "application/json",
-        "x-marketplace": marketplace,
-      },
-      body: JSON.stringify({
-        keywords: productName,
-        partnerTag,
-        marketplace,
-        itemCount: 1,
-        resources: ["images.primary.large", "itemInfo.title"],
-      }),
-    });
-
-    if (!response.ok) {
-      const errBody = await response.text();
-      console.error(`Amazon search failed for "${productName}":`, response.status, errBody);
-      return null;
-    }
-
-    const data = await response.json();
-    const item = data?.searchResult?.items?.[0];
-    if (!item) return null;
-
-    return {
-      imageUrl: item.images?.primary?.large?.url || undefined,
-      detailPageUrl: item.detailPageURL || undefined,
-    };
-  } catch (e) {
-    console.error(`Amazon search error for "${productName}":`, e);
-    return null;
-  }
-}
-
-/* ─── Enrich items with Amazon images & URLs ─── */
-async function enrichWithAmazonImages(
-  items: Record<string, string>[],
-  country: string,
-  amazonTags: Record<string, string>
-): Promise<Record<string, string>[]> {
-  const tag = amazonTags[country] || amazonTags.US;
-  const config = MARKETPLACE_CONFIG[country] || MARKETPLACE_CONFIG.US;
-
-  if (!tag) {
-    console.warn("No Amazon affiliate tag for country:", country);
-    return items;
-  }
-
-  let token: string;
-  try {
-    token = await getAmazonOAuthToken();
-  } catch (e) {
-    console.error("Failed to get Amazon token, skipping enrichment:", e);
-    return items;
-  }
-
-  const results = await Promise.allSettled(
-    items.map((item) => searchAmazonProduct(token, item.name, tag, config.marketplace))
-  );
-
-  return items.map((item, i) => {
-    const result = results[i];
-    const enriched = { ...item };
-    if (result.status === "fulfilled" && result.value) {
-      if (result.value.imageUrl) enriched.imageUrl = result.value.imageUrl;
-      if (result.value.detailPageUrl) enriched.amazonUrl = result.value.detailPageUrl;
-    }
-    // Fallback: construct Amazon search URL if no detail page from API
-    if (!enriched.amazonUrl) {
-      const domain = config.domain;
-      enriched.amazonUrl = `https://${domain}/s?k=${encodeURIComponent(item.name)}&tag=${tag}`;
-    }
-    return enriched;
-  });
-}
-
-async function enrichSingleProduct(
-  productName: string,
-  country: string,
-  amazonTags: Record<string, string>
-): Promise<{ imageUrl?: string; detailPageUrl?: string } | null> {
-  const tag = amazonTags[country] || amazonTags.US;
-  const config = MARKETPLACE_CONFIG[country] || MARKETPLACE_CONFIG.US;
-  if (!tag) return null;
-
-  try {
-    const token = await getAmazonOAuthToken();
-    return await searchAmazonProduct(token, productName, tag, config.marketplace);
-  } catch (e) {
-    console.error("Failed to enrich single product:", e);
-    return null;
-  }
-}
 
 /* ─── Vacation Type Category Lists ─── */
 const VACATION_CATEGORIES: Record<string, string[]> = {
@@ -279,7 +117,7 @@ IMPORTANT RULES:
 - NEVER include non-purchasable items like passports, travel insurance, cash/currency, visas, documents, or tickets.
 - Only recommend physical products that can be purchased on Amazon.
 - For each category, find a real, specific product with brand and model name.
-- Do NOT include imageUrl in your response. Images will be sourced separately.
+- For each item, include an "imageUrl" field with a direct URL to a product image you find on the web. Prefer Amazon product listing images (m.media-amazon.com), manufacturer product photos, or major retailer images. The URL must point directly to a .jpg, .png, or .webp image file.
 
 Return your response as valid JSON only (no markdown, no code blocks):
 
@@ -290,7 +128,8 @@ Return your response as valid JSON only (no markdown, no code blocks):
       "brand": "Brand Name",
       "priceRange": "$XX - $XX",
       "reason": "Why this specific product is the best choice for this trip (1-2 sentences)",
-      "category": "Category like Packing, Tech, Comfort, Safety, Health, Clothing, Beach, etc."
+      "category": "Category like Packing, Tech, Comfort, Safety, Health, Clothing, Beach, etc.",
+      "imageUrl": "https://example.com/product-image.jpg"
     }
   ]
 }
@@ -300,7 +139,7 @@ Be specific with product names. Example: "Osprey Farpoint 40 Travel Backpack" no
   review: (query) =>
     `You are a travel gear reviewer. Research "${query}" thoroughly using Amazon reviews, expert reviews, YouTube reviews, and travel blogs.
 
-Do NOT include imageUrl in your response. The image will be sourced separately.
+Include an "imageUrl" field with a direct URL to a product image you find on the web. Prefer Amazon product listing images (m.media-amazon.com), manufacturer product photos, or major retailer images. The URL must point directly to a .jpg, .png, or .webp image file.
 
 Return your response as valid JSON only (no markdown, no code blocks):
 
@@ -309,6 +148,7 @@ Return your response as valid JSON only (no markdown, no code blocks):
   "brand": "Brand Name",
   "priceRange": "$XX - $XX",
   "overallRating": 4.2,
+  "imageUrl": "https://example.com/product-image.jpg",
   "ratings": {
     "Durability": 4.5,
     "Value": 3.8,
@@ -369,13 +209,12 @@ serve(async (req) => {
       .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
       .maybeSingle();
 
-    // Parse Amazon tags
+    // Parse Amazon tags for affiliate URLs
     const DEFAULT_TAGS: Record<string, string> = { CA: "gen80s01-20", US: "destinati0a78-20", GB: "uktripreviews-21" };
     let amazonTags: Record<string, string> = {};
     try {
       let tagsStr = Deno.env.get("AMAZON_ASSOCIATE_TAGS");
       if (tagsStr) {
-        // Strip BOM, trim whitespace, remove surrounding quotes
         tagsStr = tagsStr.replace(/^\uFEFF/, "").trim().replace(/^["']|["']$/g, "");
         amazonTags = JSON.parse(tagsStr);
       }
@@ -389,14 +228,7 @@ serve(async (req) => {
 
     if (cached) {
       console.log("Cache hit for:", cacheKey);
-      const cachedResult = cached.result_data as Record<string, unknown>;
-
-      // Re-apply country-specific Amazon URLs from cached enrichment
-      if (type === "must-haves" && Array.isArray(cachedResult.items)) {
-        // Items already have amazonUrl from enrichment; just return
-      }
-
-      return new Response(JSON.stringify({ data: cachedResult }), {
+      return new Response(JSON.stringify({ data: cached.result_data }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -430,7 +262,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "sonar-pro",
         messages: [
-          { role: "system", content: "You are a travel gear expert. Always respond with valid JSON only, no markdown formatting. NEVER recommend non-purchasable items like passports, insurance, cash, visas, or documents. Do NOT include imageUrl fields - images are sourced separately." },
+          { role: "system", content: "You are a travel gear expert. Always respond with valid JSON only, no markdown formatting. NEVER recommend non-purchasable items like passports, insurance, cash, visas, or documents. Include imageUrl fields with direct URLs to product images found on the web." },
           { role: "user", content: prompt },
         ],
         temperature: 0.2,
@@ -474,30 +306,23 @@ serve(async (req) => {
 
     resultData.citations = citations;
 
-    // Enrich with Amazon Creators API images & detail page URLs
-    console.log("Enriching with Amazon Creators API...");
+    // Add Amazon affiliate search URLs
+    const tag = amazonTags[userCountry] || amazonTags.US;
+    const domain = MARKETPLACE_CONFIG[userCountry]?.domain || "www.amazon.com";
+
     if (type === "must-haves" && Array.isArray(resultData.items)) {
-      resultData.items = await enrichWithAmazonImages(
-        resultData.items as Record<string, string>[],
-        userCountry,
-        amazonTags
-      );
+      resultData.items = (resultData.items as Record<string, string>[]).map((item) => ({
+        ...item,
+        amazonUrl: item.amazonUrl || `https://${domain}/s?k=${encodeURIComponent(item.name)}&tag=${tag}`,
+      }));
     } else if (type === "review") {
-      const productName = (resultData.productName as string) || query.trim();
-      const amazonResult = await enrichSingleProduct(productName, userCountry, amazonTags);
-      if (amazonResult) {
-        if (amazonResult.imageUrl) resultData.imageUrl = amazonResult.imageUrl;
-        if (amazonResult.detailPageUrl) resultData.amazonUrl = amazonResult.detailPageUrl;
-      }
-      // Fallback: build search URL if no detail page from API
       if (!resultData.amazonUrl) {
-        const tag = amazonTags[userCountry] || amazonTags.US;
-        const domain = MARKETPLACE_CONFIG[userCountry]?.domain || "www.amazon.com";
+        const productName = (resultData.productName as string) || query.trim();
         resultData.amazonUrl = `https://${domain}/s?k=${encodeURIComponent(productName)}&tag=${tag}`;
       }
     }
 
-    // Cache enriched result
+    // Cache result
     await supabase
       .from("gear_intel_cache")
       .upsert({
