@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Star, MapPin, Loader2 } from "lucide-react";
+import { Search, Star, MapPin, Loader2, X } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useTravelSearch, SearchResult } from "@/hooks/useTravelSearch";
 import { useGenerateReview } from "@/hooks/useGenerateReview";
+import SearchLoadingStages from "@/components/SearchLoadingStages";
 
 const exampleChips = [
   "Adults only resorts in Punta Cana",
@@ -20,7 +21,7 @@ const exampleChips = [
 
 const TravelSearch = () => {
   const [query, setQuery] = useState("");
-  const { results, citations, isLoading, error, search } = useTravelSearch();
+  const { results, citations, isLoading, error, search, clearResults } = useTravelSearch();
   const { generateReview, isLoading: isGenerating } = useGenerateReview();
   const [reviewingName, setReviewingName] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -130,6 +131,9 @@ const TravelSearch = () => {
           )}
         </section>
 
+        {/* Loading Stages */}
+        {isLoading && <SearchLoadingStages />}
+
         {/* Error */}
         {error && (
           <div className="container mx-auto px-4 max-w-3xl text-center mb-8">
@@ -138,11 +142,17 @@ const TravelSearch = () => {
         )}
 
         {/* Results Grid */}
-        {results.length > 0 && (
+        {!isLoading && results.length > 0 && (
           <section className="container mx-auto px-4 max-w-6xl">
-            <p className="text-sm text-muted-foreground mb-6">
-              {results.length} properties found
-            </p>
+            <div className="flex items-center justify-between mb-6">
+              <p className="text-sm text-muted-foreground">
+                {results.length} properties found
+              </p>
+              <Button variant="ghost" size="sm" onClick={clearResults} className="gap-1.5">
+                <X className="h-3.5 w-3.5" />
+                Clear
+              </Button>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {results.map((result, i) => {
                 const isReviewing = reviewingName === result.name;

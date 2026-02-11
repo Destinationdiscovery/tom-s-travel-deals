@@ -40,5 +40,11 @@ export function useTravelSearch() {
     }
   };
 
-  return { results, citations, isLoading, error, search };
+  const clearResults = () => {
+    setResults([]);
+    setCitations([]);
+    setError(null);
+  };
+
+  return { results, citations, isLoading, error, search, clearResults };
 }
