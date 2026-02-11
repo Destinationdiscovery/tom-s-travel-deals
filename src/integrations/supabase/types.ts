@@ -71,6 +71,27 @@ export type Database = {
         }
         Relationships: []
       }
+      gear_product_images: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string
+          product_keyword: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url: string
+          product_keyword: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string
+          product_keyword?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
