@@ -1,33 +1,30 @@
 
-
-# Gear Admin Improvements
+# Add Links to Travel Requirements Results
 
 ## What's Changing
 
-### 1. Add a description field to image uploads
-When you upload a product image, you'll now see a "Description" text box where you can type what the image is (e.g., "Blue packing cubes set of 6" or "Carry-on suitcase front view"). This description will be saved alongside the keyword and displayed under each image in the admin grid.
+When the AI returns travel requirement items that mention forms, websites, or official portals (like the D'Viajeros form for Cuba), they'll now include clickable links so you can go directly to those resources instead of having to search for them yourself.
 
-This requires adding a new `description` column to the database table that stores your gear images.
+## How It Works
 
-### 2. Keep admin page private (no navigation link)
-The `/gear-admin` page will stay hidden from the site -- no link will be added anywhere. Only you can access it by typing the URL directly, and it already requires you to be signed in.
+Two changes are needed:
 
----
+### 1. Update the AI prompt to include URLs
+The prompt sent to the AI will be updated to instruct it to include relevant URLs inline with each requirement item. For example, instead of just saying "Completed D'Viajeros mandatory travel form," it would say "Completed D'Viajeros mandatory travel form (https://dviajeros.mitrans.gob.cu)."
 
-## About signing in
-
-Your site currently uses magic link (email-only) sign-in, which is working well for you already. Setting a password through this chat isn't possible since authentication is handled securely by the backend. You'll continue signing in via the magic link emailed to you, which is actually more secure than a password. If you'd like me to add password-based login as an option in the future, just let me know.
+### 2. Make URLs clickable in the frontend
+The bullet-point list items in the requirements results currently render as plain text. They'll be updated to automatically detect any URLs in the text and turn them into clickable links that open in a new tab -- styled in your site's primary color with an external-link icon.
 
 ---
 
 ## Technical Details
 
-### Database change
-- Add a nullable `description` column (type `text`) to the `gear_product_images` table so existing rows aren't affected.
+### Edge function change (`supabase/functions/travel-intel/index.ts`)
+- Update the `requirements` prompt to instruct the AI: *"When mentioning any official forms, portals, or websites, include the full URL in parentheses after the mention."*
 
-### Frontend changes (`src/pages/GearAdmin.tsx`)
-- Add a `Textarea` input labeled "Description (optional)" to the upload form.
-- Include the description value in the database insert when uploading.
-- Display the description text below each image's keyword in the admin grid.
-- Update the `GearImage` interface to include the new `description` field.
+### Frontend change (`src/pages/TravelIntel.tsx`)
+- Create a small `LinkifiedText` helper component that uses a regex to find URLs in text strings and wraps them in `<a>` tags with `target="_blank"` and appropriate styling.
+- Update the `Section` component's `<li>` rendering to use `LinkifiedText` instead of plain text.
 
+### Cache clearing
+- Existing cached results won't have links, so stale cache entries for previously searched destinations will need to be cleared so the new prompt generates fresh results with URLs included.
