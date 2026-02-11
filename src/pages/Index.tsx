@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
-import HeroSection from "@/components/HeroSection";
+import HeroSection, { type SearchType } from "@/components/HeroSection";
 import AIReviewResult from "@/components/AIReviewResult";
 import RecentlyReviewedSection from "@/components/RecentlyReviewedSection";
 import ComparisonFloatingBadge from "@/components/ComparisonFloatingBadge";
@@ -21,6 +21,18 @@ const Index = () => {
     await generateReview(propertyName);
   };
 
+  const handleNavigateSearch = (type: SearchType, query: string) => {
+    if (type === "gear") {
+      navigate(`/gear?q=${encodeURIComponent(query)}`);
+    } else {
+      navigate(`/travel-intel?q=${encodeURIComponent(query)}&type=${type}`);
+    }
+  };
+
+  const handleSearchTypeChange = () => {
+    clearReview();
+  };
+
   const handlePromoComplete = () => {
     sessionStorage.setItem("promo-seen", "true");
     setShowPromo(false);
@@ -33,7 +45,12 @@ const Index = () => {
       )}
       <Header />
       <main>
-        <HeroSection onSearch={handleSearch} isSearching={isLoading} />
+        <HeroSection
+          onSearch={handleSearch}
+          isSearching={isLoading}
+          onNavigateSearch={handleNavigateSearch}
+          onSearchTypeChange={handleSearchTypeChange}
+        />
         <AIReviewResult
           review={review}
           isLoading={isLoading}
