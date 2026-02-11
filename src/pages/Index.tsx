@@ -47,6 +47,8 @@ const Index = () => {
   const handleInlineSearch = (type: SearchType, query: string) => {
     setActiveSearchType(type);
     setRequiresCitizenship(false);
+    intel.clearAll();
+    gear.clearReview();
     scrollToResults();
 
     if (type === "gear") {
