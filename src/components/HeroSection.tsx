@@ -6,6 +6,7 @@ import { useSearchSuggestions } from "@/hooks/useSearchSuggestions";
 import { Link } from "react-router-dom";
 
 const heroNavLinks = [
+  { to: "/search", label: "Destination Search" },
   { to: "/destinations", label: "My Reviews" },
   { to: "/gear", label: "Gear Reviews" },
   { to: "/compass", label: "Travel Blog" },
