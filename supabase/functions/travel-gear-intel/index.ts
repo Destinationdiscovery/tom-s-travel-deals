@@ -117,7 +117,7 @@ IMPORTANT RULES:
 - NEVER include non-purchasable items like passports, travel insurance, cash/currency, visas, documents, or tickets.
 - Only recommend physical products that can be purchased on Amazon.
 - For each category, find a real, specific product with brand and model name.
-- For each item, include an "imageUrl" field with a direct URL to a product image you find on the web. Prefer Amazon product listing images (m.media-amazon.com), manufacturer product photos, or major retailer images. The URL must point directly to a .jpg, .png, or .webp image file.
+- Do NOT include an imageUrl field. Images are handled separately.
 
 Return your response as valid JSON only (no markdown, no code blocks):
 
@@ -128,8 +128,7 @@ Return your response as valid JSON only (no markdown, no code blocks):
       "brand": "Brand Name",
       "priceRange": "$XX - $XX",
       "reason": "Why this specific product is the best choice for this trip (1-2 sentences)",
-      "category": "Category like Packing, Tech, Comfort, Safety, Health, Clothing, Beach, etc.",
-      "imageUrl": "https://example.com/product-image.jpg"
+      "category": "Category like Packing, Tech, Comfort, Safety, Health, Clothing, Beach, etc."
     }
   ]
 }
@@ -139,7 +138,7 @@ Be specific with product names. Example: "Osprey Farpoint 40 Travel Backpack" no
   review: (query) =>
     `You are a travel gear reviewer. Research "${query}" thoroughly using Amazon reviews, expert reviews, YouTube reviews, and travel blogs.
 
-Include an "imageUrl" field with a direct URL to a product image you find on the web. Prefer Amazon product listing images (m.media-amazon.com), manufacturer product photos, or major retailer images. The URL must point directly to a .jpg, .png, or .webp image file.
+Do NOT include an imageUrl field. Images are handled separately.
 
 Return your response as valid JSON only (no markdown, no code blocks):
 
@@ -148,7 +147,6 @@ Return your response as valid JSON only (no markdown, no code blocks):
   "brand": "Brand Name",
   "priceRange": "$XX - $XX",
   "overallRating": 4.2,
-  "imageUrl": "https://example.com/product-image.jpg",
   "ratings": {
     "Durability": 4.5,
     "Value": 3.8,
@@ -171,6 +169,55 @@ Return your response as valid JSON only (no markdown, no code blocks):
 All ratings must be between 1.0 and 5.0. Be honest and balanced. Synthesize from real buyer feedback.`,
 };
 
+/* ─── Image Lookup Helper ─── */
+async function attachProductImages(
+  supabase: ReturnType<typeof createClient>,
+  items: Record<string, unknown>[],
+): Promise<void> {
+  try {
+    const { data: imageRows } = await supabase
+      .from("gear_product_images")
+      .select("product_keyword, image_url");
+
+    if (!imageRows || imageRows.length === 0) return;
+
+    for (const item of items) {
+      const itemName = ((item.name as string) || "").toLowerCase();
+      const match = imageRows.find((row) =>
+        itemName.includes(row.product_keyword.toLowerCase())
+      );
+      if (match) {
+        item.imageUrl = match.image_url;
+      }
+    }
+  } catch (e) {
+    console.error("Image lookup failed (non-blocking):", e);
+  }
+}
+
+async function attachSingleProductImage(
+  supabase: ReturnType<typeof createClient>,
+  resultData: Record<string, unknown>,
+): Promise<void> {
+  try {
+    const { data: imageRows } = await supabase
+      .from("gear_product_images")
+      .select("product_keyword, image_url");
+
+    if (!imageRows || imageRows.length === 0) return;
+
+    const productName = ((resultData.productName as string) || "").toLowerCase();
+    const match = imageRows.find((row) =>
+      productName.includes(row.product_keyword.toLowerCase())
+    );
+    if (match) {
+      resultData.imageUrl = match.image_url;
+    }
+  } catch (e) {
+    console.error("Image lookup failed (non-blocking):", e);
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -182,14 +229,14 @@ serve(async (req) => {
     if (!type || !VALID_TYPES.includes(type)) {
       return new Response(
         JSON.stringify({ error: "Invalid type. Must be must-haves or review." }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
     if (!query || typeof query !== "string" || query.trim().length < 2 || query.trim().length > 200) {
       return new Response(
         JSON.stringify({ error: "Please provide a valid query (2-200 characters)." }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
@@ -228,7 +275,14 @@ serve(async (req) => {
 
     if (cached) {
       console.log("Cache hit for:", cacheKey);
-      return new Response(JSON.stringify({ data: cached.result_data }), {
+      // Even for cached results, re-attach images from the lookup table
+      const cachedData = cached.result_data as Record<string, unknown>;
+      if (type === "must-haves" && Array.isArray(cachedData.items)) {
+        await attachProductImages(supabase, cachedData.items as Record<string, unknown>[]);
+      } else if (type === "review") {
+        await attachSingleProductImage(supabase, cachedData);
+      }
+      return new Response(JSON.stringify({ data: cachedData }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -238,7 +292,7 @@ serve(async (req) => {
     if (!perplexityKey) {
       return new Response(
         JSON.stringify({ error: "Perplexity API key is not configured" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
@@ -262,7 +316,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "sonar-pro",
         messages: [
-          { role: "system", content: "You are a travel gear expert. Always respond with valid JSON only, no markdown formatting. NEVER recommend non-purchasable items like passports, insurance, cash, visas, or documents. Include imageUrl fields with direct URLs to product images found on the web." },
+          { role: "system", content: "You are a travel gear expert. Always respond with valid JSON only, no markdown formatting. NEVER recommend non-purchasable items like passports, insurance, cash, visas, or documents. Do NOT include imageUrl fields — images are handled separately." },
           { role: "user", content: prompt },
         ],
         temperature: 0.2,
@@ -274,7 +328,7 @@ serve(async (req) => {
       console.error("Perplexity API error:", perplexityResponse.status, errText);
       return new Response(
         JSON.stringify({ error: "Failed to fetch gear intel. Please try again." }),
-        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
@@ -285,7 +339,7 @@ serve(async (req) => {
     if (!rawContent) {
       return new Response(
         JSON.stringify({ error: "No content generated" }),
-        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
@@ -300,7 +354,7 @@ serve(async (req) => {
       console.error("Failed to parse Perplexity response:", rawContent);
       return new Response(
         JSON.stringify({ error: "Failed to parse response. Please try again." }),
-        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
@@ -315,11 +369,15 @@ serve(async (req) => {
         ...item,
         amazonUrl: item.amazonUrl || `https://${domain}/s?k=${encodeURIComponent(item.name)}&tag=${tag}`,
       }));
+      // Attach product images from lookup table
+      await attachProductImages(supabase, resultData.items as Record<string, unknown>[]);
     } else if (type === "review") {
       if (!resultData.amazonUrl) {
         const productName = (resultData.productName as string) || query.trim();
         resultData.amazonUrl = `https://${domain}/s?k=${encodeURIComponent(productName)}&tag=${tag}`;
       }
+      // Attach product image from lookup table
+      await attachSingleProductImage(supabase, resultData);
     }
 
     // Cache result
@@ -339,7 +397,7 @@ serve(async (req) => {
     console.error("travel-gear-intel error:", e);
     return new Response(
       JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
 });
