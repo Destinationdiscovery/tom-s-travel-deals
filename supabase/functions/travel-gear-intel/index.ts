@@ -32,7 +32,7 @@ async function getAmazonOAuthToken(): Promise<string> {
   const tokenUrl = "https://creatorsapi.auth.us-east-1.amazoncognito.com/oauth2/token";
   const body = new URLSearchParams({
     grant_type: "client_credentials",
-    scope: "catalog/v1/searchItems",
+    scope: "creatorsapi/default",
   });
 
   const response = await fetch(tokenUrl, {
@@ -67,18 +67,23 @@ async function searchAmazonProduct(
   marketplace: string
 ): Promise<{ imageUrl?: string; detailPageUrl?: string } | null> {
   try {
-    const url = new URL("https://creatorsapi.amazon.com/catalog/v1/searchItems");
-    url.searchParams.set("keywords", productName);
-    url.searchParams.set("partnerTag", partnerTag);
-    url.searchParams.set("itemCount", "1");
-    url.searchParams.set("resources", "images.primary.large,itemInfo.title");
+    const version = Deno.env.get("AMAZON_CREATORS_VERSION") || "2.1";
+    const url = "https://creatorsapi.amazon/catalog/v1/searchItems";
 
-    const response = await fetch(url.toString(), {
+    const response = await fetch(url, {
+      method: "POST",
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${token}, Version ${version}`,
+        "Content-Type": "application/json",
         "x-marketplace": marketplace,
-        Accept: "application/json",
       },
+      body: JSON.stringify({
+        keywords: productName,
+        partnerTag,
+        marketplace,
+        itemCount: 1,
+        resources: ["images.primary.large", "itemInfo.title"],
+      }),
     });
 
     if (!response.ok) {
