@@ -192,11 +192,37 @@ const TravelIntel = () => {
     document.title = "Know Before You Go - ReviewThenGo";
     return () => { document.title = "ReviewThenGo.com | Honest Reviews, Tested Gear & Travel Insights"; };
   }, []);
+
   // Form states
   const [reqCitizenship, setReqCitizenship] = useState("");
   const [reqDestination, setReqDestination] = useState("");
   const [advDestination, setAdvDestination] = useState("");
   const [newsDestination, setNewsDestination] = useState("");
+
+  // Auto-search from URL query params
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get("q");
+    const type = params.get("type") as IntelType | null;
+    if (q && q.trim().length >= 2 && type) {
+      if (type === "advisories") {
+        setActiveTab("advisories");
+        setAdvDestination(q);
+        fetchIntel("advisories", q.trim());
+      } else if (type === "news") {
+        setActiveTab("news");
+        setNewsDestination(q);
+        fetchIntel("news", q.trim());
+      } else if (type === "requirements") {
+        setActiveTab("requirements");
+        setReqDestination(q);
+        // Requirements needs citizenship too - just set destination, user fills citizenship
+      }
+      // Clean up URL
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSubmit = (type: IntelType) => {
     if (type === "requirements") fetchIntel("requirements", reqDestination, reqCitizenship);

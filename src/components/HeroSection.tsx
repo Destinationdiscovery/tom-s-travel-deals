@@ -1,25 +1,92 @@
-import { useState, useRef } from "react";
-import { Search } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Search, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroBackground from "@/assets/hero-beach.jpg";
 import { useSearchSuggestions } from "@/hooks/useSearchSuggestions";
 
+export type SearchType = "destination" | "gear" | "requirements" | "advisories" | "news";
+
+interface SearchTypeConfig {
+  label: string;
+  placeholder: string;
+  buttonLabel: string;
+}
+
+const searchTypeConfigs: Record<SearchType, SearchTypeConfig> = {
+  destination: {
+    label: "Destination Review",
+    placeholder: 'e.g. "Sandals Royal Barbados" or "Hotels in Cancun"',
+    buttonLabel: "Explore Reviews",
+  },
+  gear: {
+    label: "Travel Gear Review",
+    placeholder: 'e.g. "Cancun packing list" or "beach accessories"',
+    buttonLabel: "Find Gear",
+  },
+  requirements: {
+    label: "Travel Requirements",
+    placeholder: 'e.g. "Canada to Mexico" or "USA to Japan"',
+    buttonLabel: "Check Requirements",
+  },
+  advisories: {
+    label: "Travel Advisories",
+    placeholder: 'e.g. "Thailand" or "Colombia"',
+    buttonLabel: "Check Advisories",
+  },
+  news: {
+    label: "Travel News",
+    placeholder: 'e.g. "Caribbean" or "Europe travel updates"',
+    buttonLabel: "Find News",
+  },
+};
+
 interface HeroSectionProps {
   onSearch: (propertyName: string) => void;
   isSearching?: boolean;
+  onNavigateSearch?: (type: SearchType, query: string) => void;
+  onSearchTypeChange?: () => void;
 }
 
-const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
+const HeroSection = ({ onSearch, isSearching, onNavigateSearch, onSearchTypeChange }: HeroSectionProps) => {
   const [query, setQuery] = useState("");
+  const [searchType, setSearchType] = useState<SearchType>("destination");
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const { suggestions } = useSearchSuggestions(query);
+  const [showTypeDropdown, setShowTypeDropdown] = useState(false);
+  const { suggestions } = useSearchSuggestions(searchType === "destination" ? query : "");
   const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const config = searchTypeConfigs[searchType];
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowTypeDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSearchTypeChange = (type: SearchType) => {
+    setSearchType(type);
+    setQuery("");
+    setShowTypeDropdown(false);
+    setShowSuggestions(false);
+    onSearchTypeChange?.();
+    inputRef.current?.focus();
+  };
 
   const handleSearch = () => {
     const trimmed = query.trim();
-    if (trimmed.length >= 2) {
-      setShowSuggestions(false);
+    if (trimmed.length < 2) return;
+    setShowSuggestions(false);
+
+    if (searchType === "destination") {
       onSearch(trimmed);
+    } else {
+      onNavigateSearch?.(searchType, trimmed);
     }
   };
 
@@ -62,61 +129,99 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
         </p>
 
         {/* Search Bar */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 max-w-xl mx-auto relative">
-          <div className="relative flex-1">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <input
-              ref={inputRef}
-              type="text"
-              value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
-                setShowSuggestions(true);
-              }}
-              onFocus={() => query.trim().length >= 2 && setShowSuggestions(true)}
-              onKeyDown={handleKeyDown}
-              placeholder="Search destinations, hotels, or experiences"
-              className="w-full h-12 pl-12 pr-4 rounded-lg bg-white/95 backdrop-blur-sm text-foreground placeholder:text-muted-foreground text-base focus:outline-none focus:ring-2 focus:ring-sky-300 shadow-lg"
-            />
+        <div className="flex flex-col gap-3 max-w-xl mx-auto">
+          {/* Search Type Selector + Input Row */}
+          <div className="flex flex-col sm:flex-row items-stretch gap-3">
+            {/* Type Selector */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                type="button"
+                onClick={() => setShowTypeDropdown(!showTypeDropdown)}
+                className="h-12 px-4 rounded-lg bg-white/95 backdrop-blur-sm text-foreground text-sm font-medium flex items-center gap-2 whitespace-nowrap shadow-lg hover:bg-white transition-colors w-full sm:w-auto justify-between sm:justify-start"
+              >
+                {config.label}
+                <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${showTypeDropdown ? "rotate-180" : ""}`} />
+              </button>
 
-            {/* Suggestions Dropdown */}
-            {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-elevated border border-border overflow-hidden z-20">
-                {suggestions.map((s) => (
-                  <button
-                    key={s.id}
-                    onMouseDown={() => handleSuggestionClick(s.name)}
-                    className="w-full text-left px-4 py-3 hover:bg-muted/50 transition-colors flex items-center gap-3 text-sm"
-                  >
-                    <Search className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                    <div className="flex flex-col">
-                      <span className="text-foreground font-medium">{s.name}</span>
-                      {s.secondaryText ? (
-                        <span className="text-muted-foreground text-xs">
-                          {s.secondaryText}
-                        </span>
-                      ) : s.property_type ? (
-                        <span className="text-muted-foreground text-xs capitalize">
-                          {s.property_type}
-                        </span>
-                      ) : null}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
+              {/* Type Dropdown */}
+              {showTypeDropdown && (
+                <div className="absolute top-full left-0 right-0 sm:right-auto sm:min-w-[220px] mt-1 bg-white rounded-lg shadow-lg border border-border overflow-hidden z-30">
+                  {(Object.keys(searchTypeConfigs) as SearchType[]).map((type) => (
+                    <button
+                      key={type}
+                      onMouseDown={() => handleSearchTypeChange(type)}
+                      className={`w-full text-left px-4 py-3 text-sm transition-colors ${
+                        type === searchType
+                          ? "bg-muted font-medium text-foreground"
+                          : "text-foreground hover:bg-muted/50"
+                      }`}
+                    >
+                      {searchTypeConfigs[type].label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Search Input */}
+            <div className="relative flex-1">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <input
+                ref={inputRef}
+                type="text"
+                value={query}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  if (searchType === "destination") {
+                    setShowSuggestions(true);
+                  }
+                }}
+                onFocus={() => searchType === "destination" && query.trim().length >= 2 && setShowSuggestions(true)}
+                onKeyDown={handleKeyDown}
+                placeholder={config.placeholder}
+                className="w-full h-12 pl-12 pr-4 rounded-lg bg-white/95 backdrop-blur-sm text-foreground placeholder:text-muted-foreground text-base focus:outline-none focus:ring-2 focus:ring-sky-300 shadow-lg"
+              />
+
+              {/* Suggestions Dropdown (destination only) */}
+              {searchType === "destination" && showSuggestions && suggestions.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-lg border border-border overflow-hidden z-20">
+                  {suggestions.map((s) => (
+                    <button
+                      key={s.id}
+                      onMouseDown={() => handleSuggestionClick(s.name)}
+                      className="w-full text-left px-4 py-3 hover:bg-muted/50 transition-colors flex items-center gap-3 text-sm"
+                    >
+                      <Search className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <div className="flex flex-col">
+                        <span className="text-foreground font-medium">{s.name}</span>
+                        {s.secondaryText ? (
+                          <span className="text-muted-foreground text-xs">
+                            {s.secondaryText}
+                          </span>
+                        ) : s.property_type ? (
+                          <span className="text-muted-foreground text-xs capitalize">
+                            {s.property_type}
+                          </span>
+                        ) : null}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
+
+          {/* Search Button */}
           <Button
             size="lg"
             onClick={handleSearch}
             disabled={isSearching || query.trim().length < 2}
-            className="h-12 px-8 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg shadow-lg whitespace-nowrap disabled:opacity-50"
+            className="h-12 px-8 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg shadow-lg whitespace-nowrap disabled:opacity-50 w-full sm:w-auto sm:self-end"
           >
-            {isSearching ? "Searching..." : "Explore reviews"}
+            {isSearching && searchType === "destination" ? "Searching..." : config.buttonLabel}
           </Button>
         </div>
       </div>
-
 
       {/* Scroll Indicator */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-float">

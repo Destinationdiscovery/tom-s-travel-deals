@@ -360,6 +360,19 @@ const Gear = () => {
     return () => { document.title = "ReviewThenGo.com | Honest Reviews, Tested Gear & Travel Insights"; };
   }, []);
 
+  // Auto-search from URL query param
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get("q");
+    if (q && q.trim().length >= 2) {
+      setSearchQuery(q);
+      fetchPackingList(q.trim());
+      // Clean up URL
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleSearch = () => {
     if (searchQuery.trim().length >= 2) {
       clearReview();
