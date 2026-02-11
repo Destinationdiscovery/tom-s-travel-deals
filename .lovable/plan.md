@@ -1,32 +1,33 @@
 
 
-# Fix Gear Product Image Matching
+# Gear Admin Improvements
 
-## Problem
-1. The keyword matching in the edge function is too strict -- "carry-on" (hyphenated) doesn't match "carry on" (spaces), so the image never attaches.
-2. No packing cubes image mapping exists in the database.
+## What's Changing
 
-## Changes
+### 1. Add a description field to image uploads
+When you upload a product image, you'll now see a "Description" text box where you can type what the image is (e.g., "Blue packing cubes set of 6" or "Carry-on suitcase front view"). This description will be saved alongside the keyword and displayed under each image in the admin grid.
 
-### 1. Fix keyword matching in edge function (`supabase/functions/travel-gear-intel/index.ts`)
-Update `attachProductImages` and `attachSingleProductImage` to normalize both the product name and keyword before comparing -- strip hyphens and extra spaces so "carry-on" matches "carry on".
+This requires adding a new `description` column to the database table that stores your gear images.
 
-```
-// Before:
-itemName.includes(row.product_keyword.toLowerCase())
+### 2. Keep admin page private (no navigation link)
+The `/gear-admin` page will stay hidden from the site -- no link will be added anywhere. Only you can access it by typing the URL directly, and it already requires you to be signed in.
 
-// After: normalize by replacing hyphens with spaces
-const normalize = (s: string) => s.toLowerCase().replace(/-/g, " ");
-normalize(itemName).includes(normalize(row.product_keyword))
-```
+---
 
-### 2. Add packing cubes image to the library
-- Upload the existing `src/assets/gear-packing-cubes-main.jpg` to the `gear-images` storage bucket
-- Insert a `gear_product_images` row mapping keyword **"packing cubes"** to the public URL
+## About signing in
 
-### 3. Clear the cache entry
-- Delete the current cached result for "beach vacation mexico" so the next search fetches fresh results with images properly attached
+Your site currently uses magic link (email-only) sign-in, which is working well for you already. Setting a password through this chat isn't possible since authentication is handled securely by the backend. You'll continue signing in via the magic link emailed to you, which is actually more secure than a password. If you'd like me to add password-based login as an option in the future, just let me know.
 
-## Technical details
-- The normalize function will be extracted as a shared helper used by both `attachProductImages` and `attachSingleProductImage`
-- Redeploy the `travel-gear-intel` edge function after the fix
+---
+
+## Technical Details
+
+### Database change
+- Add a nullable `description` column (type `text`) to the `gear_product_images` table so existing rows aren't affected.
+
+### Frontend changes (`src/pages/GearAdmin.tsx`)
+- Add a `Textarea` input labeled "Description (optional)" to the upload form.
+- Include the description value in the database insert when uploading.
+- Display the description text below each image's keyword in the admin grid.
+- Update the `GearImage` interface to include the new `description` field.
+
