@@ -1,30 +1,17 @@
 
-# Add Links to Travel Requirements Results
+
+# Increase Source Link Font Size
 
 ## What's Changing
 
-When the AI returns travel requirement items that mention forms, websites, or official portals (like the D'Viajeros form for Cuba), they'll now include clickable links so you can go directly to those resources instead of having to search for them yourself.
-
-## How It Works
-
-Two changes are needed:
-
-### 1. Update the AI prompt to include URLs
-The prompt sent to the AI will be updated to instruct it to include relevant URLs inline with each requirement item. For example, instead of just saying "Completed D'Viajeros mandatory travel form," it would say "Completed D'Viajeros mandatory travel form (https://dviajeros.mitrans.gob.cu)."
-
-### 2. Make URLs clickable in the frontend
-The bullet-point list items in the requirements results currently render as plain text. They'll be updated to automatically detect any URLs in the text and turn them into clickable links that open in a new tab -- styled in your site's primary color with an external-link icon.
-
----
+The "Sources" section at the bottom of requirements, advisories, and news results will have larger, more readable text. Currently the source label and links use `text-xs` (12px) -- they'll be bumped up to `text-sm` (14px) so they're easier to spot and click.
 
 ## Technical Details
 
-### Edge function change (`supabase/functions/travel-intel/index.ts`)
-- Update the `requirements` prompt to instruct the AI: *"When mentioning any official forms, portals, or websites, include the full URL in parentheses after the mention."*
+### File: `src/pages/TravelIntel.tsx`
 
-### Frontend change (`src/pages/TravelIntel.tsx`)
-- Create a small `LinkifiedText` helper component that uses a regex to find URLs in text strings and wraps them in `<a>` tags with `target="_blank"` and appropriate styling.
-- Update the `Section` component's `<li>` rendering to use `LinkifiedText` instead of plain text.
+Update the `Citations` component (around lines 63-75):
+- Change the "Sources" label from `text-xs` to `text-sm`
+- Change each source link from `text-xs` to `text-sm`
+- Increase the external link icon from `h-3 w-3` to `h-3.5 w-3.5` to match
 
-### Cache clearing
-- Existing cached results won't have links, so stale cache entries for previously searched destinations will need to be cleared so the new prompt generates fresh results with URLs included.
