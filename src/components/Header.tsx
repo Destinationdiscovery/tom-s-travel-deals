@@ -8,6 +8,7 @@ const Header = () => {
   const location = useLocation();
 
   const navLinks = [
+    { to: "/search", label: "Destination Search" },
     { to: "/gear", label: "Travel Gear Reviews" },
     { to: "/compass", label: "Travel Blog" },
     { to: "/about", label: "About" },

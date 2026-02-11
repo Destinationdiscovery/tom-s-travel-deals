@@ -1,0 +1,110 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+};
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { query } = await req.json();
+    if (!query || typeof query !== "string" || query.trim().length < 3) {
+      return new Response(JSON.stringify({ error: "Query must be at least 3 characters" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const apiKey = Deno.env.get("PERPLEXITY_API_KEY");
+    if (!apiKey) {
+      throw new Error("PERPLEXITY_API_KEY is not configured");
+    }
+
+    const systemPrompt = `You are a travel search assistant. Given a user query about travel destinations, hotels, resorts, or experiences, return a JSON object with a "results" array of 8-10 REAL, currently operating properties that match the query.
+
+Each result must have:
+- "name": string — the exact real name of the property
+- "location": string — city/area, country
+- "type": string — hotel, resort, villa, boutique hotel, etc.
+- "rating": number — approximate rating out of 5 (e.g. 4.5)
+- "description": string — 1-2 sentence summary of what makes it special
+- "bestFor": string[] — 2-4 tags like "Couples", "Families", "Luxury", "Budget", "Adults Only", "All-Inclusive", "Beach", "Adventure"
+- "priceRange": string — one of "$", "$$", "$$$", "$$$$"
+
+IMPORTANT:
+- Only include REAL properties that currently exist and operate
+- Return exactly the JSON structure requested, nothing else
+- Do not include markdown formatting or code blocks`;
+
+    const response = await fetch("https://api.perplexity.ai/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "sonar",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: query },
+        ],
+        temperature: 0.3,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Perplexity API error:", errorText);
+      throw new Error(`Perplexity API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content;
+    const citations = data.citations || [];
+
+    if (!content) {
+      throw new Error("No content in Perplexity response");
+    }
+
+    // Extract JSON from the response (handle markdown code blocks)
+    let jsonStr = content;
+    const codeBlockMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (codeBlockMatch) {
+      jsonStr = codeBlockMatch[1].trim();
+    }
+
+    // Repair common JSON issues: unquoted keys
+    jsonStr = jsonStr.replace(/(\{|\,)\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":');
+
+    let parsed;
+    try {
+      parsed = JSON.parse(jsonStr);
+    } catch {
+      // Try to find a JSON object in the string
+      const objectMatch = jsonStr.match(/\{[\s\S]*\}/);
+      if (objectMatch) {
+        let repaired = objectMatch[0].replace(/(\{|\,)\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":');
+        parsed = JSON.parse(repaired);
+      } else {
+        throw new Error("Could not parse search results");
+      }
+    }
+
+    const results = parsed.results || parsed;
+
+    return new Response(JSON.stringify({ results, citations }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    console.error("Travel search error:", error);
+    return new Response(JSON.stringify({ error: error.message || "Search failed" }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+});
