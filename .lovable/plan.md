@@ -1,22 +1,22 @@
 
-
-# Widen Search Bar Container for Better Input Space
+# Fix: Auto-Scroll to Results After Search
 
 ## Problem
 
-The current `max-w-xl` (36rem / 576px) container is too narrow to fit three elements (selector, input, button) in one row comfortably. The input field gets squeezed and placeholder text is cut off.
+When clicking "Find Gear" (or any other search button), the search executes successfully and results render below the hero section. But since the hero takes up the full viewport height (`min-h-screen`), the results are invisible below the fold and the page never scrolls down to show them.
 
 ## Solution
 
-Widen the search bar container from `max-w-xl` to `max-w-3xl` (48rem / 768px). This gives the input field significantly more room while keeping the same single-row layout on desktop.
+Add auto-scroll behavior in `Index.tsx` so that after any search is triggered, the page smoothly scrolls down to the results area.
 
 ## Technical Detail
 
-**File: `src/components/HeroSection.tsx`**
+**File: `src/pages/Index.tsx`**
 
-One-line change on line 132:
-- Change `max-w-xl` to `max-w-3xl`
+1. Add a `useRef` for the results container area (a div wrapping all results below the hero)
+2. In `handleInlineSearch` and `handleSearch`, after triggering the search, scroll to that ref with a small delay (to let the loading state render first)
+3. Use `scrollIntoView({ behavior: "smooth", block: "start" })` for a smooth transition
 
-This single change gives the flex container roughly 200px more horizontal space, which all flows into the `flex-1` input field since the selector and button have fixed widths (`shrink-0` / `w-auto`).
+The ref target will be a wrapper `<div ref={resultsRef}>` placed right after the `HeroSection` component, encompassing all the result sections (AIReviewResult, intel results, gear results, etc.).
 
-No other files are affected.
+A short `setTimeout` (~100ms) ensures the loading indicator has rendered before scrolling.
