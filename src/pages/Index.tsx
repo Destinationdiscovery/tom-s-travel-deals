@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import HeroSection, { type SearchType } from "@/components/HeroSection";
@@ -21,6 +21,7 @@ const Index = () => {
   const intel = useTravelIntel();
   const gear = useGearIntel();
 
+  const resultsRef = useRef<HTMLDivElement>(null);
   const [activeSearchType, setActiveSearchType] = useState<SearchType>("destination");
   const [showPromo, setShowPromo] = useState(() => !sessionStorage.getItem("promo-seen"));
 
@@ -29,7 +30,12 @@ const Index = () => {
   const [citizenshipInput, setCitizenshipInput] = useState("");
   const [pendingDestination, setPendingDestination] = useState("");
 
+  const scrollToResults = () => {
+    setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
+  };
+
   const handleSearch = async (propertyName: string) => {
+    scrollToResults();
     await generateReview(propertyName);
   };
 
@@ -41,6 +47,7 @@ const Index = () => {
   const handleInlineSearch = (type: SearchType, query: string) => {
     setActiveSearchType(type);
     setRequiresCitizenship(false);
+    scrollToResults();
 
     if (type === "gear") {
       gear.clearReview();
@@ -103,6 +110,7 @@ const Index = () => {
           onSearchTypeChange={handleSearchTypeChange}
         />
 
+        <div ref={resultsRef}>
         {/* Destination Review Results */}
         <AIReviewResult
           review={review}
@@ -203,6 +211,7 @@ const Index = () => {
         )}
 
         {!hasAnyResults && !isAnyLoading && !gear.reviewLoading && <RecentlyReviewedSection />}
+        </div>
       </main>
       <ComparisonFloatingBadge />
       <Footer />
