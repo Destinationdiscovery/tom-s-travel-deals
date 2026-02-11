@@ -1,4 +1,4 @@
-import { Star, Bookmark, BookmarkCheck } from "lucide-react";
+import { Star } from "lucide-react";
 import cubaGallery1 from "@/assets/cuba-gallery-1.jpg";
 import cubaGallery2 from "@/assets/cuba-gallery-2.jpg";
 import cubaGallery3 from "@/assets/cuba-gallery-3.jpg";
@@ -19,18 +19,17 @@ const BEST_FOR = ["Couples", "Honeymoon", "Beach Lovers", "Luxury"];
 
 interface PromoReviewSceneProps {
   visible: boolean;
-  saved: boolean;
   scrollProgress: number;
 }
 
-const PromoReviewScene = ({ visible, saved, scrollProgress }: PromoReviewSceneProps) => {
+const PromoReviewScene = ({ visible, scrollProgress }: PromoReviewSceneProps) => {
   return (
     <div
-      className="absolute inset-0 flex items-start justify-center bg-background overflow-hidden transition-opacity duration-700 pt-6 pb-6"
+      className="absolute inset-0 flex items-start justify-center bg-background overflow-hidden transition-opacity duration-400 pt-6 pb-6"
       style={{ opacity: visible ? 1 : 0, pointerEvents: visible ? "auto" : "none" }}
     >
       <div
-        className={`max-w-5xl w-full mx-4 transition-all duration-700 ${
+        className={`max-w-5xl w-full mx-4 transition-all duration-400 ${
           visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
         }`}
         style={{ transform: visible ? `translateY(-${scrollProgress}px)` : "translateY(32px)" }}
@@ -60,7 +59,6 @@ const PromoReviewScene = ({ visible, saved, scrollProgress }: PromoReviewScenePr
           <div className="flex flex-col lg:flex-row gap-6">
             {/* Main column */}
             <div className="flex-1 space-y-5">
-              {/* Summary */}
               <p className="text-muted-foreground leading-relaxed">
                 Sandals Royal Barbados consistently impresses guests with its stunning beachfront
                 location, exceptional service, and world-class dining options. The swim-up suites
@@ -68,23 +66,17 @@ const PromoReviewScene = ({ visible, saved, scrollProgress }: PromoReviewScenePr
                 all-inclusive resorts.
               </p>
 
-              {/* Photo gallery 2x3 grid */}
               <div>
                 <h3 className="font-display text-lg font-bold text-foreground mb-3">Photos</h3>
                 <div className="grid grid-cols-3 gap-2">
                   {GALLERY_PHOTOS.map((photo, i) => (
                     <div key={i} className="aspect-[4/3] rounded-xl overflow-hidden">
-                      <img
-                        src={photo}
-                        alt={`Gallery ${i + 1}`}
-                        className="w-full h-full object-cover"
-                      />
+                      <img src={photo} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover" />
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* What Travelers Say */}
               <div>
                 <h3 className="font-display text-lg font-bold text-foreground mb-3">What Travelers Say</h3>
                 <div className="space-y-3">
@@ -102,7 +94,6 @@ const PromoReviewScene = ({ visible, saved, scrollProgress }: PromoReviewScenePr
 
             {/* Sidebar */}
             <div className="lg:w-72 space-y-5">
-              {/* Rating Breakdown */}
               <div className="bg-muted/30 rounded-xl p-4">
                 <h3 className="font-display text-lg font-bold text-foreground mb-3">Rating Breakdown</h3>
                 <div className="space-y-3">
@@ -123,41 +114,16 @@ const PromoReviewScene = ({ visible, saved, scrollProgress }: PromoReviewScenePr
                 </div>
               </div>
 
-              {/* Best For */}
               <div>
                 <h3 className="font-display text-sm font-bold text-foreground mb-2">Best For</h3>
                 <div className="flex flex-wrap gap-2">
                   {BEST_FOR.map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium"
-                    >
+                    <span key={tag} className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
                       {tag}
                     </span>
                   ))}
                 </div>
               </div>
-
-              {/* Save to Compare button */}
-              <button
-                className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${
-                  saved
-                    ? "bg-primary text-primary-foreground scale-95"
-                    : "bg-primary/10 text-primary hover:bg-primary/20"
-                }`}
-              >
-                {saved ? (
-                  <>
-                    <BookmarkCheck className="h-4 w-4" />
-                    Saved ✓
-                  </>
-                ) : (
-                  <>
-                    <Bookmark className="h-4 w-4" />
-                    Save to Compare
-                  </>
-                )}
-              </button>
             </div>
           </div>
         </div>
