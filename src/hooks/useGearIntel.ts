@@ -94,5 +94,11 @@ export function useGearIntel() {
 
   const clearReview = () => setReviewData(null);
 
-  return { loading, error, packingData, reviewData, reviewLoading, fetchPackingList, fetchProductReview, clearReview };
+  const clearAll = () => {
+    setPackingData(null);
+    setReviewData(null);
+    setError(null);
+  };
+
+  return { loading, error, packingData, reviewData, reviewLoading, fetchPackingList, fetchProductReview, clearReview, clearAll };
 }

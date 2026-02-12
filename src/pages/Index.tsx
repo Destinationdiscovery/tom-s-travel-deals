@@ -35,20 +35,21 @@ const Index = () => {
   };
 
   const handleSearch = async (propertyName: string) => {
+    clearAllResults();
     scrollToResults();
     await generateReview(propertyName);
   };
 
   const clearAllResults = () => {
     clearReview();
-    // Reset intel/gear state by clearing references (hooks manage their own state)
+    intel.clearAll();
+    gear.clearAll();
   };
 
   const handleInlineSearch = (type: SearchType, query: string) => {
     setActiveSearchType(type);
     setRequiresCitizenship(false);
-    intel.clearAll();
-    gear.clearReview();
+    clearAllResults();
     scrollToResults();
 
     if (type === "gear") {
