@@ -1,23 +1,37 @@
 
 
-# Remove Booking CTAs and Promo Slideshow
+# Add "Destination Search" to Hero Dropdown Menu
 
-## Changes
+## What's changing
 
-### 1. `src/components/AIReviewResult.tsx`
-Remove three duplicate booking/affiliate elements from the review layout:
-- **Compare Prices row** (line 140-141) - the inline "Compare prices: Expedia | Hotels.com | VRBO" bar after the summary card
-- **Plan Your Trip CTA** (lines 200-203) - the bordered card with Compass icon after travel tips
-- **ComparePricesRow and PlanYourTripCTA function definitions** (lines 326-399) - the now-unused sub-components
+Adding the existing "Destination Search" feature (e.g. "adults only resorts in Punta Cana") as a new option in the hero search dropdown, so it works inline just like gear, advisories, requirements, and news.
 
-The sidebar `AffiliateLinks` ("Ready to Book?") and mobile `AffiliateLinks` will remain since those are the booking buttons you want to keep.
+## Technical Detail
+
+### 1. `src/components/HeroSection.tsx`
+- Add `"search"` to the `SearchType` union: `"destination" | "search" | "gear" | "requirements" | "advisories" | "news"`
+- Add a new entry in `searchTypeConfigs`:
+  - Label: "Destination Search"
+  - Placeholder: `'e.g. "Adults only in Punta Cana" or "Beach resorts in Cancun"'`
+  - Button label: "Search"
 
 ### 2. `src/pages/Index.tsx`
-Remove the promo slideshow entirely:
-- Remove the `PromoSlideshow` import (line 9)
-- Remove `showPromo` state (line 26)
-- Remove `handlePromoComplete` function (lines 94-97)
-- Remove the `{showPromo && <PromoSlideshow .../>}` render (line 106)
+- Import `useTravelSearch` hook
+- Add the `travelSearch` hook instance
+- Add `travelSearch.clearResults()` to the `clearAllResults` function
+- Handle `type === "search"` in `handleInlineSearch` -- call `travelSearch.search(query)`
+- Add a `handleReviewFromSearch` function (clicking "Review It" on a search result card triggers `generateReview`)
+- Update `hasAnyResults` to include `travelSearch.results.length > 0`
+- Update `isAnyLoading` to include `travelSearch.isLoading`
+- Add render sections for:
+  - Loading: show `SearchLoadingStages` when `travelSearch.isLoading`
+  - Results: show a grid of result cards (reusing the card layout from `TravelSearch.tsx`) with "Review It" buttons
+  - Error: show error message
+  - Citations: show source links
 
-The `/promo` route page will remain untouched for future use if needed.
+### 3. Clearing behavior
+- `clearAllResults` will call `travelSearch.clearResults()` alongside the existing clears
+- Switching search types or starting any new search will wipe travel search results too
+
+No new components needed -- the result cards will be rendered directly in `Index.tsx` using the same Card/Badge/Star pattern from the existing `/search` page.
 
