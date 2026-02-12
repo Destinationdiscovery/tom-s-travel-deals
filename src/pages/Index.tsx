@@ -6,7 +6,7 @@ import AIReviewResult from "@/components/AIReviewResult";
 import RecentlyReviewedSection from "@/components/RecentlyReviewedSection";
 import ComparisonFloatingBadge from "@/components/ComparisonFloatingBadge";
 import Footer from "@/components/Footer";
-import PromoSlideshow from "@/components/PromoSlideshow";
+
 import { useGenerateReview } from "@/hooks/useGenerateReview";
 import { useTravelIntel, type IntelType } from "@/hooks/useTravelIntel";
 import { useGearIntel } from "@/hooks/useGearIntel";
@@ -23,7 +23,7 @@ const Index = () => {
 
   const resultsRef = useRef<HTMLDivElement>(null);
   const [activeSearchType, setActiveSearchType] = useState<SearchType>("destination");
-  const [showPromo, setShowPromo] = useState(() => !sessionStorage.getItem("promo-seen"));
+  
 
   // Requirements special case: citizenship prompt
   const [requiresCitizenship, setRequiresCitizenship] = useState(false);
@@ -91,10 +91,6 @@ const Index = () => {
     window.scrollTo({ top: 400, behavior: "smooth" });
   };
 
-  const handlePromoComplete = () => {
-    sessionStorage.setItem("promo-seen", "true");
-    setShowPromo(false);
-  };
 
   const isAnyLoading = isLoading || intel.loading || gear.loading;
   const hasIntelResults = intel.requirementsData || intel.advisoriesData || intel.newsData;
@@ -103,7 +99,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {showPromo && <PromoSlideshow onComplete={handlePromoComplete} />}
       <Header />
       <main>
         <HeroSection
