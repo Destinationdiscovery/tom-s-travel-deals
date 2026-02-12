@@ -1,25 +1,36 @@
 
 
-# Fix: Dark Mode Text Visibility on Search Bar Buttons
+# Fix: Comprehensive Result Clearing Across All Search Types
 
 ## Problem
 
-The search type selector and input field use `bg-white/95` (always white) but `text-foreground` for text color. In dark mode, `--foreground` resolves to a near-white color, making text invisible against the white background.
+When switching between search types (destination, gear, requirements, advisories, news), previous results from other types are not fully cleared, causing stale content to remain visible alongside new results.
+
+### Specific gaps found
+
+| Scenario | What stays on screen |
+|----------|---------------------|
+| Do a destination review, then search gear | Destination review stays visible |
+| Do a gear search, then search advisories | Packing list stays visible |
+| Do any intel search, then search a destination | Intel results stay visible |
+| Switch search type via dropdown | Only destination review is cleared, intel and gear remain |
+
+## Root causes
+
+1. The gear hook's `clearReview()` only clears the product review — not the packing list or error state
+2. `handleInlineSearch` doesn't clear destination reviews
+3. `handleSearch` (destination) doesn't clear intel or gear
+4. `clearAllResults` only clears destination reviews
 
 ## Solution
 
-Replace theme-dependent color classes with hardcoded dark text colors on the always-white search bar elements.
+### 1. `src/hooks/useGearIntel.ts`
+- Add a `clearAll()` method that resets `packingData`, `reviewData`, and `error` to null
 
-## Technical Detail
+### 2. `src/pages/Index.tsx`
+- Create a single `clearAllResults()` function that clears everything: `clearReview()` (destination), `intel.clearAll()`, and `gear.clearAll()`
+- Call `clearAllResults()` at the start of both `handleSearch` and `handleInlineSearch`
+- Call `clearAllResults()` in `handleSearchTypeChange`
 
-**File: `src/components/HeroSection.tsx`**
-
-Three changes, all swapping `text-foreground` to `text-gray-900` (or similar fixed dark color):
-
-1. **Type selector button** (~line 140): Change `text-foreground` to `text-gray-900`
-2. **Search input** (~line 162): Change `text-foreground` to `text-gray-900` and `placeholder:text-muted-foreground` to `placeholder:text-gray-400`
-3. **Suggestions dropdown items** (~line 181): The suggestion text also uses `text-foreground` -- change to `text-gray-900`, and `text-muted-foreground` to `text-gray-500`
-4. **Type dropdown items** (~line 151): Change `text-foreground` references to `text-gray-900`
-
-These elements always have white/light backgrounds regardless of theme, so their text colors should also be fixed rather than theme-dependent.
+This ensures that no matter which search type you use, all previous results from any other type are wiped first.
 
