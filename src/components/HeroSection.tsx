@@ -137,7 +137,7 @@ const HeroSection = ({ onSearch, isSearching, onInlineSearch, onSearchTypeChange
               <button
                 type="button"
                 onClick={() => setShowTypeDropdown(!showTypeDropdown)}
-                className="h-12 px-4 rounded-lg bg-white/95 backdrop-blur-sm text-foreground text-sm font-medium flex items-center gap-2 whitespace-nowrap shadow-lg hover:bg-white transition-colors w-full sm:w-auto justify-between sm:justify-start"
+                className="h-12 px-4 rounded-lg bg-white/95 backdrop-blur-sm text-gray-900 text-sm font-medium flex items-center gap-2 whitespace-nowrap shadow-lg hover:bg-white transition-colors w-full sm:w-auto justify-between sm:justify-start"
               >
                 {config.label}
                 <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${showTypeDropdown ? "rotate-180" : ""}`} />
@@ -152,8 +152,8 @@ const HeroSection = ({ onSearch, isSearching, onInlineSearch, onSearchTypeChange
                       onMouseDown={() => handleSearchTypeChange(type)}
                       className={`w-full text-left px-4 py-3 text-sm transition-colors ${
                         type === searchType
-                          ? "bg-muted font-medium text-foreground"
-                          : "text-foreground hover:bg-muted/50"
+                          ? "bg-gray-100 font-medium text-gray-900"
+                          : "text-gray-900 hover:bg-gray-50"
                       }`}
                     >
                       {searchTypeConfigs[type].label}
@@ -179,7 +179,7 @@ const HeroSection = ({ onSearch, isSearching, onInlineSearch, onSearchTypeChange
                 onFocus={() => searchType === "destination" && query.trim().length >= 2 && setShowSuggestions(true)}
                 onKeyDown={handleKeyDown}
                 placeholder={config.placeholder}
-                className="w-full h-12 pl-12 pr-4 rounded-lg bg-white/95 backdrop-blur-sm text-foreground placeholder:text-muted-foreground text-base focus:outline-none focus:ring-2 focus:ring-sky-300 shadow-lg"
+                className="w-full h-12 pl-12 pr-4 rounded-lg bg-white/95 backdrop-blur-sm text-gray-900 placeholder:text-gray-400 text-base focus:outline-none focus:ring-2 focus:ring-sky-300 shadow-lg"
               />
 
               {/* Suggestions Dropdown (destination only) */}
@@ -193,13 +193,13 @@ const HeroSection = ({ onSearch, isSearching, onInlineSearch, onSearchTypeChange
                     >
                       <Search className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                       <div className="flex flex-col">
-                        <span className="text-foreground font-medium">{s.name}</span>
+                        <span className="text-gray-900 font-medium">{s.name}</span>
                         {s.secondaryText ? (
-                          <span className="text-muted-foreground text-xs">
+                          <span className="text-gray-500 text-xs">
                             {s.secondaryText}
                           </span>
                         ) : s.property_type ? (
-                          <span className="text-muted-foreground text-xs capitalize">
+                          <span className="text-gray-500 text-xs capitalize">
                             {s.property_type}
                           </span>
                         ) : null}
