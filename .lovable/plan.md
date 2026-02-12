@@ -1,25 +1,25 @@
 
-# Fix: Clear Previous Results When Starting a New Search
+
+# Fix: Dark Mode Text Visibility on Search Bar Buttons
 
 ## Problem
 
-The `useTravelIntel` hook stores results in three separate state variables (`requirementsData`, `advisoriesData`, `newsData`). When you search for requirements and then search for advisories, the requirements data stays in state and both render on screen.
+The search type selector and input field use `bg-white/95` (always white) but `text-foreground` for text color. In dark mode, `--foreground` resolves to a near-white color, making text invisible against the white background.
 
 ## Solution
 
-Two small changes:
+Replace theme-dependent color classes with hardcoded dark text colors on the always-white search bar elements.
 
-### 1. `src/hooks/useTravelIntel.ts`
+## Technical Detail
 
-Add a `clearAll` function that resets all three result states to `null`, and export it from the hook.
+**File: `src/components/HeroSection.tsx`**
 
-### 2. `src/pages/Index.tsx`
+Three changes, all swapping `text-foreground` to `text-gray-900` (or similar fixed dark color):
 
-In `handleInlineSearch`, call `intel.clearAll()` at the top before dispatching the new search. This ensures previous intel results are wiped before new ones load.
+1. **Type selector button** (~line 140): Change `text-foreground` to `text-gray-900`
+2. **Search input** (~line 162): Change `text-foreground` to `text-gray-900` and `placeholder:text-muted-foreground` to `placeholder:text-gray-400`
+3. **Suggestions dropdown items** (~line 181): The suggestion text also uses `text-foreground` -- change to `text-gray-900`, and `text-muted-foreground` to `text-gray-500`
+4. **Type dropdown items** (~line 151): Change `text-foreground` references to `text-gray-900`
 
-Similarly, clear gear results when doing an intel search, and clear intel results when doing a gear search -- so only one result type is ever visible.
+These elements always have white/light backgrounds regardless of theme, so their text colors should also be fixed rather than theme-dependent.
 
-| File | Change |
-|------|--------|
-| `src/hooks/useTravelIntel.ts` | Add `clearAll()` method that sets all three data states to `null` |
-| `src/pages/Index.tsx` | Call `intel.clearAll()` and `gear.clearReview()` + clear packing data at start of `handleInlineSearch` |
