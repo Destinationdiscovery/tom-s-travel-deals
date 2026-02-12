@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import heroBackground from "@/assets/hero-beach.jpg";
 import { useSearchSuggestions } from "@/hooks/useSearchSuggestions";
 
-export type SearchType = "destination" | "gear" | "requirements" | "advisories" | "news";
+export type SearchType = "destination" | "search" | "gear" | "requirements" | "advisories" | "news";
 
 interface SearchTypeConfig {
   label: string;
@@ -17,6 +17,11 @@ const searchTypeConfigs: Record<SearchType, SearchTypeConfig> = {
     label: "Destination Review",
     placeholder: 'e.g. "Sandals Royal Barbados" or "Hotels in Cancun"',
     buttonLabel: "Explore Reviews",
+  },
+  search: {
+    label: "Destination Search",
+    placeholder: 'e.g. "Adults only in Punta Cana" or "Beach resorts in Cancun"',
+    buttonLabel: "Search",
   },
   gear: {
     label: "Travel Gear Review",
