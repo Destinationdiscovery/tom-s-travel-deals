@@ -1,29 +1,35 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { Star, MapPin, Loader2, X } from "lucide-react";
 import Header from "@/components/Header";
 import HeroSection, { type SearchType } from "@/components/HeroSection";
 import AIReviewResult from "@/components/AIReviewResult";
 import RecentlyReviewedSection from "@/components/RecentlyReviewedSection";
 import ComparisonFloatingBadge from "@/components/ComparisonFloatingBadge";
 import Footer from "@/components/Footer";
+import SearchLoadingStages from "@/components/SearchLoadingStages";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 import { useGenerateReview } from "@/hooks/useGenerateReview";
 import { useTravelIntel, type IntelType } from "@/hooks/useTravelIntel";
 import { useGearIntel } from "@/hooks/useGearIntel";
+import { useTravelSearch, type SearchResult } from "@/hooks/useTravelSearch";
 import { IntelLoading, RequirementsResult, AdvisoriesResult, NewsResult } from "@/components/intel/IntelResults";
 import { GearLoading, PackingResultCard, ProductReviewPanel, GearCitations } from "@/components/gear/GearResults";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const { review, isLoading, error, generateReview, clearReview } = useGenerateReview();
   const navigate = useNavigate();
   const intel = useTravelIntel();
   const gear = useGearIntel();
+  const travelSearch = useTravelSearch();
+  const [reviewingName, setReviewingName] = useState<string | null>(null);
 
   const resultsRef = useRef<HTMLDivElement>(null);
   const [activeSearchType, setActiveSearchType] = useState<SearchType>("destination");
-  
 
   // Requirements special case: citizenship prompt
   const [requiresCitizenship, setRequiresCitizenship] = useState(false);
@@ -44,6 +50,8 @@ const Index = () => {
     clearReview();
     intel.clearAll();
     gear.clearAll();
+    travelSearch.clearResults();
+    setReviewingName(null);
   };
 
   const handleInlineSearch = (type: SearchType, query: string) => {
@@ -52,7 +60,9 @@ const Index = () => {
     clearAllResults();
     scrollToResults();
 
-    if (type === "gear") {
+    if (type === "search") {
+      travelSearch.search(query);
+    } else if (type === "gear") {
       gear.clearReview();
       gear.fetchPackingList(query);
     } else if (type === "advisories") {
@@ -92,10 +102,44 @@ const Index = () => {
   };
 
 
-  const isAnyLoading = isLoading || intel.loading || gear.loading;
+  const handleReviewFromSearch = async (result: SearchResult) => {
+    setReviewingName(result.name);
+    try {
+      const { data, error: fnError } = await (await import("@/integrations/supabase/client")).supabase.functions.invoke("generate-review", {
+        body: { propertyName: result.name },
+      });
+      if (fnError || data?.error) throw new Error(fnError?.message || data?.error);
+      if (data?.review?.slug) {
+        navigate(`/review/${data.review.slug}`, { replace: true });
+      }
+    } catch {
+      navigate(`/?search=${encodeURIComponent(result.name)}`);
+    } finally {
+      setReviewingName(null);
+    }
+  };
+
+  const renderStars = (rating: number) => {
+    const full = Math.floor(rating);
+    const half = rating % 1 >= 0.5;
+    return (
+      <div className="flex items-center gap-0.5">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Star
+            key={i}
+            className={`h-4 w-4 ${i < full ? "fill-amber-400 text-amber-400" : i === full && half ? "fill-amber-400/50 text-amber-400" : "text-muted-foreground/30"}`}
+          />
+        ))}
+        <span className="ml-1 text-sm font-medium text-muted-foreground">{rating}</span>
+      </div>
+    );
+  };
+
+  const isAnyLoading = isLoading || intel.loading || gear.loading || travelSearch.isLoading;
   const hasIntelResults = intel.requirementsData || intel.advisoriesData || intel.newsData;
   const hasGearResults = gear.packingData || gear.reviewData;
-  const hasAnyResults = review || error || hasIntelResults || hasGearResults || requiresCitizenship;
+  const hasSearchResults = travelSearch.results.length > 0;
+  const hasAnyResults = review || error || hasIntelResults || hasGearResults || hasSearchResults || requiresCitizenship;
 
   return (
     <div className="min-h-screen bg-background">
@@ -206,6 +250,81 @@ const Index = () => {
           <div className="container mx-auto px-4 py-6 max-w-2xl">
             <div className="p-4 rounded-xl bg-destructive/10 text-destructive text-sm">{gear.error}</div>
           </div>
+        )}
+
+        {/* Destination Search Results */}
+        {travelSearch.isLoading && <SearchLoadingStages />}
+        {travelSearch.error && (
+          <div className="container mx-auto px-4 py-6 max-w-2xl">
+            <div className="p-4 rounded-xl bg-destructive/10 text-destructive text-sm">{travelSearch.error}</div>
+          </div>
+        )}
+        {!travelSearch.isLoading && hasSearchResults && (
+          <section className="container mx-auto px-4 py-10 max-w-6xl">
+            <div className="flex items-center justify-between mb-6">
+              <p className="text-sm text-muted-foreground">
+                {travelSearch.results.length} properties found
+              </p>
+              <Button variant="ghost" size="sm" onClick={travelSearch.clearResults} className="gap-1.5">
+                <X className="h-3.5 w-3.5" />
+                Clear
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {travelSearch.results.map((result, i) => {
+                const isReviewing = reviewingName === result.name;
+                return (
+                  <Card key={i} className="overflow-hidden hover:shadow-md transition-shadow">
+                    <CardContent className="p-5 flex flex-col gap-3 h-full">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <h3 className="font-semibold text-lg leading-tight truncate">{result.name}</h3>
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
+                            <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+                            <span className="truncate">{result.location}</span>
+                          </div>
+                        </div>
+                        <span className="text-lg font-bold text-primary whitespace-nowrap">{result.priceRange}</span>
+                      </div>
+                      {renderStars(result.rating)}
+                      <p className="text-sm text-muted-foreground leading-relaxed flex-1">{result.description}</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {result.bestFor.map((tag) => (
+                          <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>
+                        ))}
+                      </div>
+                      <Button
+                        onClick={() => handleReviewFromSearch(result)}
+                        disabled={isReviewing}
+                        className="w-full mt-auto"
+                      >
+                        {isReviewing ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Generating Review...
+                          </>
+                        ) : (
+                          "Review It"
+                        )}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+            {travelSearch.citations.length > 0 && (
+              <div className="mt-8 pt-6 border-t border-border">
+                <p className="text-xs text-muted-foreground mb-2">Sources:</p>
+                <div className="flex flex-wrap gap-2">
+                  {travelSearch.citations.map((url, i) => (
+                    <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline truncate max-w-[250px]">
+                      [{i + 1}] {new URL(url).hostname}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
         )}
 
         {!hasAnyResults && !isAnyLoading && !gear.reviewLoading && <RecentlyReviewedSection />}
