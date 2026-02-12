@@ -1,36 +1,23 @@
 
 
-# Fix: Comprehensive Result Clearing Across All Search Types
+# Remove Booking CTAs and Promo Slideshow
 
-## Problem
+## Changes
 
-When switching between search types (destination, gear, requirements, advisories, news), previous results from other types are not fully cleared, causing stale content to remain visible alongside new results.
+### 1. `src/components/AIReviewResult.tsx`
+Remove three duplicate booking/affiliate elements from the review layout:
+- **Compare Prices row** (line 140-141) - the inline "Compare prices: Expedia | Hotels.com | VRBO" bar after the summary card
+- **Plan Your Trip CTA** (lines 200-203) - the bordered card with Compass icon after travel tips
+- **ComparePricesRow and PlanYourTripCTA function definitions** (lines 326-399) - the now-unused sub-components
 
-### Specific gaps found
-
-| Scenario | What stays on screen |
-|----------|---------------------|
-| Do a destination review, then search gear | Destination review stays visible |
-| Do a gear search, then search advisories | Packing list stays visible |
-| Do any intel search, then search a destination | Intel results stay visible |
-| Switch search type via dropdown | Only destination review is cleared, intel and gear remain |
-
-## Root causes
-
-1. The gear hook's `clearReview()` only clears the product review — not the packing list or error state
-2. `handleInlineSearch` doesn't clear destination reviews
-3. `handleSearch` (destination) doesn't clear intel or gear
-4. `clearAllResults` only clears destination reviews
-
-## Solution
-
-### 1. `src/hooks/useGearIntel.ts`
-- Add a `clearAll()` method that resets `packingData`, `reviewData`, and `error` to null
+The sidebar `AffiliateLinks` ("Ready to Book?") and mobile `AffiliateLinks` will remain since those are the booking buttons you want to keep.
 
 ### 2. `src/pages/Index.tsx`
-- Create a single `clearAllResults()` function that clears everything: `clearReview()` (destination), `intel.clearAll()`, and `gear.clearAll()`
-- Call `clearAllResults()` at the start of both `handleSearch` and `handleInlineSearch`
-- Call `clearAllResults()` in `handleSearchTypeChange`
+Remove the promo slideshow entirely:
+- Remove the `PromoSlideshow` import (line 9)
+- Remove `showPromo` state (line 26)
+- Remove `handlePromoComplete` function (lines 94-97)
+- Remove the `{showPromo && <PromoSlideshow .../>}` render (line 106)
 
-This ensures that no matter which search type you use, all previous results from any other type are wiped first.
+The `/promo` route page will remain untouched for future use if needed.
 
