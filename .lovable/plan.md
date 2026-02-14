@@ -1,37 +1,54 @@
 
 
-# Add "Destination Search" to Hero Dropdown Menu
+# Destination Search: Add "Things to Do" Results
 
-## What's changing
+## Overview
 
-Adding the existing "Destination Search" feature (e.g. "adults only resorts in Punta Cana") as a new option in the hero search dropdown, so it works inline just like gear, advisories, requirements, and news.
+Expand the Destination Search to also return activities/experiences when the query warrants it. For example, "hidden gems in Rome" would return both hidden gem hotels AND hidden gem things to do. Queries like "adults only resorts in Punta Cana" would return only properties as before.
 
-## Technical Detail
+## Approach: Single Request, Dual Results
 
-### 1. `src/components/HeroSection.tsx`
-- Add `"search"` to the `SearchType` union: `"destination" | "search" | "gear" | "requirements" | "advisories" | "news"`
-- Add a new entry in `searchTypeConfigs`:
-  - Label: "Destination Search"
-  - Placeholder: `'e.g. "Adults only in Punta Cana" or "Beach resorts in Cancun"'`
-  - Button label: "Search"
+One Perplexity API call returns both property results and optional activity results based on query intent.
 
-### 2. `src/pages/Index.tsx`
-- Import `useTravelSearch` hook
-- Add the `travelSearch` hook instance
-- Add `travelSearch.clearResults()` to the `clearAllResults` function
-- Handle `type === "search"` in `handleInlineSearch` -- call `travelSearch.search(query)`
-- Add a `handleReviewFromSearch` function (clicking "Review It" on a search result card triggers `generateReview`)
-- Update `hasAnyResults` to include `travelSearch.results.length > 0`
-- Update `isAnyLoading` to include `travelSearch.isLoading`
-- Add render sections for:
-  - Loading: show `SearchLoadingStages` when `travelSearch.isLoading`
-  - Results: show a grid of result cards (reusing the card layout from `TravelSearch.tsx`) with "Review It" buttons
-  - Error: show error message
-  - Citations: show source links
+## Technical Changes
 
-### 3. Clearing behavior
-- `clearAllResults` will call `travelSearch.clearResults()` alongside the existing clears
-- Switching search types or starting any new search will wipe travel search results too
+### 1. `supabase/functions/travel-search/index.ts`
 
-No new components needed -- the result cards will be rendered directly in `Index.tsx` using the same Card/Badge/Star pattern from the existing `/search` page.
+Update the system prompt to request two arrays:
+- `results` -- properties (same as today)
+- `activities` -- things to do (only when the query implies experiences, sightseeing, or general exploration)
 
+Each activity object:
+- `name`: string (e.g., "Trastevere Food Tour")
+- `location`: string (neighborhood/area)
+- `category`: string (e.g., "Food & Drink", "Sightseeing", "Adventure")
+- `rating`: number (out of 5)
+- `description`: string (1-2 sentences)
+- `bestFor`: string[] (e.g., "Couples", "Foodies", "History Buffs")
+- `priceRange`: string ("$" to "$$$$")
+
+Update the response parsing to extract both `results` and `activities` from the parsed JSON and return them.
+
+### 2. `src/hooks/useTravelSearch.ts`
+
+- Add a new `SearchActivity` interface matching the activity shape above
+- Add `activities` state alongside existing `results`
+- Parse `data.activities` from the edge function response
+- Include activities in `clearResults`
+
+### 3. `src/pages/Index.tsx`
+
+- After the property result cards grid, render an "Things to Do" section when `travelSearch.activities.length > 0`
+- Use a similar card layout: name, location, category badge, rating stars, description, and bestFor tags
+- No "Review It" button on activities (they aren't properties)
+- Update `hasSearchResults` to also check `travelSearch.activities.length`
+
+### 4. Clearing behavior
+
+No changes needed beyond the hook -- `clearResults` already gets called by `clearAllResults`, and it will now also reset the activities array.
+
+## What the user sees
+
+- Search "hidden gems in Rome" -> property cards appear, followed by a "Things to Do" section with activity cards
+- Search "adults only resorts Punta Cana" -> only property cards appear (no activities section)
+- Perplexity decides based on query intent whether to include activities
