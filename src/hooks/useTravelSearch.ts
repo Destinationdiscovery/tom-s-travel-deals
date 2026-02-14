@@ -11,8 +11,19 @@ export interface SearchResult {
   priceRange: string;
 }
 
+export interface SearchActivity {
+  name: string;
+  location: string;
+  category: string;
+  rating: number;
+  description: string;
+  bestFor: string[];
+  priceRange: string;
+}
+
 export function useTravelSearch() {
   const [results, setResults] = useState<SearchResult[]>([]);
+  const [activities, setActivities] = useState<SearchActivity[]>([]);
   const [citations, setCitations] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,6 +32,7 @@ export function useTravelSearch() {
     setIsLoading(true);
     setError(null);
     setResults([]);
+    setActivities([]);
     setCitations([]);
 
     try {
@@ -32,6 +44,7 @@ export function useTravelSearch() {
       if (data?.error) throw new Error(data.error);
 
       setResults(data.results || []);
+      setActivities(data.activities || []);
       setCitations(data.citations || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -42,9 +55,10 @@ export function useTravelSearch() {
 
   const clearResults = () => {
     setResults([]);
+    setActivities([]);
     setCitations([]);
     setError(null);
   };
 
-  return { results, citations, isLoading, error, search, clearResults };
+  return { results, activities, citations, isLoading, error, search, clearResults };
 }

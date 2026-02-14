@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Star, MapPin, Loader2, X } from "lucide-react";
+import { Star, MapPin, Loader2, X, Compass } from "lucide-react";
 import Header from "@/components/Header";
 import HeroSection, { type SearchType } from "@/components/HeroSection";
 import AIReviewResult from "@/components/AIReviewResult";
@@ -138,7 +138,7 @@ const Index = () => {
   const isAnyLoading = isLoading || intel.loading || gear.loading || travelSearch.isLoading;
   const hasIntelResults = intel.requirementsData || intel.advisoriesData || intel.newsData;
   const hasGearResults = gear.packingData || gear.reviewData;
-  const hasSearchResults = travelSearch.results.length > 0;
+  const hasSearchResults = travelSearch.results.length > 0 || travelSearch.activities.length > 0;
   const hasAnyResults = review || error || hasIntelResults || hasGearResults || hasSearchResults || requiresCitizenship;
 
   return (
@@ -312,6 +312,43 @@ const Index = () => {
                 );
               })}
             </div>
+            {/* Things to Do Section */}
+            {travelSearch.activities.length > 0 && (
+              <div className="mt-10">
+                <div className="flex items-center gap-2 mb-6">
+                  <Compass className="h-5 w-5 text-primary" />
+                  <h2 className="font-display text-xl font-bold text-foreground">Things to Do</h2>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {travelSearch.activities.map((activity, i) => (
+                    <Card key={i} className="overflow-hidden hover:shadow-md transition-shadow">
+                      <CardContent className="p-5 flex flex-col gap-3 h-full">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <h3 className="font-semibold text-lg leading-tight truncate">{activity.name}</h3>
+                            <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
+                              <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+                              <span className="truncate">{activity.location}</span>
+                            </div>
+                          </div>
+                          <span className="text-lg font-bold text-primary whitespace-nowrap">{activity.priceRange}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-xs">{activity.category}</Badge>
+                          {renderStars(activity.rating)}
+                        </div>
+                        <p className="text-sm text-muted-foreground leading-relaxed flex-1">{activity.description}</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {activity.bestFor.map((tag) => (
+                            <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
             {travelSearch.citations.length > 0 && (
               <div className="mt-8 pt-6 border-t border-border">
                 <p className="text-xs text-muted-foreground mb-2">Sources:</p>
