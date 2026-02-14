@@ -1,54 +1,61 @@
 
 
-# Destination Search: Add "Things to Do" Results
+# Fix: Destination Search Showing Only Activities, No Properties
 
-## Overview
+## Problem
 
-Expand the Destination Search to also return activities/experiences when the query warrants it. For example, "hidden gems in Rome" would return both hidden gem hotels AND hidden gem things to do. Queries like "adults only resorts in Punta Cana" would return only properties as before.
+When searching "hidden gems in Rome", Perplexity returned the `results` field as an **object** (containing only activities) instead of an **array** of properties. The edge function line `const results = parsed.results || parsed` passed that object through, and the frontend's `Array.isArray` check turned it into an empty array -- so no property cards appeared.
 
-## Approach: Single Request, Dual Results
+The API response looked like:
+```text
+{
+  "results": { "activities": [...] },   // <-- object, not array!
+  "activities": [...],
+  "citations": [...]
+}
+```
 
-One Perplexity API call returns both property results and optional activity results based on query intent.
-
-## Technical Changes
+## Fix
 
 ### 1. `supabase/functions/travel-search/index.ts`
 
-Update the system prompt to request two arrays:
-- `results` -- properties (same as today)
-- `activities` -- things to do (only when the query implies experiences, sightseeing, or general exploration)
+Update the parsing logic after JSON is parsed:
 
-Each activity object:
-- `name`: string (e.g., "Trastevere Food Tour")
-- `location`: string (neighborhood/area)
-- `category`: string (e.g., "Food & Drink", "Sightseeing", "Adventure")
-- `rating`: number (out of 5)
-- `description`: string (1-2 sentences)
-- `bestFor`: string[] (e.g., "Couples", "Foodies", "History Buffs")
-- `priceRange`: string ("$" to "$$$$")
+- If `parsed.results` is an array, use it as properties
+- If `parsed.results` is an object (not an array), check if it contains a nested `activities` array and merge that into the top-level activities
+- Fall back: if `parsed.results` isn't an array, also check if `parsed` itself is an array (legacy format)
+- Ensure `activities` is collected from both `parsed.activities` and any nested `parsed.results.activities`
 
-Update the response parsing to extract both `results` and `activities` from the parsed JSON and return them.
+Updated parsing (replacing lines 107-108):
+```typescript
+let results = [];
+let activities = [];
 
-### 2. `src/hooks/useTravelSearch.ts`
+if (Array.isArray(parsed.results)) {
+  results = parsed.results;
+} else if (Array.isArray(parsed)) {
+  results = parsed;
+}
 
-- Add a new `SearchActivity` interface matching the activity shape above
-- Add `activities` state alongside existing `results`
-- Parse `data.activities` from the edge function response
-- Include activities in `clearResults`
+if (Array.isArray(parsed.activities)) {
+  activities = parsed.activities;
+}
 
-### 3. `src/pages/Index.tsx`
+// Handle case where Perplexity nests activities inside results object
+if (!Array.isArray(parsed.results) && parsed.results?.activities) {
+  const nested = parsed.results.activities;
+  if (Array.isArray(nested)) {
+    activities = [...activities, ...nested];
+  }
+}
+```
 
-- After the property result cards grid, render an "Things to Do" section when `travelSearch.activities.length > 0`
-- Use a similar card layout: name, location, category badge, rating stars, description, and bestFor tags
-- No "Review It" button on activities (they aren't properties)
-- Update `hasSearchResults` to also check `travelSearch.activities.length`
+### 2. Prompt clarification (same file)
 
-### 4. Clearing behavior
+Add a line to the system prompt emphasizing:
+- `results` MUST always be an array (empty array `[]` if no properties match)
+- `activities` MUST always be an array (empty array `[]` if not applicable)
 
-No changes needed beyond the hook -- `clearResults` already gets called by `clearAllResults`, and it will now also reset the activities array.
+This is a belt-and-suspenders approach: the prompt tells Perplexity to use arrays, and the parsing handles it gracefully if it doesn't.
 
-## What the user sees
-
-- Search "hidden gems in Rome" -> property cards appear, followed by a "Things to Do" section with activity cards
-- Search "adults only resorts Punta Cana" -> only property cards appear (no activities section)
-- Perplexity decides based on query intent whether to include activities
+No frontend changes needed -- the hook already handles arrays correctly after the previous fix.
