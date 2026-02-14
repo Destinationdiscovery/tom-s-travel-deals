@@ -43,9 +43,11 @@ export function useTravelSearch() {
       if (fnError) throw new Error(fnError.message || "Search failed");
       if (data?.error) throw new Error(data.error);
 
-      setResults(data.results || []);
-      setActivities(data.activities || []);
-      setCitations(data.citations || []);
+      const rawResults = data.results;
+      const rawActivities = data.activities;
+      setResults(Array.isArray(rawResults) ? rawResults : []);
+      setActivities(Array.isArray(rawActivities) ? rawActivities : []);
+      setCitations(Array.isArray(data.citations) ? data.citations : []);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
