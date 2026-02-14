@@ -48,7 +48,8 @@ serve(async (req) => {
 IMPORTANT:
 - Only include REAL properties and activities that currently exist and operate
 - Return exactly the JSON structure requested, nothing else
-- Do not include markdown formatting or code blocks`;
+- Do not include markdown formatting or code blocks
+- CRITICAL: "results" MUST always be a JSON array (use [] if no properties match). "activities" MUST always be a JSON array (use [] if not applicable). Never nest activities inside the results object.`;
 
     const response = await fetch("https://api.perplexity.ai/chat/completions", {
       method: "POST",
@@ -104,8 +105,26 @@ IMPORTANT:
       }
     }
 
-    const results = parsed.results || parsed;
-    const activities = parsed.activities || [];
+    let results = [];
+    let activities = [];
+
+    if (Array.isArray(parsed.results)) {
+      results = parsed.results;
+    } else if (Array.isArray(parsed)) {
+      results = parsed;
+    }
+
+    if (Array.isArray(parsed.activities)) {
+      activities = parsed.activities;
+    }
+
+    // Handle case where Perplexity nests activities inside results object
+    if (!Array.isArray(parsed.results) && parsed.results?.activities) {
+      const nested = parsed.results.activities;
+      if (Array.isArray(nested)) {
+        activities = [...activities, ...nested];
+      }
+    }
 
     return new Response(JSON.stringify({ results, activities, citations }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
