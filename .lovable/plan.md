@@ -1,26 +1,39 @@
 
 
-# Add All Six Featured Deals
+# Add Pricing to Featured Deal Cards
 
-Populating the Featured Deals grid with all six deals provided.
+Adding original (crossed-out) and sale prices to each deal card as a visual CTA to drive clicks.
 
-## Deals
+## What Changes
 
-| # | Name | Location | Affiliate URL | Asset filename |
-|---|------|----------|---------------|----------------|
-| 1 | Temptation Cancun Resort All Inclusive - Adults Only | Cancun, Mexico | https://expedia.com/affiliate/sCSkKSm | `deal-temptation-cancun.png` |
-| 2 | Hotel Riu Plaza Toronto | Toronto, Canada | https://expedia.com/affiliate/4XUFIIR | `deal-riu-plaza-toronto.png` |
-| 3 | OUTRIGGER Honua Kai Resort & Spa | Lahaina, Hawaii | https://expedia.com/affiliate/N2Bmgth | `deal-outrigger-honua-kai.png` |
-| 4 | Save on Eligible Flights to Top Destinations | Flights | https://expedia.com/affiliate/bPJ1N3S | `deal-flights.png` |
-| 5 | Garza Blanca Resort & Spa Cancun | Punta Sam, Mexico | https://www.hotels.com/affiliate/gUxIS8k | `deal-garza-blanca-cancun.png` |
-| 6 | Phuket Moonlit Bay Seaview Resort & Spa | Ratsada, Thailand | https://expedia.com/affiliate/av1oUFB | `deal-phuket-moonlit-bay.png` |
+Each deal card will show a price block below the location, displaying:
+- The original price in a smaller, crossed-out style (e.g. ~~$289~~)
+- The sale price in bold green (e.g. **$189/night**)
+- A "View Deal" text prompt beside the price
 
-## Changes
+## Placeholder Prices
 
-1. **Copy six images** from user uploads into `src/assets/`
-2. **Update `src/components/TravelDealsSection.tsx`**:
-   - Import all six images
-   - Populate the `featuredDeals` array with the six entries above
+| Deal | Original | Sale |
+|------|----------|------|
+| Temptation Cancun Resort | $389/night | $249/night |
+| Hotel Riu Plaza Toronto | $279/night | $179/night |
+| OUTRIGGER Honua Kai Resort | $499/night | $329/night |
+| Flights to Top Destinations | $650 | $399 |
+| Garza Blanca Resort & Spa | $459/night | $299/night |
+| Phuket Moonlit Bay Resort | $199/night | $119/night |
 
-The grid will show two full rows of 3 cards on desktop, wrapping naturally on smaller screens.
+You can update these to real prices anytime.
+
+## Technical Details
+
+**File: `src/components/TravelDealsSection.tsx`**
+
+1. Add `originalPrice` and `salePrice` fields to the `FeaturedDeal` interface
+2. Populate each deal entry with placeholder pricing
+3. Update the card template to render a price row:
+   - Original price with `line-through` styling in muted text
+   - Sale price in bold `text-emerald-600`
+   - A small "View Deal" arrow prompt on the right side
+
+The pricing row will sit below the location text inside each card's padding area, acting as the primary CTA.
 
