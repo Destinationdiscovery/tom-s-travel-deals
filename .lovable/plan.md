@@ -1,13 +1,19 @@
 
 
-# Fix Hotels.com Banner Cropping
+# Add "ReviewThenGo Deals" Section Header
 
-## Problem
-The Hotels.com banner's "save up to 40%" badge on the right side is being cut off because `object-cover` crops the image to fit the fixed height, cutting from the top and bottom equally.
+## Overview
+Add a branded section title above the deal banners and restyle the individual deal titles to match site typography.
 
-## Change
+## Changes
 
-**`src/components/TravelDealsSection.tsx`** (line 41)
-- Add `object-position: right center` (`object-right`) to the Hotels.com banner image so the crop prioritizes showing the right side where the "40%" sale badge is
-- This keeps the same image size and dimensions but shifts the visible crop area to ensure the sale details remain visible
+**`src/components/TravelDealsSection.tsx`**
+1. Add a new heading at the top of the section: "ReviewThenGo Deals" using the tri-color brand scheme:
+   - "Review" in sky-600
+   - "Then" in amber-500
+   - "Go" in emerald-600
+   - " Deals" in standard foreground
+   - Uses `font-display text-2xl md:text-3xl font-bold` for prominence
+
+2. Restyle the two existing deal titles ("Expedia's Annual Vacation Sale..." and "Hotels.com Big Spring Sale...") to use `font-display` with a slightly smaller size (`text-base md:text-lg font-semibold text-muted-foreground`) so they sit visually beneath the new section header
 
