@@ -46,7 +46,7 @@ export default function CommentsSection({
   pageType: PageType;
 }) {
   const qc = useQueryClient();
-  const { user, isAdmin, sendMagicLink, signOut, loading: authLoading } = useAuth();
+  const { user, isAdmin, signOut, loading: authLoading } = useAuth();
 
   const [email, setEmail] = useState("");
   const [newComment, setNewComment] = useState("");
@@ -160,31 +160,7 @@ export default function CommentsSection({
     },
   });
 
-  async function onSendMagicLink() {
-    const parsed = emailSchema.safeParse(email);
-    if (!parsed.success) {
-      toast({
-        title: "Enter a valid email",
-        description: "Please check the email address and try again.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      await sendMagicLink(parsed.data);
-      toast({
-        title: "Magic link sent",
-        description: "Check your email for the sign-in link.",
-      });
-    } catch (err: any) {
-      toast({
-        title: "Could not send magic link",
-        description: err?.message ?? "Please try again.",
-        variant: "destructive",
-      });
-    }
-  }
+  // Sign-in is now handled via the admin dialog or AuthModal; removed magic link logic
 
   async function onPostComment() {
     const parsed = commentSchema.safeParse(newComment);
