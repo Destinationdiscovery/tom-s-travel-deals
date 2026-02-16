@@ -41,7 +41,7 @@ const searchTypeConfigs: Record<SearchType, SearchTypeConfig> = {
   news: {
     label: "Travel News",
     placeholder: 'e.g. "Caribbean" or "Europe travel updates"',
-    buttonLabel: "Find News",
+    buttonLabel: "Go",
   },
 };
 
