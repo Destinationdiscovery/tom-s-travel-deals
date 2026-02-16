@@ -3,9 +3,9 @@ import hotelsBanner from "@/assets/deal-hotels-spring-sale-banner.png";
 import dealTemptation from "@/assets/deal-temptation-cancun.png";
 import dealRiu from "@/assets/deal-riu-plaza-toronto.png";
 import dealOutrigger from "@/assets/deal-outrigger-honua-kai.png";
-import dealFlights from "@/assets/deal-flights.png";
-import dealGarza from "@/assets/deal-garza-blanca-cancun.png";
-import dealPhuket from "@/assets/deal-phuket-moonlit-bay.png";
+import dealFlights from "@/assets/deal-flights-clean.jpg";
+import dealGarza from "@/assets/deal-garza-blanca-clean.jpg";
+import dealPhuket from "@/assets/deal-phuket-clean.jpg";
 
 interface FeaturedDeal {
   image: string;
@@ -21,9 +21,9 @@ const featuredDeals: FeaturedDeal[] = [
   { image: dealTemptation, name: "Temptation Cancun Resort All Inclusive — Adults Only", location: "Cancun, Mexico", affiliateUrl: "https://expedia.com/affiliate/sCSkKSm", originalPrice: "$389/night", salePrice: "$249/night" },
   { image: dealRiu, name: "Hotel Riu Plaza Toronto", location: "Toronto, Canada", affiliateUrl: "https://expedia.com/affiliate/4XUFIIR", originalPrice: "$279/night", salePrice: "$179/night" },
   { image: dealOutrigger, name: "OUTRIGGER Honua Kai Resort & Spa", location: "Lahaina, Hawaii", affiliateUrl: "https://expedia.com/affiliate/N2Bmgth", originalPrice: "$499/night", salePrice: "$329/night" },
-  { image: dealFlights, name: "Save on Eligible Flights to Top Destinations", location: "Multiple Destinations", affiliateUrl: "https://expedia.com/affiliate/bPJ1N3S", originalPrice: "$650", salePrice: "$399", imagePosition: "top" },
-  { image: dealGarza, name: "Garza Blanca Resort & Spa Cancun", location: "Punta Sam, Mexico", affiliateUrl: "https://www.hotels.com/affiliate/gUxIS8k", originalPrice: "$459/night", salePrice: "$299/night", imagePosition: "top" },
-  { image: dealPhuket, name: "Phuket Moonlit Bay Seaview Resort & Spa", location: "Ratsada, Thailand", affiliateUrl: "https://expedia.com/affiliate/av1oUFB", originalPrice: "$199/night", salePrice: "$119/night", imagePosition: "top" },
+  { image: dealFlights, name: "Save on Eligible Flights to Top Destinations", location: "Multiple Destinations", affiliateUrl: "https://expedia.com/affiliate/bPJ1N3S", originalPrice: "$650", salePrice: "$399" },
+  { image: dealGarza, name: "Garza Blanca Resort & Spa Cancun", location: "Punta Sam, Mexico", affiliateUrl: "https://www.hotels.com/affiliate/gUxIS8k", originalPrice: "$459/night", salePrice: "$299/night" },
+  { image: dealPhuket, name: "Phuket Moonlit Bay Seaview Resort & Spa", location: "Ratsada, Thailand", affiliateUrl: "https://expedia.com/affiliate/av1oUFB", originalPrice: "$199/night", salePrice: "$119/night" },
 ];
 
 const TravelDealsSection = () => {
