@@ -1,50 +1,30 @@
 
-# Compass Icon as Hidden Admin Login Button
 
-## Overview
-Turn the Compass icon in the header into a secret admin login trigger. Instead of navigating to a separate `/admin-login` page, clicking the compass icon will open a small login dialog right there. You'll sign in with email and password (replacing the current magic link approach), and only users with the admin role in the database will get access.
+# Fix Admin Login to Support Both Password and Magic Link
+
+## Problem
+Your account was created using a magic link, so no password was ever set. The new admin login dialog only has email/password fields, making it impossible to log in on a new browser session (like the preview) without a password.
+
+## Solution
+Update the `AdminLoginDialog` to offer both login methods:
+1. **Email + Password** (primary) -- for when you eventually set a password
+2. **Send Magic Link** (fallback) -- so you can always get in without a password
 
 ## Changes
 
-### 1. Update AuthProvider to support email/password sign-in
-**File:** `src/components/auth/AuthProvider.tsx`
-- Add a `signInWithPassword(email, password)` method alongside the existing `sendMagicLink`
-- This uses standard email/password authentication
+### File: `src/components/auth/AdminLoginDialog.tsx`
+- Add a "Send Magic Link" button below the password sign-in button
+- When clicked, it sends a magic link to the entered email using the existing `sendMagicLink` method from AuthProvider
+- Show a confirmation message after sending ("Check your email for a login link")
+- Keep the password fields as the primary method for convenience
 
-### 2. Convert AdminLogin into a dialog component
-**File:** `src/components/auth/AdminLoginDialog.tsx` (new file)
-- Create a compact dialog/popover that contains:
-  - Email + password fields (not magic link)
-  - Sign in button
-  - When signed in: shows status ("Admin access granted" or "Not admin") and sign out button
-- This replaces the full-page `/admin-login` approach
+The dialog will look like:
+```
+[Email field]
+[Password field]
+[Sign In button]
+── or ──
+[Send Magic Link button]
+```
 
-### 3. Make the Compass icon open the admin dialog
-**File:** `src/components/Header.tsx`
-- The Compass icon (your logo icon) becomes clickable independently from the home link
-- Clicking it opens the `AdminLoginDialog` as a popover/dialog
-- The logo text ("ReviewThenGo") still links to home as normal
-- No visible change to regular visitors -- they'd never know the compass is special
-
-### 4. Keep the Dashboard link behavior
-- Once signed in as admin, the "Dashboard" link still appears in the nav (as already implemented)
-- The compass icon dialog also shows your signed-in status so you can sign out from there
-
-### 5. Clean up
-- Remove the `/admin-login` route from `App.tsx` since it's no longer needed
-- Delete `src/pages/AdminLogin.tsx`
-
-## Technical Details
-
-**Authentication flow:**
-- `supabase.auth.signInWithPassword({ email, password })` for login
-- The `user_roles` table check remains the same for admin verification
-- You'll need to set a password for your account (one-time via password reset flow, or we can set it up during implementation)
-
-**Compass icon behavior:**
-- Separated from the `<Link to="/">` wrapper so it can trigger the dialog independently
-- Regular visitors clicking it just see a login form -- but they can't get admin access without the role in the database
-
-**Security:**
-- Admin access is still controlled by the `user_roles` table -- signing in alone doesn't grant admin
-- The login dialog is visible to anyone who clicks the icon, but that's harmless since only accounts with the admin role get actual access
+No other files need to change -- `AuthProvider` already has the `sendMagicLink` method wired up.
