@@ -1,19 +1,14 @@
 
 
-# Add "ReviewThenGo Deals" Section Header
+# Replace Hotels.com Banner Image
 
-## Overview
-Add a branded section title above the deal banners and restyle the individual deal titles to match site typography.
+## Problem
+The current Hotels.com banner has the "save up to 40%" badge cut off even with `object-right` positioning.
 
-## Changes
+## Solution
+Replace the banner image file (`src/assets/deal-hotels-spring-sale-banner.png`) with the new uploaded image that shows "Members save up to 40%" fully visible. No code changes needed -- same file name, same sizing.
 
-**`src/components/TravelDealsSection.tsx`**
-1. Add a new heading at the top of the section: "ReviewThenGo Deals" using the tri-color brand scheme:
-   - "Review" in sky-600
-   - "Then" in amber-500
-   - "Go" in emerald-600
-   - " Deals" in standard foreground
-   - Uses `font-display text-2xl md:text-3xl font-bold` for prominence
-
-2. Restyle the two existing deal titles ("Expedia's Annual Vacation Sale..." and "Hotels.com Big Spring Sale...") to use `font-display` with a slightly smaller size (`text-base md:text-lg font-semibold text-muted-foreground`) so they sit visually beneath the new section header
+## Steps
+1. Copy `user-uploads://Screenshot_from_2026-02-16_12-05-38.png` to `src/assets/deal-hotels-spring-sale-banner.png`, overwriting the existing file
+2. No changes to `TravelDealsSection.tsx` since it already references this file with the correct sizing
 
