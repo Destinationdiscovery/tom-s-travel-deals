@@ -8,6 +8,7 @@ type AuthContextValue = {
   loading: boolean;
   isAdmin: boolean;
   sendMagicLink: (email: string) => Promise<void>;
+  signInWithPassword: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -64,6 +65,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             emailRedirectTo: window.location.origin,
           },
         });
+        if (error) throw error;
+      },
+      signInWithPassword: async (email: string, password: string) => {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       },
       signOut: async () => {
