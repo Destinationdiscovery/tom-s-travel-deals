@@ -1,49 +1,26 @@
 
 
-# Featured Deals Section
+# Add All Six Featured Deals
 
-## Overview
-Add a "Featured Deals" card grid below the Hotels.com banner in the Travel Deals section. Each card displays a cropped resort image, resort name, location, and links to an affiliate URL.
+Populating the Featured Deals grid with all six deals provided.
 
-## Layout
-- **Desktop (lg+):** 3 cards per row
-- **Tablet (md):** 2 cards per row  
-- **Mobile:** 1 card per row
+## Deals
 
-This matches the existing Destinations page grid and keeps the layout consistent across the site.
+| # | Name | Location | Affiliate URL | Asset filename |
+|---|------|----------|---------------|----------------|
+| 1 | Temptation Cancun Resort All Inclusive - Adults Only | Cancun, Mexico | https://expedia.com/affiliate/sCSkKSm | `deal-temptation-cancun.png` |
+| 2 | Hotel Riu Plaza Toronto | Toronto, Canada | https://expedia.com/affiliate/4XUFIIR | `deal-riu-plaza-toronto.png` |
+| 3 | OUTRIGGER Honua Kai Resort & Spa | Lahaina, Hawaii | https://expedia.com/affiliate/N2Bmgth | `deal-outrigger-honua-kai.png` |
+| 4 | Save on Eligible Flights to Top Destinations | Flights | https://expedia.com/affiliate/bPJ1N3S | `deal-flights.png` |
+| 5 | Garza Blanca Resort & Spa Cancun | Punta Sam, Mexico | https://www.hotels.com/affiliate/gUxIS8k | `deal-garza-blanca-cancun.png` |
+| 6 | Phuket Moonlit Bay Seaview Resort & Spa | Ratsada, Thailand | https://expedia.com/affiliate/av1oUFB | `deal-phuket-moonlit-bay.png` |
 
-## Card Design
-Each card will include:
-- A cropped resort image (landscape aspect ratio, ~16:9 or similar)
-- Resort/deal name (bold, 1-2 lines)
-- Location subtitle
-- The entire card is a clickable link to the affiliate URL (opens in new tab)
-- Subtle hover effect (scale + shadow lift) matching existing card patterns
+## Changes
 
-## Workflow for Adding Deals
-For each deal you want to add:
-1. You provide the image file and affiliate link
-2. I crop/optimize the image and save it to `src/assets/`
-3. I add the deal entry to a data array in the component
+1. **Copy six images** from user uploads into `src/assets/`
+2. **Update `src/components/TravelDealsSection.tsx`**:
+   - Import all six images
+   - Populate the `featuredDeals` array with the six entries above
 
-## Technical Details
-
-### File changes
-- **`src/components/TravelDealsSection.tsx`** -- Add a `featuredDeals` data array and render a responsive grid of deal cards below the existing banners. Each entry contains: `image`, `name`, `location`, `affiliateUrl`.
-
-### Card structure (per card)
-```
-[  Cropped Resort Image (h-48, object-cover)  ]
-[  Resort Name (font-display, bold)            ]
-[  Location (text-sm, muted)                   ]
-```
-
-- Cards use `rounded-2xl`, `shadow-soft`, `hover:shadow-elevated`, and `hover:-translate-y-1` for the same feel as the destination cards.
-- The grid uses `grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6`.
-
-### No new dependencies needed
-Uses existing Tailwind utilities and component patterns already in the project.
-
-## Next Steps
-Once approved, provide your first deal image + affiliate link and I will set it up. You can add as many deals as you like -- the grid will wrap naturally.
+The grid will show two full rows of 3 cards on desktop, wrapping naturally on smaller screens.
 
