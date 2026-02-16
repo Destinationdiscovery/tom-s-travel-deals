@@ -14,15 +14,16 @@ interface FeaturedDeal {
   affiliateUrl: string;
   originalPrice: string;
   salePrice: string;
+  imagePosition?: string;
 }
 
 const featuredDeals: FeaturedDeal[] = [
   { image: dealTemptation, name: "Temptation Cancun Resort All Inclusive — Adults Only", location: "Cancun, Mexico", affiliateUrl: "https://expedia.com/affiliate/sCSkKSm", originalPrice: "$389/night", salePrice: "$249/night" },
   { image: dealRiu, name: "Hotel Riu Plaza Toronto", location: "Toronto, Canada", affiliateUrl: "https://expedia.com/affiliate/4XUFIIR", originalPrice: "$279/night", salePrice: "$179/night" },
   { image: dealOutrigger, name: "OUTRIGGER Honua Kai Resort & Spa", location: "Lahaina, Hawaii", affiliateUrl: "https://expedia.com/affiliate/N2Bmgth", originalPrice: "$499/night", salePrice: "$329/night" },
-  { image: dealFlights, name: "Save on Eligible Flights to Top Destinations", location: "Multiple Destinations", affiliateUrl: "https://expedia.com/affiliate/bPJ1N3S", originalPrice: "$650", salePrice: "$399" },
-  { image: dealGarza, name: "Garza Blanca Resort & Spa Cancun", location: "Punta Sam, Mexico", affiliateUrl: "https://www.hotels.com/affiliate/gUxIS8k", originalPrice: "$459/night", salePrice: "$299/night" },
-  { image: dealPhuket, name: "Phuket Moonlit Bay Seaview Resort & Spa", location: "Ratsada, Thailand", affiliateUrl: "https://expedia.com/affiliate/av1oUFB", originalPrice: "$199/night", salePrice: "$119/night" },
+  { image: dealFlights, name: "Save on Eligible Flights to Top Destinations", location: "Multiple Destinations", affiliateUrl: "https://expedia.com/affiliate/bPJ1N3S", originalPrice: "$650", salePrice: "$399", imagePosition: "top" },
+  { image: dealGarza, name: "Garza Blanca Resort & Spa Cancun", location: "Punta Sam, Mexico", affiliateUrl: "https://www.hotels.com/affiliate/gUxIS8k", originalPrice: "$459/night", salePrice: "$299/night", imagePosition: "top" },
+  { image: dealPhuket, name: "Phuket Moonlit Bay Seaview Resort & Spa", location: "Ratsada, Thailand", affiliateUrl: "https://expedia.com/affiliate/av1oUFB", originalPrice: "$199/night", salePrice: "$119/night", imagePosition: "top" },
 ];
 
 const TravelDealsSection = () => {
@@ -93,6 +94,7 @@ const TravelDealsSection = () => {
                     src={deal.image}
                     alt={deal.name}
                     className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                    style={{ objectPosition: deal.imagePosition || "center" }}
                   />
                   <div className="p-4">
                     <h4 className="font-display font-bold text-foreground leading-tight line-clamp-2">
