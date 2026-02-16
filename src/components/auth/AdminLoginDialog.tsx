@@ -14,6 +14,9 @@ const AdminLoginDialog = () => {
   const [submitting, setSubmitting] = useState(false);
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [sendingLink, setSendingLink] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [settingPassword, setSettingPassword] = useState(false);
 
   const handleSignIn = async () => {
     if (!email.trim() || !password) return;
@@ -76,6 +79,46 @@ const AdminLoginDialog = () => {
             ) : (
               <p className="text-xs text-amber-600">Not an admin account</p>
             )}
+            <div className="flex items-center gap-2">
+              <div className="h-px flex-1 bg-border" />
+              <span className="text-xs text-muted-foreground">set password</span>
+              <div className="h-px flex-1 bg-border" />
+            </div>
+            <Input
+              type="password"
+              placeholder="New password (min 6 chars)"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="h-9 text-sm"
+            />
+            <Input
+              type="password"
+              placeholder="Confirm password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="h-9 text-sm"
+            />
+            <Button
+              size="sm"
+              className="w-full"
+              disabled={settingPassword || newPassword.length < 6 || newPassword !== confirmPassword}
+              onClick={async () => {
+                setSettingPassword(true);
+                try {
+                  const { error } = await (await import("@/integrations/supabase/client")).supabase.auth.updateUser({ password: newPassword });
+                  if (error) throw error;
+                  toast({ title: "Password set successfully!" });
+                  setNewPassword("");
+                  setConfirmPassword("");
+                } catch (e: unknown) {
+                  toast({ title: "Failed to set password", description: e instanceof Error ? e.message : "Something went wrong", variant: "destructive" });
+                }
+                setSettingPassword(false);
+              }}
+            >
+              {settingPassword && <Loader2 className="h-3 w-3 animate-spin" />}
+              Save Password
+            </Button>
             <Button
               variant="outline"
               size="sm"
