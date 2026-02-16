@@ -38,7 +38,7 @@ const TravelDealsSection = () => {
             <img
               src={hotelsBanner}
               alt="Hotels.com Big Spring Sale — Members save up to 40%"
-              className="w-full h-[120px] md:h-[180px] object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+              className="w-full h-[120px] md:h-[180px] object-cover object-right transition-transform duration-500 group-hover:scale-[1.02]"
             />
           </a>
         </div>
