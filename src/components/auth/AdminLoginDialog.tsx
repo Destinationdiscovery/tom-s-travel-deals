@@ -7,11 +7,13 @@ import { Compass, LogOut, Loader2, Shield } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 const AdminLoginDialog = () => {
-  const { user, isAdmin, signInWithPassword, signOut, loading } = useAuth();
+  const { user, isAdmin, signInWithPassword, signOut, sendMagicLink, loading } = useAuth();
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const [sendingLink, setSendingLink] = useState(false);
 
   const handleSignIn = async () => {
     if (!email.trim() || !password) return;
@@ -27,6 +29,23 @@ const AdminLoginDialog = () => {
       });
     }
     setSubmitting(false);
+  };
+
+  const handleMagicLink = async () => {
+    if (!email.trim()) return;
+    setSendingLink(true);
+    try {
+      await sendMagicLink(email.trim());
+      setMagicLinkSent(true);
+      toast({ title: "Check your email for a login link" });
+    } catch (e: unknown) {
+      toast({
+        title: "Failed to send magic link",
+        description: e instanceof Error ? e.message : "Something went wrong",
+        variant: "destructive",
+      });
+    }
+    setSendingLink(false);
   };
 
   return (
@@ -99,6 +118,27 @@ const AdminLoginDialog = () => {
               {submitting && <Loader2 className="h-3 w-3 animate-spin" />}
               Sign In
             </Button>
+            <div className="flex items-center gap-2">
+              <div className="h-px flex-1 bg-border" />
+              <span className="text-xs text-muted-foreground">or</span>
+              <div className="h-px flex-1 bg-border" />
+            </div>
+            {magicLinkSent ? (
+              <p className="text-xs text-center text-muted-foreground">
+                ✓ Check your email for a login link
+              </p>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleMagicLink}
+                disabled={sendingLink || !email.trim()}
+                className="w-full"
+              >
+                {sendingLink && <Loader2 className="h-3 w-3 animate-spin" />}
+                Send Magic Link
+              </Button>
+            )}
           </div>
         )}
       </PopoverContent>
