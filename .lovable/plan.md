@@ -1,30 +1,33 @@
 
-
-# Fix Admin Login to Support Both Password and Magic Link
+# Add "Set Password" Page for Admin Login
 
 ## Problem
-Your account was created using a magic link, so no password was ever set. The new admin login dialog only has email/password fields, making it impossible to log in on a new browser session (like the preview) without a password.
-
-## Solution
-Update the `AdminLoginDialog` to offer both login methods:
-1. **Email + Password** (primary) -- for when you eventually set a password
-2. **Send Magic Link** (fallback) -- so you can always get in without a password
+Your account was created via magic link, so no password exists. You need a way to set one directly in the preview environment.
 
 ## Changes
 
-### File: `src/components/auth/AdminLoginDialog.tsx`
-- Add a "Send Magic Link" button below the password sign-in button
-- When clicked, it sends a magic link to the entered email using the existing `sendMagicLink` method from AuthProvider
-- Show a confirmation message after sending ("Check your email for a login link")
-- Keep the password fields as the primary method for convenience
+### 1. Create a `/reset-password` page
+**New file:** `src/pages/ResetPassword.tsx`
+- A simple form with "New Password" and "Confirm Password" fields
+- On load, detects the `type=recovery` token in the URL hash (automatically set when you click a password reset link)
+- Calls `supabase.auth.updateUser({ password })` to save the new password
+- Shows success/error feedback
 
-The dialog will look like:
-```
-[Email field]
-[Password field]
-[Sign In button]
-── or ──
-[Send Magic Link button]
-```
+### 2. Add the route to App.tsx
+**File:** `src/App.tsx`
+- Add `<Route path="/reset-password" element={<ResetPassword />} />`
 
-No other files need to change -- `AuthProvider` already has the `sendMagicLink` method wired up.
+### 3. Add "Set Password" option in the Admin Login dialog
+**File:** `src/components/auth/AdminLoginDialog.tsx`
+- When already signed in (via magic link), show a "Set Password" section with two password fields and a save button
+- This calls `supabase.auth.updateUser({ password })` directly (works because you're already authenticated)
+- This way you can set a password without needing a reset email at all
+
+### 4. Send a password reset email pointing to the preview URL
+- Use the existing `send-password-reset` edge function to send a reset email
+- The reset link will redirect to the preview site's `/reset-password` page where you can set your password
+
+## Flow
+Once implemented, you have two ways to set a password:
+1. **If already signed in via magic link**: Use the "Set Password" section in the compass icon dialog
+2. **If not signed in**: Click "Send Magic Link", sign in, then set password from the dialog -- or use the password reset email link
