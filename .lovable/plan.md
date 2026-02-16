@@ -1,16 +1,16 @@
 
 
-# Remove Old Title from Banner Image
+# Fix Double Title on Travel Deals Banner
 
 ## Problem
-The Expedia banner image has "The Annual Vacation Sale" text baked into the top of the image itself. Since we already have our own white overlay box with the title, this old text is redundant and should be hidden.
+The CSS `object-position` trick didn't fully hide the original "The Annual Vacation Sale" text baked into the banner image. Two titles are now visible, which looks unprofessional.
 
 ## Solution
-Use CSS `object-position` on the banner `<img>` to shift the visible area downward, cropping out the text at the top of the image. This avoids needing to edit the actual image file.
+Crop the top of the image more aggressively by combining a taller `object-position` offset with increased height constraint, or use a CSS clip approach. Specifically:
 
-## Change
+### `src/components/TravelDealsSection.tsx`
+- Change `object-[center_80%]` to a more aggressive value like `object-[center_100%]` to push the image further down, fully hiding the baked-in title text at the top
+- If that still shows the text, wrap the image in a container with `overflow-hidden` and use a negative `margin-top` or `translate-y` on the image itself to physically shift it upward out of view
 
-**`src/components/TravelDealsSection.tsx`** (line 23)
-
-Add `object-[center_80%]` (or similar) to the image's className so the visible portion starts below the baked-in text, showing only the ocean/scenic part of the banner.
+The white overlay box with "Expedia's Annual Vacation Sale" remains as the sole title.
 
