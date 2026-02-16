@@ -1,5 +1,11 @@
 import dealBanner from "@/assets/deal-expedia-vacation-sale-banner.png";
 import hotelsBanner from "@/assets/deal-hotels-spring-sale-banner.png";
+import dealTemptation from "@/assets/deal-temptation-cancun.png";
+import dealRiu from "@/assets/deal-riu-plaza-toronto.png";
+import dealOutrigger from "@/assets/deal-outrigger-honua-kai.png";
+import dealFlights from "@/assets/deal-flights.png";
+import dealGarza from "@/assets/deal-garza-blanca-cancun.png";
+import dealPhuket from "@/assets/deal-phuket-moonlit-bay.png";
 
 interface FeaturedDeal {
   image: string;
@@ -9,7 +15,12 @@ interface FeaturedDeal {
 }
 
 const featuredDeals: FeaturedDeal[] = [
-  // Add deals here: { image: importedImage, name: "Resort Name", location: "Location", affiliateUrl: "https://..." }
+  { image: dealTemptation, name: "Temptation Cancun Resort All Inclusive — Adults Only", location: "Cancun, Mexico", affiliateUrl: "https://expedia.com/affiliate/sCSkKSm" },
+  { image: dealRiu, name: "Hotel Riu Plaza Toronto", location: "Toronto, Canada", affiliateUrl: "https://expedia.com/affiliate/4XUFIIR" },
+  { image: dealOutrigger, name: "OUTRIGGER Honua Kai Resort & Spa", location: "Lahaina, Hawaii", affiliateUrl: "https://expedia.com/affiliate/N2Bmgth" },
+  { image: dealFlights, name: "Save on Eligible Flights to Top Destinations", location: "Multiple Destinations", affiliateUrl: "https://expedia.com/affiliate/bPJ1N3S" },
+  { image: dealGarza, name: "Garza Blanca Resort & Spa Cancun", location: "Punta Sam, Mexico", affiliateUrl: "https://www.hotels.com/affiliate/gUxIS8k" },
+  { image: dealPhuket, name: "Phuket Moonlit Bay Seaview Resort & Spa", location: "Ratsada, Thailand", affiliateUrl: "https://expedia.com/affiliate/av1oUFB" },
 ];
 
 const TravelDealsSection = () => {
