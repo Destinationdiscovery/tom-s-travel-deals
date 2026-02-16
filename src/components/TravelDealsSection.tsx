@@ -28,7 +28,7 @@ const featuredDeals: FeaturedDeal[] = [
 
 const TravelDealsSection = () => {
   return (
-    <section className="py-10 bg-muted/30">
+    <section id="travel-deals" className="py-10 bg-muted/30">
       <div className="container mx-auto px-4 space-y-6">
         <h2 className="font-display text-2xl md:text-3xl font-bold">
           <span className="text-sky-600">Review</span>
