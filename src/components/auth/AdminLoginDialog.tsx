@@ -7,12 +7,10 @@ import { Compass, LogOut, Loader2, Shield } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 const AdminLoginDialog = () => {
-  const { user, isAdmin, signInWithPassword, signUp, signOut, loading } = useAuth();
+  const { user, isAdmin, signInWithPassword, signOut, loading } = useAuth();
   const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState<"signin" | "register">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const handleSignIn = async () => {
@@ -25,32 +23,6 @@ const AdminLoginDialog = () => {
       toast({
         title: "Sign in failed",
         description: e instanceof Error ? e.message : "Invalid credentials",
-        variant: "destructive",
-      });
-    }
-    setSubmitting(false);
-  };
-
-  const handleRegister = async () => {
-    if (!email.trim() || !password || password.length < 6) return;
-    if (password !== confirmPassword) {
-      toast({ title: "Passwords do not match", variant: "destructive" });
-      return;
-    }
-    setSubmitting(true);
-    try {
-      await signUp(email.trim(), password);
-      toast({
-        title: "Registration successful",
-        description: "Check your email to confirm your account before signing in.",
-      });
-      setMode("signin");
-      setPassword("");
-      setConfirmPassword("");
-    } catch (e: unknown) {
-      toast({
-        title: "Registration failed",
-        description: e instanceof Error ? e.message : "Something went wrong",
         variant: "destructive",
       });
     }
@@ -97,7 +69,7 @@ const AdminLoginDialog = () => {
               <LogOut className="h-3 w-3" /> Sign Out
             </Button>
           </div>
-        ) : mode === "signin" ? (
+        ) : (
           <div className="space-y-3">
             <div className="flex items-center gap-2 justify-center">
               <Shield className="h-4 w-4 text-primary" />
@@ -127,58 +99,6 @@ const AdminLoginDialog = () => {
               {submitting && <Loader2 className="h-3 w-3 animate-spin" />}
               Sign In
             </Button>
-            <button
-              type="button"
-              onClick={() => { setMode("register"); setPassword(""); }}
-              className="text-xs text-muted-foreground hover:text-foreground w-full text-center"
-            >
-              No account? Register
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 justify-center">
-              <Shield className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium text-foreground">Admin Register</span>
-            </div>
-            <Input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="h-9 text-sm"
-            />
-            <Input
-              type="password"
-              placeholder="Password (min 6 chars)"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="h-9 text-sm"
-            />
-            <Input
-              type="password"
-              placeholder="Confirm password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleRegister()}
-              className="h-9 text-sm"
-            />
-            <Button
-              onClick={handleRegister}
-              disabled={submitting || !email.trim() || password.length < 6 || password !== confirmPassword}
-              size="sm"
-              className="w-full"
-            >
-              {submitting && <Loader2 className="h-3 w-3 animate-spin" />}
-              Register
-            </Button>
-            <button
-              type="button"
-              onClick={() => { setMode("signin"); setPassword(""); setConfirmPassword(""); }}
-              className="text-xs text-muted-foreground hover:text-foreground w-full text-center"
-            >
-              Already have an account? Sign In
-            </button>
           </div>
         )}
       </PopoverContent>
