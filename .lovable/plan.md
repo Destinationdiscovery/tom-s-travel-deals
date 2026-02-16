@@ -1,39 +1,28 @@
 
 
-# Add Pricing to Featured Deal Cards
+# Fix Bottom Row Deal Card Images
 
-Adding original (crossed-out) and sale prices to each deal card as a visual CTA to drive clicks.
+The bottom three deal cards (Flights, Garza Blanca, Phuket Moonlit Bay) are currently showing the resort name text in the image instead of the actual resort scenery. Since the resort name is already displayed below the image in text, the image should focus on the visual appeal of the property.
 
-## What Changes
+## Problem
 
-Each deal card will show a price block below the location, displaying:
-- The original price in a smaller, crossed-out style (e.g. ~~$289~~)
-- The sale price in bold green (e.g. **$189/night**)
-- A "View Deal" text prompt beside the price
+The images for the bottom row are screenshots from booking sites that include large text overlays with the resort name and location. The top row images show clean resort photography, creating an inconsistent look.
 
-## Placeholder Prices
+## Solution
 
-| Deal | Original | Sale |
-|------|----------|------|
-| Temptation Cancun Resort | $389/night | $249/night |
-| Hotel Riu Plaza Toronto | $279/night | $179/night |
-| OUTRIGGER Honua Kai Resort | $499/night | $329/night |
-| Flights to Top Destinations | $650 | $399 |
-| Garza Blanca Resort & Spa | $459/night | $299/night |
-| Phuket Moonlit Bay Resort | $199/night | $119/night |
+Use CSS `object-position` to shift the visible crop area of each bottom-row image upward, focusing on the resort/scenery portion rather than the text overlay area. Each image needs a different position:
 
-You can update these to real prices anytime.
+- **Flights**: Crop to show the airplane window area — use `object-position: center top`
+- **Garza Blanca**: Crop to show the resort building/pool at the top of the image — use `object-position: center top`
+- **Phuket Moonlit Bay**: Crop to show the beach/water scenery at the top — use `object-position: center top`
 
 ## Technical Details
 
 **File: `src/components/TravelDealsSection.tsx`**
 
-1. Add `originalPrice` and `salePrice` fields to the `FeaturedDeal` interface
-2. Populate each deal entry with placeholder pricing
-3. Update the card template to render a price row:
-   - Original price with `line-through` styling in muted text
-   - Sale price in bold `text-emerald-600`
-   - A small "View Deal" arrow prompt on the right side
+1. Add an optional `imagePosition` field to the `FeaturedDeal` interface (defaults to `center`)
+2. Set `imagePosition: "top"` on the three bottom-row deals (Flights, Garza Blanca, Phuket)
+3. Apply the `objectPosition` style inline on the `<img>` tag using this field
 
-The pricing row will sit below the location text inside each card's padding area, acting as the primary CTA.
+This is a CSS-only fix — no new images needed. If the cropping still doesn't look right after this change, we can replace those three images with cleaner resort photos.
 
