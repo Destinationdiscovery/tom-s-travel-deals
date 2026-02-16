@@ -7,16 +7,13 @@ import { Compass, LogOut, Loader2, Shield } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 const AdminLoginDialog = () => {
-  const { user, isAdmin, signInWithPassword, signOut, sendMagicLink, loading } = useAuth();
+  const { user, isAdmin, signInWithPassword, signUp, signOut, loading } = useAuth();
   const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<"signin" | "register">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [magicLinkSent, setMagicLinkSent] = useState(false);
-  const [sendingLink, setSendingLink] = useState(false);
-  const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [settingPassword, setSettingPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleSignIn = async () => {
     if (!email.trim() || !password) return;
@@ -34,21 +31,30 @@ const AdminLoginDialog = () => {
     setSubmitting(false);
   };
 
-  const handleMagicLink = async () => {
-    if (!email.trim()) return;
-    setSendingLink(true);
+  const handleRegister = async () => {
+    if (!email.trim() || !password || password.length < 6) return;
+    if (password !== confirmPassword) {
+      toast({ title: "Passwords do not match", variant: "destructive" });
+      return;
+    }
+    setSubmitting(true);
     try {
-      await sendMagicLink(email.trim());
-      setMagicLinkSent(true);
-      toast({ title: "Check your email for a login link" });
+      await signUp(email.trim(), password);
+      toast({
+        title: "Registration successful",
+        description: "Check your email to confirm your account before signing in.",
+      });
+      setMode("signin");
+      setPassword("");
+      setConfirmPassword("");
     } catch (e: unknown) {
       toast({
-        title: "Failed to send magic link",
+        title: "Registration failed",
         description: e instanceof Error ? e.message : "Something went wrong",
         variant: "destructive",
       });
     }
-    setSendingLink(false);
+    setSubmitting(false);
   };
 
   return (
@@ -79,46 +85,6 @@ const AdminLoginDialog = () => {
             ) : (
               <p className="text-xs text-amber-600">Not an admin account</p>
             )}
-            <div className="flex items-center gap-2">
-              <div className="h-px flex-1 bg-border" />
-              <span className="text-xs text-muted-foreground">set password</span>
-              <div className="h-px flex-1 bg-border" />
-            </div>
-            <Input
-              type="password"
-              placeholder="New password (min 6 chars)"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              className="h-9 text-sm"
-            />
-            <Input
-              type="password"
-              placeholder="Confirm password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="h-9 text-sm"
-            />
-            <Button
-              size="sm"
-              className="w-full"
-              disabled={settingPassword || newPassword.length < 6 || newPassword !== confirmPassword}
-              onClick={async () => {
-                setSettingPassword(true);
-                try {
-                  const { error } = await (await import("@/integrations/supabase/client")).supabase.auth.updateUser({ password: newPassword });
-                  if (error) throw error;
-                  toast({ title: "Password set successfully!" });
-                  setNewPassword("");
-                  setConfirmPassword("");
-                } catch (e: unknown) {
-                  toast({ title: "Failed to set password", description: e instanceof Error ? e.message : "Something went wrong", variant: "destructive" });
-                }
-                setSettingPassword(false);
-              }}
-            >
-              {settingPassword && <Loader2 className="h-3 w-3 animate-spin" />}
-              Save Password
-            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -131,7 +97,7 @@ const AdminLoginDialog = () => {
               <LogOut className="h-3 w-3" /> Sign Out
             </Button>
           </div>
-        ) : (
+        ) : mode === "signin" ? (
           <div className="space-y-3">
             <div className="flex items-center gap-2 justify-center">
               <Shield className="h-4 w-4 text-primary" />
@@ -161,27 +127,58 @@ const AdminLoginDialog = () => {
               {submitting && <Loader2 className="h-3 w-3 animate-spin" />}
               Sign In
             </Button>
-            <div className="flex items-center gap-2">
-              <div className="h-px flex-1 bg-border" />
-              <span className="text-xs text-muted-foreground">or</span>
-              <div className="h-px flex-1 bg-border" />
+            <button
+              type="button"
+              onClick={() => { setMode("register"); setPassword(""); }}
+              className="text-xs text-muted-foreground hover:text-foreground w-full text-center"
+            >
+              No account? Register
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 justify-center">
+              <Shield className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium text-foreground">Admin Register</span>
             </div>
-            {magicLinkSent ? (
-              <p className="text-xs text-center text-muted-foreground">
-                ✓ Check your email for a login link
-              </p>
-            ) : (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleMagicLink}
-                disabled={sendingLink || !email.trim()}
-                className="w-full"
-              >
-                {sendingLink && <Loader2 className="h-3 w-3 animate-spin" />}
-                Send Magic Link
-              </Button>
-            )}
+            <Input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="h-9 text-sm"
+            />
+            <Input
+              type="password"
+              placeholder="Password (min 6 chars)"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="h-9 text-sm"
+            />
+            <Input
+              type="password"
+              placeholder="Confirm password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleRegister()}
+              className="h-9 text-sm"
+            />
+            <Button
+              onClick={handleRegister}
+              disabled={submitting || !email.trim() || password.length < 6 || password !== confirmPassword}
+              size="sm"
+              className="w-full"
+            >
+              {submitting && <Loader2 className="h-3 w-3 animate-spin" />}
+              Register
+            </Button>
+            <button
+              type="button"
+              onClick={() => { setMode("signin"); setPassword(""); setConfirmPassword(""); }}
+              className="text-xs text-muted-foreground hover:text-foreground w-full text-center"
+            >
+              Already have an account? Sign In
+            </button>
           </div>
         )}
       </PopoverContent>

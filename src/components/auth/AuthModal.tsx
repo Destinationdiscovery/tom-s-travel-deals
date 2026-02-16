@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Mail, CheckCircle, Loader2 } from "lucide-react";
+import { Loader2, LogIn } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { toast } from "@/hooks/use-toast";
 
 interface AuthModalProps {
   open: boolean;
@@ -12,26 +13,48 @@ interface AuthModalProps {
 }
 
 const AuthModal = ({ open, onOpenChange, promptMessage }: AuthModalProps) => {
-  const { sendMagicLink } = useAuth();
+  const { signInWithPassword, signUp } = useAuth();
+  const [mode, setMode] = useState<"signin" | "register">("signin");
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmed = email.trim();
-    if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
-      setErrorMsg("Please enter a valid email address");
+    if (!email.trim() || !password) return;
+    setStatus("loading");
+    try {
+      await signInWithPassword(email.trim(), password);
+      onOpenChange(false);
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : "Invalid credentials");
+      setStatus("error");
+    }
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim() || password.length < 6) return;
+    if (password !== confirmPassword) {
+      setErrorMsg("Passwords do not match");
       setStatus("error");
       return;
     }
-
     setStatus("loading");
     try {
-      await sendMagicLink(trimmed);
-      setStatus("success");
-    } catch {
-      setErrorMsg("Something went wrong. Please try again.");
+      await signUp(email.trim(), password);
+      toast({
+        title: "Registration successful",
+        description: "Check your email to confirm your account before signing in.",
+      });
+      setMode("signin");
+      setPassword("");
+      setConfirmPassword("");
+      setStatus("idle");
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : "Something went wrong");
       setStatus("error");
     }
   };
@@ -39,8 +62,11 @@ const AuthModal = ({ open, onOpenChange, promptMessage }: AuthModalProps) => {
   const handleOpenChange = (next: boolean) => {
     if (!next) {
       setEmail("");
+      setPassword("");
+      setConfirmPassword("");
       setStatus("idle");
       setErrorMsg("");
+      setMode("signin");
     }
     onOpenChange(next);
   };
@@ -50,59 +76,54 @@ const AuthModal = ({ open, onOpenChange, promptMessage }: AuthModalProps) => {
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="font-display text-2xl">
-            {status === "success" ? "Check your email!" : "Sign in to ReviewThenGo"}
+            {mode === "signin" ? "Sign In" : "Register"}
           </DialogTitle>
           <DialogDescription>
-            {status === "success"
-              ? "We sent you a magic link. Click it to sign in — no password needed."
-              : promptMessage || "Sign in to save unlimited reviews, track your history, and organize trip lists."}
+            {promptMessage || "Sign in to save reviews, track history, and organize trips."}
           </DialogDescription>
         </DialogHeader>
 
-        {status === "success" ? (
-          <div className="flex flex-col items-center gap-3 py-4">
-            <CheckCircle className="h-12 w-12 text-primary" />
-            <p className="text-sm text-muted-foreground text-center">
-              Didn't get it? Check your spam folder or try again.
-            </p>
-            <Button variant="outline" onClick={() => { setStatus("idle"); setEmail(""); }}>
-              Try another email
-            </Button>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4 pt-2">
-            <div className="flex items-center gap-2">
-              <Mail className="h-4 w-4 text-muted-foreground" />
-              <Input
-                type="email"
-                placeholder="you@email.com"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  if (status === "error") setStatus("idle");
-                }}
-                maxLength={255}
-                autoFocus
-              />
-            </div>
-            {status === "error" && (
-              <p className="text-xs text-destructive">{errorMsg}</p>
+        <form onSubmit={mode === "signin" ? handleSignIn : handleRegister} className="flex flex-col gap-4 pt-2">
+          <Input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => { setEmail(e.target.value); if (status === "error") setStatus("idle"); }}
+            maxLength={255}
+            autoFocus
+          />
+          <Input
+            type="password"
+            placeholder={mode === "register" ? "Password (min 6 chars)" : "Password"}
+            value={password}
+            onChange={(e) => { setPassword(e.target.value); if (status === "error") setStatus("idle"); }}
+          />
+          {mode === "register" && (
+            <Input
+              type="password"
+              placeholder="Confirm password"
+              value={confirmPassword}
+              onChange={(e) => { setConfirmPassword(e.target.value); if (status === "error") setStatus("idle"); }}
+            />
+          )}
+          {status === "error" && (
+            <p className="text-xs text-destructive">{errorMsg}</p>
+          )}
+          <Button type="submit" disabled={status === "loading"} className="w-full">
+            {status === "loading" ? (
+              <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> {mode === "signin" ? "Signing in..." : "Registering..."}</>
+            ) : (
+              <><LogIn className="h-4 w-4 mr-2" /> {mode === "signin" ? "Sign In" : "Register"}</>
             )}
-            <Button type="submit" disabled={status === "loading"} className="w-full">
-              {status === "loading" ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Sending...
-                </>
-              ) : (
-                "Send Magic Link"
-              )}
-            </Button>
-            <p className="text-xs text-muted-foreground text-center">
-              No password needed — we'll email you a sign-in link.
-            </p>
-          </form>
-        )}
+          </Button>
+          <button
+            type="button"
+            onClick={() => { setMode(mode === "signin" ? "register" : "signin"); setPassword(""); setConfirmPassword(""); setStatus("idle"); }}
+            className="text-xs text-muted-foreground hover:text-foreground text-center"
+          >
+            {mode === "signin" ? "No account? Register" : "Already have an account? Sign In"}
+          </button>
+        </form>
       </DialogContent>
     </Dialog>
   );
