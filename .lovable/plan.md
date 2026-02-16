@@ -1,61 +1,40 @@
 
 
-# Fix: Destination Search Showing Only Activities, No Properties
+# Replace "Recently Reviewed" with "Travel Deals" Section
 
-## Problem
+## Overview
 
-When searching "hidden gems in Rome", Perplexity returned the `results` field as an **object** (containing only activities) instead of an **array** of properties. The edge function line `const results = parsed.results || parsed` passed that object through, and the frontend's `Array.isArray` check turned it into an empty array -- so no property cards appeared.
+Replace the `RecentlyReviewedSection` component with a new `TravelDealsSection` that displays a hero banner image (the Expedia vacation sale screenshot) linked to the affiliate URL. The white overlay box text will be updated to say "Expedia's Annual Vacation Sale" with the rest of the copy kept as-is.
 
-The API response looked like:
-```text
-{
-  "results": { "activities": [...] },   // <-- object, not array!
-  "activities": [...],
-  "citations": [...]
-}
-```
+## Changes
 
-## Fix
+### 1. Copy the uploaded banner image into the project
 
-### 1. `supabase/functions/travel-search/index.ts`
+Copy `user-uploads://Screenshot_from_2026-02-15_21-51-18.png` to `src/assets/deal-expedia-vacation-sale.png` so it can be imported as an ES6 module.
 
-Update the parsing logic after JSON is parsed:
+### 2. Rewrite `src/components/RecentlyReviewedSection.tsx` as `TravelDealsSection`
 
-- If `parsed.results` is an array, use it as properties
-- If `parsed.results` is an object (not an array), check if it contains a nested `activities` array and merge that into the top-level activities
-- Fall back: if `parsed.results` isn't an array, also check if `parsed` itself is an array (legacy format)
-- Ensure `activities` is collected from both `parsed.activities` and any nested `parsed.results.activities`
+- Remove all the Supabase query logic, star ratings, review cards, etc.
+- Replace with a simple section containing:
+  - A section title: "Travel Deals"
+  - A subtitle: something like "Exclusive deals and savings from our partners"
+  - A full-width clickable banner image (rounded corners) that links to `https://expedia.com/affiliate/7ymxnWK` (opens in new tab)
+  - A white overlay box positioned bottom-left (matching the reference screenshot) with:
+    - Title: **"Expedia's Annual Vacation Sale"**
+    - Body: "Members save up to 40% on selected hotels and vacation rentals. Plan this year's big trip and save."
+- The entire banner is wrapped in an `<a>` tag so clicking anywhere on it goes to the affiliate link
 
-Updated parsing (replacing lines 107-108):
-```typescript
-let results = [];
-let activities = [];
+### 3. Update `src/pages/Index.tsx`
 
-if (Array.isArray(parsed.results)) {
-  results = parsed.results;
-} else if (Array.isArray(parsed)) {
-  results = parsed;
-}
+- Change the import from `RecentlyReviewedSection` to `TravelDealsSection`
+- Update the JSX reference accordingly
+- The conditional rendering logic stays the same (show when no search results are active)
 
-if (Array.isArray(parsed.activities)) {
-  activities = parsed.activities;
-}
+## Technical Details
 
-// Handle case where Perplexity nests activities inside results object
-if (!Array.isArray(parsed.results) && parsed.results?.activities) {
-  const nested = parsed.results.activities;
-  if (Array.isArray(nested)) {
-    activities = [...activities, ...nested];
-  }
-}
-```
+- The component will import the image via `import dealBanner from "@/assets/deal-expedia-vacation-sale.png"`
+- The banner will use `object-cover` for responsive sizing with a max height (~300-350px)
+- The white overlay box uses `absolute` positioning within a `relative` container
+- `target="_blank"` and `rel="noopener noreferrer"` on the affiliate link
+- No database or backend changes needed
 
-### 2. Prompt clarification (same file)
-
-Add a line to the system prompt emphasizing:
-- `results` MUST always be an array (empty array `[]` if no properties match)
-- `activities` MUST always be an array (empty array `[]` if not applicable)
-
-This is a belt-and-suspenders approach: the prompt tells Perplexity to use arrays, and the parsing handles it gracefully if it doesn't.
-
-No frontend changes needed -- the hook already handles arrays correctly after the previous fix.
