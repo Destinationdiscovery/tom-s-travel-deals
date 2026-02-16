@@ -2,8 +2,6 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from "
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
-const ADMIN_USER_ID = "f4b1009b-e47a-496e-87ae-d310df7f938e";
-
 type AuthContextValue = {
   session: Session | null;
   user: User | null;
@@ -18,9 +16,9 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    // Important: set up listener before getSession to avoid missing changes.
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, next) => {
@@ -38,12 +36,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+  useEffect(() => {
+    const uid = session?.user?.id;
+    if (!uid) {
+      setIsAdmin(false);
+      return;
+    }
+    supabase
+      .from("user_roles")
+      .select("id")
+      .eq("user_id", uid)
+      .eq("role", "admin")
+      .maybeSingle()
+      .then(({ data }) => setIsAdmin(!!data));
+  }, [session?.user?.id]);
+
   const value = useMemo<AuthContextValue>(() => {
     return {
       session,
       user: session?.user ?? null,
       loading,
-      isAdmin: session?.user?.id === ADMIN_USER_ID,
+      isAdmin,
       sendMagicLink: async (email: string) => {
         const { error } = await supabase.auth.signInWithOtp({
           email,
@@ -58,7 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (error) throw error;
       },
     };
-  }, [session, loading]);
+  }, [session, loading, isAdmin]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
