@@ -1,6 +1,17 @@
 import dealBanner from "@/assets/deal-expedia-vacation-sale-banner.png";
 import hotelsBanner from "@/assets/deal-hotels-spring-sale-banner.png";
 
+interface FeaturedDeal {
+  image: string;
+  name: string;
+  location: string;
+  affiliateUrl: string;
+}
+
+const featuredDeals: FeaturedDeal[] = [
+  // Add deals here: { image: importedImage, name: "Resort Name", location: "Location", affiliateUrl: "https://..." }
+];
+
 const TravelDealsSection = () => {
   return (
     <section className="py-10 bg-muted/30">
@@ -49,6 +60,38 @@ const TravelDealsSection = () => {
             />
           </a>
         </div>
+
+        {/* Featured Deals Grid */}
+        {featuredDeals.length > 0 && (
+          <div className="pt-4">
+            <h3 className="font-display text-lg md:text-xl font-semibold text-foreground mb-4">
+              Featured Deals
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featuredDeals.map((deal, i) => (
+                <a
+                  key={i}
+                  href={deal.affiliateUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group block rounded-2xl overflow-hidden bg-card shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1"
+                >
+                  <img
+                    src={deal.image}
+                    alt={deal.name}
+                    className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                  />
+                  <div className="p-4">
+                    <h4 className="font-display font-bold text-foreground leading-tight line-clamp-2">
+                      {deal.name}
+                    </h4>
+                    <p className="text-sm text-muted-foreground mt-1">{deal.location}</p>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
