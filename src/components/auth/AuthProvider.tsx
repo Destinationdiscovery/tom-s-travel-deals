@@ -7,7 +7,6 @@ type AuthContextValue = {
   user: User | null;
   loading: boolean;
   isAdmin: boolean;
-  signUp: (email: string, password: string) => Promise<void>;
   signInWithPassword: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
 };
@@ -58,10 +57,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       user: session?.user ?? null,
       loading,
       isAdmin,
-      signUp: async (email: string, password: string) => {
-        const { error } = await supabase.auth.signUp({ email, password });
-        if (error) throw error;
-      },
       signInWithPassword: async (email: string, password: string) => {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
