@@ -4,7 +4,7 @@ import { Star, MapPin, Loader2, X, Compass } from "lucide-react";
 import Header from "@/components/Header";
 import HeroSection, { type SearchType } from "@/components/HeroSection";
 import AIReviewResult from "@/components/AIReviewResult";
-import RecentlyReviewedSection from "@/components/RecentlyReviewedSection";
+import TravelDealsSection from "@/components/TravelDealsSection";
 import ComparisonFloatingBadge from "@/components/ComparisonFloatingBadge";
 import Footer from "@/components/Footer";
 import SearchLoadingStages from "@/components/SearchLoadingStages";
@@ -364,7 +364,7 @@ const Index = () => {
           </section>
         )}
 
-        {!hasAnyResults && !isAnyLoading && !gear.reviewLoading && <RecentlyReviewedSection />}
+        {!hasAnyResults && !isAnyLoading && !gear.reviewLoading && <TravelDealsSection />}
         </div>
       </main>
       <ComparisonFloatingBadge />
