@@ -1,11 +1,13 @@
-import { Compass, Menu, X } from "lucide-react";
+import { Compass, Menu, Shield, X } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import ThemeToggle from "@/components/ThemeToggle";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const { isAdmin } = useAuth();
 
   const navLinks = [
     { to: "/search", label: "Destination Search" },
@@ -43,6 +45,16 @@ const Header = () => {
               </Link>
             ))}
 
+            {isAdmin && (
+              <Link
+                to="/gear-admin"
+                className="text-lg font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+              >
+                <Shield className="h-4 w-4" />
+                Dashboard
+              </Link>
+            )}
+
             <ThemeToggle />
           </nav>
 
@@ -72,6 +84,17 @@ const Header = () => {
                   {link.label}
                 </Link>
               ))}
+
+              {isAdmin && (
+                <Link
+                  to="/gear-admin"
+                  className="text-left text-lg font-medium text-muted-foreground hover:text-primary transition-colors py-2 flex items-center gap-1"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <Shield className="h-4 w-4" />
+                  Dashboard
+                </Link>
+              )}
 
             </nav>
           </div>
