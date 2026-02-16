@@ -22,7 +22,7 @@ const TravelDealsSection = () => {
           <img
             src={dealBanner}
             alt="Expedia's Annual Vacation Sale"
-            className="w-full h-[250px] md:h-[350px] object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+            className="w-full h-[250px] md:h-[350px] object-cover object-[center_80%] transition-transform duration-500 group-hover:scale-[1.02]"
           />
           <div className="absolute bottom-4 left-4 md:bottom-6 md:left-6 bg-card/95 backdrop-blur-sm rounded-xl p-4 md:p-6 max-w-sm shadow-lg">
             <h3 className="font-display font-bold text-foreground text-lg md:text-xl mb-1">
