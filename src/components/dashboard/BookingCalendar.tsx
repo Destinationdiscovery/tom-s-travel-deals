@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, Plus, Loader2, CalendarIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Loader2, CalendarIcon, List, Grid3X3, Check } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,7 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths, isToday } from "date-fns";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths, isToday, isBefore, startOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 
 interface BookingEvent {
@@ -73,7 +74,7 @@ const BookingCalendar = () => {
   const [editingEvent, setEditingEvent] = useState<BookingEvent | null>(null);
   const [saving, setSaving] = useState(false);
   const [clientList, setClientList] = useState<{ name: string; email: string }[]>([]);
-
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [form, setForm] = useState({ clientName: "", clientEmail: "", eventType: "booking", title: "", notes: "", eventDate: "", bookingNumber: "" });
 
   // Full booking dialog state
@@ -221,11 +222,19 @@ const BookingCalendar = () => {
     }
   };
 
-  return (
+   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="font-display text-2xl font-bold text-foreground">Booking Calendar</h1>
         <div className="flex gap-2">
+          <div className="flex border border-border rounded-lg overflow-hidden">
+            <button onClick={() => setViewMode("grid")} className={cn("px-2.5 py-1.5 text-xs font-medium transition-colors", viewMode === "grid" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted")}>
+              <Grid3X3 className="h-3.5 w-3.5" />
+            </button>
+            <button onClick={() => setViewMode("list")} className={cn("px-2.5 py-1.5 text-xs font-medium transition-colors", viewMode === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted")}>
+              <List className="h-3.5 w-3.5" />
+            </button>
+          </div>
           <Button variant="outline" onClick={openFullBooking} className="gap-2"><CalendarIcon className="h-4 w-4" /> Add Full Booking</Button>
           <Button onClick={() => openNewEvent()} className="gap-2"><Plus className="h-4 w-4" /> Add Event</Button>
         </div>
@@ -240,33 +249,87 @@ const BookingCalendar = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-7 gap-px">
-            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-              <div key={d} className="text-center text-xs font-medium text-muted-foreground py-2">{d}</div>
-            ))}
-            {Array.from({ length: startDay }).map((_, i) => <div key={`empty-${i}`} />)}
-            {days.map((day) => {
-              const dateStr = format(day, "yyyy-MM-dd");
-              const dayEvents = events.filter((e) => e.event_date === dateStr);
-              return (
-                <button key={dateStr} onClick={() => openNewEvent(day)} className={cn(
-                  "min-h-[80px] p-1 border border-border/50 rounded-md text-left hover:bg-muted/30 transition-colors",
-                  isToday(day) && "ring-1 ring-primary/50 bg-primary/5"
-                )}>
-                  <span className={cn("text-xs font-medium", isToday(day) ? "text-primary" : "text-muted-foreground")}>{format(day, "d")}</span>
-                  <div className="space-y-0.5 mt-1">
-                    {dayEvents.slice(0, 3).map((e) => (
-                      <div key={e.id} onClick={(ev) => { ev.stopPropagation(); openEditEvent(e); }}
-                        className={cn("text-[10px] px-1 py-0.5 rounded text-white truncate cursor-pointer", eventTypeColors[e.event_type] || "bg-muted", e.is_completed && "opacity-50 line-through")}>
-                        {e.booking_number ? `${e.client_name.split(" ").pop()} - ${e.booking_number}` : e.title}
+          {viewMode === "grid" ? (
+            <>
+              <div className="grid grid-cols-7 gap-px">
+                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+                  <div key={d} className="text-center text-xs font-medium text-muted-foreground py-2">{d}</div>
+                ))}
+                {Array.from({ length: startDay }).map((_, i) => <div key={`empty-${i}`} />)}
+                {days.map((day) => {
+                  const dateStr = format(day, "yyyy-MM-dd");
+                  const dayEvents = events.filter((e) => e.event_date === dateStr);
+                  return (
+                    <button key={dateStr} onClick={() => openNewEvent(day)} className={cn(
+                      "min-h-[80px] p-1 border border-border/50 rounded-md text-left hover:bg-muted/30 transition-colors",
+                      isToday(day) && "ring-1 ring-primary/50 bg-primary/5"
+                    )}>
+                      <span className={cn("text-xs font-medium", isToday(day) ? "text-primary" : "text-muted-foreground")}>{format(day, "d")}</span>
+                      <div className="space-y-0.5 mt-1">
+                        {dayEvents.slice(0, 3).map((e) => {
+                          const isOverdue = !e.is_completed && isBefore(new Date(e.event_date), startOfDay(new Date()));
+                          return (
+                            <div key={e.id} onClick={(ev) => { ev.stopPropagation(); toggleComplete(e); }}
+                              title="Click to toggle complete"
+                              className={cn(
+                                "text-[10px] px-1 py-0.5 rounded text-white truncate cursor-pointer",
+                                eventTypeColors[e.event_type] || "bg-muted",
+                                e.is_completed && "opacity-50 line-through",
+                                isOverdue && "ring-1 ring-destructive animate-pulse"
+                              )}>
+                              {e.is_completed && <Check className="h-2 w-2 inline mr-0.5" />}
+                              {e.booking_number ? `${e.client_name.split(" ").pop()} - ${e.booking_number}` : e.title}
+                            </div>
+                          );
+                        })}
+                        {dayEvents.length > 3 && <span className="text-[10px] text-muted-foreground">+{dayEvents.length - 3}</span>}
                       </div>
-                    ))}
-                    {dayEvents.length > 3 && <span className="text-[10px] text-muted-foreground">+{dayEvents.length - 3}</span>}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          ) : (
+            /* List / Agenda View */
+            <div className="space-y-1">
+              {events.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-4 text-center">No events this month.</p>
+              ) : (
+                events.sort((a, b) => a.event_date.localeCompare(b.event_date)).map((e) => {
+                  const isOverdue = !e.is_completed && isBefore(new Date(e.event_date), startOfDay(new Date()));
+                  return (
+                    <div
+                      key={e.id}
+                      className={cn(
+                        "flex items-center justify-between p-3 rounded-lg border border-border/50 hover:bg-muted/30 transition-colors",
+                        e.is_completed && "opacity-60",
+                        isOverdue && "border-destructive/50 bg-destructive/5"
+                      )}
+                    >
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <button onClick={() => toggleComplete(e)} className={cn("w-5 h-5 rounded border flex items-center justify-center shrink-0 transition-colors", e.is_completed ? "bg-emerald-500 border-emerald-500 text-white" : "border-border hover:border-primary")}>
+                          {e.is_completed && <Check className="h-3 w-3" />}
+                        </button>
+                        <div className={cn("w-2 h-2 rounded-full shrink-0", eventTypeColors[e.event_type])} />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className={cn("text-sm font-medium truncate", e.is_completed && "line-through text-muted-foreground")}>{e.title}</span>
+                            {e.booking_number && <Badge variant="outline" className="text-[10px] shrink-0">{e.booking_number}</Badge>}
+                          </div>
+                          <p className="text-xs text-muted-foreground">{e.client_name}{e.client_email ? ` · ${e.client_email}` : ""}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <Badge variant="secondary" className="text-[10px] capitalize">{eventTypeLabels[e.event_type] || e.event_type}</Badge>
+                        <span className={cn("text-xs", isOverdue ? "text-destructive font-semibold" : "text-muted-foreground")}>{format(new Date(e.event_date), "MMM d")}</span>
+                        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => openEditEvent(e)}>Edit</Button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          )}
 
           {/* Legend */}
           <div className="flex flex-wrap gap-4 mt-4 text-xs">

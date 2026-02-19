@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Mail, Send, ExternalLink, Loader2 } from "lucide-react";
+import { Mail, Send, ExternalLink, Loader2, Link2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,14 +19,21 @@ const EmailComposer = () => {
   const [body, setBody] = useState("");
   const [emailLog, setEmailLog] = useState<any[]>([]);
   const [bookingPortalUrl, setBookingPortalUrl] = useState(() => localStorage.getItem("rtg_booking_portal") || "");
+  const [quotes, setQuotes] = useState<any[]>([]);
 
   useEffect(() => {
     fetchEmailLog();
+    fetchQuotes();
   }, []);
 
   const fetchEmailLog = async () => {
     const { data } = await supabase.from("email_log").select("*").order("created_at", { ascending: false }).limit(20);
     setEmailLog(data || []);
+  };
+
+  const fetchQuotes = async () => {
+    const { data } = await supabase.from("client_quotes").select("id, client_name, client_email, resort_name, share_token, status").order("created_at", { ascending: false }).limit(50);
+    setQuotes(data || []);
   };
 
   const applyTemplate = (templateId: string) => {
@@ -47,6 +54,19 @@ const EmailComposer = () => {
     setBody(filled.body);
   };
 
+  const insertQuoteLink = (quoteId: string) => {
+    const quote = quotes.find((q) => q.id === quoteId);
+    if (!quote?.share_token) {
+      toast({ title: "No share link", description: "This quote doesn't have a share link yet. Save it first.", variant: "destructive" });
+      return;
+    }
+    const url = `${window.location.origin}/quote/${quote.share_token}`;
+    setBody((prev) => prev + `\n\nView your quote: ${url}`);
+    if (!to && quote.client_email) setTo(quote.client_email);
+    if (!clientName && quote.client_name) setClientName(quote.client_name);
+    toast({ title: "Quote link inserted" });
+  };
+
   const handleSendViaOutlook = async () => {
     if (!to.trim()) {
       toast({ title: "Missing email", description: "Please enter a recipient email.", variant: "destructive" });
@@ -56,8 +76,6 @@ const EmailComposer = () => {
     const mailtoUrl = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.open(mailtoUrl);
 
-    // Log the email
-    const template = emailTemplates.find((t) => t.id === selectedTemplate);
     await supabase.from("email_log").insert({
       client_name: clientName || to,
       client_email: to,
@@ -101,6 +119,31 @@ const EmailComposer = () => {
               <div><Label>To</Label><Input type="email" value={to} onChange={(e) => setTo(e.target.value)} placeholder="client@email.com" /></div>
               <div><Label>Subject</Label><Input value={subject} onChange={(e) => setSubject(e.target.value)} /></div>
               <div><Label>Body</Label><Textarea value={body} onChange={(e) => setBody(e.target.value)} className="min-h-[250px] font-mono text-sm" /></div>
+
+              {/* Insert quote link */}
+              {quotes.length > 0 && (
+                <div className="flex items-end gap-2">
+                  <div className="flex-1">
+                    <Label className="text-xs text-muted-foreground">Insert Quote Link</Label>
+                    <Select onValueChange={insertQuoteLink}>
+                      <SelectTrigger className="h-9">
+                        <SelectValue placeholder="Select a quote to insert link..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {quotes.filter((q) => q.share_token).map((q) => (
+                          <SelectItem key={q.id} value={q.id}>
+                            <span className="flex items-center gap-2">
+                              <Link2 className="h-3 w-3" />
+                              {q.client_name} — {q.resort_name}
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
+
               <div className="flex gap-2">
                 <Button onClick={handleSendViaOutlook} className="gap-2"><Mail className="h-4 w-4" /> Send via Outlook</Button>
               </div>

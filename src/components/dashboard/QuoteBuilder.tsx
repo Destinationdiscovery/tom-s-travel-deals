@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Search, ChevronRight, ChevronLeft, Plus, Trash2, Save, Loader2, Users, FileText, Star, MapPin, CalendarIcon } from "lucide-react";
+import { Search, ChevronRight, ChevronLeft, Plus, Trash2, Save, Loader2, Users, FileText, Star, MapPin, CalendarIcon, Copy } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -383,6 +383,30 @@ const QuoteBuilder = () => {
     setBookingDialogOpen(true);
   };
 
+  const duplicateQuote = (q: any) => {
+    setEditingId(null);
+    setQuote({
+      clientName: q.client_name, clientEmail: q.client_email || "", resortName: q.resort_name,
+      resortReviewSlug: q.resort_review_slug || "", destination: q.destination || "",
+      checkIn: q.check_in || "", checkOut: q.check_out || "", numTravellers: q.num_travellers || 2,
+      roomType: "", inclusions: [], flights: q.flight_details || [{ ...emptyFlight }],
+      lineItems: q.line_items || [{ ...emptyLineItem }], notes: q.notes || "",
+      currency: q.currency || "CAD", status: "draft", reviewSummary: "",
+      includeReview: q.include_review || false, reviewData: q.review_data || null,
+    });
+    setIncludeReview(q.include_review || false);
+    setStep(2);
+    toast({ title: "Quote duplicated", description: "Edit and save as a new quote." });
+  };
+
+  const statusColors: Record<string, string> = {
+    draft: "bg-muted text-muted-foreground",
+    sent: "bg-sky-500/10 text-sky-400 border-sky-500/20",
+    accepted: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+    booked: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+    expired: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -421,8 +445,11 @@ const QuoteBuilder = () => {
                             <span className="text-sm text-foreground">{q.resort_name}</span>
                           </button>
                           <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="text-xs capitalize">{q.status}</Badge>
+                            <Badge variant="outline" className={`text-xs capitalize ${statusColors[q.status] || ""}`}>{q.status}</Badge>
                             <span className="text-xs text-muted-foreground">{new Date(q.created_at).toLocaleDateString()}</span>
+                            <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => duplicateQuote(q)}>
+                              <Copy className="h-3 w-3" /> Duplicate
+                            </Button>
                             {q.status !== "booked" && (
                               <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={() => openBookingDialog(q)}>
                                 <CalendarIcon className="h-3 w-3" /> Book
