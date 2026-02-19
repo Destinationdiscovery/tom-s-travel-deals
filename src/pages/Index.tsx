@@ -62,7 +62,15 @@ const Index = () => {
     clearAllResults();
     scrollToResults();
 
-    if (type === "search") {
+    if (type === "intel") {
+      // Auto-detect: "X to Y" = requirements, otherwise advisories
+      const match = query.match(/^(.+?)\s+to\s+(.+)$/i);
+      if (match) {
+        intel.fetchIntel("requirements", match[2].trim(), match[1].trim());
+      } else {
+        intel.fetchIntel("advisories", query);
+      }
+    } else if (type === "search") {
       travelSearch.search(query);
     } else if (type === "gear") {
       gear.clearReview();
@@ -72,12 +80,10 @@ const Index = () => {
     } else if (type === "news") {
       intel.fetchIntel("news", query);
     } else if (type === "requirements") {
-      // Parse "X to Y" pattern
       const match = query.match(/^(.+?)\s+to\s+(.+)$/i);
       if (match) {
         intel.fetchIntel("requirements", match[2].trim(), match[1].trim());
       } else {
-        // Need citizenship - show prompt
         setPendingDestination(query);
         setRequiresCitizenship(true);
       }
@@ -375,7 +381,6 @@ const Index = () => {
         )}
         </div>
       </main>
-      <Footer />
       <Footer />
     </div>
   );

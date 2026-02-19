@@ -3,6 +3,7 @@ import { Star, MapPin, Sparkles, Search, Camera } from "lucide-react";
 import ReviewLoadingStages from "@/components/ReviewLoadingStages";
 import { Button } from "@/components/ui/button";
 import AffiliateLinks from "@/components/AffiliateLinks";
+import InlineAffiliateCTA from "@/components/InlineAffiliateCTA";
 import SaveReviewButton from "@/components/SaveReviewButton";
 import PhotoGallery from "@/components/review/PhotoGallery";
 import ThingsToDoSection from "@/components/review/ThingsToDoSection";
@@ -135,8 +136,10 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview, onReviewReady }
                   </p>
                 </div>
                 <p className="text-lg text-foreground leading-relaxed">{data.summary}</p>
+                <div className="mt-4">
+                  <InlineAffiliateCTA propertyName={data.propertyName} variant="banner" />
+                </div>
               </div>
-
 
               {/* 2. Photo Gallery */}
               {hasPhotos && (
@@ -195,20 +198,25 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview, onReviewReady }
                 </div>
               )}
 
+              {/* Inline affiliate after tips */}
+              <div className="order-7">
+                <InlineAffiliateCTA propertyName={data.propertyName} variant="banner" />
+              </div>
 
 
-              {/* 7. Location Map (mobile only) */}
-              <div className="lg:hidden order-7">
+
+              {/* 8. Location Map (mobile only) */}
+              <div className="lg:hidden order-8">
                 <LocationMap data={data} />
               </div>
 
-              {/* 8. Affiliate Links (mobile only) */}
-              <div className="lg:hidden order-8">
+              {/* 9. Affiliate Links (mobile only) */}
+              <div className="lg:hidden order-9">
                 <AffiliateLinks propertyName={data.propertyName} />
               </div>
 
-              {/* 9. Save & New Review Buttons (mobile only) */}
-              <div className="lg:hidden flex flex-col gap-3 order-9">
+              {/* 10. Save & New Review Buttons (mobile only) */}
+              <div className="lg:hidden flex flex-col gap-3 order-10">
                 <SaveReviewButton review={review} />
                 {onNewReview && <NewSearchButton onNewReview={onNewReview} />}
               </div>

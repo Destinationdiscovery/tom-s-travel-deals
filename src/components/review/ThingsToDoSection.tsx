@@ -74,9 +74,18 @@ const ThingsToDoSection = ({ thingsToDo, functionUrl, propertyName }: ThingsToDo
                   </div>
                 )}
 
-                <p className="text-sm text-muted-foreground leading-relaxed">
+                <p className="text-sm text-muted-foreground leading-relaxed mb-3">
                   {activity.description}
                 </p>
+                <a
+                  href={expediaLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                >
+                  Book this
+                  <ExternalLink className="h-3 w-3" />
+                </a>
               </div>
             </div>
           );

@@ -6,6 +6,7 @@ import { Star, ArrowLeft, Calendar, MapPin, Heart, Share2 } from "lucide-react";
 
 import CommentsSection from "@/components/comments/CommentsSection";
 import AffiliateLinks from "@/components/AffiliateLinks";
+import InlineAffiliateCTA from "@/components/InlineAffiliateCTA";
 
 import { Button } from "@/components/ui/button";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
@@ -457,6 +458,9 @@ const DestinationReview = () => {
                 ))}
               </div>
 
+              {/* Inline affiliate after My Experience */}
+              <InlineAffiliateCTA propertyName={review.destination} variant="banner" />
+
               {/* Video */}
               {review.videoUrl && (
                 <div className="space-y-4">
@@ -487,6 +491,9 @@ const DestinationReview = () => {
                   ))}
                 </ul>
               </div>
+
+              {/* Inline affiliate after Tips */}
+              <InlineAffiliateCTA propertyName={review.destination} variant="banner" />
 
               {/* Gallery */}
               {review.gallery && review.gallery.length > 0 && (

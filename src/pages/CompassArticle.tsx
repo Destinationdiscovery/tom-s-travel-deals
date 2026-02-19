@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import { getArticleBySlug, getRelatedArticles, ContentBlock } from "@/data/compassArticles";
 import { ArrowLeft, ArrowRight, Clock, User } from "lucide-react";
 import CommentsSection from "@/components/comments/CommentsSection";
+import InlineAffiliateCTA from "@/components/InlineAffiliateCTA";
 import { Button } from "@/components/ui/button";
 
 const CompassArticle = () => {
@@ -168,6 +169,11 @@ const CompassArticle = () => {
                 )}
               </div>
 
+              </div>
+
+            {/* Affiliate banner before comments */}
+            <div className="mt-8">
+              <InlineAffiliateCTA variant="banner" />
             </div>
 
             {/* Comments Section */}
