@@ -26,8 +26,8 @@ const HeroSection = () => {
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity"
         >
-          <span className="text-white/50 text-xs font-light">Powered by:</span>
-          <img src={expediaLogo} alt="Expedia" className="h-5 md:h-6" />
+          <span className="text-white/60 text-sm font-light">Powered by:</span>
+          <img src={expediaLogo} alt="Expedia" className="h-8 md:h-10" />
         </a>
       </div>
     </section>
