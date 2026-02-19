@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Star, ArrowRight } from "lucide-react";
+import { Star, ArrowRight, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { buildDeepLinks, detectCountry } from "@/components/AffiliateLinks";
 
 interface CachedReview {
   id: string;
@@ -15,6 +16,7 @@ interface CachedReview {
 
 const RecentReviewsHomepage = () => {
   const [reviews, setReviews] = useState<CachedReview[]>([]);
+  const country = useMemo(() => detectCountry(), []);
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -58,13 +60,16 @@ const RecentReviewsHomepage = () => {
           {reviews.map((review) => {
             const rating = getOverallRating(review);
             const summary = getSummary(review);
+            const expediaLink = buildDeepLinks(country, review.property_name).expedia;
             return (
-              <Link
+              <div
                 key={review.id}
-                to={`/review/${review.slug}`}
-                className="group block rounded-2xl overflow-hidden bg-card shadow-sm hover:shadow-elevated transition-all duration-300 hover:-translate-y-1 border border-border/50"
+                className="rounded-2xl overflow-hidden bg-card shadow-sm hover:shadow-elevated transition-all duration-300 hover:-translate-y-1 border border-border/50 flex flex-col"
               >
-                <div className="p-5 flex flex-col gap-3 h-full">
+                <Link
+                  to={`/review/${review.slug}`}
+                  className="group p-5 flex flex-col gap-3 flex-1"
+                >
                   <h3 className="font-display font-bold text-foreground leading-tight line-clamp-2 group-hover:text-primary transition-colors">
                     {review.property_name}
                   </h3>
@@ -92,8 +97,19 @@ const RecentReviewsHomepage = () => {
                   <span className="text-xs font-semibold text-primary group-hover:underline mt-auto">
                     Read Review →
                   </span>
+                </Link>
+                <div className="px-5 pb-4">
+                  <a
+                    href={expediaLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                  >
+                    Book on Expedia
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
                 </div>
-              </Link>
+              </div>
             );
           })}
         </div>

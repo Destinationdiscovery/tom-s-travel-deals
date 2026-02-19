@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import heroBackground from "@/assets/hero-beach.jpg";
 import { useSearchSuggestions } from "@/hooks/useSearchSuggestions";
 
-export type SearchType = "destination" | "search" | "gear" | "requirements" | "advisories" | "news";
+export type SearchType = "destination" | "search" | "gear" | "requirements" | "advisories" | "news" | "intel";
 
 interface SearchTypeConfig {
   label: string;
@@ -12,38 +12,25 @@ interface SearchTypeConfig {
   buttonLabel: string;
 }
 
-const searchTypeConfigs: Record<SearchType, SearchTypeConfig> = {
+const searchTypeConfigs: Record<string, SearchTypeConfig> = {
   destination: {
     label: "Destination Review",
     placeholder: 'e.g. "Sandals Royal Barbados" or "Hotels in Cancun"',
     buttonLabel: "Explore Reviews",
   },
-  search: {
-    label: "Destination Search",
-    placeholder: 'e.g. "Adults only in Punta Cana" or "Beach resorts in Cancun"',
-    buttonLabel: "Search",
-  },
   gear: {
-    label: "Travel Gear Review",
+    label: "Travel Gear",
     placeholder: 'e.g. "Cancun packing list" or "beach accessories"',
     buttonLabel: "Find Gear",
   },
-  requirements: {
-    label: "Travel Requirements",
-    placeholder: 'e.g. "Canada to Mexico" or "USA to Japan"',
-    buttonLabel: "Check Requirements",
-  },
-  advisories: {
-    label: "Travel Advisories",
-    placeholder: 'e.g. "Thailand" or "Colombia"',
-    buttonLabel: "Check Advisories",
-  },
-  news: {
-    label: "Travel News",
-    placeholder: 'e.g. "Caribbean" or "Europe travel updates"',
-    buttonLabel: "Go",
+  intel: {
+    label: "Travel Intel",
+    placeholder: 'e.g. "Canada to Mexico" or "Thailand advisories"',
+    buttonLabel: "Get Intel",
   },
 };
+
+const heroSearchTypes = ["destination", "gear", "intel"] as const;
 
 interface HeroSectionProps {
   onSearch: (propertyName: string) => void;
@@ -98,7 +85,7 @@ const HeroSection = ({ onSearch, isSearching, onInlineSearch, onSearchTypeChange
   };
 
   return (
-    <section className="relative min-h-[70vh] flex items-center justify-center pt-20">
+    <section className="relative min-h-[50vh] flex items-center justify-center pt-20">
       <img
         src={heroBackground}
         alt="Overwater villa at sunset"
@@ -107,13 +94,13 @@ const HeroSection = ({ onSearch, isSearching, onInlineSearch, onSearchTypeChange
       <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60" />
 
       <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
-        <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight">
+        <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
           <span className="text-sky-300">REVIEW</span>{" "}
           <span className="text-amber-400">THEN</span>{" "}
           <span className="text-emerald-400 font-black">GO</span>
         </h1>
 
-        <p className="text-white/80 text-xl md:text-2xl mb-10 font-light">
+        <p className="text-white/80 text-lg md:text-xl mb-8 font-light">
           Honest Reviews by Travellers, for Travellers
         </p>
 
@@ -173,10 +160,10 @@ const HeroSection = ({ onSearch, isSearching, onInlineSearch, onSearchTypeChange
 
           {/* Category Buttons Row */}
           <div className="flex flex-wrap justify-center gap-2">
-            {(Object.keys(searchTypeConfigs) as SearchType[]).map((type) => (
+            {heroSearchTypes.map((type) => (
               <button
                 key={type}
-                onClick={() => handleSearchTypeChange(type)}
+                onClick={() => handleSearchTypeChange(type as SearchType)}
                 className={`px-4 py-2 rounded-full text-sm font-medium backdrop-blur-sm transition-all duration-200 ${
                   type === searchType
                     ? "bg-white/90 text-gray-900 font-semibold shadow-md"
@@ -186,12 +173,6 @@ const HeroSection = ({ onSearch, isSearching, onInlineSearch, onSearchTypeChange
                 {searchTypeConfigs[type].label}
               </button>
             ))}
-            <button
-              onClick={handleDealsClick}
-              className="px-4 py-2 rounded-full text-sm font-medium backdrop-blur-sm bg-white/20 text-white border border-white/30 hover:bg-white/30 transition-all duration-200"
-            >
-              Travel Deals
-            </button>
           </div>
         </div>
       </div>
