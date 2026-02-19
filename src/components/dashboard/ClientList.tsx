@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
-import { Search, FileText, Calendar, ChevronRight, Mail } from "lucide-react";
+import { Search, FileText, Calendar, ChevronRight, Mail, UserPlus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import type { DashboardTab } from "./DashboardSidebar";
 
@@ -35,6 +39,11 @@ const ClientList = ({ onNavigate }: ClientListProps) => {
   const [search, setSearch] = useState("");
   const [expandedClient, setExpandedClient] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [addOpen, setAddOpen] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [newNotes, setNewNotes] = useState("");
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const fetchClients = async () => {
@@ -74,15 +83,74 @@ const ClientList = ({ onNavigate }: ClientListProps) => {
     fetchClients();
   }, []);
 
+  const handleAddClient = async () => {
+    if (!newName.trim()) return;
+    setSaving(true);
+    const { error } = await supabase.from("client_quotes").insert({
+      client_name: newName.trim(),
+      client_email: newEmail.trim() || null,
+      resort_name: "General Inquiry",
+      status: "draft" as any,
+      total_price: 0,
+      notes: newNotes.trim() || null,
+    });
+    setSaving(false);
+    if (error) {
+      toast({ title: "Error", description: "Failed to add client.", variant: "destructive" });
+      return;
+    }
+    toast({ title: "Client added", description: `${newName.trim()} has been added.` });
+    setNewName(""); setNewEmail(""); setNewNotes(""); setAddOpen(false);
+    // re-fetch
+    const [quotesRes, bookingsRes] = await Promise.all([
+      supabase.from("client_quotes").select("*").order("created_at", { ascending: false }),
+      supabase.from("bookings").select("*").order("event_date", { ascending: false }),
+    ]);
+    const quotes = quotesRes.data || [];
+    const bookings = bookingsRes.data || [];
+    const map = new Map<string, ClientInfo>();
+    quotes.forEach((q) => {
+      const key = q.client_name;
+      if (!map.has(key)) map.set(key, { name: key, email: q.client_email || "", quoteCount: 0, bookedCount: 0, lastActivity: q.created_at, quotes: [], bookings: [] });
+      const client = map.get(key)!;
+      client.quoteCount++;
+      if (q.status === "booked") client.bookedCount++;
+      client.quotes.push(q);
+      if (new Date(q.created_at) > new Date(client.lastActivity)) client.lastActivity = q.created_at;
+    });
+    bookings.forEach((b) => {
+      const key = b.client_name;
+      if (!map.has(key)) map.set(key, { name: key, email: b.client_email || "", quoteCount: 0, bookedCount: 0, lastActivity: b.created_at, quotes: [], bookings: [] });
+      map.get(key)!.bookings.push(b);
+    });
+    setClients(Array.from(map.values()).sort((a, b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
+  };
+
   const filtered = search.trim()
     ? clients.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))
     : clients;
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-display text-2xl font-bold text-foreground">Clients</h1>
-        <p className="text-sm text-muted-foreground mt-1">All your client files in one place.</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="font-display text-2xl font-bold text-foreground">Clients</h1>
+          <p className="text-sm text-muted-foreground mt-1">All your client files in one place.</p>
+        </div>
+        <Dialog open={addOpen} onOpenChange={setAddOpen}>
+          <DialogTrigger asChild>
+            <Button className="gap-2"><UserPlus className="h-4 w-4" /> Add Client</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader><DialogTitle>Add New Client</DialogTitle></DialogHeader>
+            <div className="space-y-4 pt-2">
+              <div><Label>Client Name *</Label><Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Jane Doe" /></div>
+              <div><Label>Client Email</Label><Input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="jane@email.com" /></div>
+              <div><Label>Notes</Label><Textarea value={newNotes} onChange={(e) => setNewNotes(e.target.value)} placeholder="Optional notes..." className="min-h-[80px]" /></div>
+              <Button onClick={handleAddClient} disabled={!newName.trim() || saving} className="w-full">{saving ? "Adding..." : "Add Client"}</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="relative">

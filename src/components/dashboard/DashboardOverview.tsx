@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FileText, Calendar, Mail, DollarSign, AlertTriangle, Plus, TrendingUp, Clock } from "lucide-react";
+import { FileText, Calendar, Mail, DollarSign, AlertTriangle, Plus, TrendingUp, Clock, ExternalLink } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -201,6 +201,43 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
         </Card>
       </div>
 
+      {/* Urgent Deadlines (next 3 days) */}
+      {(() => {
+        const urgentDeadlines = upcomingDeadlines.filter((d) => {
+          const eventDate = new Date(d.event_date);
+          return isBefore(eventDate, addDays(new Date(), 3));
+        });
+        if (urgentDeadlines.length === 0) return null;
+        return (
+          <Card className="border-rose-500/30 bg-rose-500/5">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-rose-400" />
+                  <span className="text-sm font-semibold text-foreground">Urgent — Due Within 3 Days</span>
+                  <Badge variant="destructive" className="text-xs">{urgentDeadlines.length}</Badge>
+                </div>
+                <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => window.open("https://outlook.cloud.microsoft/mail/", "_blank")}>
+                  <Mail className="h-3 w-3" /> Open Outlook
+                </Button>
+              </div>
+              <div className="space-y-1.5">
+                {urgentDeadlines.map((d) => (
+                  <div key={d.id} className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2">
+                      <span className={`text-xs font-medium uppercase ${eventColors[d.event_type] || "text-muted-foreground"}`}>{d.event_type.replace(/_/g, " ")}</span>
+                      <span className="text-foreground">{d.title}</span>
+                      {d.client_name && <span className="text-xs text-muted-foreground">— {d.client_name}</span>}
+                    </div>
+                    <span className="text-muted-foreground">{format(new Date(d.event_date), "MMM d")}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })()}
+
       {/* Quick Actions */}
       <div className="flex gap-3 flex-wrap">
         <Button onClick={() => onNavigate("quotes")} className="gap-2">
@@ -211,6 +248,19 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
         </Button>
         <Button variant="outline" onClick={() => onNavigate("emails")} className="gap-2">
           <Mail className="h-4 w-4" /> Compose Email
+        </Button>
+      </div>
+
+      {/* Quick Links */}
+      <div className="flex gap-3 flex-wrap">
+        <Button variant="outline" size="sm" className="gap-2" onClick={() => window.open("https://outlook.cloud.microsoft/mail/", "_blank")}>
+          <ExternalLink className="h-3.5 w-3.5" /> Outlook Email
+        </Button>
+        <Button variant="outline" size="sm" className="gap-2" onClick={() => window.open("https://tob.sax.softvoyage.com/", "_blank")}>
+          <ExternalLink className="h-3.5 w-3.5" /> Sirev Booking
+        </Button>
+        <Button variant="outline" size="sm" className="gap-2" onClick={() => window.open("https://www.expediataap.ca/", "_blank")}>
+          <ExternalLink className="h-3.5 w-3.5" /> Expedia TAAP
         </Button>
       </div>
 
