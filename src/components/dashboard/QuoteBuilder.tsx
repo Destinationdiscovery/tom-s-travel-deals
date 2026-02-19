@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Search, ChevronRight, ChevronLeft, Plus, Trash2, Save, Loader2, Users, FileText, Star, MapPin } from "lucide-react";
+import { Search, ChevronRight, ChevronLeft, Plus, Trash2, Save, Loader2, Users, FileText, Star, MapPin, CalendarIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,10 +9,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { supabase } from "@/integrations/supabase/client";
 import { useGenerateReview } from "@/hooks/useGenerateReview";
 import { useSearchSuggestions } from "@/hooks/useSearchSuggestions";
 import { toast } from "@/hooks/use-toast";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 import QuotePreview from "./QuotePreview";
 import MultiTagInput from "./MultiTagInput";
 
@@ -62,6 +67,127 @@ const INCLUSION_PRESETS = [
 const emptyFlight: FlightDetail = { airline: "", flightNumber: "", departureAirport: "", arrivalAirport: "", departureTime: "", arrivalTime: "" };
 const emptyLineItem: LineItem = { description: "", amount: 0 };
 
+// --- Date Picker Helper ---
+const DatePickerField = ({ label, date, onSelect }: { label: string; date: Date | undefined; onSelect: (d: Date | undefined) => void }) => (
+  <div>
+    <Label>{label}</Label>
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
+          <CalendarIcon className="mr-2 h-4 w-4" />
+          {date ? format(date, "PPP") : <span>Pick a date</span>}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0" align="start">
+        <Calendar mode="single" selected={date} onSelect={onSelect} initialFocus className={cn("p-3 pointer-events-auto")} />
+      </PopoverContent>
+    </Popover>
+  </div>
+);
+
+// --- Booking From Quote Dialog ---
+interface BookingDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  quoteData: any;
+  onSaved: () => void;
+}
+
+const BookingFromQuoteDialog = ({ open, onOpenChange, quoteData, onSaved }: BookingDialogProps) => {
+  const [bookingNumber, setBookingNumber] = useState("");
+  const [dateBooked, setDateBooked] = useState<Date | undefined>(new Date());
+  const [depositDue, setDepositDue] = useState<Date | undefined>();
+  const [finalPaymentDue, setFinalPaymentDue] = useState<Date | undefined>();
+  const [tripStart, setTripStart] = useState<Date | undefined>(quoteData?.check_in ? new Date(quoteData.check_in + "T00:00:00") : undefined);
+  const [tripEnd, setTripEnd] = useState<Date | undefined>(quoteData?.check_out ? new Date(quoteData.check_out + "T00:00:00") : undefined);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (quoteData) {
+      setTripStart(quoteData.check_in ? new Date(quoteData.check_in + "T00:00:00") : undefined);
+      setTripEnd(quoteData.check_out ? new Date(quoteData.check_out + "T00:00:00") : undefined);
+      setBookingNumber("");
+      setDateBooked(new Date());
+      setDepositDue(undefined);
+      setFinalPaymentDue(undefined);
+    }
+  }, [quoteData]);
+
+  const handleSaveBooking = async () => {
+    if (!bookingNumber.trim()) {
+      toast({ title: "Missing booking number", variant: "destructive" });
+      return;
+    }
+    setSaving(true);
+
+    const entries: any[] = [];
+    const base = {
+      client_name: quoteData.client_name,
+      client_email: quoteData.client_email || null,
+      quote_id: quoteData.id,
+      booking_number: bookingNumber,
+    };
+
+    if (dateBooked) entries.push({ ...base, event_type: "booking", event_date: format(dateBooked, "yyyy-MM-dd"), title: `${quoteData.resort_name} - Booked` });
+    if (depositDue) entries.push({ ...base, event_type: "deposit_due", event_date: format(depositDue, "yyyy-MM-dd"), title: `${quoteData.resort_name} - Deposit Due` });
+    if (finalPaymentDue) entries.push({ ...base, event_type: "final_payment", event_date: format(finalPaymentDue, "yyyy-MM-dd"), title: `${quoteData.resort_name} - Final Payment` });
+    if (tripStart) entries.push({ ...base, event_type: "trip_start", event_date: format(tripStart, "yyyy-MM-dd"), title: `${quoteData.resort_name} - Trip Start` });
+    if (tripEnd) entries.push({ ...base, event_type: "trip_end", event_date: format(tripEnd, "yyyy-MM-dd"), title: `${quoteData.resort_name} - Trip End` });
+
+    if (entries.length === 0) {
+      toast({ title: "Add at least one date", variant: "destructive" });
+      setSaving(false);
+      return;
+    }
+
+    const { error } = await supabase.from("bookings").insert(entries);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      // Update quote status to booked
+      await supabase.from("client_quotes").update({ status: "booked" } as any).eq("id", quoteData.id);
+      toast({ title: "Booking created!", description: `${entries.length} calendar entries added.` });
+      onOpenChange(false);
+      onSaved();
+    }
+    setSaving(false);
+  };
+
+  if (!quoteData) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Book: {quoteData.resort_name}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            <div><span className="text-muted-foreground">Client:</span> <span className="font-medium text-foreground">{quoteData.client_name}</span></div>
+            <div><span className="text-muted-foreground">Email:</span> <span className="font-medium text-foreground">{quoteData.client_email || "—"}</span></div>
+          </div>
+          <div>
+            <Label>Booking Number *</Label>
+            <Input value={bookingNumber} onChange={(e) => setBookingNumber(e.target.value)} placeholder="e.g. BK12345" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <DatePickerField label="Date Booked" date={dateBooked} onSelect={setDateBooked} />
+            <DatePickerField label="Deposit Due" date={depositDue} onSelect={setDepositDue} />
+            <DatePickerField label="Final Payment Due" date={finalPaymentDue} onSelect={setFinalPaymentDue} />
+            <DatePickerField label="Trip Start" date={tripStart} onSelect={setTripStart} />
+            <DatePickerField label="Trip End" date={tripEnd} onSelect={setTripEnd} />
+          </div>
+          <Button onClick={handleSaveBooking} disabled={saving} className="w-full gap-2">
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <CalendarIcon className="h-4 w-4" />}
+            Save Booking
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+// --- Main Component ---
 const QuoteBuilder = () => {
   const [step, setStep] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
@@ -74,6 +200,9 @@ const QuoteBuilder = () => {
   const [existingQuotes, setExistingQuotes] = useState<any[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [includeReview, setIncludeReview] = useState(false);
+  const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
+  const [bookingQuote, setBookingQuote] = useState<any>(null);
+  const [selectedClient, setSelectedClient] = useState<string>("__new__");
 
   const [quote, setQuote] = useState<QuoteData>({
     clientName: "", clientEmail: "", resortName: "", resortReviewSlug: "", destination: "",
@@ -89,7 +218,6 @@ const QuoteBuilder = () => {
     fetchQuotes();
   }, []);
 
-  // Close suggestions on outside click
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (suggestionsRef.current && !suggestionsRef.current.contains(e.target as Node)) {
@@ -119,15 +247,15 @@ const QuoteBuilder = () => {
     return acc;
   }, {});
 
+  // Unique clients for dropdown
+  const uniqueClients = Object.entries(clientGroups).map(([name, { email }]) => ({ name, email }));
+
   const selectReview = async (r: any) => {
     let reviewData = r.review_data || null;
-
-    // If we only have partial data (from the list), fetch full review
     if (includeReview && r.slug && (!reviewData || !reviewData.summary)) {
       const { data } = await supabase.from("cached_reviews").select("review_data").eq("slug", r.slug).single();
       if (data) reviewData = data.review_data;
     }
-
     setQuote((prev) => ({
       ...prev,
       resortName: r.property_name,
@@ -208,7 +336,6 @@ const QuoteBuilder = () => {
 
   const loadQuote = (q: any) => {
     setEditingId(q.id);
-    // Parse inclusions - could be stored in notes or line_items metadata
     const inclusions: string[] = [];
     setQuote({
       clientName: q.client_name, clientEmail: q.client_email || "", resortName: q.resort_name,
@@ -228,6 +355,7 @@ const QuoteBuilder = () => {
   const resetQuote = () => {
     setEditingId(null);
     setIncludeReview(false);
+    setSelectedClient("__new__");
     setQuote({
       clientName: "", clientEmail: "", resortName: "", resortReviewSlug: "", destination: "",
       checkIn: "", checkOut: "", numTravellers: 2, roomType: "", inclusions: [],
@@ -236,6 +364,23 @@ const QuoteBuilder = () => {
       includeReview: false, reviewData: null,
     });
     setStep(1);
+  };
+
+  const handleClientSelect = (value: string) => {
+    setSelectedClient(value);
+    if (value === "__new__") {
+      setQuote((prev) => ({ ...prev, clientName: "", clientEmail: "" }));
+    } else {
+      const client = uniqueClients.find((c) => c.name === value);
+      if (client) {
+        setQuote((prev) => ({ ...prev, clientName: client.name, clientEmail: client.email }));
+      }
+    }
+  };
+
+  const openBookingDialog = (q: any) => {
+    setBookingQuote(q);
+    setBookingDialogOpen(true);
   };
 
   return (
@@ -270,16 +415,21 @@ const QuoteBuilder = () => {
                   <AccordionContent>
                     <div className="space-y-1 pl-2">
                       {quotes.map((q: any) => (
-                        <button key={q.id} onClick={() => loadQuote(q)} className="w-full text-left p-2 rounded-lg hover:bg-muted/50 transition-colors flex items-center justify-between">
-                          <div className="flex items-center gap-2">
+                        <div key={q.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                          <button onClick={() => loadQuote(q)} className="flex items-center gap-2 text-left flex-1">
                             <FileText className="h-3.5 w-3.5 text-muted-foreground" />
                             <span className="text-sm text-foreground">{q.resort_name}</span>
-                          </div>
+                          </button>
                           <div className="flex items-center gap-2">
                             <Badge variant="outline" className="text-xs capitalize">{q.status}</Badge>
                             <span className="text-xs text-muted-foreground">{new Date(q.created_at).toLocaleDateString()}</span>
+                            {q.status !== "booked" && (
+                              <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={() => openBookingDialog(q)}>
+                                <CalendarIcon className="h-3 w-3" /> Book
+                              </Button>
+                            )}
                           </div>
-                        </button>
+                        </div>
                       ))}
                     </div>
                   </AccordionContent>
@@ -393,6 +543,23 @@ const QuoteBuilder = () => {
             {quote.includeReview && quote.reviewData && (
               <Badge variant="secondary" className="text-xs">✓ Resort review will be included in quote</Badge>
             )}
+
+            {/* Client file dropdown */}
+            {uniqueClients.length > 0 && (
+              <div>
+                <Label>Select Existing Client</Label>
+                <Select value={selectedClient} onValueChange={handleClientSelect}>
+                  <SelectTrigger><SelectValue placeholder="Choose a client..." /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__new__">+ New Client</SelectItem>
+                    {uniqueClients.map((c) => (
+                      <SelectItem key={c.name} value={c.name}>{c.name}{c.email ? ` — ${c.email}` : ""}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div><Label>Client Name *</Label><Input value={quote.clientName} onChange={(e) => setQuote({ ...quote, clientName: e.target.value })} /></div>
               <div><Label>Client Email</Label><Input type="email" value={quote.clientEmail} onChange={(e) => setQuote({ ...quote, clientEmail: e.target.value })} /></div>
@@ -507,6 +674,14 @@ const QuoteBuilder = () => {
       {step === 4 && (
         <QuotePreview quote={quote} totalPrice={totalPrice} onBack={() => setStep(3)} onSave={handleSave} saving={saving} editingId={editingId} />
       )}
+
+      {/* Booking from Quote Dialog */}
+      <BookingFromQuoteDialog
+        open={bookingDialogOpen}
+        onOpenChange={setBookingDialogOpen}
+        quoteData={bookingQuote}
+        onSaved={fetchQuotes}
+      />
     </div>
   );
 };
