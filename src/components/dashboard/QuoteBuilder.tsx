@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Search, ChevronRight, ChevronLeft, Plus, Trash2, Save, Loader2, Users, FileText } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Search, ChevronRight, ChevronLeft, Plus, Trash2, Save, Loader2, Users, FileText, Star, MapPin } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useGenerateReview } from "@/hooks/useGenerateReview";
+import { useSearchSuggestions } from "@/hooks/useSearchSuggestions";
 import { toast } from "@/hooks/use-toast";
 import QuotePreview from "./QuotePreview";
 import MultiTagInput from "./MultiTagInput";
@@ -64,8 +65,11 @@ const emptyLineItem: LineItem = { description: "", amount: 0 };
 const QuoteBuilder = () => {
   const [step, setStep] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [cachedReviews, setCachedReviews] = useState<any[]>([]);
   const { review, isLoading, generateReview } = useGenerateReview();
+  const { suggestions, isLoading: suggestionsLoading } = useSearchSuggestions(searchQuery);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
   const [saving, setSaving] = useState(false);
   const [existingQuotes, setExistingQuotes] = useState<any[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -80,10 +84,27 @@ const QuoteBuilder = () => {
   });
 
   useEffect(() => {
-    supabase.from("cached_reviews").select("property_name, slug, location, review_data").order("created_at", { ascending: false }).limit(20)
+    supabase.from("cached_reviews").select("id, property_name, slug, location, review_data, created_at").order("created_at", { ascending: false }).limit(8)
       .then(({ data }) => setCachedReviews(data || []));
     fetchQuotes();
   }, []);
+
+  // Close suggestions on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSuggestionClick = (name: string) => {
+    setSearchQuery(name);
+    setShowSuggestions(false);
+    generateReview(name);
+  };
 
   const fetchQuotes = async () => {
     const { data } = await supabase.from("client_quotes").select("*").order("created_at", { ascending: false }).limit(50);
@@ -293,24 +314,70 @@ const QuoteBuilder = () => {
               <span className="text-xs text-muted-foreground ml-1">(ratings, summary, tips — no affiliate links)</span>
             </div>
 
-            <div className="flex gap-2">
-              <Input placeholder="Search for a resort or destination..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()} className="flex-1" />
-              <Button onClick={handleSearch} disabled={isLoading} className="gap-2">
-                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-                Search
-              </Button>
+            <div className="relative" ref={suggestionsRef}>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Search for a resort or destination..."
+                  value={searchQuery}
+                  onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true); }}
+                  onFocus={() => setShowSuggestions(true)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                  className="flex-1"
+                />
+                <Button onClick={handleSearch} disabled={isLoading} className="gap-2">
+                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                  Search
+                </Button>
+              </div>
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-elevated overflow-hidden">
+                  {suggestions.map((s) => (
+                    <button
+                      key={s.id}
+                      onClick={() => handleSuggestionClick(s.name)}
+                      className="w-full text-left px-4 py-2.5 hover:bg-muted/50 transition-colors border-b border-border last:border-b-0"
+                    >
+                      <p className="text-sm font-medium text-foreground">{s.name}</p>
+                      {s.secondaryText && <p className="text-xs text-muted-foreground">{s.secondaryText}</p>}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
+
             {cachedReviews.length > 0 && (
               <div>
                 <p className="text-xs text-muted-foreground mb-2">Or pick from recent reviews:</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {cachedReviews.map((r) => (
-                    <button key={r.slug} onClick={() => selectReview(r)} className="text-left p-3 rounded-lg border border-border hover:border-primary/30 transition-colors">
-                      <p className="text-sm font-medium text-foreground">{r.property_name}</p>
-                      <p className="text-xs text-muted-foreground">{r.location}</p>
-                    </button>
-                  ))}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  {cachedReviews.map((r) => {
+                    const rating = (r.review_data as any)?.overallRating ?? 0;
+                    return (
+                      <button
+                        key={r.slug}
+                        onClick={() => selectReview(r)}
+                        className="group text-left bg-card rounded-xl border border-border p-4 shadow-soft hover:shadow-elevated transition-all duration-300 hover:-translate-y-1 flex flex-col"
+                      >
+                        <div className="flex items-center gap-0.5 mb-2">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`h-3 w-3 ${i < Math.floor(rating) ? "text-accent fill-accent" : "text-muted-foreground/30"}`}
+                            />
+                          ))}
+                          <span className="text-xs font-semibold text-foreground ml-1">{rating}</span>
+                        </div>
+                        <h4 className="font-display font-bold text-foreground text-sm leading-snug mb-1.5 group-hover:text-primary transition-colors line-clamp-2">
+                          {r.property_name}
+                        </h4>
+                        {r.location && (
+                          <p className="text-muted-foreground text-xs flex items-center gap-1">
+                            <MapPin className="h-3 w-3 flex-shrink-0" />
+                            <span className="line-clamp-1">{r.location}</span>
+                          </p>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
