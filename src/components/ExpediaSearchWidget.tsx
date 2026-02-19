@@ -19,8 +19,8 @@ const EXPEDIA_AFFILIATE_URL =
 const ExpediaSearchWidget = ({ isOpen, onClose }: ExpediaSearchWidgetProps) => {
   const scriptLoaded = useRef(false);
   const widgetRef = useRef<HTMLDivElement>(null);
-  const [widgetKey, setWidgetKey] = useState(0);
   const [widgetFailed, setWidgetFailed] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   // Load the Expedia script once
   useEffect(() => {
@@ -42,15 +42,21 @@ const ExpediaSearchWidget = ({ isOpen, onClose }: ExpediaSearchWidgetProps) => {
     document.head.appendChild(script);
   }, []);
 
-  // Re-initialize widget when opened
+  // Mount/unmount widget div and re-init when opened
   useEffect(() => {
-    if (!isOpen) return;
+    if (isOpen) {
+      setWidgetFailed(false);
+      setMounted(true);
+    } else {
+      setMounted(false);
+    }
+  }, [isOpen]);
 
-    setWidgetFailed(false);
-    setWidgetKey((k) => k + 1);
+  // After mounted, try to init the widget
+  useEffect(() => {
+    if (!mounted) return;
 
-    // Try multiple times with increasing delays
-    const timers = [300, 800, 1500].map((delay) =>
+    const timers = [100, 500, 1000, 2000].map((delay) =>
       setTimeout(() => {
         try {
           window.eg?.widgets?.init?.();
@@ -60,30 +66,31 @@ const ExpediaSearchWidget = ({ isOpen, onClose }: ExpediaSearchWidgetProps) => {
       }, delay)
     );
 
-    // Check if widget rendered after 2.5s
+    // Check if widget rendered after 3s
     const checkTimer = setTimeout(() => {
       if (widgetRef.current) {
         const hasContent =
-          widgetRef.current.querySelector("iframe, form, input, .eg-search");
+          widgetRef.current.querySelector("iframe, form, input, .eg-search, [class*='eg-']");
         if (!hasContent) {
           setWidgetFailed(true);
         }
       }
-    }, 2500);
+    }, 3000);
 
     return () => {
       timers.forEach(clearTimeout);
       clearTimeout(checkTimer);
     };
-  }, [isOpen]);
+  }, [mounted]);
 
   return (
     <div
-      className={`fixed top-16 right-4 z-[60] w-[92vw] max-w-lg transition-all duration-300 ${
+      className={`fixed top-16 right-4 z-[60] transition-all duration-300 ${
         isOpen
           ? "opacity-100 translate-y-0 pointer-events-auto"
           : "opacity-0 -translate-y-4 pointer-events-none"
       }`}
+      style={{ width: "min(575px, 92vw)", minWidth: "375px" }}
     >
       <div className="rounded-xl border border-border/60 bg-slate-950/95 backdrop-blur-xl shadow-2xl overflow-hidden">
         <div className="flex items-center justify-between px-4 py-2 border-b border-border/40">
@@ -96,21 +103,21 @@ const ExpediaSearchWidget = ({ isOpen, onClose }: ExpediaSearchWidgetProps) => {
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div className="p-4 min-h-[220px]">
-          {isOpen && !widgetFailed && (
+        <div className="p-3">
+          {mounted && !widgetFailed && (
             <div
-              key={widgetKey}
               ref={widgetRef}
-              className="eg-widget bg-white rounded-lg p-2 min-h-[180px]"
+              className="eg-widget bg-white rounded-lg overflow-hidden"
               data-widget="search"
               data-program="ca-expedia"
               data-lobs="stays,flights"
               data-network="pz"
               data-camref="1100l5DpWA"
               data-pubref=""
+              style={{ minHeight: 200, width: "100%" }}
             />
           )}
-          {isOpen && widgetFailed && (
+          {mounted && widgetFailed && (
             <div className="flex flex-col items-center justify-center gap-4 py-6">
               <p className="text-white/70 text-sm text-center">
                 Search for flights, hotels & more on Expedia
