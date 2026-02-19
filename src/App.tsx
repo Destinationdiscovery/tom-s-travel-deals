@@ -24,6 +24,7 @@ import MyTrips from "./pages/MyTrips";
 import Promo from "./pages/Promo";
 import TravelSearch from "./pages/TravelSearch";
 
+import PublicQuote from "./pages/PublicQuote";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -55,6 +56,7 @@ const App = () => (
               <Route path="/my-trips" element={<MyTrips />} />
               <Route path="/promo" element={<Promo />} />
               <Route path="/search" element={<TravelSearch />} />
+              <Route path="/quote/:token" element={<PublicQuote />} />
               
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

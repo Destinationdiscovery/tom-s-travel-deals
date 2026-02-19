@@ -14,6 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      bookings: {
+        Row: {
+          client_email: string | null
+          client_name: string
+          created_at: string
+          event_date: string
+          event_type: Database["public"]["Enums"]["booking_event_type"]
+          id: string
+          is_completed: boolean | null
+          notes: string | null
+          quote_id: string | null
+          title: string
+        }
+        Insert: {
+          client_email?: string | null
+          client_name: string
+          created_at?: string
+          event_date: string
+          event_type: Database["public"]["Enums"]["booking_event_type"]
+          id?: string
+          is_completed?: boolean | null
+          notes?: string | null
+          quote_id?: string | null
+          title: string
+        }
+        Update: {
+          client_email?: string | null
+          client_name?: string
+          created_at?: string
+          event_date?: string
+          event_type?: Database["public"]["Enums"]["booking_event_type"]
+          id?: string
+          is_completed?: boolean | null
+          notes?: string | null
+          quote_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "client_quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cached_reviews: {
         Row: {
           created_at: string
@@ -43,6 +90,117 @@ export type Database = {
           slug?: string
         }
         Relationships: []
+      }
+      client_quotes: {
+        Row: {
+          check_in: string | null
+          check_out: string | null
+          client_email: string | null
+          client_name: string
+          created_at: string
+          currency: string | null
+          destination: string | null
+          flight_details: Json | null
+          id: string
+          line_items: Json | null
+          notes: string | null
+          num_travellers: number | null
+          resort_name: string
+          resort_review_slug: string | null
+          share_token: string | null
+          status: Database["public"]["Enums"]["quote_status"] | null
+          total_price: number | null
+          updated_at: string
+        }
+        Insert: {
+          check_in?: string | null
+          check_out?: string | null
+          client_email?: string | null
+          client_name: string
+          created_at?: string
+          currency?: string | null
+          destination?: string | null
+          flight_details?: Json | null
+          id?: string
+          line_items?: Json | null
+          notes?: string | null
+          num_travellers?: number | null
+          resort_name: string
+          resort_review_slug?: string | null
+          share_token?: string | null
+          status?: Database["public"]["Enums"]["quote_status"] | null
+          total_price?: number | null
+          updated_at?: string
+        }
+        Update: {
+          check_in?: string | null
+          check_out?: string | null
+          client_email?: string | null
+          client_name?: string
+          created_at?: string
+          currency?: string | null
+          destination?: string | null
+          flight_details?: Json | null
+          id?: string
+          line_items?: Json | null
+          notes?: string | null
+          num_travellers?: number | null
+          resort_name?: string
+          resort_review_slug?: string | null
+          share_token?: string | null
+          status?: Database["public"]["Enums"]["quote_status"] | null
+          total_price?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      email_log: {
+        Row: {
+          booking_id: string | null
+          client_email: string | null
+          client_name: string
+          created_at: string
+          email_type: Database["public"]["Enums"]["email_type"]
+          id: string
+          quote_id: string | null
+          subject: string
+        }
+        Insert: {
+          booking_id?: string | null
+          client_email?: string | null
+          client_name: string
+          created_at?: string
+          email_type: Database["public"]["Enums"]["email_type"]
+          id?: string
+          quote_id?: string | null
+          subject: string
+        }
+        Update: {
+          booking_id?: string | null
+          client_email?: string | null
+          client_name?: string
+          created_at?: string
+          email_type?: Database["public"]["Enums"]["email_type"]
+          id?: string
+          quote_id?: string | null
+          subject?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_log_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_log_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "client_quotes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       gear_intel_cache: {
         Row: {
@@ -293,6 +451,9 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      booking_event_type: "booking" | "final_payment" | "departure" | "return"
+      email_type: "quote" | "followup" | "pre_departure" | "after_trip"
+      quote_status: "draft" | "sent" | "accepted" | "expired"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -421,6 +582,9 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      booking_event_type: ["booking", "final_payment", "departure", "return"],
+      email_type: ["quote", "followup", "pre_departure", "after_trip"],
+      quote_status: ["draft", "sent", "accepted", "expired"],
     },
   },
 } as const
