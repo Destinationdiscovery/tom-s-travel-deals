@@ -49,11 +49,10 @@ const Header = () => {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setWidgetOpen((v) => !v)}
-              className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-white/10 transition-colors"
+              className="p-2 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-white/10 transition-colors"
               aria-label="Toggle Expedia search"
             >
               <Search className="h-4 w-4" />
-              <span className="hidden sm:inline text-xs font-medium">Expedia</span>
             </button>
             {isAdmin && (
               <Link
