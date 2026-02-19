@@ -8,6 +8,7 @@ import QuoteBuilder from "@/components/dashboard/QuoteBuilder";
 import BookingCalendar from "@/components/dashboard/BookingCalendar";
 import EmailComposer from "@/components/dashboard/EmailComposer";
 import GearImageManager from "@/components/dashboard/GearImageManager";
+import ClientList from "@/components/dashboard/ClientList";
 
 const GearAdmin = () => {
   const { user, isAdmin } = useAuth();
@@ -38,6 +39,7 @@ const GearAdmin = () => {
         <main className="flex-1 p-6 max-w-6xl">
           {activeTab === "overview" && <DashboardOverview onNavigate={setActiveTab} />}
           {activeTab === "quotes" && <QuoteBuilder />}
+          {activeTab === "clients" && <ClientList onNavigate={setActiveTab} />}
           {activeTab === "calendar" && <BookingCalendar />}
           {activeTab === "emails" && <EmailComposer />}
           {activeTab === "gear" && <GearImageManager />}
