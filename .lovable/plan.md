@@ -1,49 +1,42 @@
 
 
-# Hero Logo Swap + Fix Floating Expedia Widget
+# Fix Expedia Logo Size + Search Widget
 
 ## Overview
 
-Three changes:
-1. Replace the "expedia" text in the hero with the uploaded Expedia logo image, positioned BELOW the headline with "Powered by:" label
-2. Fix the Expedia search widget so it actually renders and floats properly on the page
+Two fixes: make the Expedia logo in the hero much larger and more visible, and address the blank search widget by using an iframe-based embed approach since the JavaScript widget SDK isn't rendering inside a React SPA.
 
 ## Changes
 
-### 1. Copy Expedia Logo to Project Assets
-Copy `user-uploads://expedia.png` to `src/assets/expedia-logo.png` so it can be imported as an ES6 module.
-
-### 2. Update Hero Section
+### 1. Increase Expedia Logo Size in Hero
 **File: `src/components/HeroSection.tsx`**
 
-- Remove the "expedia" text link that currently sits ABOVE the headline (lines 14-21)
-- Add below the subtitle: small "Powered by:" text followed by the Expedia logo image (~120px wide), wrapped in an affiliate link
-- Layout: headline, subtitle, then "Powered by: [logo]"
+- Change the logo height from `h-5 md:h-6` (20-24px) to `h-8 md:h-10` (32-40px) so it's clearly visible
+- Slightly increase the "Powered by:" text size from `text-xs` to `text-sm`
 
-### 3. Fix Floating Expedia Search Widget
+### 2. Fix Blank Search Widget
 **File: `src/components/ExpediaSearchWidget.tsx`**
 
-The widget isn't working because the Expedia script likely initializes on load but the widget div is hidden via CSS. Two fixes:
+The Expedia `eg-widgets.js` script scans the DOM on load and initializes `.eg-widget` divs it finds. In a React SPA, the widget div gets mounted/unmounted dynamically, and calling `window.eg.widgets.init()` may not reliably re-scan. The widget appears blank because the script ran before the div existed or can't re-initialize properly.
 
-- Re-initialize the widget each time it becomes visible by calling `window.eg?.widgets?.init?.()` (or re-inserting the widget div) when `isOpen` changes to true
-- Add a small delay after script load before attempting init
-- Ensure the widget container has minimum height so the Expedia form has space to render
-- Keep the widget always in DOM but use visibility approach that doesn't prevent script initialization
+**Fix approach:**
+- Instead of relying on the JS SDK's init method, use an **iframe-based embed** pointing to the Expedia affiliate search page. This is more reliable in SPAs since iframes are self-contained.
+- The iframe URL pattern: `https://www.expedia.ca/affiliate/search?affcid=ca.network.pz.affiliate.1100l5DpWA` embedded in the floating panel.
+- If the iframe approach doesn't work with Expedia's affiliate program, fall back to a **direct link button** styled as a search prompt that opens Expedia in a new tab with the affiliate tracking code.
+- As a secondary attempt, also try a longer delay (1000ms) on `init()` and ensure the script's `onload` callback is used rather than just setting `scriptLoaded` immediately.
 
-### 4. Header -- No Changes Needed
-The header toggle already works correctly with the Search icon and "Expedia" label.
+The widget container will also get a white/light background so the Expedia form elements (which render with light theme) are visible rather than being invisible on the dark background.
 
 ## Technical Details
 
-- The Expedia widget script scans for `.eg-widget` divs on load. If the div is hidden (opacity-0, pointer-events-none), the script may skip it. The fix is to detect when the script's global object is available and manually trigger re-initialization when the panel opens.
-- The logo is a PNG with transparent background -- it will display cleanly over the dark hero gradient.
-- No new dependencies needed.
+- The core issue with the blank widget is that third-party widget scripts that scan the DOM on initial load often don't work well with React's virtual DOM and conditional rendering
+- Adding `background: white` to the widget container ensures any rendered form elements are visible (Expedia's widget uses light-colored inputs)
+- The iframe fallback is the most reliable approach for third-party booking widgets in SPAs
 
 ## File Summary
 
 | File | Action |
 |------|--------|
-| `src/assets/expedia-logo.png` | New: copy uploaded logo |
-| `src/components/HeroSection.tsx` | Move Expedia logo below headline, use image |
-| `src/components/ExpediaSearchWidget.tsx` | Fix widget initialization and floating behavior |
+| `src/components/HeroSection.tsx` | Increase logo size from h-5 to h-8 |
+| `src/components/ExpediaSearchWidget.tsx` | Add white background for widget, improve init timing, add iframe fallback |
 
