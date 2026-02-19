@@ -61,19 +61,7 @@ const IntelPreviewSection = () => {
   };
 
   const handleCardClick = (card: typeof intelCards[0]) => {
-    if (card.type === "requirements") {
-      setQuery(card.query);
-      const match = card.query.match(/^(.+?)\s+to\s+(.+)$/i);
-      if (match) {
-        doSearch("requirements", match[2].trim(), match[1].trim());
-      } else {
-        setPendingDest(card.query);
-        setCitizenshipPrompt(true);
-      }
-    } else {
-      setQuery(card.query);
-      doSearch(card.type, card.query);
-    }
+    setQuery(card.query);
   };
 
   const handleCitizenshipSubmit = () => {
