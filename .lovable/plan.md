@@ -1,64 +1,49 @@
 
-# Floating Expedia Search Widget + Hero Branding
+
+# Hero Logo Swap + Fix Floating Expedia Widget
 
 ## Overview
 
-Two changes inspired by the reference image:
-
-1. **Expedia logo on the hero banner** -- Add the Expedia brand mark overlaid on the hero image, just like in the reference screenshot where it appears above the "TRAVEL REVIEWS" headline.
-
-2. **Floating Expedia search widget** -- A toggleable floating panel (triggered by the Search icon in the header) that embeds the official Expedia affiliate search widget using their provided script/div snippet. Users can show/hide it at will.
+Three changes:
+1. Replace the "expedia" text in the hero with the uploaded Expedia logo image, positioned BELOW the headline with "Powered by:" label
+2. Fix the Expedia search widget so it actually renders and floats properly on the page
 
 ## Changes
 
-### 1. Add Expedia Logo to Hero
+### 1. Copy Expedia Logo to Project Assets
+Copy `user-uploads://expedia.png` to `src/assets/expedia-logo.png` so it can be imported as an ES6 module.
+
+### 2. Update Hero Section
 **File: `src/components/HeroSection.tsx`**
 
-- Add a small Expedia logo (yellow on dark) above the headline text
-- Use an SVG or text-based Expedia brand mark that links to the affiliate URL
-- Positioned centered above "REVIEW THEN GO", matching the reference layout
+- Remove the "expedia" text link that currently sits ABOVE the headline (lines 14-21)
+- Add below the subtitle: small "Powered by:" text followed by the Expedia logo image (~120px wide), wrapped in an affiliate link
+- Layout: headline, subtitle, then "Powered by: [logo]"
 
-### 2. Create Floating Search Widget Component
-**File: `src/components/ExpediaSearchWidget.tsx`** (new)
+### 3. Fix Floating Expedia Search Widget
+**File: `src/components/ExpediaSearchWidget.tsx`**
 
-A floating panel component that:
-- Renders as a fixed-position overlay (top-right, below header)
-- Contains the Expedia affiliate widget embed code:
-  ```html
-  <div class="eg-widget" data-widget="search" data-program="ca-expedia" 
-       data-lobs="stays,flights" data-network="pz" 
-       data-camref="1100l5DpWA" data-pubref=""></div>
-  ```
-- Loads the Expedia widget script (`eg-widgets.js`) dynamically via a useEffect
-- Has a close/minimize button
-- Slides in/out with animation
-- Semi-transparent dark background to match the site theme
+The widget isn't working because the Expedia script likely initializes on load but the widget div is hidden via CSS. Two fixes:
 
-### 3. Update Header with Widget Toggle
-**File: `src/components/Header.tsx`**
+- Re-initialize the widget each time it becomes visible by calling `window.eg?.widgets?.init?.()` (or re-inserting the widget div) when `isOpen` changes to true
+- Add a small delay after script load before attempting init
+- Ensure the widget container has minimum height so the Expedia form has space to render
+- Keep the widget always in DOM but use visibility approach that doesn't prevent script initialization
 
-- Change the existing Search icon button from "scroll to top" to toggling the floating Expedia widget open/closed
-- Add an "Expedia" label or small logo next to the search icon so users know what it opens
-- Manage open/close state for the widget
-
-### 4. Update Index Page
-**File: `src/pages/Index.tsx`**
-
-- Include the `ExpediaSearchWidget` component in the page layout so it's available as a floating overlay
+### 4. Header -- No Changes Needed
+The header toggle already works correctly with the Search icon and "Expedia" label.
 
 ## Technical Details
 
-- The Expedia widget script (`eg-widgets.js`) will be loaded dynamically using a `useEffect` that appends a script tag to the document head, only once
-- The widget div needs to be in the DOM when the script loads, so we render it but hide/show via CSS (opacity/transform) rather than conditional mounting
-- The `data-camref="1100l5DpWA"` is the affiliate tracking code from the provided snippet
-- The widget supports `stays,flights` as configured LOBs (lines of business)
-- No new dependencies needed -- just DOM script injection
+- The Expedia widget script scans for `.eg-widget` divs on load. If the div is hidden (opacity-0, pointer-events-none), the script may skip it. The fix is to detect when the script's global object is available and manually trigger re-initialization when the panel opens.
+- The logo is a PNG with transparent background -- it will display cleanly over the dark hero gradient.
+- No new dependencies needed.
 
 ## File Summary
 
 | File | Action |
 |------|--------|
-| `src/components/HeroSection.tsx` | Add Expedia logo above headline |
-| `src/components/ExpediaSearchWidget.tsx` | New: floating widget with Expedia embed |
-| `src/components/Header.tsx` | Toggle widget instead of scroll-to-top |
-| `src/pages/Index.tsx` | Add ExpediaSearchWidget to layout |
+| `src/assets/expedia-logo.png` | New: copy uploaded logo |
+| `src/components/HeroSection.tsx` | Move Expedia logo below headline, use image |
+| `src/components/ExpediaSearchWidget.tsx` | Fix widget initialization and floating behavior |
+
