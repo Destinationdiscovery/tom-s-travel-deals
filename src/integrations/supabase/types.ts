@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       bookings: {
         Row: {
+          booking_number: string | null
           client_email: string | null
           client_name: string
           created_at: string
@@ -28,6 +29,7 @@ export type Database = {
           title: string
         }
         Insert: {
+          booking_number?: string | null
           client_email?: string | null
           client_name: string
           created_at?: string
@@ -40,6 +42,7 @@ export type Database = {
           title: string
         }
         Update: {
+          booking_number?: string | null
           client_email?: string | null
           client_name?: string
           created_at?: string
@@ -457,9 +460,16 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
-      booking_event_type: "booking" | "final_payment" | "departure" | "return"
+      booking_event_type:
+        | "booking"
+        | "final_payment"
+        | "departure"
+        | "return"
+        | "deposit_due"
+        | "trip_start"
+        | "trip_end"
       email_type: "quote" | "followup" | "pre_departure" | "after_trip"
-      quote_status: "draft" | "sent" | "accepted" | "expired"
+      quote_status: "draft" | "sent" | "accepted" | "expired" | "booked"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -588,9 +598,17 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
-      booking_event_type: ["booking", "final_payment", "departure", "return"],
+      booking_event_type: [
+        "booking",
+        "final_payment",
+        "departure",
+        "return",
+        "deposit_due",
+        "trip_start",
+        "trip_end",
+      ],
       email_type: ["quote", "followup", "pre_departure", "after_trip"],
-      quote_status: ["draft", "sent", "accepted", "expired"],
+      quote_status: ["draft", "sent", "accepted", "expired", "booked"],
     },
   },
 } as const
