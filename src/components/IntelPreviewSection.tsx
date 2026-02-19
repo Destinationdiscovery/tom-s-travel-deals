@@ -1,8 +1,9 @@
 import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Search, Shield, AlertTriangle, Newspaper, Globe } from "lucide-react";
+import { ArrowRight, Shield, AlertTriangle, Newspaper, Globe, FileText, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTravelIntel, type IntelType } from "@/hooks/useTravelIntel";
 import { IntelLoading, RequirementsResult, AdvisoriesResult, NewsResult } from "@/components/intel/IntelResults";
 
@@ -12,7 +13,6 @@ const intelCards = [
     description: "Visa policies, documents, and health requirements for your destination",
     icon: Shield,
     type: "requirements" as IntelType,
-    query: "Canada to Mexico",
     color: "bg-emerald-500/10 text-emerald-600",
   },
   {
@@ -20,7 +20,6 @@ const intelCards = [
     description: "Current travel advisories, health alerts, and safety tips",
     icon: AlertTriangle,
     type: "advisories" as IntelType,
-    query: "Thailand",
     color: "bg-amber-500/10 text-amber-600",
   },
   {
@@ -28,47 +27,30 @@ const intelCards = [
     description: "Latest travel news, policy changes, and trending destinations",
     icon: Newspaper,
     type: "news" as IntelType,
-    query: "Caribbean",
     color: "bg-sky-500/10 text-sky-600",
   },
 ];
 
 const IntelPreviewSection = () => {
-  const [query, setQuery] = useState("");
   const intel = useTravelIntel();
   const resultsRef = useRef<HTMLDivElement>(null);
-  const [citizenshipPrompt, setCitizenshipPrompt] = useState(false);
-  const [citizenship, setCitizenship] = useState("");
-  const [pendingDest, setPendingDest] = useState("");
+  const [activeTab, setActiveTab] = useState<IntelType>("requirements");
 
-  const doSearch = (type: IntelType, dest: string, cit?: string) => {
+  const [reqCitizenship, setReqCitizenship] = useState("");
+  const [reqDestination, setReqDestination] = useState("");
+  const [advDestination, setAdvDestination] = useState("");
+  const [newsDestination, setNewsDestination] = useState("");
+
+  const handleSubmit = (type: IntelType) => {
     intel.clearAll();
-    intel.fetchIntel(type, dest, cit);
+    if (type === "requirements") intel.fetchIntel("requirements", reqDestination, reqCitizenship);
+    else if (type === "advisories") intel.fetchIntel("advisories", advDestination);
+    else intel.fetchIntel("news", newsDestination);
     setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
   };
 
-  const handleSearch = () => {
-    const trimmed = query.trim();
-    if (trimmed.length < 2) return;
-    setCitizenshipPrompt(false);
-    // Auto-detect: "X to Y" = requirements, else advisories
-    const match = trimmed.match(/^(.+?)\s+to\s+(.+)$/i);
-    if (match) {
-      doSearch("requirements", match[2].trim(), match[1].trim());
-    } else {
-      doSearch("advisories", trimmed);
-    }
-  };
-
   const handleCardClick = (card: typeof intelCards[0]) => {
-    setQuery(card.query);
-  };
-
-  const handleCitizenshipSubmit = () => {
-    if (citizenship.trim().length >= 2) {
-      setCitizenshipPrompt(false);
-      doSearch("requirements", pendingDest, citizenship.trim());
-    }
+    setActiveTab(card.type);
   };
 
   const hasResults = intel.requirementsData || intel.advisoriesData || intel.newsData;
@@ -89,51 +71,53 @@ const IntelPreviewSection = () => {
           </Link>
         </div>
 
-        {/* Inline Search */}
+        {/* Tabbed Search */}
         <div className="max-w-2xl mb-8">
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                placeholder='e.g. "Canada to Mexico" or "Thailand advisories"'
-                className="w-full h-11 pl-10 pr-4 rounded-lg border border-border bg-card text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-              />
-            </div>
-            <Button onClick={handleSearch} disabled={intel.loading || query.trim().length < 2} className="h-11 px-6">
-              {intel.loading ? "Searching..." : "Get Intel"}
-            </Button>
-          </div>
-        </div>
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as IntelType)}>
+            <TabsList className="w-full grid grid-cols-3 mb-4">
+              <TabsTrigger value="requirements" className="gap-2"><FileText className="h-4 w-4 hidden sm:block" />Requirements</TabsTrigger>
+              <TabsTrigger value="advisories" className="gap-2"><Shield className="h-4 w-4 hidden sm:block" />Advisories</TabsTrigger>
+              <TabsTrigger value="news" className="gap-2"><Newspaper className="h-4 w-4 hidden sm:block" />News</TabsTrigger>
+            </TabsList>
 
-        {/* Citizenship prompt */}
-        {citizenshipPrompt && (
-          <div className="max-w-xl mb-8 bg-card rounded-2xl p-6 shadow-soft">
-            <h3 className="font-display text-lg font-bold mb-3">What's your citizenship?</h3>
-            <p className="text-sm text-muted-foreground mb-4">We need your citizenship to check entry requirements for {pendingDest}.</p>
-            <div className="flex gap-3">
-              <Input
-                placeholder="e.g. Canada, USA, UK..."
-                value={citizenship}
-                onChange={(e) => setCitizenship(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleCitizenshipSubmit()}
-                className="flex-1"
-              />
-              <Button onClick={handleCitizenshipSubmit} disabled={citizenship.trim().length < 2}>
-                Check
-              </Button>
-            </div>
-          </div>
-        )}
+            <TabsContent value="requirements">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Input placeholder="Your citizenship (e.g., Canada)" value={reqCitizenship} onChange={(e) => setReqCitizenship(e.target.value)} />
+                <Input placeholder="Destination (e.g., Cuba)" value={reqDestination} onChange={(e) => setReqDestination(e.target.value)} />
+                <Button onClick={() => handleSubmit("requirements")} disabled={intel.loading || reqCitizenship.trim().length < 2 || reqDestination.trim().length < 2} className="whitespace-nowrap">
+                  {intel.loading && activeTab === "requirements" ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                  Check
+                </Button>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="advisories">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Input placeholder="Destination (e.g., Cuba)" value={advDestination} onChange={(e) => setAdvDestination(e.target.value)} className="flex-1" />
+                <Button onClick={() => handleSubmit("advisories")} disabled={intel.loading || advDestination.trim().length < 2} className="whitespace-nowrap">
+                  {intel.loading && activeTab === "advisories" ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                  Check
+                </Button>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="news">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Input placeholder="Destination (e.g., Cuba)" value={newsDestination} onChange={(e) => setNewsDestination(e.target.value)} className="flex-1" />
+                <Button onClick={() => handleSubmit("news")} disabled={intel.loading || newsDestination.trim().length < 2} className="whitespace-nowrap">
+                  {intel.loading && activeTab === "news" ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                  Get News
+                </Button>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
 
         {/* Inline results */}
         <div ref={resultsRef}>
           {intel.loading && (
             <div className="mb-8 max-w-3xl">
-              <IntelLoading type="advisories" />
+              <IntelLoading type={activeTab} />
             </div>
           )}
           {!intel.loading && intel.requirementsData && (
