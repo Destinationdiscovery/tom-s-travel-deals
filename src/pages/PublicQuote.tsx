@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import QuoteReviewSection from "@/components/dashboard/QuoteReviewSection";
 
 const PublicQuote = () => {
   const { token } = useParams<{ token: string }>();
@@ -65,6 +67,11 @@ const PublicQuote = () => {
               <h2 className="font-display text-xl font-bold text-foreground">{quote.resort_name}</h2>
               {quote.destination && <p className="text-sm text-muted-foreground">{quote.destination}</p>}
             </div>
+
+            {/* Embedded Review Section */}
+            {quote.include_review && quote.review_data && (
+              <QuoteReviewSection reviewData={quote.review_data} />
+            )}
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
               {quote.check_in && <div><p className="text-muted-foreground text-xs">Check-In</p><p className="font-medium text-foreground">{format(new Date(quote.check_in), "MMM d, yyyy")}</p></div>}
