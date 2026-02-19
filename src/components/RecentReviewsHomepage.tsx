@@ -72,7 +72,7 @@ const RecentReviewsHomepage = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between mb-6">
           <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground">
-            Destination Reviews
+            Real Destination Reviews
           </h2>
           <Link
             to="/destinations"

@@ -18,7 +18,7 @@ const HeroSection = () => {
           <span className="text-emerald-400 font-black">GO</span>
         </h1>
         <p className="text-white/80 text-sm md:text-base font-light mb-3">
-          Honest Reviews by Travellers, for Travellers
+          Real Reviews by Travellers, for Travellers
         </p>
         <a
           href="https://www.expedia.ca/?affcid=ca.network.pz.affiliate.1100l5DpWA"
