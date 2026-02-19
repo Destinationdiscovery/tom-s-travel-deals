@@ -98,7 +98,7 @@ const HeroSection = ({ onSearch, isSearching, onInlineSearch, onSearchTypeChange
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center pt-20">
+    <section className="relative min-h-[70vh] flex items-center justify-center pt-20">
       <img
         src={heroBackground}
         alt="Overwater villa at sunset"
@@ -114,7 +114,7 @@ const HeroSection = ({ onSearch, isSearching, onInlineSearch, onSearchTypeChange
         </h1>
 
         <p className="text-white/80 text-xl md:text-2xl mb-10 font-light">
-          Know what to expect before you go.
+          Honest Reviews by Travellers, for Travellers
         </p>
 
         <div className="max-w-3xl mx-auto space-y-4">
