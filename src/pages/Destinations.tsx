@@ -1,17 +1,25 @@
-import { useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Star, ArrowRight, Play, Filter } from "lucide-react";
+import { Star, ArrowRight, Play, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useGenerateReview } from "@/hooks/useGenerateReview";
+import { useSearchSuggestions } from "@/hooks/useSearchSuggestions";
+import AIReviewResult from "@/components/AIReviewResult";
 import heroImg from "@/assets/snowbird-caribbean-aerial.jpg";
 import cubaImg from "@/assets/deal-cuba.jpg";
 import curacaoImg from "@/assets/curacao-hero.avif";
 import mexicoImg from "@/assets/mexico-hero.webp";
 import vegasImg from "@/assets/vegas-gallery-1.jpg";
 import cruiseImg from "@/assets/cruise-hero.jpg";
+import banffImg from "@/assets/canada-boom-banff-street.jpg";
+import santoriniImg from "@/assets/deal-santorini.jpg";
+import maldivesImg from "@/assets/deal-maldives.jpg";
+import phuketImg from "@/assets/deal-phuket-clean.jpg";
+import DestinationCard from "@/components/destinations/DestinationCard";
 
-interface Destination {
+export interface Destination {
   slug: string;
   image: string;
   destination: string;
@@ -26,7 +34,7 @@ interface Destination {
 
 const destinations: Destination[] = [
   {
-    slug: "mexico-barcelo-riviera",
+    slug: "barcelo-maya-riviera",
     image: mexicoImg,
     destination: "Barceló Maya Riviera Adults Only",
     country: "Riviera Maya, Mexico",
@@ -38,7 +46,7 @@ const destinations: Destination[] = [
     tags: ["Adults-Only", "Luxury", "All-Inclusive", "Pool"],
   },
   {
-    slug: "cuba-vila-gale",
+    slug: "vila-gale-paredon",
     image: cubaImg,
     destination: "Vila Galé Paredón",
     country: "Cayo Coco, Cuba",
@@ -50,7 +58,7 @@ const destinations: Destination[] = [
     tags: ["Budget", "Beach", "All-Inclusive"],
   },
   {
-    slug: "curacao-blue-bay",
+    slug: "villa-blue-bay-curacao",
     image: curacaoImg,
     destination: "Villa in Blue Bay Resort",
     country: "Curaçao",
@@ -62,36 +70,106 @@ const destinations: Destination[] = [
     tags: ["Villa", "Luxury", "Beach", "Privacy"],
   },
   {
-    slug: "vegas-bellagio",
+    slug: "bellagio-las-vegas",
     image: vegasImg,
     destination: "Bellagio",
     country: "Las Vegas, USA",
     region: "North America",
-    teaser: "After more than 30 trips to Vegas and stays all over the Strip, Bellagio is still the resort I come back to the most. It's upscale without feeling stuffy, perfectly located, and consistently delivers the full Vegas experience.",
+    teaser: "After more than 30 trips to Vegas, Bellagio is still the resort I come back to the most. Upscale without feeling stuffy, perfectly located, and consistently delivers.",
     rating: 4.5,
     dateVisited: "February 2025",
     hasVideo: false,
     tags: ["Casino", "Luxury", "City", "Iconic"],
   },
   {
-    slug: "cruise-experience",
+    slug: "cruising-experience",
     image: cruiseImg,
     destination: "Cruising as a Travel Experience",
     country: "Caribbean & Alaska",
     region: "Multiple",
-    teaser: "After more than 15 years of cruising in the Caribbean and Alaska, cruising still stands out as one of the easiest ways to travel if you plan it properly and know what to expect.",
+    teaser: "After 15+ years of cruising, it still stands out as one of the easiest ways to travel if you plan it properly and know what to expect.",
     rating: 4.0,
     dateVisited: "15+ years experience",
     hasVideo: false,
     tags: ["Cruise", "Caribbean", "Alaska", "Multi-destination"],
   },
+  {
+    slug: "banff-lake-louise",
+    image: banffImg,
+    destination: "Banff & Lake Louise",
+    country: "Alberta, Canada",
+    region: "North America",
+    teaser: "Stunning mountain scenery, world-class skiing, turquoise lakes, and charming alpine towns make Banff one of Canada's most iconic destinations.",
+    rating: 4.8,
+    dateVisited: "Winter 2025",
+    hasVideo: false,
+    tags: ["Mountains", "Skiing", "Nature", "Adventure"],
+  },
+  {
+    slug: "santorini-greece",
+    image: santoriniImg,
+    destination: "Santorini",
+    country: "Greece",
+    region: "Europe",
+    teaser: "White-washed cliffs, dramatic sunsets over the caldera, and incredible Mediterranean cuisine make Santorini a bucket-list destination that lives up to the hype.",
+    rating: 4.7,
+    dateVisited: "Summer 2025",
+    hasVideo: false,
+    tags: ["Romantic", "Beach", "Views", "Culture"],
+  },
+  {
+    slug: "maldives-beach-resort",
+    image: maldivesImg,
+    destination: "Maldives Beach Resort",
+    country: "Maldives",
+    region: "Indian Ocean",
+    teaser: "Overwater bungalows, crystal-clear lagoons, and some of the best snorkeling on earth. The Maldives is the ultimate luxury beach escape.",
+    rating: 4.9,
+    dateVisited: "Spring 2025",
+    hasVideo: false,
+    tags: ["Luxury", "Beach", "Overwater", "Snorkeling"],
+  },
+  {
+    slug: "phuket-thailand",
+    image: phuketImg,
+    destination: "Phuket",
+    country: "Thailand",
+    region: "Southeast Asia",
+    teaser: "Vibrant nightlife, stunning beaches, incredible street food, and temples perched on hillsides. Phuket offers something for every type of traveler.",
+    rating: 4.5,
+    dateVisited: "Fall 2025",
+    hasVideo: false,
+    tags: ["Beach", "Culture", "Budget", "Nightlife"],
+  },
 ];
 
 const Destinations = () => {
+  const navigate = useNavigate();
+  const [query, setQuery] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const { suggestions } = useSearchSuggestions(query);
+  const { review, isLoading, error, generateReview, clearReview } = useGenerateReview();
+  const resultsRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    document.title = "Destination Reviews - ReviewThenGo";
-    return () => { document.title = "ReviewThenGo.com | Honest Reviews, Tested Gear & Travel Insights"; };
+    document.title = "Real Destination Reviews - ReviewThenGo";
+    return () => { document.title = "ReviewThenGo.com | Real Reviews, Tested Gear & Travel Insights"; };
   }, []);
+
+  const handleSearch = () => {
+    const trimmed = query.trim();
+    if (trimmed.length < 2) return;
+    setShowSuggestions(false);
+    generateReview(trimmed);
+    setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
+  };
+
+  const handleSuggestionClick = (name: string) => {
+    setQuery(name);
+    setShowSuggestions(false);
+    generateReview(name);
+    setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -103,99 +181,76 @@ const Destinations = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60" />
           <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
             <h1 className="font-display text-4xl md:text-6xl font-bold text-white mb-4">
-              <span className="text-sky-300">My</span> Reviews
+              <span className="text-sky-300">Real</span> Destination Reviews
             </h1>
             <p className="text-white/80 text-lg max-w-2xl mx-auto">
-              Real stories from real travels. Every destination here, I've walked those streets, 
-              tasted that food, and captured those moments myself.
+              Explore curated reviews from real traveler experiences. Search any hotel, resort, or destination to generate a fresh AI-powered review.
             </p>
           </div>
         </section>
 
-        {/* Destinations Grid */}
+        {/* Search + Grid */}
         <section className="py-16">
           <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between mb-8">
-              <p className="text-muted-foreground">{destinations.length} destinations reviewed</p>
-              <Button variant="outline" size="sm" className="gap-2">
-                <Filter className="h-4 w-4" />
-                Filter
-              </Button>
+            {/* Search Bar */}
+            <div className="max-w-2xl mx-auto mb-12">
+              <div className="flex gap-2 relative">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <input
+                    type="text"
+                    value={query}
+                    onChange={(e) => { setQuery(e.target.value); setShowSuggestions(true); }}
+                    onFocus={() => query.trim().length >= 2 && setShowSuggestions(true)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                    placeholder="Search a hotel, resort, or destination..."
+                    className="w-full h-11 pl-10 pr-4 rounded-lg border border-border bg-card text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                  {showSuggestions && suggestions.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-card rounded-lg shadow-lg border border-border overflow-hidden z-20">
+                      {suggestions.map((s) => (
+                        <button
+                          key={s.id}
+                          onMouseDown={() => handleSuggestionClick(s.name)}
+                          className="w-full text-left px-4 py-2.5 hover:bg-muted/50 transition-colors flex items-center gap-2 text-sm"
+                        >
+                          <Search className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                          <span className="text-foreground font-medium">{s.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <Button onClick={handleSearch} disabled={isLoading || query.trim().length < 2} className="h-11 px-6">
+                  {isLoading ? "Searching..." : "Search"}
+                </Button>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {destinations.map((dest, index) => (
-                <Link 
-                  key={dest.slug}
-                  to={`/destinations/${dest.slug}`}
-                  className="group block"
-                >
-                  <article 
-                    className="bg-card rounded-2xl overflow-hidden shadow-soft hover:shadow-elevated transition-all duration-500 hover:-translate-y-2 animate-fade-up h-full flex flex-col"
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  >
-                    {/* Image */}
-                    <div className="relative h-56 overflow-hidden">
-                      <img
-                        src={dest.image}
-                        alt={dest.destination}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 to-transparent" />
-                      
-                      {dest.hasVideo && (
-                        <div className="absolute top-4 right-4 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
-                          <Play className="h-3 w-3 fill-current" />
-                          Video
-                        </div>
-                      )}
-                      
-                      <div className="absolute bottom-4 left-4">
-                        <p className="text-primary-foreground/80 text-sm">{dest.country}</p>
-                        <h3 className="font-display text-2xl font-bold text-primary-foreground">
-                          {dest.destination}
-                        </h3>
-                      </div>
-                    </div>
-
-                    {/* Content */}
-                    <div className="p-6 space-y-4 flex-1 flex flex-col">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1">
-                          {[...Array(5)].map((_, i) => (
-                            <Star 
-                              key={i} 
-                              className={`h-4 w-4 ${i < Math.floor(dest.rating) ? 'text-accent fill-accent' : 'text-muted-foreground'}`} 
-                            />
-                          ))}
-                          <span className="text-sm font-medium text-foreground ml-1">{dest.rating}</span>
-                        </div>
-                        <span className="text-xs text-muted-foreground">{dest.dateVisited}</span>
-                      </div>
-
-                      <p className="text-muted-foreground text-sm flex-1">
-                        {dest.teaser}
-                      </p>
-
-                      <div className="flex flex-wrap gap-2">
-                        {dest.tags.map((tag) => (
-                          <span 
-                            key={tag}
-                            className="text-xs px-2 py-1 rounded-full bg-muted text-muted-foreground"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-
-                      <div className="flex items-center text-primary text-sm font-medium group-hover:gap-2 transition-all pt-2">
-                        Read My Review <ArrowRight className="h-4 w-4 ml-1" />
-                      </div>
-                    </div>
-                  </article>
-                </Link>
-              ))}
+            {/* Inline AI results */}
+            <div ref={resultsRef}>
+              <AIReviewResult
+                review={review}
+                isLoading={isLoading}
+                error={error}
+                onNewReview={() => { clearReview(); setQuery(""); }}
+                onReviewReady={(slug) => navigate(`/review/${slug}`, { replace: true })}
+              />
             </div>
+
+            {/* Destinations Grid */}
+            {!review && !isLoading && !error && (
+              <>
+                <div className="flex items-center justify-between mb-8">
+                  <p className="text-muted-foreground">{destinations.length} destinations reviewed</p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {destinations.map((dest, index) => (
+                    <DestinationCard key={dest.slug} destination={dest} index={index} />
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         </section>
       </main>
