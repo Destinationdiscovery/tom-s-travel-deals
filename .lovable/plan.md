@@ -1,16 +1,15 @@
 
+# Update Branding Text
 
-# Add "Search More Deals" CTA Next to Featured Deals Heading
+## Changes
 
-## Change
+### 1. Hero subtitle (src/components/HeroSection.tsx)
+Change "Honest Reviews by Travellers, for Travellers" to "Real Reviews by Travellers, for Travellers"
 
-Add a "Search More Deals" link beside the "Featured Deals" heading in `TravelDealsSection.tsx`, styled similarly to the "All Articles" link in the Blog Preview section (small text, primary color, with an arrow icon). It will link to the Expedia affiliate homepage using the geo-detected country link.
+### 2. Homepage section heading (src/components/RecentReviewsHomepage.tsx)
+Change "Destination Reviews" to "Real Destination Reviews"
 
 ## Technical Details
 
-### File: `src/components/TravelDealsSection.tsx`
-
-- Import `ArrowRight` from lucide-react, and `detectCountry`, `EXPEDIA_LINKS` from `@/components/AffiliateLinks`
-- Wrap the "Featured Deals" `<h3>` in a flex container with `justify-between` and `items-center`
-- Add an `<a>` tag linking to `EXPEDIA_LINKS[detectCountry()]` with text "Search More Deals" and an arrow icon, styled as `text-sm font-medium text-primary hover:underline`
-
+- **src/components/HeroSection.tsx** line 18: Replace "Honest" with "Real"
+- **src/components/RecentReviewsHomepage.tsx** line 75: Replace "Destination Reviews" with "Real Destination Reviews"
