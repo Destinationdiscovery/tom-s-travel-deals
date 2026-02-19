@@ -1,33 +1,28 @@
 
-# Populate Search Bar on Card Click (No Auto-Search)
+# Replace Single Search Bar with Tabbed Inputs on Homepage Travel Intel
 
-## Overview
+## What Changes
 
-When a user clicks a category card (Entry Requirements, Safety Advisories, Travel News) in the Travel Intel section on the homepage, the search bar should only be populated with the example query text -- not automatically execute the search. The user can then review/edit the query and click "Get Intel" themselves.
+Replace the current single generic search bar in the homepage Travel Intel section with the same tabbed search interface used on the full Travel Intel page. Each tab shows the correct input fields with proper placeholder examples.
 
-## Changes
+## How It Works
 
-### File: `src/components/IntelPreviewSection.tsx`
-
-Update the `handleCardClick` function to only set the query text without calling `doSearch`:
-
-- **Current behavior**: Clicking a card sets the query AND immediately triggers the search
-- **New behavior**: Clicking a card only sets the query in the search input, letting the user initiate the search manually
-
-The updated function will simply call `setQuery(card.query)` for all card types, removing the `doSearch()` calls and the citizenship prompt trigger. The user can then click "Get Intel" or press Enter to run the search.
+- **Three tabs**: Requirements, Advisories, News (matching the full Travel Intel page)
+- **Requirements tab**: Two inputs -- "Your citizenship (e.g., Canada)" and "Destination (e.g., Cuba)" with a "Check" button
+- **Advisories tab**: Single input -- "Destination (e.g., Cuba)" with a "Check" button
+- **News tab**: Single input -- "Destination (e.g., Cuba)" with a "Get News" button
+- **Clicking a category card**: Switches to the corresponding tab (no auto-search)
+- Results still display below the tabs as they do now
 
 ## Technical Details
 
-Replace the `handleCardClick` function body (lines 63-77) with:
+### File: `src/components/IntelPreviewSection.tsx`
 
-```typescript
-const handleCardClick = (card: typeof intelCards[0]) => {
-  setQuery(card.query);
-};
-```
-
-This removes:
-- The automatic `doSearch()` calls for advisories and news cards
-- The automatic requirements search and citizenship prompt for requirements cards
-
-The existing `handleSearch` function (triggered by the "Get Intel" button or Enter key) already handles parsing "X to Y" patterns and citizenship prompts correctly, so no other changes are needed.
+- Remove the single `query` search bar and the generic `handleSearch` function
+- Remove `citizenshipPrompt`, `citizenship`, `pendingDest` state (no longer needed since Requirements tab has its own citizenship field)
+- Add `activeTab` state and per-tab input states: `reqCitizenship`, `reqDestination`, `advDestination`, `newsDestination`
+- Import `Tabs, TabsContent, TabsList, TabsTrigger` from UI components and `FileText, Loader2` from lucide-react
+- Add a `handleSubmit(type)` function matching the full page logic
+- Update `handleCardClick` to set `activeTab` to the card's type
+- Replace the search bar section with the `Tabs` component containing three `TabsContent` blocks, each with the appropriate inputs (copied from the full Travel Intel page pattern)
+- Keep the category cards, results display, and error handling as-is
