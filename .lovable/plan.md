@@ -1,98 +1,72 @@
 
 
-# Full Site Redesign: Dark Theme, Content-Rich, Conversion-Optimized
+# Homepage & Affiliate Redesign: Compact, Content-Rich, Click-Optimized
 
-## Vision
+## What Changes
 
-Based on your reference images and the goal of maximizing views and clicks, I recommend transforming ReviewThenGo from a minimal light-theme search engine into a **dark-themed, content-forward travel portal** that gives visitors reasons to stay, scroll, and click -- even before they search.
+### 1. Shrink the Hero Section
+The hero currently dominates the viewport. We'll cut it down significantly:
+- Reduce from `min-h-[70vh]` to `min-h-[50vh]`
+- Make the headline smaller (from `text-7xl` to `text-5xl` on desktop)
+- Keep only **3 search categories** instead of 6: **Destination Review**, **Travel Gear**, and **Travel Intel** (which combines requirements, advisories, and news into one)
+- Remove the separate "Travel Deals" button since deals are visible right below anyway
 
-The current site shows a hero + search bar + deals. That's effective for repeat visitors who know what to do, but first-time visitors see very little content and have no reason to explore further. The redesign adds visual density, social proof, and multiple click paths while keeping the AI search as the centerpiece.
+### 2. Consolidate Search Categories
+Instead of 6 buttons (Destination Review, Destination Search, Travel Gear, Requirements, Advisories, News), simplify to 3:
+- **Destination Review** -- keeps existing behavior
+- **Travel Gear** -- keeps existing behavior
+- **Travel Intel** -- a new combined category that replaces Requirements, Advisories, and News with a single search that lets the AI decide what type of intel to return
 
-## Key Design Principles
+This reduces visual clutter and decision fatigue.
 
-1. **Dark theme as default** -- travel sites with dark backgrounds make destination photography pop (higher contrast = more clicks on deal cards)
-2. **Content above the fold** -- show deals, recent reviews, and blog teasers immediately so Google indexes rich content and visitors see value
-3. **Multiple engagement paths** -- not everyone will search; give them cards to click, deals to browse, articles to read
-4. **Affiliate links front and center** -- bigger deal cards with percentage-off badges, Expedia branding visible
+### 3. Add Inline Affiliate Links Throughout
 
-## Changes Overview
+This is the biggest change. Currently affiliate links only appear:
+- In the sidebar of review pages (one "Ready to Book?" card)
+- In the "Things to Do" section footer
 
-### 1. Default to Dark Theme
-**File: `src/App.tsx`**
-- Change `defaultTheme="light"` to `defaultTheme="dark"`
+After this change, affiliate links will appear:
 
-### 2. Redesign Header with Navigation Links
-**File: `src/components/Header.tsx`**
-- Add navigation links back: Home, Reviews, Gear, About
-- Style with dark background (`bg-slate-950/90 backdrop-blur-md`)
-- Add a compact search icon/button in the header that scrolls to the hero search
-- Keep the logo, admin Dashboard, and theme toggle
+**a) Recent Reviews cards on homepage** -- each card gets a small "Book on Expedia" link beneath the star rating
 
-### 3. Redesign Hero Section
-**File: `src/components/HeroSection.tsx`**
-- Keep the hero background image and search bar with category buttons (current design is strong)
-- Reduce hero height from full viewport (`min-h-screen`) to roughly 70vh so content peeks above the fold
-- Update subtitle to "Honest Reviews by Travellers for Travellers" (from your reference)
-- Add a subtle Expedia logo/badge near the search bar to build trust and drive affiliate awareness
+**b) Blog preview cards on homepage** -- any travel article mentioning a bookable destination gets a subtle "Find deals" affiliate link
 
-### 4. Revamp Travel Deals Section with Discount Badges
-**File: `src/components/TravelDealsSection.tsx`**
-- Add percentage-off discount badges (e.g., "$26%", "20%") overlaid on deal card images (like your reference mockups)
-- Calculate discount percentages from existing original/sale prices
-- Add star ratings to deal cards for social proof
-- Make the section heading bolder with a "View All" link
-- Keep the Expedia and Hotels.com banners but make them more compact
+**c) AI Review pages (`AIReviewResult.tsx`)** -- add an inline affiliate CTA after the summary card AND after the travel tips section (2 placements instead of just sidebar)
 
-### 5. Add "Recent Reviews" Section to Homepage
-**File: `src/components/RecentReviewsHomepage.tsx`** (new file)
-- Query the `cached_reviews` table to show 3-4 recent destination review cards
-- Each card: destination image, title, star rating, short excerpt, "Read Review" button
-- This gives Google crawlable content and gives visitors something to click immediately
-- Displayed between the hero and the deals section
+**d) Manual review pages (`DestinationReview.tsx`)** -- add an inline affiliate CTA after the "My Experience" section and after the Tips section
 
-### 6. Add "From the Blog" Section to Homepage
-**File: `src/components/BlogPreviewSection.tsx`** (new file)
-- Pull 3 recent Compass articles and display as horizontal cards
-- Each card: image, title, author ("Tom"), date, short excerpt
-- Links to `/compass/:slug` pages
-- Adds crawlable content, increases time on site, and supports SEO
+**e) Blog article pages (`CompassArticle.tsx`)** -- add a contextual "Planning a trip?" affiliate banner between the article content and the comments section
 
-### 7. Update Homepage Layout
-**File: `src/pages/Index.tsx`**
-- New section order when no search is active:
-  1. Header
-  2. Hero (shorter, ~70vh)
-  3. Recent Reviews section (new)
-  4. Travel Deals section (revamped)
-  5. Blog Preview section (new)
-  6. Footer
-- When a search IS active, results still replace sections 3-5 (existing behavior preserved)
+**f) Things To Do cards** -- each activity card gets a small "Book this" Expedia link (not just the section footer)
 
-### 8. Footer Polish
-**File: `src/components/Footer.tsx`**
-- Update to match dark aesthetic with subtle border separators
-- Add social media icon placeholders (optional, for future use)
-- Keep existing Explore links
+### 4. Homepage Section Previews
+Keep the current 3-section layout but make each more prominent:
+- **Recent Reviews** -- increase from 4 cards to showing rating + location more prominently, add "Book Now" affiliate micro-links
+- **Travel Deals** -- keep as-is (already strong)
+- **Blog Preview** -- add destination-aware affiliate links to cards
 
-### 9. Dark Theme Color Refinements
-**File: `src/index.css`**
-- Tweak dark mode card backgrounds to use slightly lighter slate tones for better card contrast against the page background
-- Ensure deal card pricing (emerald green) and discount badges (amber/yellow) remain vibrant against dark backgrounds
+### 5. Fix Double Footer
+There's a bug on line 378-379 of `Index.tsx` -- the Footer component is rendered twice. We'll remove the duplicate.
+
+## Files Changed
+
+| File | Change |
+|------|--------|
+| `src/components/HeroSection.tsx` | Reduce height, remove 3 search types, shrink headline |
+| `src/pages/Index.tsx` | Remove duplicate Footer, pass affiliate context to sections |
+| `src/components/RecentReviewsHomepage.tsx` | Add inline Expedia affiliate links per card |
+| `src/components/BlogPreviewSection.tsx` | Add "Find deals" affiliate links on destination articles |
+| `src/components/AIReviewResult.tsx` | Add 2 additional inline affiliate CTAs (after summary, after tips) |
+| `src/pages/DestinationReview.tsx` | Add inline affiliate CTA after "My Experience" and after Tips |
+| `src/pages/CompassArticle.tsx` | Add "Planning a trip?" affiliate banner before comments |
+| `src/components/review/ThingsToDoSection.tsx` | Add per-activity "Book this" link |
 
 ## Technical Details
 
+- The `buildDeepLinks` and `detectCountry` functions from `AffiliateLinks.tsx` will be reused everywhere -- no new affiliate logic needed
+- For the combined "Travel Intel" category, the edge function call will use the existing `travel-intel` function but the frontend will auto-detect the query type (contains "to" = requirements, otherwise = advisories/news combo)
+- Inline affiliate components will be lightweight -- just an anchor tag with the Expedia deep link, not the full 3-platform card. The full card stays in the sidebar only
+- The `RecentReviewsHomepage` cards will use `buildDeepLinks(country, review.property_name).expedia` to generate per-property Expedia links
 - No new dependencies required
-- `cached_reviews` table is already used by `/top/:location` pages, so querying it for recent reviews follows existing patterns
-- `compassArticles` data is already in `src/data/compassArticles.ts`, so the blog preview section just imports from there
-- All affiliate links and existing functionality remain untouched
-- The dark theme switch is a single prop change; all components already support dark mode via CSS variables
-- Discount badge calculation: `Math.round((1 - salePrice/originalPrice) * 100)`
-
-## Expected Impact
-
-- **More clicks**: Visitors see deals and reviews without needing to search first
-- **Better SEO**: Google indexes actual review and blog content on the homepage instead of just a search bar
-- **Higher affiliate revenue**: Discount badges and prominent deal cards create urgency
-- **Lower bounce rate**: Multiple content sections give visitors reasons to scroll and explore
-- **Professional appearance**: Dark theme with vivid photography creates a premium travel brand feel
+- No database changes needed
 
