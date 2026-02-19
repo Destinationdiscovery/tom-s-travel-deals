@@ -1,4 +1,5 @@
-import { Star } from "lucide-react";
+import { Star, ArrowRight } from "lucide-react";
+import { detectCountry, EXPEDIA_LINKS } from "@/components/AffiliateLinks";
 import dealBanner from "@/assets/deal-expedia-vacation-sale-banner.png";
 import hotelsBanner from "@/assets/deal-hotels-spring-sale-banner.png";
 import dealTemptation from "@/assets/deal-temptation-cancun.png";
@@ -77,9 +78,19 @@ const TravelDealsSection = () => {
 
         {/* Featured Deals Grid */}
         <div>
-          <h3 className="font-display text-lg md:text-xl font-semibold text-foreground mb-4">
-            Featured Deals
-          </h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-display text-lg md:text-xl font-semibold text-foreground">
+              Featured Deals
+            </h3>
+            <a
+              href={EXPEDIA_LINKS[detectCountry()]}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-medium text-primary hover:underline flex items-center gap-1"
+            >
+              Search More Deals <ArrowRight className="h-4 w-4" />
+            </a>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredDeals.map((deal, i) => (
               <a
