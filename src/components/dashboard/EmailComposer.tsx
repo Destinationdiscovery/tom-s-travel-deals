@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Mail, Send, ExternalLink, Loader2, Link2 } from "lucide-react";
+import { Mail, ExternalLink, Link2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,7 +18,7 @@ const EmailComposer = () => {
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [emailLog, setEmailLog] = useState<any[]>([]);
-  const [bookingPortalUrl, setBookingPortalUrl] = useState(() => localStorage.getItem("rtg_booking_portal") || "");
+  
   const [quotes, setQuotes] = useState<any[]>([]);
 
   useEffect(() => {
@@ -87,11 +87,6 @@ const EmailComposer = () => {
     fetchEmailLog();
   };
 
-  const saveBookingPortal = () => {
-    localStorage.setItem("rtg_booking_portal", bookingPortalUrl);
-    toast({ title: "Saved", description: "Booking portal URL saved." });
-  };
-
   return (
     <div className="space-y-6">
       <h1 className="font-display text-2xl font-bold text-foreground">Email System</h1>
@@ -153,19 +148,19 @@ const EmailComposer = () => {
 
         {/* Sidebar */}
         <div className="space-y-4">
-          {/* Booking Portal */}
+          {/* Quick Links */}
           <Card>
-            <CardHeader className="pb-3"><CardTitle className="text-sm">Booking Portal</CardTitle></CardHeader>
+            <CardHeader className="pb-3"><CardTitle className="text-sm">Quick Links</CardTitle></CardHeader>
             <CardContent className="space-y-2">
-              <Input value={bookingPortalUrl} onChange={(e) => setBookingPortalUrl(e.target.value)} placeholder="https://your-booking-portal.com" />
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={saveBookingPortal}>Save</Button>
-                {bookingPortalUrl && (
-                  <Button variant="outline" size="sm" onClick={() => window.open(bookingPortalUrl, "_blank")} className="gap-1">
-                    <ExternalLink className="h-3 w-3" /> Open
-                  </Button>
-                )}
-              </div>
+              <Button variant="outline" size="sm" className="w-full justify-start gap-2" onClick={() => window.open("https://outlook.cloud.microsoft/mail/", "_blank")}>
+                <ExternalLink className="h-3.5 w-3.5" /> Outlook Email
+              </Button>
+              <Button variant="outline" size="sm" className="w-full justify-start gap-2" onClick={() => window.open("https://tob.sax.softvoyage.com/", "_blank")}>
+                <ExternalLink className="h-3.5 w-3.5" /> Sirev Booking
+              </Button>
+              <Button variant="outline" size="sm" className="w-full justify-start gap-2" onClick={() => window.open("https://www.expediataap.ca/", "_blank")}>
+                <ExternalLink className="h-3.5 w-3.5" /> Expedia TAAP
+              </Button>
             </CardContent>
           </Card>
 

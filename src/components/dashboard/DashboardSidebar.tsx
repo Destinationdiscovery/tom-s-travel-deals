@@ -1,7 +1,7 @@
-import { LayoutDashboard, FileText, Calendar, Mail, ImageIcon, Users } from "lucide-react";
+import { LayoutDashboard, FileText, Calendar, Mail, ImageIcon, Users, Megaphone } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export type DashboardTab = "overview" | "quotes" | "calendar" | "emails" | "gear" | "clients";
+export type DashboardTab = "overview" | "quotes" | "calendar" | "emails" | "gear" | "clients" | "deals";
 
 const tabs = [
   { id: "overview" as const, label: "Dashboard", icon: LayoutDashboard },
@@ -9,6 +9,7 @@ const tabs = [
   { id: "clients" as const, label: "Clients", icon: Users },
   { id: "calendar" as const, label: "Calendar", icon: Calendar },
   { id: "emails" as const, label: "Emails", icon: Mail },
+  { id: "deals" as const, label: "Deal Maker", icon: Megaphone },
   { id: "gear" as const, label: "Gear Images", icon: ImageIcon },
 ];
 

@@ -27,3 +27,6 @@ verify_jwt = false
 [functions.setup-admin]
 verify_jwt = false
 
+[functions.generate-deal-content]
+verify_jwt = false
+
