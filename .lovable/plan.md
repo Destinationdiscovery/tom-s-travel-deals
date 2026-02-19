@@ -1,42 +1,43 @@
 
 
-# Fix Expedia Logo Size + Search Widget
+# Expedia Search Widget -- Right-Side Slide Panel
 
 ## Overview
 
-Two fixes: make the Expedia logo in the hero much larger and more visible, and address the blank search widget by using an iframe-based embed approach since the JavaScript widget SDK isn't rendering inside a React SPA.
+Redesign the Expedia search widget from a top-right dropdown into a **right-side slide-out panel** that users can open and close at any time while browsing. The toggle button stays in the header, but the panel slides in from the right edge of the screen like a sidebar drawer.
 
 ## Changes
 
-### 1. Increase Expedia Logo Size in Hero
-**File: `src/components/HeroSection.tsx`**
-
-- Change the logo height from `h-5 md:h-6` (20-24px) to `h-8 md:h-10` (32-40px) so it's clearly visible
-- Slightly increase the "Powered by:" text size from `text-xs` to `text-sm`
-
-### 2. Fix Blank Search Widget
+### 1. Redesign Widget as Right-Side Panel
 **File: `src/components/ExpediaSearchWidget.tsx`**
 
-The Expedia `eg-widgets.js` script scans the DOM on load and initializes `.eg-widget` divs it finds. In a React SPA, the widget div gets mounted/unmounted dynamically, and calling `window.eg.widgets.init()` may not reliably re-scan. The widget appears blank because the script ran before the div existed or can't re-initialize properly.
+- Change from a small top-right fixed dropdown to a **full-height right-side panel** (fixed, top to bottom, right edge)
+- Slide in/out using `translateX` animation (off-screen right when closed, slides in when open)
+- Panel width: `min(575px, 92vw)` (matching Expedia's optimal range)
+- Top padding accounts for the fixed header height (~64px)
+- Includes the Expedia logo header bar with a close button
+- The `.eg-widget` embed div renders inline within the panel with a white background
+- Keeps the existing script loading, retry init logic, and fallback button
+- Adds a semi-transparent backdrop overlay behind the panel that also closes the widget on click
 
-**Fix approach:**
-- Instead of relying on the JS SDK's init method, use an **iframe-based embed** pointing to the Expedia affiliate search page. This is more reliable in SPAs since iframes are self-contained.
-- The iframe URL pattern: `https://www.expedia.ca/affiliate/search?affcid=ca.network.pz.affiliate.1100l5DpWA` embedded in the floating panel.
-- If the iframe approach doesn't work with Expedia's affiliate program, fall back to a **direct link button** styled as a search prompt that opens Expedia in a new tab with the affiliate tracking code.
-- As a secondary attempt, also try a longer delay (1000ms) on `init()` and ensure the script's `onload` callback is used rather than just setting `scriptLoaded` immediately.
+### 2. Remove "Expedia" Text from Header Button
+**File: `src/components/Header.tsx`**
 
-The widget container will also get a white/light background so the Expedia form elements (which render with light theme) are visible rather than being invisible on the dark background.
+- Keep the Search icon toggle button in the header but remove the "Expedia" text label -- the icon alone is cleaner
+- Replace with just an Expedia logo icon or keep the search icon as-is
+- The button still toggles `widgetOpen` state which controls the slide panel
 
 ## Technical Details
 
-- The core issue with the blank widget is that third-party widget scripts that scan the DOM on initial load often don't work well with React's virtual DOM and conditional rendering
-- Adding `background: white` to the widget container ensures any rendered form elements are visible (Expedia's widget uses light-colored inputs)
-- The iframe fallback is the most reliable approach for third-party booking widgets in SPAs
+- The panel uses `fixed inset-y-0 right-0` positioning with `transform translateX(100%)` when closed and `translateX(0)` when open
+- A backdrop overlay (`bg-black/40`) appears behind the panel and dismisses it on click
+- The widget embed code, script loading, and init retry logic remain unchanged
+- The panel sits at `z-[60]` to float above all page content
 
 ## File Summary
 
 | File | Action |
 |------|--------|
-| `src/components/HeroSection.tsx` | Increase logo size from h-5 to h-8 |
-| `src/components/ExpediaSearchWidget.tsx` | Add white background for widget, improve init timing, add iframe fallback |
+| `src/components/ExpediaSearchWidget.tsx` | Redesign as right-side slide panel with backdrop |
+| `src/components/Header.tsx` | Clean up toggle button (remove "Expedia" text) |
 
