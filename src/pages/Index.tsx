@@ -5,6 +5,8 @@ import Header from "@/components/Header";
 import HeroSection, { type SearchType } from "@/components/HeroSection";
 import AIReviewResult from "@/components/AIReviewResult";
 import TravelDealsSection from "@/components/TravelDealsSection";
+import RecentReviewsHomepage from "@/components/RecentReviewsHomepage";
+import BlogPreviewSection from "@/components/BlogPreviewSection";
 import ComparisonFloatingBadge from "@/components/ComparisonFloatingBadge";
 import Footer from "@/components/Footer";
 import SearchLoadingStages from "@/components/SearchLoadingStages";
@@ -364,10 +366,16 @@ const Index = () => {
           </section>
         )}
 
-        {!hasAnyResults && !isAnyLoading && !gear.reviewLoading && <TravelDealsSection />}
+        {!hasAnyResults && !isAnyLoading && !gear.reviewLoading && (
+          <>
+            <RecentReviewsHomepage />
+            <TravelDealsSection />
+            <BlogPreviewSection />
+          </>
+        )}
         </div>
       </main>
-      <ComparisonFloatingBadge />
+      <Footer />
       <Footer />
     </div>
   );
