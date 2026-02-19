@@ -1,93 +1,134 @@
 
+# Enhanced Quote Builder with Resort Review, Multi-Select Inclusions, and Client Files
 
-# Travel Agent Dashboard -- The Ultimate Tool
+## What Changes
 
-## Overview
+Three major enhancements to the Quote Builder:
 
-Transform the current admin dashboard into a full-featured travel agent command center with four new modules: Quote Builder, Booking Calendar, Client Email System, and a unified Dashboard Hub. The existing Gear Image admin stays as-is.
+1. **"Include Review?" toggle at quote start** -- When you begin a new quote and select/search a resort, you get asked "Include resort review in this quote?" If yes, the full AI review (ratings, summary, traveler comments, tips -- no affiliate links) is embedded in the quote preview and public quote page, appearing before the flight/pricing details.
 
-## New Modules
+2. **Multi-select dropdowns for form fields** -- Inclusions, room type, and other fields that benefit from multiple selections become tag-based multi-select inputs. You can pick from preset options (e.g. "All-Inclusive", "Airport Transfers", "Travel Insurance", "Spa Package") and also type custom ones.
 
-### 1. Dashboard Hub (replaces current GearAdmin as the landing view)
-- Sidebar navigation with sections: Dashboard, Quote Builder, Calendar, Emails, Gear Images
-- At-a-glance widgets: upcoming payments, recent quotes, bookings this month
-- Quick-action buttons for common tasks
+3. **Client file system** -- Quotes are grouped by client. The first quote for a new client auto-creates a "client file." The Recent Quotes list becomes a client-focused view showing client names with their quote count. Clicking a client expands to show all their quotes. This uses the existing `client_quotes` table grouped by `client_name`/`client_email` -- no new tables needed.
 
-### 2. Quote Builder
-- **Step 1 -- Select Resort**: Search for a destination using the existing AI review engine, or pick from cached reviews. The review summary auto-populates the quote.
-- **Step 2 -- Vacation Details Form**: Flight info (airline, flight numbers, departure/arrival times, airports), hotel room type, dates, number of travellers, inclusions, special notes.
-- **Step 3 -- Pricing**: Line items (flights, hotel, transfers, insurance, extras) with per-person and total pricing.
-- **Step 4 -- Preview and Send**: Professional quote card with resort review highlights, trip details, and pricing. No affiliate links. Options to:
-  - Download as PDF (browser print-to-PDF)
-  - Copy a shareable web link (public quote page at `/quote/:id`)
-  - Open in Outlook to email directly
+## How It Works
 
-### 3. Booking Calendar
-- Monthly calendar view showing all bookings
-- Event types with color coding: Booking dates, Final payment due, Departure, Return
-- Click to add/edit events
-- Upcoming deadlines panel on the side
-- Data stored in a new `bookings` database table
+### Include Review Flow
+- Step 1 (Resort Selection) gains a checkbox: "Include resort review in quote"
+- When checked and a resort is selected, the full `review_data` JSON is stored alongside the quote in a new `review_data` JSONB column on `client_quotes`
+- The QuotePreview and PublicQuote pages render the review first (property name, rating stars, summary, rating breakdown, traveler paragraphs, tips) followed by flight details and pricing
+- Affiliate links (AffiliateLinks, InlineAffiliateCTA) are excluded from the quote version
+- When unchecked, quotes work exactly as they do now
 
-### 4. Client Email System
-- Pre-built email templates: Quote, Follow-up, Pre-departure, After-trip feedback
-- Compose view that pre-fills template with client/booking data
-- "Open in Outlook" button generates a `mailto:` link with subject, body pre-filled (works with your Outlook travel email)
-- Link to booking portal for quick access
-- Email log to track what was sent to whom
+### Multi-Select Inclusions
+- Replace the single "Inclusions" text input with a tag-based multi-select
+- Preset options: "All-Inclusive", "Airport Transfers", "Travel Insurance", "Spa Package", "Kids Club", "Room Upgrade", "Late Check-Out", "Excursions"
+- You can type a custom inclusion and press Enter to add it
+- Tags display as removable chips
+- Same pattern available for Room Type if desired
+- Stored as a string array in the quote's JSONB or as comma-separated in the existing fields
 
-## Database Changes
-
-Three new tables (all with RLS restricted to admin only):
-
-**`client_quotes`** -- stores quote details
-- id, created_at, client_name, client_email, resort_name, resort_review_slug, destination, check_in, check_out, num_travellers, flight_details (jsonb), line_items (jsonb), total_price, currency, notes, status (draft/sent/accepted/expired), share_token
-
-**`bookings`** -- calendar events
-- id, created_at, client_name, client_email, quote_id (FK to client_quotes), event_type (booking/final_payment/departure/return), event_date, title, notes, is_completed
-
-**`email_log`** -- tracks sent communications
-- id, created_at, client_name, client_email, email_type (quote/followup/pre_departure/after_trip), subject, booking_id (FK), quote_id (FK)
-
-## New Pages and Routes
-
-| Route | Page | Description |
-|-------|------|-------------|
-| `/gear-admin` | Dashboard Hub | Tabbed layout with all modules |
-| `/quote/:token` | Public Quote View | Shareable client-facing quote (no auth required) |
-
-## Email Approach -- Outlook Integration
-
-Since you want to use your Outlook travel email:
-- All email actions generate `mailto:` links pre-filled with subject, body (HTML-formatted), and recipient
-- Clicking "Send via Outlook" opens your default email client with everything ready
-- A text field in settings lets you store your booking portal URL for quick access
-- The email log tracks that you initiated the email (date, recipient, type)
+### Client File Grouping
+- The "Recent Quotes" section on Step 1 is reorganized: quotes are grouped by client name
+- Each client row shows: name, email, number of quotes, most recent quote date
+- Clicking a client expands to show all their quotes for that client
+- Creating a new quote for an existing client name automatically files it under that client
+- No new database table -- this is purely a UI grouping of existing `client_quotes` data
 
 ## Technical Details
 
-### File Structure
-- `src/pages/GearAdmin.tsx` -- Refactored into a tabbed dashboard with sidebar
-- `src/components/dashboard/DashboardOverview.tsx` -- At-a-glance widgets
-- `src/components/dashboard/QuoteBuilder.tsx` -- Multi-step quote form
-- `src/components/dashboard/QuotePreview.tsx` -- Professional quote card for PDF/sharing
-- `src/components/dashboard/BookingCalendar.tsx` -- Monthly calendar with events
-- `src/components/dashboard/EmailComposer.tsx` -- Template-based email composer
-- `src/components/dashboard/EmailTemplates.ts` -- Pre-built email template strings
-- `src/pages/PublicQuote.tsx` -- Public shareable quote view (no auth)
-- New route `/quote/:token` added to App.tsx
+### Database Migration
+Add one new column to `client_quotes`:
 
-### Calendar Implementation
-- Built with a custom month-grid component using `date-fns`
-- No external calendar library needed -- keeps it lightweight
-- Events rendered as colored dots/pills on each day
+```text
+ALTER TABLE client_quotes
+  ADD COLUMN include_review boolean DEFAULT false,
+  ADD COLUMN review_data jsonb DEFAULT null;
+```
 
-### Quote PDF
-- Uses browser `window.print()` with a print-optimized CSS layout
-- Clean, professional output with resort image, review highlights, flight details, and pricing table
+This stores the full review data with the quote so the public quote page can render it without needing to look up cached_reviews.
 
-### Public Quote Page
-- Accessed via `/quote/:shareToken`
-- RLS policy allows public SELECT when matching the share_token
-- Professional client-facing view with your branding, no admin controls
+### File Changes
 
+**`src/components/dashboard/QuoteBuilder.tsx`**
+- Add `includeReview: boolean` and `reviewData: ReviewData | null` to QuoteData interface
+- Add checkbox "Include resort review in this quote?" on Step 1
+- When selecting a resort with include_review=true, fetch and store the full review_data from cached_reviews
+- Replace inclusions text input with a multi-tag input component (preset options + custom entry)
+- Save `include_review` and `review_data` to the database payload
+- Group existing quotes by client in the Recent Quotes panel (accordion-style: client name -> list of their quotes)
+
+**`src/components/dashboard/QuotePreview.tsx`**
+- When `quote.includeReview` is true and `quote.reviewData` exists, render the resort review section first:
+  - Property name, star rating, "Compiled from Real Traveler Reviews" badge
+  - Summary paragraph
+  - Rating breakdown bars
+  - "What Travelers Say" paragraphs
+  - Travel tips
+  - Best For tags
+  - No affiliate links, no save button, no "search another" button
+- Then render the existing vacation details, flights, and pricing below
+
+**`src/pages/PublicQuote.tsx`**
+- Read `include_review` and `review_data` from the fetched quote
+- When present, render the same review section (matching the preview) before flights and pricing
+- Clean, professional presentation for the client
+
+**New: `src/components/dashboard/MultiTagInput.tsx`**
+- Reusable component: displays preset options as a dropdown, selected items as removable chips
+- Props: `presets: string[]`, `value: string[]`, `onChange: (tags: string[]) => void`, `placeholder: string`
+- Supports typing custom values and pressing Enter to add
+- Used for Inclusions (and optionally Room Type)
+
+### Quote Preview Layout (with review included)
+
+```text
++----------------------------------+
+| Vacation Quote                   |
+| Prepared for [Client]    RTG logo|
++----------------------------------+
+| [Resort Name]                    |
+| [Location]                       |
+| *** 4.2 - Compiled from Reviews |
+| [Summary paragraph]             |
+|                                  |
+| Rating Breakdown                 |
+|  Rooms        ====== 4.5        |
+|  Service      ===== 4.0         |
+|  Food         ====== 4.3        |
+|                                  |
+| What Travelers Say               |
+| [paragraphs...]                  |
+|                                  |
+| Travel Tips                      |
+| 1. [tip]  2. [tip]              |
+|                                  |
+| Best For: Couples, Beach, ...    |
++----------------------------------+
+| Flight Details                   |
+|  WestJet WS1234  YYZ -> CUN     |
++----------------------------------+
+| Pricing Breakdown                |
+|  Hotel         $3,200            |
+|  Flights       $1,800            |
+|  Total     CAD $5,000            |
++----------------------------------+
+| Inclusions: All-Inclusive,       |
+|   Airport Transfers, Spa Package |
++----------------------------------+
+| Notes: ...                       |
++----------------------------------+
+```
+
+### Client File UI (Step 1)
+
+```text
+Recent Clients
++-- John Smith (3 quotes) --------+
+|   > Barcelo Maya - Draft  Feb 15|
+|   > Sandals Jamaica - Sent Feb 1|
+|   > Riu Cancun - Accepted Jan 20|
++-- Sarah Lee (1 quote) ----------+
+|   > Bellagio LV - Draft  Feb 18 |
++---------------------------------+
+```
