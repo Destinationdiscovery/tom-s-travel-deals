@@ -11,6 +11,14 @@ const HeroSection = () => {
       <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60" />
 
       <div className="relative z-10 text-center px-4">
+        <a
+          href="https://www.expedia.ca/?affcid=ca.network.pz.affiliate.1100l5DpWA"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-block mb-2 text-amber-400 font-bold text-lg md:text-xl tracking-widest hover:text-amber-300 transition-colors"
+        >
+          expedia
+        </a>
         <h1 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold mb-2 leading-tight">
           <span className="text-sky-300">REVIEW</span>{" "}
           <span className="text-amber-400">THEN</span>{" "}
