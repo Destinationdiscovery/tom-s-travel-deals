@@ -1,15 +1,19 @@
 import { useState, useEffect } from "react";
-import { Search, ChevronRight, ChevronLeft, Plus, Trash2, Save, Loader2 } from "lucide-react";
+import { Search, ChevronRight, ChevronLeft, Plus, Trash2, Save, Loader2, Users, FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { useGenerateReview, type CachedReview } from "@/hooks/useGenerateReview";
+import { useGenerateReview } from "@/hooks/useGenerateReview";
 import { toast } from "@/hooks/use-toast";
 import QuotePreview from "./QuotePreview";
+import MultiTagInput from "./MultiTagInput";
 
 interface LineItem {
   description: string;
@@ -36,7 +40,7 @@ export interface QuoteData {
   checkOut: string;
   numTravellers: number;
   roomType: string;
-  inclusions: string;
+  inclusions: string[];
   flights: FlightDetail[];
   lineItems: LineItem[];
   notes: string;
@@ -44,7 +48,15 @@ export interface QuoteData {
   status: string;
   shareToken?: string;
   reviewSummary?: string;
+  includeReview: boolean;
+  reviewData: any | null;
 }
+
+const INCLUSION_PRESETS = [
+  "All-Inclusive", "Airport Transfers", "Travel Insurance", "Spa Package",
+  "Kids Club", "Room Upgrade", "Late Check-Out", "Excursions",
+  "Private Pool", "Butler Service", "Meal Plan", "Car Rental",
+];
 
 const emptyFlight: FlightDetail = { airline: "", flightNumber: "", departureAirport: "", arrivalAirport: "", departureTime: "", arrivalTime: "" };
 const emptyLineItem: LineItem = { description: "", amount: 0 };
@@ -57,33 +69,52 @@ const QuoteBuilder = () => {
   const [saving, setSaving] = useState(false);
   const [existingQuotes, setExistingQuotes] = useState<any[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [includeReview, setIncludeReview] = useState(false);
 
   const [quote, setQuote] = useState<QuoteData>({
     clientName: "", clientEmail: "", resortName: "", resortReviewSlug: "", destination: "",
-    checkIn: "", checkOut: "", numTravellers: 2, roomType: "", inclusions: "",
+    checkIn: "", checkOut: "", numTravellers: 2, roomType: "", inclusions: [],
     flights: [{ ...emptyFlight }], lineItems: [{ ...emptyLineItem }],
     notes: "", currency: "CAD", status: "draft", reviewSummary: "",
+    includeReview: false, reviewData: null,
   });
 
   useEffect(() => {
-    supabase.from("cached_reviews").select("property_name, slug, location").order("created_at", { ascending: false }).limit(20)
+    supabase.from("cached_reviews").select("property_name, slug, location, review_data").order("created_at", { ascending: false }).limit(20)
       .then(({ data }) => setCachedReviews(data || []));
     fetchQuotes();
   }, []);
 
   const fetchQuotes = async () => {
-    const { data } = await supabase.from("client_quotes").select("*").order("created_at", { ascending: false }).limit(20);
+    const { data } = await supabase.from("client_quotes").select("*").order("created_at", { ascending: false }).limit(50);
     setExistingQuotes(data || []);
   };
 
-  const selectReview = (r: any) => {
-    const reviewData = r.review_data || {};
+  // Group quotes by client
+  const clientGroups = existingQuotes.reduce<Record<string, { email: string; quotes: any[] }>>((acc, q) => {
+    const key = q.client_name;
+    if (!acc[key]) acc[key] = { email: q.client_email || "", quotes: [] };
+    acc[key].quotes.push(q);
+    return acc;
+  }, {});
+
+  const selectReview = async (r: any) => {
+    let reviewData = r.review_data || null;
+
+    // If we only have partial data (from the list), fetch full review
+    if (includeReview && r.slug && (!reviewData || !reviewData.summary)) {
+      const { data } = await supabase.from("cached_reviews").select("review_data").eq("slug", r.slug).single();
+      if (data) reviewData = data.review_data;
+    }
+
     setQuote((prev) => ({
       ...prev,
       resortName: r.property_name,
       resortReviewSlug: r.slug,
       destination: r.location || "",
-      reviewSummary: reviewData.summary || "",
+      reviewSummary: reviewData?.summary || "",
+      includeReview,
+      reviewData: includeReview ? reviewData : null,
     }));
     setStep(2);
   };
@@ -95,12 +126,15 @@ const QuoteBuilder = () => {
 
   useEffect(() => {
     if (review) {
+      const reviewData = review.review_data as any;
       setQuote((prev) => ({
         ...prev,
         resortName: review.property_name,
         resortReviewSlug: review.slug,
         destination: review.location || "",
-        reviewSummary: (review.review_data as any)?.summary || "",
+        reviewSummary: reviewData?.summary || "",
+        includeReview,
+        reviewData: includeReview ? reviewData : null,
       }));
       setStep(2);
     }
@@ -114,7 +148,7 @@ const QuoteBuilder = () => {
       return;
     }
     setSaving(true);
-    const payload = {
+    const payload: Record<string, any> = {
       client_name: quote.clientName,
       client_email: quote.clientEmail || null,
       resort_name: quote.resortName,
@@ -123,12 +157,14 @@ const QuoteBuilder = () => {
       check_in: quote.checkIn || null,
       check_out: quote.checkOut || null,
       num_travellers: quote.numTravellers,
-      flight_details: quote.flights as any,
-      line_items: quote.lineItems as any,
+      flight_details: quote.flights,
+      line_items: quote.lineItems,
       total_price: totalPrice,
       currency: quote.currency,
       notes: quote.notes || null,
-      status: quote.status as any,
+      status: quote.status,
+      include_review: quote.includeReview,
+      review_data: quote.includeReview ? quote.reviewData : null,
     };
 
     let result;
@@ -151,25 +187,32 @@ const QuoteBuilder = () => {
 
   const loadQuote = (q: any) => {
     setEditingId(q.id);
+    // Parse inclusions - could be stored in notes or line_items metadata
+    const inclusions: string[] = [];
     setQuote({
       clientName: q.client_name, clientEmail: q.client_email || "", resortName: q.resort_name,
       resortReviewSlug: q.resort_review_slug || "", destination: q.destination || "",
       checkIn: q.check_in || "", checkOut: q.check_out || "", numTravellers: q.num_travellers || 2,
-      roomType: "", inclusions: "", flights: q.flight_details || [{ ...emptyFlight }],
+      roomType: "", inclusions, flights: q.flight_details || [{ ...emptyFlight }],
       lineItems: q.line_items || [{ ...emptyLineItem }], notes: q.notes || "",
       currency: q.currency || "CAD", status: q.status || "draft", shareToken: q.share_token,
       reviewSummary: "",
+      includeReview: q.include_review || false,
+      reviewData: q.review_data || null,
     });
+    setIncludeReview(q.include_review || false);
     setStep(2);
   };
 
   const resetQuote = () => {
     setEditingId(null);
+    setIncludeReview(false);
     setQuote({
       clientName: "", clientEmail: "", resortName: "", resortReviewSlug: "", destination: "",
-      checkIn: "", checkOut: "", numTravellers: 2, roomType: "", inclusions: "",
+      checkIn: "", checkOut: "", numTravellers: 2, roomType: "", inclusions: [],
       flights: [{ ...emptyFlight }], lineItems: [{ ...emptyLineItem }],
       notes: "", currency: "CAD", status: "draft", reviewSummary: "",
+      includeReview: false, reviewData: null,
     });
     setStep(1);
   };
@@ -184,24 +227,44 @@ const QuoteBuilder = () => {
         <Button variant="outline" size="sm" onClick={resetQuote}>New Quote</Button>
       </div>
 
-      {/* Existing quotes list */}
-      {existingQuotes.length > 0 && step === 1 && (
+      {/* Client Files - grouped quotes */}
+      {Object.keys(clientGroups).length > 0 && step === 1 && (
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Recent Quotes</CardTitle>
+            <CardTitle className="text-base flex items-center gap-2"><Users className="h-4 w-4" /> Recent Clients</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              {existingQuotes.map((q) => (
-                <button key={q.id} onClick={() => loadQuote(q)} className="w-full text-left p-3 rounded-lg hover:bg-muted/50 transition-colors flex items-center justify-between">
-                  <div>
-                    <span className="text-sm font-medium text-foreground">{q.client_name}</span>
-                    <span className="text-xs text-muted-foreground ml-2">{q.resort_name}</span>
-                  </div>
-                  <span className="text-xs text-muted-foreground capitalize">{q.status}</span>
-                </button>
+            <Accordion type="multiple" className="w-full">
+              {Object.entries(clientGroups).map(([name, { email, quotes }]) => (
+                <AccordionItem key={name} value={name}>
+                  <AccordionTrigger className="py-3 hover:no-underline">
+                    <div className="flex items-center gap-3 text-left">
+                      <div>
+                        <span className="text-sm font-medium text-foreground">{name}</span>
+                        {email && <span className="text-xs text-muted-foreground ml-2">{email}</span>}
+                      </div>
+                      <Badge variant="secondary" className="text-xs">{quotes.length} {quotes.length === 1 ? "quote" : "quotes"}</Badge>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-1 pl-2">
+                      {quotes.map((q: any) => (
+                        <button key={q.id} onClick={() => loadQuote(q)} className="w-full text-left p-2 rounded-lg hover:bg-muted/50 transition-colors flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+                            <span className="text-sm text-foreground">{q.resort_name}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs capitalize">{q.status}</Badge>
+                            <span className="text-xs text-muted-foreground">{new Date(q.created_at).toLocaleDateString()}</span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
               ))}
-            </div>
+            </Accordion>
           </CardContent>
         </Card>
       )}
@@ -220,6 +283,16 @@ const QuoteBuilder = () => {
         <Card>
           <CardContent className="p-6 space-y-4">
             <h3 className="font-semibold text-foreground">Search or Select a Resort</h3>
+
+            {/* Include Review checkbox */}
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 border border-border">
+              <Checkbox id="include-review" checked={includeReview} onCheckedChange={(c) => setIncludeReview(!!c)} />
+              <label htmlFor="include-review" className="text-sm font-medium text-foreground cursor-pointer">
+                Include resort review in this quote
+              </label>
+              <span className="text-xs text-muted-foreground ml-1">(ratings, summary, tips — no affiliate links)</span>
+            </div>
+
             <div className="flex gap-2">
               <Input placeholder="Search for a resort or destination..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()} className="flex-1" />
@@ -250,6 +323,9 @@ const QuoteBuilder = () => {
         <Card>
           <CardContent className="p-6 space-y-5">
             <h3 className="font-semibold text-foreground">Vacation Details — {quote.resortName}</h3>
+            {quote.includeReview && quote.reviewData && (
+              <Badge variant="secondary" className="text-xs">✓ Resort review will be included in quote</Badge>
+            )}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div><Label>Client Name *</Label><Input value={quote.clientName} onChange={(e) => setQuote({ ...quote, clientName: e.target.value })} /></div>
               <div><Label>Client Email</Label><Input type="email" value={quote.clientEmail} onChange={(e) => setQuote({ ...quote, clientEmail: e.target.value })} /></div>
@@ -258,7 +334,16 @@ const QuoteBuilder = () => {
               <div><Label>Travellers</Label><Input type="number" min={1} value={quote.numTravellers} onChange={(e) => setQuote({ ...quote, numTravellers: parseInt(e.target.value) || 1 })} /></div>
               <div><Label>Room Type</Label><Input value={quote.roomType} onChange={(e) => setQuote({ ...quote, roomType: e.target.value })} placeholder="e.g. Ocean View Suite" /></div>
             </div>
-            <div><Label>Inclusions</Label><Input value={quote.inclusions} onChange={(e) => setQuote({ ...quote, inclusions: e.target.value })} placeholder="e.g. All-inclusive, airport transfers" /></div>
+
+            <div>
+              <Label>Inclusions</Label>
+              <MultiTagInput
+                presets={INCLUSION_PRESETS}
+                value={quote.inclusions}
+                onChange={(tags) => setQuote({ ...quote, inclusions: tags })}
+                placeholder="Select or type inclusions..."
+              />
+            </div>
 
             <div className="space-y-3">
               <div className="flex items-center justify-between">

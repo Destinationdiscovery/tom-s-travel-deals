@@ -102,11 +102,13 @@ export type Database = {
           destination: string | null
           flight_details: Json | null
           id: string
+          include_review: boolean | null
           line_items: Json | null
           notes: string | null
           num_travellers: number | null
           resort_name: string
           resort_review_slug: string | null
+          review_data: Json | null
           share_token: string | null
           status: Database["public"]["Enums"]["quote_status"] | null
           total_price: number | null
@@ -122,11 +124,13 @@ export type Database = {
           destination?: string | null
           flight_details?: Json | null
           id?: string
+          include_review?: boolean | null
           line_items?: Json | null
           notes?: string | null
           num_travellers?: number | null
           resort_name: string
           resort_review_slug?: string | null
+          review_data?: Json | null
           share_token?: string | null
           status?: Database["public"]["Enums"]["quote_status"] | null
           total_price?: number | null
@@ -142,11 +146,13 @@ export type Database = {
           destination?: string | null
           flight_details?: Json | null
           id?: string
+          include_review?: boolean | null
           line_items?: Json | null
           notes?: string | null
           num_travellers?: number | null
           resort_name?: string
           resort_review_slug?: string | null
+          review_data?: Json | null
           share_token?: string | null
           status?: Database["public"]["Enums"]["quote_status"] | null
           total_price?: number | null

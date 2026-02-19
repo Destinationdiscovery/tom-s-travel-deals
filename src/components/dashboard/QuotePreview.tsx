@@ -1,9 +1,11 @@
 import { ChevronLeft, Download, Link2, Mail, Save, Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import type { QuoteData } from "./QuoteBuilder";
 import { format } from "date-fns";
+import QuoteReviewSection from "./QuoteReviewSection";
 
 interface QuotePreviewProps {
   quote: QuoteData;
@@ -47,7 +49,6 @@ const QuotePreview = ({ quote, totalPrice, onBack, onSave, saving, editingId }: 
 
   return (
     <div className="space-y-4">
-      {/* Print-optimized quote card */}
       <Card className="print:shadow-none print:border-none" id="quote-preview">
         <CardContent className="p-8 space-y-6">
           <div className="flex items-start justify-between">
@@ -68,10 +69,12 @@ const QuotePreview = ({ quote, totalPrice, onBack, onSave, saving, editingId }: 
           <div className="border-t border-border pt-4">
             <h3 className="font-display text-xl font-bold text-foreground">{quote.resortName}</h3>
             <p className="text-sm text-muted-foreground">{quote.destination}</p>
-            {quote.reviewSummary && (
-              <p className="text-sm text-muted-foreground mt-2 italic">"{quote.reviewSummary}"</p>
-            )}
           </div>
+
+          {/* Embedded Review Section */}
+          {quote.includeReview && quote.reviewData && (
+            <QuoteReviewSection reviewData={quote.reviewData} />
+          )}
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
             {quote.checkIn && <div><p className="text-muted-foreground text-xs">Check-In</p><p className="font-medium text-foreground">{format(new Date(quote.checkIn), "MMM d, yyyy")}</p></div>}
@@ -113,6 +116,18 @@ const QuotePreview = ({ quote, totalPrice, onBack, onSave, saving, editingId }: 
               )}
             </div>
           </div>
+
+          {/* Inclusions */}
+          {quote.inclusions.length > 0 && (
+            <div>
+              <h4 className="text-sm font-semibold text-foreground mb-2">Inclusions</h4>
+              <div className="flex flex-wrap gap-1.5">
+                {quote.inclusions.map((inc, i) => (
+                  <Badge key={i} variant="secondary" className="text-xs">{inc}</Badge>
+                ))}
+              </div>
+            </div>
+          )}
 
           {quote.notes && (
             <div className="text-sm"><p className="text-muted-foreground text-xs mb-1">Notes</p><p className="text-foreground">{quote.notes}</p></div>
