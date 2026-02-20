@@ -6,6 +6,7 @@ import DashboardSidebar, { type DashboardTab } from "@/components/dashboard/Dash
 import DashboardOverview from "@/components/dashboard/DashboardOverview";
 import QuoteBuilder from "@/components/dashboard/QuoteBuilder";
 import BookingCalendar from "@/components/dashboard/BookingCalendar";
+import BookingManager from "@/components/dashboard/BookingManager";
 import EmailComposer from "@/components/dashboard/EmailComposer";
 import GearImageManager from "@/components/dashboard/GearImageManager";
 import ClientList from "@/components/dashboard/ClientList";
@@ -41,6 +42,7 @@ const GearAdmin = () => {
           {activeTab === "overview" && <DashboardOverview onNavigate={setActiveTab} />}
           {activeTab === "quotes" && <QuoteBuilder />}
           {activeTab === "clients" && <ClientList onNavigate={setActiveTab} />}
+          {activeTab === "bookings" && <BookingManager />}
           {activeTab === "calendar" && <BookingCalendar />}
           {activeTab === "emails" && <EmailComposer />}
           {activeTab === "deals" && <DealMaker />}

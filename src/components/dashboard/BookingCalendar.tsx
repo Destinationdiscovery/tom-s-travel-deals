@@ -71,22 +71,11 @@ const BookingCalendar = () => {
   const [events, setEvents] = useState<BookingEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [fullBookingOpen, setFullBookingOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<BookingEvent | null>(null);
   const [saving, setSaving] = useState(false);
   const [clientList, setClientList] = useState<{ name: string; email: string }[]>([]);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [form, setForm] = useState({ clientName: "", clientEmail: "", eventType: "booking", title: "", notes: "", eventDate: "", bookingNumber: "", supplier: "" });
-
-  // Full booking dialog state
-  const [fullBooking, setFullBooking] = useState({
-    clientName: "", clientEmail: "", bookingNumber: "", title: "", supplier: "",
-    dateBooked: undefined as Date | undefined,
-    depositDue: undefined as Date | undefined,
-    finalPaymentDue: undefined as Date | undefined,
-    tripStart: undefined as Date | undefined,
-    tripEnd: undefined as Date | undefined,
-  });
 
   useEffect(() => { fetchEvents(); }, [currentMonth]);
 
@@ -169,58 +158,12 @@ const BookingCalendar = () => {
     fetchEvents();
   };
 
-  const openFullBooking = () => {
-    setFullBooking({ clientName: "", clientEmail: "", bookingNumber: "", title: "", supplier: "", dateBooked: new Date(), depositDue: undefined, finalPaymentDue: undefined, tripStart: undefined, tripEnd: undefined });
-    setFullBookingOpen(true);
-  };
-
-  const handleFullBookingSave = async () => {
-    if (!fullBooking.clientName.trim() || !fullBooking.bookingNumber.trim() || !fullBooking.title.trim()) {
-      toast({ title: "Missing fields", description: "Client name, booking number, and title are required.", variant: "destructive" });
-      return;
-    }
-    setSaving(true);
-    const entries: any[] = [];
-    const base = { client_name: fullBooking.clientName, client_email: fullBooking.clientEmail || null, booking_number: fullBooking.bookingNumber, supplier: fullBooking.supplier || null };
-
-    if (fullBooking.dateBooked) entries.push({ ...base, event_type: "booking", event_date: format(fullBooking.dateBooked, "yyyy-MM-dd"), title: `${fullBooking.title} - Booked` });
-    if (fullBooking.depositDue) entries.push({ ...base, event_type: "deposit_due", event_date: format(fullBooking.depositDue, "yyyy-MM-dd"), title: `${fullBooking.title} - Deposit Due` });
-    if (fullBooking.finalPaymentDue) entries.push({ ...base, event_type: "final_payment", event_date: format(fullBooking.finalPaymentDue, "yyyy-MM-dd"), title: `${fullBooking.title} - Final Payment` });
-    if (fullBooking.tripStart) entries.push({ ...base, event_type: "trip_start", event_date: format(fullBooking.tripStart, "yyyy-MM-dd"), title: `${fullBooking.title} - Trip Start` });
-    if (fullBooking.tripEnd) entries.push({ ...base, event_type: "trip_end", event_date: format(fullBooking.tripEnd, "yyyy-MM-dd"), title: `${fullBooking.title} - Trip End` });
-
-    if (entries.length === 0) {
-      toast({ title: "Add at least one date", variant: "destructive" });
-      setSaving(false);
-      return;
-    }
-
-    const { error } = await supabase.from("bookings").insert(entries);
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Booking created!", description: `${entries.length} calendar entries added.` });
-      setFullBookingOpen(false);
-      fetchEvents();
-    }
-    setSaving(false);
-  };
-
   const handleClientSelectInDialog = (value: string) => {
     if (value === "__new__") {
       setForm((f) => ({ ...f, clientName: "", clientEmail: "" }));
     } else {
       const client = clientList.find((c) => c.name === value);
       if (client) setForm((f) => ({ ...f, clientName: client.name, clientEmail: client.email }));
-    }
-  };
-
-  const handleClientSelectFullBooking = (value: string) => {
-    if (value === "__new__") {
-      setFullBooking((f) => ({ ...f, clientName: "", clientEmail: "" }));
-    } else {
-      const client = clientList.find((c) => c.name === value);
-      if (client) setFullBooking((f) => ({ ...f, clientName: client.name, clientEmail: client.email }));
     }
   };
 
@@ -237,7 +180,7 @@ const BookingCalendar = () => {
               <List className="h-3.5 w-3.5" />
             </button>
           </div>
-          <Button variant="outline" onClick={openFullBooking} className="gap-2"><CalendarIcon className="h-4 w-4" /> Add Full Booking</Button>
+          <Button onClick={() => openNewEvent()} className="gap-2"><Plus className="h-4 w-4" /> Add Event</Button>
           <Button onClick={() => openNewEvent()} className="gap-2"><Plus className="h-4 w-4" /> Add Event</Button>
         </div>
       </div>
@@ -389,45 +332,6 @@ const BookingCalendar = () => {
                 {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Save
               </Button>
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Full Booking Dialog */}
-      <Dialog open={fullBookingOpen} onOpenChange={setFullBookingOpen}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Add Full Booking</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            {clientList.length > 0 && (
-              <div>
-                <Label>Select Client</Label>
-                <Select onValueChange={handleClientSelectFullBooking}>
-                  <SelectTrigger><SelectValue placeholder="Choose a client..." /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__new__">+ New Client</SelectItem>
-                    {clientList.map((c) => <SelectItem key={c.name} value={c.name}>{c.name}{c.email ? ` — ${c.email}` : ""}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-            <div><Label>Client Name *</Label><Input value={fullBooking.clientName} onChange={(e) => setFullBooking({ ...fullBooking, clientName: e.target.value })} /></div>
-            <div><Label>Client Email</Label><Input value={fullBooking.clientEmail} onChange={(e) => setFullBooking({ ...fullBooking, clientEmail: e.target.value })} /></div>
-            <div><Label>Trip/Resort Name *</Label><Input value={fullBooking.title} onChange={(e) => setFullBooking({ ...fullBooking, title: e.target.value })} placeholder="e.g. Sandals Montego Bay" /></div>
-            <div><Label>Booking Number *</Label><Input value={fullBooking.bookingNumber} onChange={(e) => setFullBooking({ ...fullBooking, bookingNumber: e.target.value })} placeholder="e.g. BK12345" /></div>
-            <div><Label>Supplier</Label><Input value={fullBooking.supplier} onChange={(e) => setFullBooking({ ...fullBooking, supplier: e.target.value })} placeholder="e.g. Sunwing, Sandals" /></div>
-            <div className="grid grid-cols-2 gap-3">
-              <DatePickerField label="Date Booked" date={fullBooking.dateBooked} onSelect={(d) => setFullBooking({ ...fullBooking, dateBooked: d })} />
-              <DatePickerField label="Deposit Due" date={fullBooking.depositDue} onSelect={(d) => setFullBooking({ ...fullBooking, depositDue: d })} />
-              <DatePickerField label="Final Payment Due" date={fullBooking.finalPaymentDue} onSelect={(d) => setFullBooking({ ...fullBooking, finalPaymentDue: d })} />
-              <DatePickerField label="Trip Start" date={fullBooking.tripStart} onSelect={(d) => setFullBooking({ ...fullBooking, tripStart: d })} />
-              <DatePickerField label="Trip End" date={fullBooking.tripEnd} onSelect={(d) => setFullBooking({ ...fullBooking, tripEnd: d })} />
-            </div>
-            <Button onClick={handleFullBookingSave} disabled={saving} className="w-full gap-2">
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <CalendarIcon className="h-4 w-4" />}
-              Save Booking
-            </Button>
           </div>
         </DialogContent>
       </Dialog>
