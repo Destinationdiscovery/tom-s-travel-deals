@@ -618,141 +618,194 @@ const BookingManager = () => {
 
       {/* Booking Detail Dialog */}
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent className="max-w-xl max-h-[90vh] overflow-hidden flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-3">
-              <span>{selectedBooking?.title}</span>
-              {selectedBooking && (
-                <Badge variant="outline" className="font-mono text-xs">{selectedBooking.bookingNumber}</Badge>
-              )}
-            </DialogTitle>
-            {selectedBooking?.tripStart && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                <CalendarIcon className="h-4 w-4" />
-                <span className="font-medium text-foreground">
-                  {format(new Date(selectedBooking.tripStart), "MMM d")}
-                  {selectedBooking.tripEnd ? ` – ${format(new Date(selectedBooking.tripEnd), "MMM d, yyyy")}` : `, ${format(new Date(selectedBooking.tripStart), "yyyy")}`}
-                </span>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col p-0">
+          {/* Professional Header */}
+          <div className="bg-primary/5 border-b border-border px-6 pt-6 pb-5">
+            <div className="flex items-start justify-between gap-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <h2 className="text-xl font-display font-bold text-foreground leading-tight">
+                    {selectedBooking?.title}
+                  </h2>
+                  {selectedBooking && (
+                    <Badge className="font-mono text-xs">{selectedBooking.bookingNumber}</Badge>
+                  )}
+                </div>
+                {selectedBooking?.supplier && (
+                  <p className="text-sm text-muted-foreground">
+                    via <span className="font-medium text-foreground">{selectedBooking.supplier}</span>
+                  </p>
+                )}
+                {selectedBooking?.tripStart && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <CalendarIcon className="h-4 w-4 text-primary" />
+                    <span className="font-semibold text-foreground">
+                      {format(new Date(selectedBooking.tripStart), "MMMM d")}
+                      {selectedBooking.tripEnd
+                        ? ` – ${format(new Date(selectedBooking.tripEnd), "MMMM d, yyyy")}`
+                        : `, ${format(new Date(selectedBooking.tripStart), "yyyy")}`}
+                    </span>
+                  </div>
+                )}
               </div>
-            )}
-          </DialogHeader>
+            </div>
+          </div>
 
           {detailLoading ? (
-            <div className="flex justify-center py-12">
+            <div className="flex justify-center py-16">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
           ) : (
-            <ScrollArea className="flex-1 -mx-6 px-6">
-              <div className="space-y-6 pb-4">
-                {/* Client & Supplier Info */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Client</p>
-                    <p className="font-medium text-sm">{selectedBooking?.clientName}</p>
-                    {selectedBooking?.clientEmail && (
-                      <p className="text-xs text-muted-foreground">{selectedBooking.clientEmail}</p>
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Supplier</p>
-                    <p className="font-medium text-sm">{selectedBooking?.supplier || "—"}</p>
-                  </div>
-                </div>
+            <ScrollArea className="flex-1">
+              <div className="px-6 py-5 space-y-6">
 
-                <Separator />
-
-                {/* Events Timeline */}
-                <div>
-                  <h3 className="text-sm font-semibold mb-3">Events Timeline</h3>
-                  <div className="space-y-2">
-                    {detailEvents.map((event) => (
-                      <div
-                        key={event.id}
-                        className="flex items-start gap-3 p-3 rounded-lg border border-border bg-muted/30 hover:bg-muted/50 transition-colors"
-                      >
-                        <button
-                          onClick={() => toggleEventCompletion(event)}
-                          className="mt-0.5 shrink-0"
-                        >
-                          {event.is_completed ? (
-                            <CheckCircle2 className="h-5 w-5 text-primary" />
-                          ) : (
-                            <Circle className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors" />
-                          )}
-                        </button>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-2">
-                            <span className={cn(
-                              "text-sm font-medium",
-                              event.is_completed && "line-through text-muted-foreground"
-                            )}>
-                              {EVENT_TYPE_LABELS[event.event_type] || event.event_type}
-                            </span>
-                            <span className="text-xs text-muted-foreground shrink-0">
-                              {format(new Date(event.event_date), "MMM d, yyyy")}
-                            </span>
-                          </div>
-                          {event.notes && (
-                            <p className="text-xs text-muted-foreground mt-1">{event.notes}</p>
-                          )}
-                        </div>
+                {/* Trip Details Card */}
+                <div className="rounded-lg border border-border bg-card">
+                  <div className="px-4 py-3 border-b border-border">
+                    <h3 className="text-sm font-semibold">Trip Details</h3>
+                  </div>
+                  <div className="divide-y divide-border">
+                    <div className="grid grid-cols-[140px_1fr] px-4 py-3">
+                      <span className="text-xs text-muted-foreground uppercase tracking-wider self-center">Client</span>
+                      <div>
+                        <p className="text-sm font-medium">{selectedBooking?.clientName}</p>
+                        {selectedBooking?.clientEmail && (
+                          <p className="text-xs text-muted-foreground">{selectedBooking.clientEmail}</p>
+                        )}
                       </div>
-                    ))}
-                    {detailEvents.length === 0 && (
-                      <p className="text-sm text-muted-foreground text-center py-4">No events found.</p>
+                    </div>
+                    <div className="grid grid-cols-[140px_1fr] px-4 py-3">
+                      <span className="text-xs text-muted-foreground uppercase tracking-wider self-center">Supplier</span>
+                      <p className="text-sm font-medium">{selectedBooking?.supplier || "—"}</p>
+                    </div>
+                    <div className="grid grid-cols-[140px_1fr] px-4 py-3">
+                      <span className="text-xs text-muted-foreground uppercase tracking-wider self-center">Booking #</span>
+                      <p className="text-sm font-mono font-medium">{selectedBooking?.bookingNumber}</p>
+                    </div>
+                    {/* Show notes from first event if available */}
+                    {detailEvents.some(e => e.notes) && (
+                      <div className="grid grid-cols-[140px_1fr] px-4 py-3">
+                        <span className="text-xs text-muted-foreground uppercase tracking-wider self-center">Notes</span>
+                        <p className="text-sm text-muted-foreground">
+                          {detailEvents.find(e => e.notes)?.notes}
+                        </p>
+                      </div>
                     )}
                   </div>
                 </div>
 
-                <Separator />
-
-                {/* Documents */}
+                {/* Events Timeline — vertical line style */}
                 <div>
-                  <h3 className="text-sm font-semibold mb-3">Documents</h3>
+                  <h3 className="text-sm font-semibold mb-4">Events Timeline</h3>
+                  {detailEvents.length > 0 ? (
+                    <div className="relative pl-6">
+                      {/* Vertical connecting line */}
+                      <div className="absolute left-[9px] top-2 bottom-2 w-px bg-border" />
+                      <div className="space-y-0">
+                        {detailEvents.map((event, idx) => (
+                          <div key={event.id} className="relative flex items-start gap-4 pb-5 last:pb-0">
+                            {/* Node circle */}
+                            <button
+                              onClick={() => toggleEventCompletion(event)}
+                              className="absolute -left-6 top-0.5 z-10 shrink-0"
+                            >
+                              {event.is_completed ? (
+                                <CheckCircle2 className="h-[18px] w-[18px] text-primary" />
+                              ) : (
+                                <Circle className="h-[18px] w-[18px] text-muted-foreground hover:text-primary transition-colors" />
+                              )}
+                            </button>
+                            {/* Content */}
+                            <div className="flex-1 flex items-start justify-between gap-3 min-w-0">
+                              <div className="min-w-0">
+                                <span className={cn(
+                                  "text-sm font-medium",
+                                  event.is_completed && "line-through text-muted-foreground"
+                                )}>
+                                  {EVENT_TYPE_LABELS[event.event_type] || event.event_type}
+                                </span>
+                                {event.notes && (
+                                  <p className="text-xs text-muted-foreground mt-0.5 truncate">{event.notes}</p>
+                                )}
+                              </div>
+                              <span className="text-xs text-muted-foreground whitespace-nowrap pt-0.5">
+                                {format(new Date(event.event_date), "MMM d, yyyy")}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">No events found.</p>
+                  )}
+                </div>
+
+                {/* Documents & Images */}
+                <div>
+                  <h3 className="text-sm font-semibold mb-4">Documents & Photos</h3>
                   {detailDocuments.length > 0 ? (
-                    <div className="space-y-3">
-                      {/* Image previews */}
-                      {detailDocuments.some((doc) => /\.(jpg|jpeg|png|webp|gif|avif)$/i.test(doc.name)) && (
-                        <div className="grid grid-cols-2 gap-2">
-                          {detailDocuments
-                            .filter((doc) => /\.(jpg|jpeg|png|webp|gif|avif)$/i.test(doc.name))
-                            .map((doc, i) => (
+                    <div className="space-y-4">
+                      {/* Image previews — large cards */}
+                      {(() => {
+                        const imageFiles = detailDocuments.filter((doc) => /\.(jpg|jpeg|png|webp|gif|avif)$/i.test(doc.name));
+                        if (imageFiles.length === 0) return null;
+                        return (
+                          <div className={cn(
+                            "grid gap-3",
+                            imageFiles.length === 1 ? "grid-cols-1" : "grid-cols-2"
+                          )}>
+                            {imageFiles.map((doc, i) => (
                               <button
                                 key={i}
                                 onClick={() => selectedBooking && getSignedUrl(doc.name, selectedBooking.clientName)}
-                                className="relative rounded-lg overflow-hidden border border-border hover:ring-2 hover:ring-primary/50 transition-all aspect-video"
+                                className="group relative rounded-xl overflow-hidden border border-border hover:ring-2 hover:ring-primary/50 transition-all aspect-[4/3]"
                               >
-                                <img src={doc.url} alt={doc.name} className="w-full h-full object-cover" />
-                                <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-2">
-                                  <span className="text-[10px] text-white truncate block">{doc.name}</span>
+                                <img
+                                  src={doc.url}
+                                  alt={doc.name}
+                                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                <div className="absolute bottom-0 inset-x-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                  <span className="text-xs text-white font-medium truncate block">{doc.name}</span>
+                                </div>
+                                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                  <div className="bg-black/50 rounded-full p-1.5">
+                                    <Download className="h-3.5 w-3.5 text-white" />
+                                  </div>
                                 </div>
                               </button>
                             ))}
-                        </div>
-                      )}
+                          </div>
+                        );
+                      })()}
                       {/* Non-image files */}
                       {detailDocuments
                         .filter((doc) => !/\.(jpg|jpeg|png|webp|gif|avif)$/i.test(doc.name))
                         .map((doc, i) => (
                           <div
                             key={i}
-                            className="flex items-center gap-3 p-2.5 rounded-lg border border-border hover:bg-muted/50 transition-colors"
+                            className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors"
                           >
-                            <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
-                            <span className="text-sm flex-1 truncate">{doc.name}</span>
+                            <FileText className="h-5 w-5 text-muted-foreground shrink-0" />
+                            <span className="text-sm flex-1 truncate font-medium">{doc.name}</span>
                             <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 shrink-0"
+                              variant="outline"
+                              size="sm"
+                              className="shrink-0 gap-1.5"
                               onClick={() => selectedBooking && getSignedUrl(doc.name, selectedBooking.clientName)}
                             >
-                              <Download className="h-4 w-4" />
+                              <Download className="h-3.5 w-3.5" /> Download
                             </Button>
                           </div>
                         ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-muted-foreground text-center py-4">No documents uploaded.</p>
+                    <div className="text-center py-6 rounded-lg border border-dashed border-border">
+                      <ImageIcon className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
+                      <p className="text-sm text-muted-foreground">No documents uploaded yet.</p>
+                    </div>
                   )}
                 </div>
 
