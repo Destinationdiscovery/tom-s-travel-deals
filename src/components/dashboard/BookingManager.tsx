@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Plus, Loader2, CalendarIcon, ClipboardList, Paperclip, Send, X, FileText, Image as ImageIcon, Download, Trash2, CheckCircle2, Circle } from "lucide-react";
+import { Plus, Loader2, CalendarIcon, ClipboardList, Paperclip, Send, X, FileText, Image as ImageIcon, Download, Trash2, CheckCircle2, Circle, MapPin, Plane, DollarSign, Users, Hotel, Tag } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,6 +38,20 @@ interface AttachedFile {
 interface StorageFile {
   name: string;
   url: string;
+}
+
+interface BookingDetails {
+  booking_number: string;
+  client_name: string | null;
+  client_email: string | null;
+  supplier: string | null;
+  resort_name: string | null;
+  destination: string | null;
+  room_type: string | null;
+  flight_details: any;
+  pricing: any;
+  num_travellers: number | null;
+  extras: any[];
 }
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
@@ -70,6 +83,41 @@ const DatePickerField = ({ label, date, onSelect }: { label: string; date: Date 
   </div>
 );
 
+/* ─── Detail Section Components ─── */
+
+const DetailRow = ({ label, value, icon }: { label: string; value: React.ReactNode; icon?: React.ReactNode }) => (
+  <div className="grid grid-cols-[140px_1fr] px-4 py-3">
+    <span className="text-xs text-muted-foreground uppercase tracking-wider self-center flex items-center gap-1.5">
+      {icon}
+      {label}
+    </span>
+    <div className="text-sm font-medium">{value || "—"}</div>
+  </div>
+);
+
+const FlightLeg = ({ label, leg }: { label: string; leg: any }) => {
+  if (!leg) return null;
+  return (
+    <div className="space-y-1">
+      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{label}</p>
+      <div className="flex items-center gap-3 text-sm">
+        <div className="text-right">
+          <p className="font-bold">{leg.departure_airport || "—"}</p>
+          <p className="text-xs text-muted-foreground">{leg.departure_time || ""}</p>
+        </div>
+        <div className="flex flex-col items-center gap-0.5">
+          <Plane className="h-4 w-4 text-primary" />
+          <span className="text-[10px] text-muted-foreground">{leg.airline} {leg.flight_number}</span>
+        </div>
+        <div>
+          <p className="font-bold">{leg.arrival_airport || "—"}</p>
+          <p className="text-xs text-muted-foreground">{leg.arrival_time || ""}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const BookingManager = () => {
   const [bookings, setBookings] = useState<BookingGroup[]>([]);
   const [loading, setLoading] = useState(true);
@@ -84,13 +132,21 @@ const BookingManager = () => {
   const [detailDocuments, setDetailDocuments] = useState<StorageFile[]>([]);
   const [detailLoading, setDetailLoading] = useState(false);
   const [deletingBooking, setDeletingBooking] = useState(false);
+  const [bookingDetails, setBookingDetails] = useState<BookingDetails | null>(null);
 
-  // Chat input state
+  // Chat input state (main)
   const [chatMessage, setChatMessage] = useState("");
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
   const [aiProcessing, setAiProcessing] = useState(false);
   const [aiStatus, setAiStatus] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // In-booking chat state
+  const [inBookingMessage, setInBookingMessage] = useState("");
+  const [inBookingFiles, setInBookingFiles] = useState<AttachedFile[]>([]);
+  const [inBookingProcessing, setInBookingProcessing] = useState(false);
+  const [inBookingStatus, setInBookingStatus] = useState("");
+  const inBookingFileRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({
     clientName: "", clientEmail: "", bookingNumber: "", title: "", supplier: "",
@@ -155,9 +211,11 @@ const BookingManager = () => {
     setDetailLoading(true);
     setDetailEvents([]);
     setDetailDocuments([]);
+    setBookingDetails(null);
+    setInBookingMessage("");
+    setInBookingFiles([]);
 
-    // Fetch events and documents in parallel
-    const [eventsResult, docsResult] = await Promise.all([
+    const [eventsResult, docsResult, detailsResult] = await Promise.all([
       supabase
         .from("bookings")
         .select("*")
@@ -166,10 +224,14 @@ const BookingManager = () => {
       supabase.storage
         .from("booking-documents")
         .list(slugify(booking.clientName), { limit: 100 }),
+      supabase
+        .from("booking_details" as any)
+        .select("*")
+        .eq("booking_number", booking.bookingNumber)
+        .maybeSingle(),
     ]);
 
     if (eventsResult.data) {
-      // Sort by event type order
       const sorted = [...eventsResult.data].sort((a, b) => {
         const ai = EVENT_TYPE_ORDER.indexOf(a.event_type);
         const bi = EVENT_TYPE_ORDER.indexOf(b.event_type);
@@ -181,7 +243,6 @@ const BookingManager = () => {
     if (docsResult.data && docsResult.data.length > 0) {
       const clientSlug = slugify(booking.clientName);
       const validFiles = docsResult.data.filter((f) => f.name !== ".emptyFolderPlaceholder");
-      // Use signed URLs so private bucket files render
       const signedResults = await Promise.all(
         validFiles.map((f) =>
           supabase.storage.from("booking-documents").createSignedUrl(`${clientSlug}/${f.name}`, 3600)
@@ -192,6 +253,10 @@ const BookingManager = () => {
         url: signedResults[i].data?.signedUrl || "",
       })).filter((f) => f.url);
       setDetailDocuments(files);
+    }
+
+    if ((detailsResult as any).data) {
+      setBookingDetails((detailsResult as any).data as BookingDetails);
     }
 
     setDetailLoading(false);
@@ -218,6 +283,12 @@ const BookingManager = () => {
     if (!selectedBooking) return;
     setDeletingBooking(true);
 
+    // Delete booking_details row too
+    await supabase
+      .from("booking_details" as any)
+      .delete()
+      .eq("booking_number", selectedBooking.bookingNumber);
+
     const { error } = await supabase
       .from("bookings")
       .delete()
@@ -236,13 +307,61 @@ const BookingManager = () => {
 
   const getSignedUrl = async (fileName: string, clientName: string) => {
     const clientSlug = slugify(clientName);
-    const { data, error } = await supabase.storage
+    const { data } = await supabase.storage
       .from("booking-documents")
       .createSignedUrl(`${clientSlug}/${fileName}`, 3600);
     if (data?.signedUrl) {
       window.open(data.signedUrl, "_blank");
     } else {
       toast({ title: "Error", description: "Could not generate download link.", variant: "destructive" });
+    }
+  };
+
+  // --- Upsert booking_details helper ---
+
+  const upsertBookingDetails = async (bookingNumber: string, details: Partial<BookingDetails>) => {
+    // Check if row exists
+    const { data: existing } = await supabase
+      .from("booking_details" as any)
+      .select("booking_number")
+      .eq("booking_number", bookingNumber)
+      .maybeSingle();
+
+    if ((existing as any)) {
+      // Merge: only update non-null fields
+      const updates: any = {};
+      for (const [k, v] of Object.entries(details)) {
+        if (v !== null && v !== undefined && k !== "booking_number") {
+          if (k === "extras" && Array.isArray(v)) {
+            // Append new extras to existing
+            const { data: currentRow } = await supabase
+              .from("booking_details" as any)
+              .select("extras")
+              .eq("booking_number", bookingNumber)
+              .single();
+            const currentExtras = (currentRow as any)?.extras || [];
+            const merged = [...currentExtras];
+            for (const ext of v as any[]) {
+              if (!merged.some((e: any) => e.label === ext.label)) {
+                merged.push(ext);
+              }
+            }
+            updates.extras = merged;
+          } else {
+            updates[k] = v;
+          }
+        }
+      }
+      if (Object.keys(updates).length > 0) {
+        await supabase
+          .from("booking_details" as any)
+          .update(updates)
+          .eq("booking_number", bookingNumber);
+      }
+    } else {
+      await supabase
+        .from("booking_details" as any)
+        .insert({ booking_number: bookingNumber, ...details });
     }
   };
 
@@ -316,7 +435,7 @@ const BookingManager = () => {
     setSaving(false);
   };
 
-  // --- Chat / AI logic ---
+  // --- Chat / AI logic (shared) ---
 
   const handleFileAttach = () => fileInputRef.current?.click();
 
@@ -349,6 +468,92 @@ const BookingManager = () => {
       reader.readAsDataURL(file);
     });
 
+  const processAiResponse = async (
+    result: any,
+    files: AttachedFile[],
+    onDone?: () => void,
+  ) => {
+    if (result.error) {
+      toast({ title: "AI Error", description: result.error, variant: "destructive" });
+      return;
+    }
+
+    if (result.action === "create_booking") {
+      const d = result.data;
+      const clientSlug = slugify(d.client_name);
+      for (const af of files) {
+        const path = `${clientSlug}/${af.file.name}`;
+        await supabase.storage.from("booking-documents").upload(path, af.file, { upsert: true });
+      }
+
+      const count = await createBookingEntries({
+        clientName: d.client_name,
+        clientEmail: d.client_email || undefined,
+        bookingNumber: d.booking_number,
+        title: d.resort_or_trip,
+        supplier: d.supplier || undefined,
+        dateBooked: d.date_booked || format(new Date(), "yyyy-MM-dd"),
+        depositDue: d.deposit_due || undefined,
+        finalPaymentDue: d.final_payment_due || undefined,
+        tripStart: d.trip_start || undefined,
+        tripEnd: d.trip_end || undefined,
+      });
+
+      // Save rich details
+      await upsertBookingDetails(d.booking_number, {
+        client_name: d.client_name,
+        client_email: d.client_email || null,
+        supplier: d.supplier || null,
+        resort_name: d.resort_or_trip,
+        destination: d.destination || null,
+        room_type: d.room_type || null,
+        flight_details: d.flight_details || [],
+        pricing: d.pricing || {},
+        num_travellers: d.num_travellers || null,
+        extras: d.extras || [],
+      });
+
+      toast({
+        title: "Booking created!",
+        description: `${d.resort_or_trip} for ${d.client_name} (${d.booking_number}) — ${count} calendar events added.`,
+      });
+      fetchBookings();
+    } else if (result.action === "add_to_booking") {
+      const d = result.data;
+      const clientSlug = slugify(d.client_name);
+
+      for (const af of files) {
+        const path = `${clientSlug}/${af.file.name}`;
+        await supabase.storage.from("booking-documents").upload(path, af.file, { upsert: true });
+      }
+
+      // Merge new details
+      const mergeData: Partial<BookingDetails> = {};
+      if (d.destination) mergeData.destination = d.destination;
+      if (d.room_type) mergeData.room_type = d.room_type;
+      if (d.num_travellers) mergeData.num_travellers = d.num_travellers;
+      if (d.flight_details) mergeData.flight_details = d.flight_details;
+      if (d.pricing) mergeData.pricing = d.pricing;
+      if (d.extras) mergeData.extras = d.extras;
+
+      if (Object.keys(mergeData).length > 0) {
+        await upsertBookingDetails(d.booking_number, mergeData);
+      }
+
+      toast({
+        title: "Booking updated!",
+        description: `${files.length} file(s) added to booking ${d.booking_number}.${d.notes ? ` ${d.notes}` : ""}`,
+      });
+    } else {
+      toast({
+        title: "AI Response",
+        description: result.message || "No action taken.",
+      });
+    }
+
+    onDone?.();
+  };
+
   const handleChatSend = async () => {
     if (!chatMessage.trim() && attachedFiles.length === 0) return;
 
@@ -377,59 +582,8 @@ const BookingManager = () => {
 
       if (error) throw error;
 
-      if (result.error) {
-        toast({ title: "AI Error", description: result.error, variant: "destructive" });
-        return;
-      }
-
-      if (result.action === "create_booking") {
-        setAiStatus("Creating booking...");
-        const d = result.data;
-
-        const clientSlug = slugify(d.client_name);
-        for (const af of attachedFiles) {
-          const path = `${clientSlug}/${af.file.name}`;
-          await supabase.storage.from("booking-documents").upload(path, af.file, { upsert: true });
-        }
-
-        const count = await createBookingEntries({
-          clientName: d.client_name,
-          clientEmail: d.client_email || undefined,
-          bookingNumber: d.booking_number,
-          title: d.resort_or_trip,
-          supplier: d.supplier || undefined,
-          dateBooked: d.date_booked || format(new Date(), "yyyy-MM-dd"),
-          depositDue: d.deposit_due || undefined,
-          finalPaymentDue: d.final_payment_due || undefined,
-          tripStart: d.trip_start || undefined,
-          tripEnd: d.trip_end || undefined,
-        });
-
-        toast({
-          title: "Booking created!",
-          description: `${d.resort_or_trip} for ${d.client_name} (${d.booking_number}) — ${count} calendar events added.`,
-        });
-        fetchBookings();
-      } else if (result.action === "add_to_booking") {
-        setAiStatus("Adding files to booking...");
-        const d = result.data;
-        const clientSlug = slugify(d.client_name);
-
-        for (const af of attachedFiles) {
-          const path = `${clientSlug}/${af.file.name}`;
-          await supabase.storage.from("booking-documents").upload(path, af.file, { upsert: true });
-        }
-
-        toast({
-          title: "Files added!",
-          description: `${attachedFiles.length} file(s) added to booking ${d.booking_number}.`,
-        });
-      } else {
-        toast({
-          title: "AI Response",
-          description: result.message || "No action taken.",
-        });
-      }
+      setAiStatus("Creating booking...");
+      await processAiResponse(result, attachedFiles);
 
       setChatMessage("");
       setAttachedFiles([]);
@@ -448,6 +602,93 @@ const BookingManager = () => {
       handleChatSend();
     }
   };
+
+  // --- In-booking chat ---
+
+  const handleInBookingFileAttach = () => inBookingFileRef.current?.click();
+
+  const handleInBookingFilesSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const newAttached: AttachedFile[] = files.map((file) => ({
+      file,
+      preview: file.type.startsWith("image/") ? URL.createObjectURL(file) : undefined,
+    }));
+    setInBookingFiles((prev) => [...prev, ...newAttached]);
+    if (inBookingFileRef.current) inBookingFileRef.current.value = "";
+  };
+
+  const removeInBookingFile = (index: number) => {
+    setInBookingFiles((prev) => {
+      const removed = prev[index];
+      if (removed.preview) URL.revokeObjectURL(removed.preview);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  const handleInBookingSend = async () => {
+    if (!selectedBooking) return;
+    if (!inBookingMessage.trim() && inBookingFiles.length === 0) return;
+
+    setInBookingProcessing(true);
+    setInBookingStatus("Reading documents...");
+
+    try {
+      const filesPayload = await Promise.all(
+        inBookingFiles.map(async (af) => ({
+          name: af.file.name,
+          mimeType: af.file.type,
+          base64: await fileToBase64(af.file),
+        }))
+      );
+
+      const contextMsg = `This is for existing booking ${selectedBooking.bookingNumber} (${selectedBooking.title}) for client ${selectedBooking.clientName}. ${inBookingMessage}`;
+
+      setInBookingStatus("Analyzing with AI...");
+
+      const { data: result, error } = await supabase.functions.invoke("booking-assistant", {
+        body: {
+          message: contextMsg,
+          files: filesPayload,
+          existing_bookings: bookings,
+          existing_clients: clientList,
+        },
+      });
+
+      if (error) throw error;
+
+      setInBookingStatus("Updating booking...");
+      await processAiResponse(result, inBookingFiles, () => {
+        // Re-open detail to refresh
+        if (selectedBooking) openBookingDetail(selectedBooking);
+      });
+
+      setInBookingMessage("");
+      setInBookingFiles([]);
+    } catch (err: any) {
+      console.error("In-booking AI error:", err);
+      toast({ title: "Error", description: err.message || "Something went wrong.", variant: "destructive" });
+    } finally {
+      setInBookingProcessing(false);
+      setInBookingStatus("");
+    }
+  };
+
+  const handleInBookingKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleInBookingSend();
+    }
+  };
+
+  // --- Render helpers ---
+
+  const hasFlightDetails = bookingDetails?.flight_details &&
+    typeof bookingDetails.flight_details === "object" &&
+    (bookingDetails.flight_details.outbound || bookingDetails.flight_details.return);
+
+  const hasPricing = bookingDetails?.pricing &&
+    typeof bookingDetails.pricing === "object" &&
+    (bookingDetails.pricing.total || bookingDetails.pricing.deposit);
 
   return (
     <div className="flex flex-col h-full">
@@ -616,26 +857,26 @@ const BookingManager = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Booking Detail Dialog */}
+      {/* Booking Detail Dialog — Trip Listing */}
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col p-0">
-          {/* Professional Header */}
+          {/* Header Banner */}
           <div className="bg-primary/5 border-b border-border px-6 pt-6 pb-5">
-            <div className="flex items-start justify-between gap-4">
-              <div className="space-y-2">
-                <div className="flex items-center gap-3 flex-wrap">
-                  <h2 className="text-xl font-display font-bold text-foreground leading-tight">
-                    {selectedBooking?.title}
-                  </h2>
-                  {selectedBooking && (
-                    <Badge className="font-mono text-xs">{selectedBooking.bookingNumber}</Badge>
-                  )}
-                </div>
-                {selectedBooking?.supplier && (
-                  <p className="text-sm text-muted-foreground">
-                    via <span className="font-medium text-foreground">{selectedBooking.supplier}</span>
-                  </p>
+            <div className="space-y-2">
+              <div className="flex items-center gap-3 flex-wrap">
+                <h2 className="text-xl font-display font-bold text-foreground leading-tight">
+                  {bookingDetails?.resort_name || selectedBooking?.title}
+                </h2>
+                {selectedBooking && (
+                  <Badge className="font-mono text-xs">{selectedBooking.bookingNumber}</Badge>
                 )}
+              </div>
+              {(bookingDetails?.supplier || selectedBooking?.supplier) && (
+                <p className="text-sm text-muted-foreground">
+                  via <span className="font-medium text-foreground">{bookingDetails?.supplier || selectedBooking?.supplier}</span>
+                </p>
+              )}
+              <div className="flex items-center gap-4 flex-wrap">
                 {selectedBooking?.tripStart && (
                   <div className="flex items-center gap-2 text-sm">
                     <CalendarIcon className="h-4 w-4 text-primary" />
@@ -645,6 +886,12 @@ const BookingManager = () => {
                         ? ` – ${format(new Date(selectedBooking.tripEnd), "MMMM d, yyyy")}`
                         : `, ${format(new Date(selectedBooking.tripStart), "yyyy")}`}
                     </span>
+                  </div>
+                )}
+                {bookingDetails?.destination && (
+                  <div className="flex items-center gap-1.5 text-sm">
+                    <MapPin className="h-4 w-4 text-primary" />
+                    <span className="font-medium">{bookingDetails.destination}</span>
                   </div>
                 )}
               </div>
@@ -659,52 +906,106 @@ const BookingManager = () => {
             <ScrollArea className="flex-1">
               <div className="px-6 py-5 space-y-6">
 
-                {/* Trip Details Card */}
+                {/* Trip Overview Card */}
                 <div className="rounded-lg border border-border bg-card">
                   <div className="px-4 py-3 border-b border-border">
-                    <h3 className="text-sm font-semibold">Trip Details</h3>
+                    <h3 className="text-sm font-semibold flex items-center gap-2">
+                      <Hotel className="h-4 w-4 text-primary" /> Trip Overview
+                    </h3>
                   </div>
                   <div className="divide-y divide-border">
-                    <div className="grid grid-cols-[140px_1fr] px-4 py-3">
-                      <span className="text-xs text-muted-foreground uppercase tracking-wider self-center">Client</span>
+                    <DetailRow label="Client" value={
                       <div>
-                        <p className="text-sm font-medium">{selectedBooking?.clientName}</p>
-                        {selectedBooking?.clientEmail && (
-                          <p className="text-xs text-muted-foreground">{selectedBooking.clientEmail}</p>
+                        <p>{bookingDetails?.client_name || selectedBooking?.clientName}</p>
+                        {(bookingDetails?.client_email || selectedBooking?.clientEmail) && (
+                          <p className="text-xs text-muted-foreground font-normal">{bookingDetails?.client_email || selectedBooking?.clientEmail}</p>
                         )}
                       </div>
-                    </div>
-                    <div className="grid grid-cols-[140px_1fr] px-4 py-3">
-                      <span className="text-xs text-muted-foreground uppercase tracking-wider self-center">Supplier</span>
-                      <p className="text-sm font-medium">{selectedBooking?.supplier || "—"}</p>
-                    </div>
-                    <div className="grid grid-cols-[140px_1fr] px-4 py-3">
-                      <span className="text-xs text-muted-foreground uppercase tracking-wider self-center">Booking #</span>
-                      <p className="text-sm font-mono font-medium">{selectedBooking?.bookingNumber}</p>
-                    </div>
-                    {/* Show notes from first event if available */}
+                    } />
+                    <DetailRow label="Booking #" value={<span className="font-mono">{selectedBooking?.bookingNumber}</span>} />
+                    <DetailRow label="Supplier" value={bookingDetails?.supplier || selectedBooking?.supplier} />
+                    {bookingDetails?.destination && (
+                      <DetailRow label="Destination" value={bookingDetails.destination} icon={<MapPin className="h-3 w-3" />} />
+                    )}
+                    {bookingDetails?.room_type && (
+                      <DetailRow label="Room Type" value={bookingDetails.room_type} />
+                    )}
+                    {bookingDetails?.num_travellers && (
+                      <DetailRow label="Travellers" value={
+                        <div className="flex items-center gap-1.5">
+                          <Users className="h-3.5 w-3.5 text-muted-foreground" />
+                          <span>{bookingDetails.num_travellers}</span>
+                        </div>
+                      } />
+                    )}
+                    {/* Extras */}
+                    {bookingDetails?.extras && Array.isArray(bookingDetails.extras) && bookingDetails.extras.length > 0 && (
+                      bookingDetails.extras.map((ext: any, i: number) => (
+                        <DetailRow key={i} label={ext.label} value={ext.value} icon={<Tag className="h-3 w-3" />} />
+                      ))
+                    )}
+                    {/* Notes from events */}
                     {detailEvents.some(e => e.notes) && (
-                      <div className="grid grid-cols-[140px_1fr] px-4 py-3">
-                        <span className="text-xs text-muted-foreground uppercase tracking-wider self-center">Notes</span>
-                        <p className="text-sm text-muted-foreground">
-                          {detailEvents.find(e => e.notes)?.notes}
-                        </p>
-                      </div>
+                      <DetailRow label="Notes" value={
+                        <p className="text-muted-foreground font-normal">{detailEvents.find(e => e.notes)?.notes}</p>
+                      } />
                     )}
                   </div>
                 </div>
 
-                {/* Events Timeline — vertical line style */}
+                {/* Flight Details Card */}
+                {hasFlightDetails && (
+                  <div className="rounded-lg border border-border bg-card">
+                    <div className="px-4 py-3 border-b border-border">
+                      <h3 className="text-sm font-semibold flex items-center gap-2">
+                        <Plane className="h-4 w-4 text-primary" /> Flight Details
+                      </h3>
+                    </div>
+                    <div className="px-4 py-4 space-y-4">
+                      <FlightLeg label="Outbound" leg={bookingDetails!.flight_details.outbound} />
+                      <FlightLeg label="Return" leg={bookingDetails!.flight_details.return} />
+                    </div>
+                  </div>
+                )}
+
+                {/* Pricing Card */}
+                {hasPricing && (
+                  <div className="rounded-lg border border-border bg-card">
+                    <div className="px-4 py-3 border-b border-border">
+                      <h3 className="text-sm font-semibold flex items-center gap-2">
+                        <DollarSign className="h-4 w-4 text-primary" /> Pricing
+                      </h3>
+                    </div>
+                    <div className="divide-y divide-border">
+                      {bookingDetails!.pricing.total && (
+                        <DetailRow label="Total" value={
+                          <span className="text-lg font-bold">
+                            {bookingDetails!.pricing.currency || "$"}{Number(bookingDetails!.pricing.total).toLocaleString()}
+                          </span>
+                        } />
+                      )}
+                      {bookingDetails!.pricing.deposit && (
+                        <DetailRow label="Deposit" value={`${bookingDetails!.pricing.currency || "$"}${Number(bookingDetails!.pricing.deposit).toLocaleString()}`} />
+                      )}
+                      {bookingDetails!.pricing.taxes && (
+                        <DetailRow label="Taxes / Fees" value={`${bookingDetails!.pricing.currency || "$"}${Number(bookingDetails!.pricing.taxes).toLocaleString()}`} />
+                      )}
+                      {bookingDetails!.pricing.per_person && (
+                        <DetailRow label="Per Person" value={`${bookingDetails!.pricing.currency || "$"}${Number(bookingDetails!.pricing.per_person).toLocaleString()}`} />
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Events Timeline */}
                 <div>
                   <h3 className="text-sm font-semibold mb-4">Events Timeline</h3>
                   {detailEvents.length > 0 ? (
                     <div className="relative pl-6">
-                      {/* Vertical connecting line */}
                       <div className="absolute left-[9px] top-2 bottom-2 w-px bg-border" />
                       <div className="space-y-0">
-                        {detailEvents.map((event, idx) => (
+                        {detailEvents.map((event) => (
                           <div key={event.id} className="relative flex items-start gap-4 pb-5 last:pb-0">
-                            {/* Node circle */}
                             <button
                               onClick={() => toggleEventCompletion(event)}
                               className="absolute -left-6 top-0.5 z-10 shrink-0"
@@ -715,7 +1016,6 @@ const BookingManager = () => {
                                 <Circle className="h-[18px] w-[18px] text-muted-foreground hover:text-primary transition-colors" />
                               )}
                             </button>
-                            {/* Content */}
                             <div className="flex-1 flex items-start justify-between gap-3 min-w-0">
                               <div className="min-w-0">
                                 <span className={cn(
@@ -746,7 +1046,6 @@ const BookingManager = () => {
                   <h3 className="text-sm font-semibold mb-4">Documents & Photos</h3>
                   {detailDocuments.length > 0 ? (
                     <div className="space-y-4">
-                      {/* Image previews — large cards */}
                       {(() => {
                         const imageFiles = detailDocuments.filter((doc) => /\.(jpg|jpeg|png|webp|gif|avif)$/i.test(doc.name));
                         if (imageFiles.length === 0) return null;
@@ -780,7 +1079,6 @@ const BookingManager = () => {
                           </div>
                         );
                       })()}
-                      {/* Non-image files */}
                       {detailDocuments
                         .filter((doc) => !/\.(jpg|jpeg|png|webp|gif|avif)$/i.test(doc.name))
                         .map((doc, i) => (
@@ -807,6 +1105,73 @@ const BookingManager = () => {
                       <p className="text-sm text-muted-foreground">No documents uploaded yet.</p>
                     </div>
                   )}
+                </div>
+
+                {/* In-Booking Chat Input */}
+                <div>
+                  <h3 className="text-sm font-semibold mb-3">Add More Info</h3>
+                  <div className="border border-border rounded-xl bg-muted/30 p-3 space-y-2">
+                    {inBookingFiles.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {inBookingFiles.map((af, i) => (
+                          <div key={i} className="flex items-center gap-1.5 bg-background rounded-lg px-2.5 py-1.5 text-xs">
+                            {af.preview ? (
+                              <img src={af.preview} alt="" className="h-6 w-6 rounded object-cover" />
+                            ) : (
+                              <FileText className="h-4 w-4 text-muted-foreground" />
+                            )}
+                            <span className="max-w-[120px] truncate">{af.file.name}</span>
+                            <button onClick={() => removeInBookingFile(i)} className="text-muted-foreground hover:text-foreground">
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {inBookingProcessing && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>{inBookingStatus}</span>
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-2">
+                      <input
+                        ref={inBookingFileRef}
+                        type="file"
+                        className="hidden"
+                        multiple
+                        accept="image/*,.pdf"
+                        onChange={handleInBookingFilesSelected}
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="shrink-0 h-9 w-9"
+                        onClick={handleInBookingFileAttach}
+                        disabled={inBookingProcessing}
+                      >
+                        <Paperclip className="h-4 w-4" />
+                      </Button>
+                      <Input
+                        value={inBookingMessage}
+                        onChange={(e) => setInBookingMessage(e.target.value)}
+                        onKeyDown={handleInBookingKeyDown}
+                        placeholder="Add flight change, extra docs, notes..."
+                        className="border-0 shadow-none focus-visible:ring-0 bg-transparent"
+                        disabled={inBookingProcessing}
+                      />
+                      <Button
+                        size="icon"
+                        className="shrink-0 h-9 w-9"
+                        onClick={handleInBookingSend}
+                        disabled={inBookingProcessing || (!inBookingMessage.trim() && inBookingFiles.length === 0)}
+                      >
+                        <Send className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
                 </div>
 
                 <Separator />

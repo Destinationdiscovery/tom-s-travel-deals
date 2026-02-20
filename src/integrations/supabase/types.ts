@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      booking_details: {
+        Row: {
+          booking_number: string
+          client_email: string | null
+          client_name: string | null
+          created_at: string
+          destination: string | null
+          extras: Json | null
+          flight_details: Json | null
+          id: string
+          num_travellers: number | null
+          pricing: Json | null
+          resort_name: string | null
+          room_type: string | null
+          supplier: string | null
+          updated_at: string
+        }
+        Insert: {
+          booking_number: string
+          client_email?: string | null
+          client_name?: string | null
+          created_at?: string
+          destination?: string | null
+          extras?: Json | null
+          flight_details?: Json | null
+          id?: string
+          num_travellers?: number | null
+          pricing?: Json | null
+          resort_name?: string | null
+          room_type?: string | null
+          supplier?: string | null
+          updated_at?: string
+        }
+        Update: {
+          booking_number?: string
+          client_email?: string | null
+          client_name?: string | null
+          created_at?: string
+          destination?: string | null
+          extras?: Json | null
+          flight_details?: Json | null
+          id?: string
+          num_travellers?: number | null
+          pricing?: Json | null
+          resort_name?: string | null
+          room_type?: string | null
+          supplier?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           booking_number: string | null
