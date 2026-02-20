@@ -1,55 +1,71 @@
 
 
-# Separate Bookings Tab from Calendar
+# AI-Powered Booking Assistant with Chat Interface
 
-## What Changes
+## What You Get
 
-The "Add Full Booking" functionality (with AI import) moves out of the Calendar tab into its own **Bookings** tab in the sidebar. The Calendar tab keeps only the grid/list view and the "Add Event" button for quick one-off entries.
+The Bookings tab gets a ChatGPT-style input bar at the bottom. You attach booking confirmations (screenshots, PDFs, photos) and type natural language instructions like:
 
-## Sidebar Update
+- "Create a new booking under Leo Guddemmi and add all details from these files"
+- "Add these files to the Laracy booking"
+- "Create a booking for Sarah Chen from these confirmations"
 
-A new "Bookings" tab appears between **Clients** and **Calendar** in the sidebar, using a briefcase/clipboard icon.
+The AI reads the documents, extracts all booking details (client, booking number, supplier, resort, dates), creates the booking record, generates all calendar events, and stores the uploaded files in a folder organized by client name.
 
-## Bookings Tab (new standalone component)
+## How It Works
 
-This is where you create and manage full bookings. It will contain:
-- A list/table of all bookings grouped by booking number (pulled from the `bookings` table, grouped by `booking_number`)
-- An "Add Booking" button that opens the full booking form (client, resort, booking number, supplier, all dates)
-- The upcoming AI import button (from the approved plan) will live here too
-- Each booking row shows: client name, supplier, booking number, trip dates, and number of calendar events generated
-- Click a booking to edit its details
-
-## Calendar Tab (simplified)
-
-- Remove the "Add Full Booking" button -- only the "Add Event" button remains
-- The calendar grid/list view stays exactly as-is, showing all events from the `bookings` table
-- You can still click events to edit/complete them
+1. You type a message and/or attach files in the chat-style input bar
+2. Files are uploaded to cloud storage under a client folder (e.g., `leo-guddemmi/filename.pdf`)
+3. The AI processes attached images/PDFs, extracts booking data, and determines the intent (new booking vs. add to existing)
+4. For new bookings: creates the booking record and all calendar events automatically
+5. For existing bookings: links the files and updates details if needed
+6. A response message confirms what was created, with a summary card
 
 ## Technical Details
 
-### Files to modify
+### 1. Storage Bucket (database migration)
 
-**`src/components/dashboard/DashboardSidebar.tsx`**
-- Add `"bookings"` to the `DashboardTab` type
-- Add a Bookings entry in the tabs array (between Clients and Calendar)
+Create a `booking-documents` storage bucket to hold uploaded files, with an RLS policy allowing admin access.
 
-**`src/components/dashboard/BookingCalendar.tsx`**
-- Remove the "Add Full Booking" button from the header
-- Remove the full booking dialog and all related state/handlers (`fullBookingOpen`, `fullBooking`, `openFullBooking`, `handleFullBookingSave`, `handleClientSelectFullBooking`)
-- Keep everything else (grid, list, single event add/edit)
+### 2. New Edge Function: `booking-assistant`
 
-**`src/pages/GearAdmin.tsx`**
-- Import and wire up the new `BookingManager` component for the `"bookings"` tab
+**File: `supabase/functions/booking-assistant/index.ts`**
 
-### New file to create
+- Accepts: base64-encoded file(s), file names, user message, list of existing bookings and clients
+- Uses Lovable AI (google/gemini-2.5-flash) with tool calling to extract structured data from document images
+- Tools defined for: `create_booking` (returns client name, email, booking number, supplier, resort, dates) and `add_to_booking` (returns booking number and file references)
+- Handles 429/402 rate limit errors gracefully
+- Returns structured action result (what was extracted, what to create)
 
-**`src/components/dashboard/BookingManager.tsx`**
-- Contains the full booking form (moved from BookingCalendar) plus a bookings list view
-- Lists all bookings grouped by `booking_number` from the `bookings` table
-- "Add Booking" button opens the full booking form dialog
-- On save, creates calendar events in the `bookings` table (same logic as current `handleFullBookingSave`)
-- This is also where the AI import feature will be added next
+Config: add `[functions.booking-assistant]` with `verify_jwt = false` to `supabase/config.toml`
 
-### No database changes required
-Everything uses the existing `bookings` table.
+### 3. Updated BookingManager Component
+
+**File: `src/components/dashboard/BookingManager.tsx`**
+
+Replace the "Add Booking" button with a sticky chat-style input bar at the bottom of the page:
+
+- A text input with placeholder "Ask anything" (matching the reference screenshot style)
+- An attachment button (paperclip icon) on the left that opens a file picker (accepts images and PDFs)
+- Attached files shown as removable chips/thumbnails above the input
+- A send button on the right
+- Processing state shows a loading indicator with status text
+- After AI processes: auto-creates the booking via the existing `handleSave` logic and shows a toast confirmation
+- The manual "Add Booking" button remains available as a fallback in the header
+
+The existing bookings table/list stays exactly as-is above the input bar.
+
+### 4. File Upload Flow
+
+When files are attached and the message is sent:
+1. Upload each file to the `booking-documents` bucket under `{client-name-slug}/{filename}`
+2. Convert images to base64 for the AI to read
+3. Send to the `booking-assistant` edge function along with the text message, existing clients list, and existing bookings list
+4. AI returns extracted data
+5. Frontend creates booking entries in the `bookings` table (same logic as current form save)
+6. Toast confirms success with summary of what was created
+
+### No New Database Tables
+
+Files go to cloud storage. Bookings use the existing `bookings` table. No schema changes needed beyond the storage bucket.
 
