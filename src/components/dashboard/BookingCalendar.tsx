@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, Plus, Loader2, CalendarIcon, List, Grid3X3, Check } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Loader2, CalendarIcon, List, Grid3X3, Check, CheckCircle2, Circle, FileText, Download, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,12 +8,16 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths, isToday, isBefore, startOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
+import type { Tables } from "@/integrations/supabase/types";
 
 interface BookingEvent {
   id: string;
@@ -26,6 +30,11 @@ interface BookingEvent {
   is_completed: boolean;
   booking_number: string | null;
   supplier: string | null;
+}
+
+interface StorageFile {
+  name: string;
+  url: string;
 }
 
 const eventTypeColors: Record<string, string> = {
@@ -47,6 +56,11 @@ const eventTypeLabels: Record<string, string> = {
   trip_start: "Trip Start",
   trip_end: "Trip End",
 };
+
+const EVENT_TYPE_ORDER = ["booking", "deposit_due", "final_payment", "departure", "trip_start", "trip_end", "return"];
+
+const slugify = (name: string) =>
+  name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
 // --- Date Picker Helper ---
 const DatePickerField = ({ label, date, onSelect }: { label: string; date: Date | undefined; onSelect: (d: Date | undefined) => void }) => (
@@ -76,6 +90,20 @@ const BookingCalendar = () => {
   const [clientList, setClientList] = useState<{ name: string; email: string }[]>([]);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [form, setForm] = useState({ clientName: "", clientEmail: "", eventType: "booking", title: "", notes: "", eventDate: "", bookingNumber: "", supplier: "" });
+
+  // Booking detail dialog state
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailBookingNumber, setDetailBookingNumber] = useState<string | null>(null);
+  const [detailEvents, setDetailEvents] = useState<Tables<"bookings">[]>([]);
+  const [detailDocuments, setDetailDocuments] = useState<StorageFile[]>([]);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailClientName, setDetailClientName] = useState("");
+  const [detailClientEmail, setDetailClientEmail] = useState<string | null>(null);
+  const [detailSupplier, setDetailSupplier] = useState<string | null>(null);
+  const [detailTitle, setDetailTitle] = useState("");
+  const [detailTripStart, setDetailTripStart] = useState<string | null>(null);
+  const [detailTripEnd, setDetailTripEnd] = useState<string | null>(null);
+  const [deletingBooking, setDeletingBooking] = useState(false);
 
   useEffect(() => { fetchEvents(); }, [currentMonth]);
 
@@ -110,6 +138,82 @@ const BookingCalendar = () => {
     setEditingEvent(event);
     setForm({ clientName: event.client_name, clientEmail: event.client_email || "", eventType: event.event_type, title: event.title, notes: event.notes || "", eventDate: event.event_date, bookingNumber: event.booking_number || "", supplier: event.supplier || "" });
     setDialogOpen(true);
+  };
+
+  // --- Booking Detail Dialog ---
+  const openBookingDetail = async (event: BookingEvent) => {
+    if (!event.booking_number) return;
+    setDetailBookingNumber(event.booking_number);
+    setDetailOpen(true);
+    setDetailLoading(true);
+    setDetailEvents([]);
+    setDetailDocuments([]);
+
+    const [eventsResult, docsResult] = await Promise.all([
+      supabase.from("bookings").select("*").eq("booking_number", event.booking_number).order("event_date", { ascending: true }),
+      supabase.storage.from("booking-documents").list(slugify(event.client_name), { limit: 100 }),
+    ]);
+
+    if (eventsResult.data && eventsResult.data.length > 0) {
+      const sorted = [...eventsResult.data].sort((a, b) => EVENT_TYPE_ORDER.indexOf(a.event_type) - EVENT_TYPE_ORDER.indexOf(b.event_type));
+      setDetailEvents(sorted);
+      const first = eventsResult.data[0];
+      setDetailClientName(first.client_name);
+      setDetailClientEmail(first.client_email);
+      setDetailSupplier(first.supplier);
+      setDetailTitle(first.title.replace(/ - (Booked|Deposit Due|Final Payment|Trip Start|Trip End|Departure|Return)$/, ""));
+      setDetailTripStart(eventsResult.data.find((e) => e.event_type === "trip_start")?.event_date || null);
+      setDetailTripEnd(eventsResult.data.find((e) => e.event_type === "trip_end")?.event_date || null);
+    }
+
+    if (docsResult.data && docsResult.data.length > 0) {
+      const clientSlug = slugify(event.client_name);
+      const validFiles = docsResult.data.filter((f) => f.name !== ".emptyFolderPlaceholder");
+      const signedResults = await Promise.all(
+        validFiles.map((f) => supabase.storage.from("booking-documents").createSignedUrl(`${clientSlug}/${f.name}`, 3600))
+      );
+      setDetailDocuments(validFiles.map((f, i) => ({ name: f.name, url: signedResults[i].data?.signedUrl || "" })).filter((f) => f.url));
+    }
+
+    setDetailLoading(false);
+  };
+
+  const toggleDetailEventCompletion = async (evt: Tables<"bookings">) => {
+    const newValue = !evt.is_completed;
+    await supabase.from("bookings").update({ is_completed: newValue }).eq("id", evt.id);
+    setDetailEvents((prev) => prev.map((e) => (e.id === evt.id ? { ...e, is_completed: newValue } : e)));
+    // Also refresh calendar events
+    fetchEvents();
+  };
+
+  const handleDeleteBookingFromDetail = async () => {
+    if (!detailBookingNumber) return;
+    setDeletingBooking(true);
+    const { error } = await supabase.from("bookings").delete().eq("booking_number", detailBookingNumber);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Booking deleted" });
+      setDetailOpen(false);
+      fetchEvents();
+    }
+    setDeletingBooking(false);
+  };
+
+  const getSignedUrl = async (fileName: string, clientName: string) => {
+    const { data } = await supabase.storage.from("booking-documents").createSignedUrl(`${slugify(clientName)}/${fileName}`, 3600);
+    if (data?.signedUrl) window.open(data.signedUrl, "_blank");
+    else toast({ title: "Error", description: "Could not generate download link.", variant: "destructive" });
+  };
+
+  // Handle event click: if it has a booking_number, open detail; otherwise open edit
+  const handleEventClick = (event: BookingEvent, ev: React.MouseEvent) => {
+    ev.stopPropagation();
+    if (event.booking_number) {
+      openBookingDetail(event);
+    } else {
+      openEditEvent(event);
+    }
   };
 
   const handleSave = async () => {
@@ -181,7 +285,6 @@ const BookingCalendar = () => {
             </button>
           </div>
           <Button onClick={() => openNewEvent()} className="gap-2"><Plus className="h-4 w-4" /> Add Event</Button>
-          <Button onClick={() => openNewEvent()} className="gap-2"><Plus className="h-4 w-4" /> Add Event</Button>
         </div>
       </div>
 
@@ -214,8 +317,8 @@ const BookingCalendar = () => {
                         {dayEvents.slice(0, 3).map((e) => {
                           const isOverdue = !e.is_completed && isBefore(new Date(e.event_date), startOfDay(new Date()));
                           return (
-                            <div key={e.id} onClick={(ev) => { ev.stopPropagation(); toggleComplete(e); }}
-                              title="Click to toggle complete"
+                            <div key={e.id} onClick={(ev) => handleEventClick(e, ev)}
+                              title={e.booking_number ? "Click to view booking details" : "Click to edit"}
                               className={cn(
                                 "text-[10px] px-1 py-0.5 rounded text-white truncate cursor-pointer",
                                 eventTypeColors[e.event_type] || "bg-muted",
@@ -246,13 +349,14 @@ const BookingCalendar = () => {
                     <div
                       key={e.id}
                       className={cn(
-                        "flex items-center justify-between p-3 rounded-lg border border-border/50 hover:bg-muted/30 transition-colors",
+                        "flex items-center justify-between p-3 rounded-lg border border-border/50 hover:bg-muted/30 transition-colors cursor-pointer",
                         e.is_completed && "opacity-60",
                         isOverdue && "border-destructive/50 bg-destructive/5"
                       )}
+                      onClick={() => e.booking_number ? openBookingDetail(e) : openEditEvent(e)}
                     >
                       <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <button onClick={() => toggleComplete(e)} className={cn("w-5 h-5 rounded border flex items-center justify-center shrink-0 transition-colors", e.is_completed ? "bg-emerald-500 border-emerald-500 text-white" : "border-border hover:border-primary")}>
+                        <button onClick={(ev) => { ev.stopPropagation(); toggleComplete(e); }} className={cn("w-5 h-5 rounded border flex items-center justify-center shrink-0 transition-colors", e.is_completed ? "bg-emerald-500 border-emerald-500 text-white" : "border-border hover:border-primary")}>
                           {e.is_completed && <Check className="h-3 w-3" />}
                         </button>
                         <div className={cn("w-2 h-2 rounded-full shrink-0", eventTypeColors[e.event_type])} />
@@ -267,7 +371,7 @@ const BookingCalendar = () => {
                       <div className="flex items-center gap-3 shrink-0">
                         <Badge variant="secondary" className="text-[10px] capitalize">{eventTypeLabels[e.event_type] || e.event_type}</Badge>
                         <span className={cn("text-xs", isOverdue ? "text-destructive font-semibold" : "text-muted-foreground")}>{format(new Date(e.event_date), "MMM d")}</span>
-                        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => openEditEvent(e)}>Edit</Button>
+                        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={(ev) => { ev.stopPropagation(); openEditEvent(e); }}>Edit</Button>
                       </div>
                     </div>
                   );
@@ -295,7 +399,6 @@ const BookingCalendar = () => {
             <DialogTitle>{editingEvent ? "Edit Event" : "New Event"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            {/* Client dropdown */}
             {clientList.length > 0 && !editingEvent && (
               <div>
                 <Label>Select Client</Label>
@@ -333,6 +436,142 @@ const BookingCalendar = () => {
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Booking Detail Dialog */}
+      <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
+        <DialogContent className="max-w-xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <span>{detailTitle}</span>
+              {detailBookingNumber && (
+                <Badge variant="outline" className="font-mono text-xs">{detailBookingNumber}</Badge>
+              )}
+            </DialogTitle>
+            {detailTripStart && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                <CalendarIcon className="h-4 w-4" />
+                <span className="font-medium text-foreground">
+                  {format(new Date(detailTripStart), "MMM d")}
+                  {detailTripEnd ? ` – ${format(new Date(detailTripEnd), "MMM d, yyyy")}` : `, ${format(new Date(detailTripStart), "yyyy")}`}
+                </span>
+              </div>
+            )}
+          </DialogHeader>
+
+          {detailLoading ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <ScrollArea className="flex-1 -mx-6 px-6">
+              <div className="space-y-6 pb-4">
+                {/* Client & Supplier Info */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Client</p>
+                    <p className="font-medium text-sm">{detailClientName}</p>
+                    {detailClientEmail && <p className="text-xs text-muted-foreground">{detailClientEmail}</p>}
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Supplier</p>
+                    <p className="font-medium text-sm">{detailSupplier || "—"}</p>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Events Timeline */}
+                <div>
+                  <h3 className="text-sm font-semibold mb-3">Events Timeline</h3>
+                  <div className="space-y-2">
+                    {detailEvents.map((event) => (
+                      <div key={event.id} className="flex items-start gap-3 p-3 rounded-lg border border-border bg-muted/30 hover:bg-muted/50 transition-colors">
+                        <button onClick={() => toggleDetailEventCompletion(event)} className="mt-0.5 shrink-0">
+                          {event.is_completed ? <CheckCircle2 className="h-5 w-5 text-primary" /> : <Circle className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors" />}
+                        </button>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className={cn("text-sm font-medium", event.is_completed && "line-through text-muted-foreground")}>
+                              {eventTypeLabels[event.event_type] || event.event_type}
+                            </span>
+                            <span className="text-xs text-muted-foreground shrink-0">{format(new Date(event.event_date), "MMM d, yyyy")}</span>
+                          </div>
+                          {event.notes && <p className="text-xs text-muted-foreground mt-1">{event.notes}</p>}
+                        </div>
+                      </div>
+                    ))}
+                    {detailEvents.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">No events found.</p>}
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Documents */}
+                <div>
+                  <h3 className="text-sm font-semibold mb-3">Documents</h3>
+                  {detailDocuments.length > 0 ? (
+                    <div className="space-y-3">
+                      {detailDocuments.some((doc) => /\.(jpg|jpeg|png|webp|gif|avif)$/i.test(doc.name)) && (
+                        <div className="grid grid-cols-2 gap-2">
+                          {detailDocuments
+                            .filter((doc) => /\.(jpg|jpeg|png|webp|gif|avif)$/i.test(doc.name))
+                            .map((doc, i) => (
+                              <button key={i} onClick={() => getSignedUrl(doc.name, detailClientName)} className="relative rounded-lg overflow-hidden border border-border hover:ring-2 hover:ring-primary/50 transition-all aspect-video">
+                                <img src={doc.url} alt={doc.name} className="w-full h-full object-cover" />
+                                <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-2">
+                                  <span className="text-[10px] text-white truncate block">{doc.name}</span>
+                                </div>
+                              </button>
+                            ))}
+                        </div>
+                      )}
+                      {detailDocuments
+                        .filter((doc) => !/\.(jpg|jpeg|png|webp|gif|avif)$/i.test(doc.name))
+                        .map((doc, i) => (
+                          <div key={i} className="flex items-center gap-3 p-2.5 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                            <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                            <span className="text-sm flex-1 truncate">{doc.name}</span>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => getSignedUrl(doc.name, detailClientName)}>
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">No documents uploaded.</p>
+                  )}
+                </div>
+
+                <Separator />
+
+                {/* Delete action */}
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="sm" className="w-full gap-2">
+                      <Trash2 className="h-4 w-4" /> Delete Entire Booking
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete this booking?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will permanently remove all {detailEvents.length} calendar events for booking {detailBookingNumber}. This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDeleteBookingFromDetail} disabled={deletingBooking}>
+                        {deletingBooking ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </ScrollArea>
+          )}
         </DialogContent>
       </Dialog>
     </div>

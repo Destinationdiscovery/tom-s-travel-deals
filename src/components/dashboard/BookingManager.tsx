@@ -180,14 +180,17 @@ const BookingManager = () => {
 
     if (docsResult.data && docsResult.data.length > 0) {
       const clientSlug = slugify(booking.clientName);
-      const files: StorageFile[] = docsResult.data
-        .filter((f) => f.name !== ".emptyFolderPlaceholder")
-        .map((f) => {
-          const { data: urlData } = supabase.storage
-            .from("booking-documents")
-            .getPublicUrl(`${clientSlug}/${f.name}`);
-          return { name: f.name, url: urlData.publicUrl };
-        });
+      const validFiles = docsResult.data.filter((f) => f.name !== ".emptyFolderPlaceholder");
+      // Use signed URLs so private bucket files render
+      const signedResults = await Promise.all(
+        validFiles.map((f) =>
+          supabase.storage.from("booking-documents").createSignedUrl(`${clientSlug}/${f.name}`, 3600)
+        )
+      );
+      const files: StorageFile[] = validFiles.map((f, i) => ({
+        name: f.name,
+        url: signedResults[i].data?.signedUrl || "",
+      })).filter((f) => f.url);
       setDetailDocuments(files);
     }
 
@@ -623,6 +626,15 @@ const BookingManager = () => {
                 <Badge variant="outline" className="font-mono text-xs">{selectedBooking.bookingNumber}</Badge>
               )}
             </DialogTitle>
+            {selectedBooking?.tripStart && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                <CalendarIcon className="h-4 w-4" />
+                <span className="font-medium text-foreground">
+                  {format(new Date(selectedBooking.tripStart), "MMM d")}
+                  {selectedBooking.tripEnd ? ` – ${format(new Date(selectedBooking.tripEnd), "MMM d, yyyy")}` : `, ${format(new Date(selectedBooking.tripStart), "yyyy")}`}
+                </span>
+              </div>
+            )}
           </DialogHeader>
 
           {detailLoading ? (
@@ -698,24 +710,46 @@ const BookingManager = () => {
                 <div>
                   <h3 className="text-sm font-semibold mb-3">Documents</h3>
                   {detailDocuments.length > 0 ? (
-                    <div className="space-y-2">
-                      {detailDocuments.map((doc, i) => (
-                        <div
-                          key={i}
-                          className="flex items-center gap-3 p-2.5 rounded-lg border border-border hover:bg-muted/50 transition-colors"
-                        >
-                          <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
-                          <span className="text-sm flex-1 truncate">{doc.name}</span>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 shrink-0"
-                            onClick={() => selectedBooking && getSignedUrl(doc.name, selectedBooking.clientName)}
-                          >
-                            <Download className="h-4 w-4" />
-                          </Button>
+                    <div className="space-y-3">
+                      {/* Image previews */}
+                      {detailDocuments.some((doc) => /\.(jpg|jpeg|png|webp|gif|avif)$/i.test(doc.name)) && (
+                        <div className="grid grid-cols-2 gap-2">
+                          {detailDocuments
+                            .filter((doc) => /\.(jpg|jpeg|png|webp|gif|avif)$/i.test(doc.name))
+                            .map((doc, i) => (
+                              <button
+                                key={i}
+                                onClick={() => selectedBooking && getSignedUrl(doc.name, selectedBooking.clientName)}
+                                className="relative rounded-lg overflow-hidden border border-border hover:ring-2 hover:ring-primary/50 transition-all aspect-video"
+                              >
+                                <img src={doc.url} alt={doc.name} className="w-full h-full object-cover" />
+                                <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-2">
+                                  <span className="text-[10px] text-white truncate block">{doc.name}</span>
+                                </div>
+                              </button>
+                            ))}
                         </div>
-                      ))}
+                      )}
+                      {/* Non-image files */}
+                      {detailDocuments
+                        .filter((doc) => !/\.(jpg|jpeg|png|webp|gif|avif)$/i.test(doc.name))
+                        .map((doc, i) => (
+                          <div
+                            key={i}
+                            className="flex items-center gap-3 p-2.5 rounded-lg border border-border hover:bg-muted/50 transition-colors"
+                          >
+                            <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                            <span className="text-sm flex-1 truncate">{doc.name}</span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 shrink-0"
+                              onClick={() => selectedBooking && getSignedUrl(doc.name, selectedBooking.clientName)}
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
                     </div>
                   ) : (
                     <p className="text-sm text-muted-foreground text-center py-4">No documents uploaded.</p>
