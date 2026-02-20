@@ -379,7 +379,7 @@ const ClientFile = () => {
           extras: d.extras || [],
         });
         toast({ title: "New booking created!", description: `${d.resort_or_trip} added to ${clientName}'s file.` });
-        await fetchAll();
+        navigate(`/booking/${encodeURIComponent(d.booking_number)}`);
       } else if (result?.action === "add_to_booking") {
         const d = result.data;
         for (const af of chatFiles) {
@@ -396,7 +396,7 @@ const ClientFile = () => {
           await upsertBookingDetails(d.booking_number, mergeData);
         }
         toast({ title: "Booking updated!", description: `${chatFiles.length} file(s) added.` });
-        await fetchAll();
+        navigate(`/booking/${encodeURIComponent(d.booking_number)}`);
       } else {
         toast({ title: "AI Response", description: result?.message || "No action taken." });
       }
