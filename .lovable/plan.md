@@ -1,44 +1,100 @@
 
-# Re-scan Existing Bookings
 
-## Problem
-Existing bookings were created before the new `booking_details` table existed, so they show a bare-bones detail view with no destination, room type, flights, pricing, or extras. The documents are already uploaded in storage -- they just need to be re-processed by the AI.
+# Trip Report -- Full-Page Booking Presentation
 
-## Solution
-Add a "Re-scan Documents" button inside the booking detail view. When clicked, it will:
+## The Problem
 
-1. Fetch all documents already stored in the `booking-documents` bucket for that client
-2. Download each file and convert it to base64
-3. Send them all to the `booking-assistant` edge function with a message like "Extract all details from these documents for booking [number]"
-4. Process the AI response the same way as `add_to_booking` -- upsert the extracted data into `booking_details`
-5. Refresh the detail view to show the newly populated fields
+The AI review page gathers web data and presents a beautiful, magazine-style report. The booking system gathers document data and presents... a list of key-value rows in a small dialog. Same AI extraction concept, completely different presentation quality.
+
+## The Solution
+
+Replace the current booking detail dialog with a full-page Trip Report that mirrors the design language of the AI review page. The AI already extracts the data -- this is purely about how we present it.
 
 ## What Changes
 
-### `src/components/dashboard/BookingManager.tsx`
-- Add a `rescanDocuments` async function that:
-  - Downloads each file from the `booking-documents` bucket using signed URLs
-  - Converts them to base64
-  - Calls the `booking-assistant` edge function
-  - Runs `upsertBookingDetails` with the response
-  - Refreshes the detail view
-- Add a new state variable `rescanning` (boolean) for loading state
-- Add a "Re-scan Documents" button in the detail view header banner area, visible when there are documents but no `booking_details` data (or always available as a refresh option)
-- The button shows a spinner while processing
+### 1. New dedicated route: `/booking/:bookingNumber`
 
-### No database or edge function changes needed
-The `booking-assistant` edge function already supports the `add_to_booking` tool and extracts all the rich fields. The `booking_details` table already exists. This is purely a frontend change.
+Instead of a cramped dialog, booking details get their own full page -- just like reviews get `/review/:slug`. This gives room for a proper report layout.
+
+### 2. Trip Report page layout (mirrors the AI review page)
+
+```text
++--------------------------------------------------+
+|  HEADER BANNER                                    |
+|  Resort Name (large)          Booking # badge     |
+|  Supplier  |  Destination  |  Trip Dates          |
++--------------------------------------------------+
+|                                                    |
+|  MAIN COLUMN (left ~60%)   |  SIDEBAR (right ~40%)|
+|                            |                       |
+|  -- Trip Summary Card --   |  -- Quick Facts --    |
+|  Client, Room Type,        |  Travellers           |
+|  Meal Plan, Transfers,     |  Room Type            |
+|  Insurance, any extras     |  Supplier             |
+|  presented as organized    |  Booking #            |
+|  sections, not raw rows    |  Dates                |
+|                            |                       |
+|  -- Flight Itinerary --    |  -- Pricing --        |
+|  Departure card with       |  Total (large)        |
+|  airline, flight #,        |  Deposit bar          |
+|  airports, times           |  Taxes                |
+|  Return card same format   |  Per person           |
+|                            |                       |
+|  -- Events Timeline --     |  -- Documents --      |
+|  Visual timeline with      |  Thumbnail grid       |
+|  completion toggles        |  of uploaded files     |
+|                            |                       |
+|  -- Uploaded Documents --  |  -- Actions --        |
+|  Full image previews       |  Re-scan button       |
+|  File downloads            |  Add docs (chat)      |
+|                            |  Delete booking       |
++--------------------------------------------------+
+|  IN-BOOKING CHAT BAR (sticky bottom)              |
+|  [paperclip] Type to add info...         [send]   |
++--------------------------------------------------+
+```
+
+### 3. Design elements borrowed from AI review page
+
+- **Rating-bar style** for pricing breakdown (progress bars showing deposit paid vs total)
+- **Photo gallery grid** for uploaded document images (same `PhotoGallery` lightbox component)
+- **Section cards with icons** (same card styling as review sections)
+- **Badge/tag chips** for extras (meal plan, transfers, insurance) -- same style as "Best For" tags on reviews
+- **2-column responsive layout** that collapses to single column on mobile
+
+### 4. Data flow stays the same
+
+No database or edge function changes needed. The `booking_details` table and `booking-assistant` function already extract everything. This is a pure frontend presentation upgrade.
+
+### 5. Navigation updates
+
+- Clicking a booking row in the table navigates to `/booking/:bookingNumber` instead of opening a dialog
+- Back button returns to the bookings tab
+- Calendar booking clicks also navigate to the full page
 
 ## Technical Details
 
-The re-scan flow:
+### New file: `src/pages/BookingReport.tsx`
+- Full-page component with Header/Footer
+- Fetches from both `bookings` (events) and `booking_details` (metadata) tables by booking number
+- 2-column layout using existing Tailwind grid patterns
+- Reuses existing components: `PhotoGallery`, `Badge`, `Card`, `ScrollArea`
+- Includes the in-booking chat bar (same logic currently in BookingManager)
+- Includes re-scan functionality
+- Responsive: 2 columns on desktop, single column stacked on mobile
 
-1. Use `supabase.storage.from("booking-documents").list(clientSlug)` to get file names (already done in `openBookingDetail`)
-2. For each file, use `supabase.storage.from("booking-documents").download(path)` to get the blob
-3. Convert each blob to base64 using FileReader
-4. Call `supabase.functions.invoke("booking-assistant", { body: { message, files, existing_bookings, existing_clients } })`
-5. The AI returns `add_to_booking` action with extracted fields
-6. `upsertBookingDetails` saves/merges the data
-7. Re-call `openBookingDetail` to refresh the view
+### Modified: `src/components/dashboard/BookingManager.tsx`
+- Remove the detail dialog entirely (the large Dialog with all the cards)
+- Keep the bookings table and chat input bar
+- `openBookingDetail` now navigates to `/booking/:bookingNumber` using `react-router-dom`
 
-The button will appear in the header banner next to the booking number badge, styled as a small outline button with a refresh icon.
+### Modified: `src/components/dashboard/BookingCalendar.tsx`
+- Calendar event clicks navigate to `/booking/:bookingNumber` instead of opening the dialog
+
+### Modified: `src/App.tsx`
+- Add route: `/booking/:bookingNumber` pointing to `BookingReport.tsx`
+
+### Shared components extracted
+- `FlightLeg`, `DetailRow` helpers moved to a shared file or kept in `BookingReport.tsx`
+- `upsertBookingDetails` logic shared between BookingManager (for new bookings) and BookingReport (for re-scans/chat updates)
+
