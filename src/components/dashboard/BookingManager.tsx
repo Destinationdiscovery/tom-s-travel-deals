@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Plus, Loader2, CalendarIcon, ClipboardList, Paperclip, Send, X, FileText, Image as ImageIcon, Download, Trash2, CheckCircle2, Circle, MapPin, Plane, DollarSign, Users, Hotel, Tag } from "lucide-react";
+import { Plus, Loader2, CalendarIcon, ClipboardList, Paperclip, Send, X, FileText, Image as ImageIcon, Download, Trash2, CheckCircle2, Circle, MapPin, Plane, DollarSign, Users, Hotel, Tag, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -133,6 +133,7 @@ const BookingManager = () => {
   const [detailLoading, setDetailLoading] = useState(false);
   const [deletingBooking, setDeletingBooking] = useState(false);
   const [bookingDetails, setBookingDetails] = useState<BookingDetails | null>(null);
+  const [rescanning, setRescanning] = useState(false);
 
   // Chat input state (main)
   const [chatMessage, setChatMessage] = useState("");
@@ -680,6 +681,89 @@ const BookingManager = () => {
     }
   };
 
+  // --- Re-scan documents ---
+
+  const rescanDocuments = async () => {
+    if (!selectedBooking) return;
+    setRescanning(true);
+
+    try {
+      const clientSlug = slugify(selectedBooking.clientName);
+      const { data: fileList } = await supabase.storage
+        .from("booking-documents")
+        .list(clientSlug, { limit: 100 });
+
+      const validFiles = (fileList || []).filter((f) => f.name !== ".emptyFolderPlaceholder");
+
+      if (validFiles.length === 0) {
+        toast({ title: "No documents", description: "No files found to re-scan.", variant: "destructive" });
+        setRescanning(false);
+        return;
+      }
+
+      // Download each file and convert to base64
+      const filesPayload = [];
+      for (const f of validFiles) {
+        const { data: blob } = await supabase.storage
+          .from("booking-documents")
+          .download(`${clientSlug}/${f.name}`);
+        if (!blob) continue;
+
+        const base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve((reader.result as string).split(",")[1]);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+
+        filesPayload.push({
+          name: f.name,
+          mimeType: f.metadata?.mimetype || (f.name.match(/\.(pdf)$/i) ? "application/pdf" : "image/jpeg"),
+          base64,
+        });
+      }
+
+      const { data: result, error } = await supabase.functions.invoke("booking-assistant", {
+        body: {
+          message: `Extract all booking details from these documents for existing booking ${selectedBooking.bookingNumber} (${selectedBooking.title}) for client ${selectedBooking.clientName}. Use the add_to_booking tool.`,
+          files: filesPayload,
+          existing_bookings: bookings,
+          existing_clients: clientList,
+        },
+      });
+
+      if (error) throw error;
+
+      if (result?.action === "add_to_booking" || result?.action === "create_booking") {
+        const d = result.data;
+        const mergeData: Partial<BookingDetails> = {};
+        if (d.destination) mergeData.destination = d.destination;
+        if (d.room_type) mergeData.room_type = d.room_type;
+        if (d.num_travellers) mergeData.num_travellers = d.num_travellers;
+        if (d.flight_details) mergeData.flight_details = d.flight_details;
+        if (d.pricing) mergeData.pricing = d.pricing;
+        if (d.extras) mergeData.extras = d.extras;
+        if (d.supplier) mergeData.supplier = d.supplier;
+        if (d.client_name) mergeData.client_name = d.client_name;
+        if (d.client_email) mergeData.client_email = d.client_email;
+        if (d.resort_or_trip || d.resort_name) mergeData.resort_name = d.resort_or_trip || d.resort_name;
+
+        await upsertBookingDetails(selectedBooking.bookingNumber, mergeData);
+        toast({ title: "Re-scan complete!", description: "Booking details have been updated." });
+
+        // Refresh the detail view
+        await openBookingDetail(selectedBooking);
+      } else {
+        toast({ title: "No details extracted", description: result?.message || "AI couldn't extract structured data from these documents." });
+      }
+    } catch (err: any) {
+      console.error("Rescan error:", err);
+      toast({ title: "Error", description: err.message || "Re-scan failed.", variant: "destructive" });
+    } finally {
+      setRescanning(false);
+    }
+  };
+
   // --- Render helpers ---
 
   const hasFlightDetails = bookingDetails?.flight_details &&
@@ -869,6 +953,18 @@ const BookingManager = () => {
                 </h2>
                 {selectedBooking && (
                   <Badge className="font-mono text-xs">{selectedBooking.bookingNumber}</Badge>
+                )}
+                {detailDocuments.length > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5 h-7 text-xs"
+                    onClick={rescanDocuments}
+                    disabled={rescanning}
+                  >
+                    {rescanning ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+                    {rescanning ? "Scanning..." : "Re-scan Docs"}
+                  </Button>
                 )}
               </div>
               {(bookingDetails?.supplier || selectedBooking?.supplier) && (
