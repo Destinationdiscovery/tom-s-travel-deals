@@ -113,16 +113,18 @@ const BookingCalendar = () => {
     setDialogOpen(true);
   };
 
-  // Navigate to full-page booking report
-  const openBookingDetail = (event: BookingEvent) => {
-    if (!event.booking_number) return;
-    navigate(`/booking/${encodeURIComponent(event.booking_number)}`);
+  const slugify = (name: string) =>
+    name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+  // Navigate to client file
+  const openClientFile = (event: BookingEvent) => {
+    navigate(`/client/${slugify(event.client_name)}`);
   };
 
   const handleEventClick = (event: BookingEvent, ev: React.MouseEvent) => {
     ev.stopPropagation();
     if (event.booking_number) {
-      openBookingDetail(event);
+      openClientFile(event);
     } else {
       openEditEvent(event);
     }
@@ -264,7 +266,7 @@ const BookingCalendar = () => {
                         e.is_completed && "opacity-60",
                         isOverdue && "border-destructive/50 bg-destructive/5"
                       )}
-                      onClick={() => e.booking_number ? openBookingDetail(e) : openEditEvent(e)}
+                      onClick={() => e.booking_number ? openClientFile(e) : openEditEvent(e)}
                     >
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         <button onClick={(ev) => { ev.stopPropagation(); toggleComplete(e); }} className={cn("w-5 h-5 rounded border flex items-center justify-center shrink-0 transition-colors", e.is_completed ? "bg-emerald-500 border-emerald-500 text-white" : "border-border hover:border-primary")}>

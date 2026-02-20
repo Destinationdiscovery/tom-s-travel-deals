@@ -16,6 +16,16 @@ import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
+interface ClientGroup {
+  clientName: string;
+  clientEmail: string | null;
+  clientSlug: string;
+  bookingCount: number;
+  bookingNumbers: string[];
+  upcomingTrip: string | null;
+  lastActivity: string;
+}
+
 interface BookingGroup {
   bookingNumber: string;
   clientName: string;
@@ -62,10 +72,13 @@ const DatePickerField = ({ label, date, onSelect }: { label: string; date: Date 
     </Popover>
   </div>
 );
+const slugify = (name: string) =>
+  name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
 const BookingManager = () => {
   const navigate = useNavigate();
   const [bookings, setBookings] = useState<BookingGroup[]>([]);
+  const [clients, setClients] = useState<ClientGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -107,6 +120,7 @@ const BookingManager = () => {
       .order("event_date", { ascending: false });
 
     if (data) {
+      // Build booking groups (kept for AI processing context)
       const groups = new Map<string, BookingGroup>();
       for (const row of data) {
         const key = row.booking_number!;
@@ -126,16 +140,50 @@ const BookingManager = () => {
         if (row.event_type === "trip_end") g.tripEnd = row.event_date;
       }
       setBookings(Array.from(groups.values()));
+
+      // Build client groups
+      const clientMap = new Map<string, ClientGroup>();
+      for (const row of data) {
+        const key = slugify(row.client_name);
+        if (!clientMap.has(key)) {
+          clientMap.set(key, {
+            clientName: row.client_name,
+            clientEmail: row.client_email,
+            clientSlug: key,
+            bookingCount: 0,
+            bookingNumbers: [],
+            upcomingTrip: null,
+            lastActivity: row.event_date,
+          });
+        }
+        const c = clientMap.get(key)!;
+        if (row.booking_number && !c.bookingNumbers.includes(row.booking_number)) {
+          c.bookingNumbers.push(row.booking_number);
+          c.bookingCount = c.bookingNumbers.length;
+        }
+        // Track upcoming trip (nearest future trip_start)
+        if (row.event_type === "trip_start") {
+          const tripDate = new Date(row.event_date);
+          if (tripDate >= new Date()) {
+            if (!c.upcomingTrip || tripDate < new Date(c.upcomingTrip)) {
+              c.upcomingTrip = row.event_date;
+            }
+          }
+        }
+      }
+      setClients(Array.from(clientMap.values()).sort((a, b) => {
+        // Upcoming trips first, then by last activity
+        if (a.upcomingTrip && !b.upcomingTrip) return -1;
+        if (!a.upcomingTrip && b.upcomingTrip) return 1;
+        return new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime();
+      }));
     }
     setLoading(false);
   };
 
-  const slugify = (name: string) =>
-    name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-
-  // Navigate to full-page report
-  const openBookingDetail = (booking: BookingGroup) => {
-    navigate(`/booking/${encodeURIComponent(booking.bookingNumber)}`);
+  // Navigate to client file
+  const openClientFile = (client: ClientGroup) => {
+    navigate(`/client/${client.clientSlug}`);
   };
 
   // --- Upsert booking_details helper ---
@@ -319,8 +367,8 @@ const BookingManager = () => {
       });
       fetchBookings();
 
-      // Navigate to the new booking report
-      navigate(`/booking/${encodeURIComponent(d.booking_number)}`);
+      // Navigate to the client file
+      navigate(`/client/${slugify(d.client_name)}`);
     } else if (result.action === "add_to_booking") {
       const d = result.data;
       const clientSlug = slugify(d.client_name);
@@ -346,8 +394,8 @@ const BookingManager = () => {
         description: `${files.length} file(s) added to booking ${d.booking_number}.`,
       });
 
-      // Navigate to the booking report
-      navigate(`/booking/${encodeURIComponent(d.booking_number)}`);
+      // Navigate to the client file
+      navigate(`/client/${slugify(d.client_name)}`);
     } else {
       toast({ title: "AI Response", description: result.message || "No action taken." });
     }
@@ -412,52 +460,53 @@ const BookingManager = () => {
         </Button>
       </div>
 
-      {/* Bookings Table */}
+      {/* Client Files Table */}
       <Card className="flex-1 min-h-0 overflow-auto mb-4">
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg flex items-center gap-2"><ClipboardList className="h-5 w-5" /> All Bookings</CardTitle>
+          <CardTitle className="text-lg flex items-center gap-2"><ClipboardList className="h-5 w-5" /> Client Files</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
             <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
-          ) : bookings.length === 0 ? (
+          ) : clients.length === 0 ? (
             <p className="text-sm text-muted-foreground py-8 text-center">No bookings yet. Attach documents below or click "Manual Add".</p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Client</TableHead>
-                  <TableHead>Trip / Resort</TableHead>
-                  <TableHead>Booking #</TableHead>
-                  <TableHead>Supplier</TableHead>
-                  <TableHead>Trip Dates</TableHead>
-                  <TableHead className="text-right">Events</TableHead>
+                  <TableHead>Bookings</TableHead>
+                  <TableHead>Upcoming Trip</TableHead>
+                  <TableHead>Last Activity</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {bookings.map((b) => (
+                {clients.map((c) => (
                   <TableRow
-                    key={b.bookingNumber}
+                    key={c.clientSlug}
                     className="cursor-pointer hover:bg-accent/50 transition-colors"
-                    onClick={() => openBookingDetail(b)}
+                    onClick={() => openClientFile(c)}
                   >
                     <TableCell>
-                      <div>
-                        <span className="font-medium">{b.clientName}</span>
-                        {b.clientEmail && <p className="text-xs text-muted-foreground">{b.clientEmail}</p>}
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm shrink-0">
+                          {c.clientName.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <span className="font-medium">{c.clientName}</span>
+                          {c.clientEmail && <p className="text-xs text-muted-foreground">{c.clientEmail}</p>}
+                        </div>
                       </div>
                     </TableCell>
-                    <TableCell>{b.title}</TableCell>
-                    <TableCell><Badge variant="outline">{b.bookingNumber}</Badge></TableCell>
-                    <TableCell className="text-muted-foreground">{b.supplier || "—"}</TableCell>
+                    <TableCell><Badge variant="secondary">{c.bookingCount}</Badge></TableCell>
                     <TableCell className="text-sm">
-                      {b.tripStart && b.tripEnd
-                        ? `${format(new Date(b.tripStart), "MMM d")} – ${format(new Date(b.tripEnd), "MMM d, yyyy")}`
-                        : b.tripStart
-                        ? `From ${format(new Date(b.tripStart), "MMM d, yyyy")}`
-                        : "—"}
+                      {c.upcomingTrip
+                        ? format(new Date(c.upcomingTrip), "MMM d, yyyy")
+                        : <span className="text-muted-foreground">—</span>}
                     </TableCell>
-                    <TableCell className="text-right"><Badge variant="secondary">{b.eventCount}</Badge></TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {format(new Date(c.lastActivity), "MMM d, yyyy")}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
