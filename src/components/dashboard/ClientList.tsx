@@ -58,21 +58,26 @@ const ClientList = ({ onNavigate }: ClientListProps) => {
 
       const map = new Map<string, ClientInfo>();
       quotes.forEach((q) => {
-        const key = q.client_name;
+        const key = q.client_name.toLowerCase().trim();
         if (!map.has(key)) {
-          map.set(key, { name: key, email: q.client_email || "", quoteCount: 0, bookedCount: 0, lastActivity: q.created_at, quotes: [], bookings: [] });
+          map.set(key, { name: q.client_name, email: q.client_email || "", quoteCount: 0, bookedCount: 0, lastActivity: q.created_at, quotes: [], bookings: [] });
         }
         const client = map.get(key)!;
+        // Use the most recent record's casing as display name
+        if (new Date(q.created_at) > new Date(client.lastActivity)) {
+          client.name = q.client_name;
+          client.lastActivity = q.created_at;
+        }
+        if (q.client_email) client.email = q.client_email;
         client.quoteCount++;
         if (q.status === "booked") client.bookedCount++;
         client.quotes.push(q);
-        if (new Date(q.created_at) > new Date(client.lastActivity)) client.lastActivity = q.created_at;
       });
 
       bookings.forEach((b) => {
-        const key = b.client_name;
+        const key = b.client_name.toLowerCase().trim();
         if (!map.has(key)) {
-          map.set(key, { name: key, email: b.client_email || "", quoteCount: 0, bookedCount: 0, lastActivity: b.created_at, quotes: [], bookings: [] });
+          map.set(key, { name: b.client_name, email: b.client_email || "", quoteCount: 0, bookedCount: 0, lastActivity: b.created_at, quotes: [], bookings: [] });
         }
         map.get(key)!.bookings.push(b);
       });
@@ -110,17 +115,21 @@ const ClientList = ({ onNavigate }: ClientListProps) => {
     const bookings = bookingsRes.data || [];
     const map = new Map<string, ClientInfo>();
     quotes.forEach((q) => {
-      const key = q.client_name;
-      if (!map.has(key)) map.set(key, { name: key, email: q.client_email || "", quoteCount: 0, bookedCount: 0, lastActivity: q.created_at, quotes: [], bookings: [] });
+      const key = q.client_name.toLowerCase().trim();
+      if (!map.has(key)) map.set(key, { name: q.client_name, email: q.client_email || "", quoteCount: 0, bookedCount: 0, lastActivity: q.created_at, quotes: [], bookings: [] });
       const client = map.get(key)!;
+      if (new Date(q.created_at) > new Date(client.lastActivity)) {
+        client.name = q.client_name;
+        client.lastActivity = q.created_at;
+      }
+      if (q.client_email) client.email = q.client_email;
       client.quoteCount++;
       if (q.status === "booked") client.bookedCount++;
       client.quotes.push(q);
-      if (new Date(q.created_at) > new Date(client.lastActivity)) client.lastActivity = q.created_at;
     });
     bookings.forEach((b) => {
-      const key = b.client_name;
-      if (!map.has(key)) map.set(key, { name: key, email: b.client_email || "", quoteCount: 0, bookedCount: 0, lastActivity: b.created_at, quotes: [], bookings: [] });
+      const key = b.client_name.toLowerCase().trim();
+      if (!map.has(key)) map.set(key, { name: b.client_name, email: b.client_email || "", quoteCount: 0, bookedCount: 0, lastActivity: b.created_at, quotes: [], bookings: [] });
       map.get(key)!.bookings.push(b);
     });
     setClients(Array.from(map.values()).sort((a, b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
