@@ -1,71 +1,37 @@
 
+# Clickable Booking Detail View
 
-# AI-Powered Booking Assistant with Chat Interface
+## What Changes
 
-## What You Get
+Each booking row in the table becomes clickable. Clicking it opens a detail dialog showing all the booking information: client details, supplier, booking number, all calendar events with their dates and completion status, and any uploaded documents from the storage bucket.
 
-The Bookings tab gets a ChatGPT-style input bar at the bottom. You attach booking confirmations (screenshots, PDFs, photos) and type natural language instructions like:
+## Detail Dialog Contents
 
-- "Create a new booking under Leo Guddemmi and add all details from these files"
-- "Add these files to the Laracy booking"
-- "Create a booking for Sarah Chen from these confirmations"
-
-The AI reads the documents, extracts all booking details (client, booking number, supplier, resort, dates), creates the booking record, generates all calendar events, and stores the uploaded files in a folder organized by client name.
-
-## How It Works
-
-1. You type a message and/or attach files in the chat-style input bar
-2. Files are uploaded to cloud storage under a client folder (e.g., `leo-guddemmi/filename.pdf`)
-3. The AI processes attached images/PDFs, extracts booking data, and determines the intent (new booking vs. add to existing)
-4. For new bookings: creates the booking record and all calendar events automatically
-5. For existing bookings: links the files and updates details if needed
-6. A response message confirms what was created, with a summary card
+- **Header**: Trip/resort name with booking number badge
+- **Client Info**: Name and email
+- **Supplier**: Travel provider
+- **Events Timeline**: A list of all calendar events for this booking (Booked, Deposit Due, Final Payment, Trip Start, Trip End) with dates, completion checkboxes, and notes
+- **Documents**: List of uploaded files from the `booking-documents` storage bucket under the client's folder, with download links
+- **Actions**: Edit and delete options
 
 ## Technical Details
 
-### 1. Storage Bucket (database migration)
+### File: `src/components/dashboard/BookingManager.tsx`
 
-Create a `booking-documents` storage bucket to hold uploaded files, with an RLS policy allowing admin access.
+1. **Add state** for selected booking: `selectedBooking: BookingGroup | null` and a detail dialog open flag
 
-### 2. New Edge Function: `booking-assistant`
+2. **Make table rows clickable** by adding `onClick` and `cursor-pointer` styling to each `TableRow`
 
-**File: `supabase/functions/booking-assistant/index.ts`**
+3. **Fetch full event details** when a booking is clicked: query `bookings` table filtered by `booking_number` to get all individual events (dates, types, completion status, notes)
 
-- Accepts: base64-encoded file(s), file names, user message, list of existing bookings and clients
-- Uses Lovable AI (google/gemini-2.5-flash) with tool calling to extract structured data from document images
-- Tools defined for: `create_booking` (returns client name, email, booking number, supplier, resort, dates) and `add_to_booking` (returns booking number and file references)
-- Handles 429/402 rate limit errors gracefully
-- Returns structured action result (what was extracted, what to create)
+4. **Fetch documents** from the `booking-documents` storage bucket by listing files under the client's slugified name folder
 
-Config: add `[functions.booking-assistant]` with `verify_jwt = false` to `supabase/config.toml`
+5. **New detail dialog** showing:
+   - Client name, email, supplier, booking number at the top
+   - Events list with date, type label, completion toggle (updates `is_completed` in DB), and notes
+   - Documents section with file names and download links (using `getPublicUrl` or `createSignedUrl`)
+   - A delete booking button that removes all events for that booking number
 
-### 3. Updated BookingManager Component
+6. **Toggle event completion** inline -- clicking a checkbox updates `is_completed` on that specific booking row
 
-**File: `src/components/dashboard/BookingManager.tsx`**
-
-Replace the "Add Booking" button with a sticky chat-style input bar at the bottom of the page:
-
-- A text input with placeholder "Ask anything" (matching the reference screenshot style)
-- An attachment button (paperclip icon) on the left that opens a file picker (accepts images and PDFs)
-- Attached files shown as removable chips/thumbnails above the input
-- A send button on the right
-- Processing state shows a loading indicator with status text
-- After AI processes: auto-creates the booking via the existing `handleSave` logic and shows a toast confirmation
-- The manual "Add Booking" button remains available as a fallback in the header
-
-The existing bookings table/list stays exactly as-is above the input bar.
-
-### 4. File Upload Flow
-
-When files are attached and the message is sent:
-1. Upload each file to the `booking-documents` bucket under `{client-name-slug}/{filename}`
-2. Convert images to base64 for the AI to read
-3. Send to the `booking-assistant` edge function along with the text message, existing clients list, and existing bookings list
-4. AI returns extracted data
-5. Frontend creates booking entries in the `bookings` table (same logic as current form save)
-6. Toast confirms success with summary of what was created
-
-### No New Database Tables
-
-Files go to cloud storage. Bookings use the existing `bookings` table. No schema changes needed beyond the storage bucket.
-
+No new files, no database changes -- everything uses the existing `bookings` table and `booking-documents` storage bucket.
