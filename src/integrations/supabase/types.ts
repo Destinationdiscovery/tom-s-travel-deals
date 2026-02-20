@@ -26,6 +26,7 @@ export type Database = {
           is_completed: boolean | null
           notes: string | null
           quote_id: string | null
+          supplier: string | null
           title: string
         }
         Insert: {
@@ -39,6 +40,7 @@ export type Database = {
           is_completed?: boolean | null
           notes?: string | null
           quote_id?: string | null
+          supplier?: string | null
           title: string
         }
         Update: {
@@ -52,6 +54,7 @@ export type Database = {
           is_completed?: boolean | null
           notes?: string | null
           quote_id?: string | null
+          supplier?: string | null
           title?: string
         }
         Relationships: [

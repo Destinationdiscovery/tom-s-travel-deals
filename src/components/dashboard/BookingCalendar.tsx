@@ -25,6 +25,7 @@ interface BookingEvent {
   notes: string | null;
   is_completed: boolean;
   booking_number: string | null;
+  supplier: string | null;
 }
 
 const eventTypeColors: Record<string, string> = {
@@ -75,11 +76,11 @@ const BookingCalendar = () => {
   const [saving, setSaving] = useState(false);
   const [clientList, setClientList] = useState<{ name: string; email: string }[]>([]);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [form, setForm] = useState({ clientName: "", clientEmail: "", eventType: "booking", title: "", notes: "", eventDate: "", bookingNumber: "" });
+  const [form, setForm] = useState({ clientName: "", clientEmail: "", eventType: "booking", title: "", notes: "", eventDate: "", bookingNumber: "", supplier: "" });
 
   // Full booking dialog state
   const [fullBooking, setFullBooking] = useState({
-    clientName: "", clientEmail: "", bookingNumber: "", title: "",
+    clientName: "", clientEmail: "", bookingNumber: "", title: "", supplier: "",
     dateBooked: undefined as Date | undefined,
     depositDue: undefined as Date | undefined,
     finalPaymentDue: undefined as Date | undefined,
@@ -112,13 +113,13 @@ const BookingCalendar = () => {
 
   const openNewEvent = (date?: Date) => {
     setEditingEvent(null);
-    setForm({ clientName: "", clientEmail: "", eventType: "booking", title: "", notes: "", eventDate: date ? format(date, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"), bookingNumber: "" });
+    setForm({ clientName: "", clientEmail: "", eventType: "booking", title: "", notes: "", eventDate: date ? format(date, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"), bookingNumber: "", supplier: "" });
     setDialogOpen(true);
   };
 
   const openEditEvent = (event: BookingEvent) => {
     setEditingEvent(event);
-    setForm({ clientName: event.client_name, clientEmail: event.client_email || "", eventType: event.event_type, title: event.title, notes: event.notes || "", eventDate: event.event_date, bookingNumber: event.booking_number || "" });
+    setForm({ clientName: event.client_name, clientEmail: event.client_email || "", eventType: event.event_type, title: event.title, notes: event.notes || "", eventDate: event.event_date, bookingNumber: event.booking_number || "", supplier: event.supplier || "" });
     setDialogOpen(true);
   };
 
@@ -136,6 +137,7 @@ const BookingCalendar = () => {
       title: form.title,
       notes: form.notes || null,
       booking_number: form.bookingNumber || null,
+      supplier: form.supplier || null,
     };
 
     let result;
@@ -168,7 +170,7 @@ const BookingCalendar = () => {
   };
 
   const openFullBooking = () => {
-    setFullBooking({ clientName: "", clientEmail: "", bookingNumber: "", title: "", dateBooked: new Date(), depositDue: undefined, finalPaymentDue: undefined, tripStart: undefined, tripEnd: undefined });
+    setFullBooking({ clientName: "", clientEmail: "", bookingNumber: "", title: "", supplier: "", dateBooked: new Date(), depositDue: undefined, finalPaymentDue: undefined, tripStart: undefined, tripEnd: undefined });
     setFullBookingOpen(true);
   };
 
@@ -179,7 +181,7 @@ const BookingCalendar = () => {
     }
     setSaving(true);
     const entries: any[] = [];
-    const base = { client_name: fullBooking.clientName, client_email: fullBooking.clientEmail || null, booking_number: fullBooking.bookingNumber };
+    const base = { client_name: fullBooking.clientName, client_email: fullBooking.clientEmail || null, booking_number: fullBooking.bookingNumber, supplier: fullBooking.supplier || null };
 
     if (fullBooking.dateBooked) entries.push({ ...base, event_type: "booking", event_date: format(fullBooking.dateBooked, "yyyy-MM-dd"), title: `${fullBooking.title} - Booked` });
     if (fullBooking.depositDue) entries.push({ ...base, event_type: "deposit_due", event_date: format(fullBooking.depositDue, "yyyy-MM-dd"), title: `${fullBooking.title} - Deposit Due` });
@@ -316,7 +318,7 @@ const BookingCalendar = () => {
                             <span className={cn("text-sm font-medium truncate", e.is_completed && "line-through text-muted-foreground")}>{e.title}</span>
                             {e.booking_number && <Badge variant="outline" className="text-[10px] shrink-0">{e.booking_number}</Badge>}
                           </div>
-                          <p className="text-xs text-muted-foreground">{e.client_name}{e.client_email ? ` · ${e.client_email}` : ""}</p>
+                          <p className="text-xs text-muted-foreground">{e.client_name}{e.supplier ? ` · ${e.supplier}` : ""}{e.client_email ? ` · ${e.client_email}` : ""}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
@@ -375,6 +377,7 @@ const BookingCalendar = () => {
             </div>
             <div><Label>Date</Label><Input type="date" value={form.eventDate} onChange={(e) => setForm({ ...form, eventDate: e.target.value })} /></div>
             <div><Label>Booking Number</Label><Input value={form.bookingNumber} onChange={(e) => setForm({ ...form, bookingNumber: e.target.value })} placeholder="e.g. BK12345" /></div>
+            <div><Label>Supplier</Label><Input value={form.supplier} onChange={(e) => setForm({ ...form, supplier: e.target.value })} placeholder="e.g. Sunwing, Sandals" /></div>
             <div><Label>Title *</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
             <div><Label>Notes</Label><Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></div>
             <div className="flex gap-2 justify-between">
@@ -413,6 +416,7 @@ const BookingCalendar = () => {
             <div><Label>Client Email</Label><Input value={fullBooking.clientEmail} onChange={(e) => setFullBooking({ ...fullBooking, clientEmail: e.target.value })} /></div>
             <div><Label>Trip/Resort Name *</Label><Input value={fullBooking.title} onChange={(e) => setFullBooking({ ...fullBooking, title: e.target.value })} placeholder="e.g. Sandals Montego Bay" /></div>
             <div><Label>Booking Number *</Label><Input value={fullBooking.bookingNumber} onChange={(e) => setFullBooking({ ...fullBooking, bookingNumber: e.target.value })} placeholder="e.g. BK12345" /></div>
+            <div><Label>Supplier</Label><Input value={fullBooking.supplier} onChange={(e) => setFullBooking({ ...fullBooking, supplier: e.target.value })} placeholder="e.g. Sunwing, Sandals" /></div>
             <div className="grid grid-cols-2 gap-3">
               <DatePickerField label="Date Booked" date={fullBooking.dateBooked} onSelect={(d) => setFullBooking({ ...fullBooking, dateBooked: d })} />
               <DatePickerField label="Deposit Due" date={fullBooking.depositDue} onSelect={(d) => setFullBooking({ ...fullBooking, depositDue: d })} />
