@@ -1,43 +1,62 @@
 
 
-# Rich Booking Detail View + Clickable Calendar Events
+# Professional Booking Detail View
 
 ## What Changes
 
-Two improvements to make bookings fully accessible from everywhere:
+The current booking detail dialog gets completely redesigned into a rich, professional trip overview. Instead of the minimal layout with just a timeline and documents list, clicking a booking opens a polished detail view that presents all extracted information in organized sections -- similar to what you see on a travel supplier confirmation page.
 
-### 1. Calendar events become clickable to open booking details
-Currently, clicking a calendar event toggles its completion. Instead, clicking an event that has a `booking_number` will open the full booking detail dialog (the same one from the Bookings tab). Events without a booking number will still open the single-event edit dialog as they do now.
+## New Detail Layout
 
-### 2. Richer booking detail dialog
-The existing detail dialog gets expanded to show everything about the booking in one place:
-- Client name, email
+### Header Section
+- Resort/trip name large and prominent
+- Booking number badge beside it
+- Trip date range with calendar icon
+- Supplier name displayed clearly (e.g., "WestJet Vacations")
+
+### Trip Details Card
+- Client name and email
 - Supplier
 - Booking number
-- Resort/trip name
-- Trip date range prominently displayed
-- Events timeline with completion toggles (already exists)
-- Documents section with image previews for image files (not just file names)
-- Download links for all docs
+- Destination (parsed from the resort name or notes)
+- Room type if available in notes
+
+### Events Timeline
+- Same interactive checklist as now (Booked, Deposit Due, Final Payment, Trip Start, Trip End) with dates and completion toggles
+- But styled as a cleaner vertical timeline with connecting lines between events, dates on the right
+
+### Documents and Images
+- Image documents shown as large previews (not tiny thumbnails) -- these are the confirmation screenshots/photos
+- Non-image files shown with download buttons
+- Clicking any image opens it full-size in a new tab
+
+### Delete Action
+- Stays at the bottom as a destructive action, same as now
 
 ## Technical Details
 
-### File: `src/components/dashboard/BookingCalendar.tsx`
-
-1. Import and reuse the booking detail dialog pattern from BookingManager
-2. Add state for `detailOpen`, `selectedBooking`, `detailEvents`, `detailDocuments`
-3. Add the `openBookingDetail` function (same logic as BookingManager -- fetches events by booking_number and docs from storage)
-4. Modify the grid view event click handler: if the event has a `booking_number`, call `openBookingDetail` instead of `toggleComplete`. If no booking_number, open the edit dialog as before
-5. Modify the list view: add a click handler on the row that opens the detail if there is a booking_number
-6. Add the detail dialog JSX (same structure as BookingManager's detail dialog)
-7. Fix the duplicate "Add Event" button (line 184 is a duplicate of line 183)
-
 ### File: `src/components/dashboard/BookingManager.tsx`
 
-1. Enhance the detail dialog to show document image previews inline (for .jpg, .png, .webp files) instead of just file names with download icons
-2. Use signed URLs for images so they render in the detail view
-3. Add a visual header section with the trip date range displayed prominently
+1. **Widen the dialog** from `max-w-xl` to `max-w-2xl` to give more room for the professional layout
 
-### No database changes needed
-Everything uses existing tables and storage bucket.
+2. **Redesign the header** with the resort name as a large heading, booking number as an inline badge, and the date range prominently below with a calendar icon. Add supplier as a subtle label beneath.
+
+3. **Replace the grid client/supplier section** with a more structured "Trip Details" card showing:
+   - Client (name + email)
+   - Supplier
+   - Booking Number
+   - All laid out in a clean label-value format with proper spacing
+
+4. **Restyle the Events Timeline** to use a vertical timeline look:
+   - A vertical line connecting events
+   - Each event as a node on the line with the completion circle, label, and date
+   - Completed events get a strikethrough and muted color
+   - More padding and visual hierarchy
+
+5. **Improve the Documents section**:
+   - Image files displayed as larger previews (full-width or 2-column grid with taller aspect ratio)
+   - Each image has a hover overlay with the filename
+   - Non-image files in a clean list with file icon and download button
+
+6. No database or schema changes needed -- all data is already available from the `bookings` table and `booking-documents` storage bucket
 
