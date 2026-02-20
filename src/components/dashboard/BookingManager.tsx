@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Plus, Loader2, CalendarIcon, ClipboardList } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Plus, Loader2, CalendarIcon, ClipboardList, Paperclip, Send, X, FileText, Image as ImageIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,11 @@ interface BookingGroup {
   eventCount: number;
 }
 
+interface AttachedFile {
+  file: File;
+  preview?: string;
+}
+
 const DatePickerField = ({ label, date, onSelect }: { label: string; date: Date | undefined; onSelect: (d: Date | undefined) => void }) => (
   <div>
     <Label>{label}</Label>
@@ -49,6 +54,13 @@ const BookingManager = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [clientList, setClientList] = useState<{ name: string; email: string }[]>([]);
+
+  // Chat input state
+  const [chatMessage, setChatMessage] = useState("");
+  const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
+  const [aiProcessing, setAiProcessing] = useState(false);
+  const [aiStatus, setAiStatus] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({
     clientName: "", clientEmail: "", bookingNumber: "", title: "", supplier: "",
@@ -89,9 +101,7 @@ const BookingManager = () => {
             clientEmail: row.client_email,
             supplier: row.supplier,
             title: row.title.replace(/ - (Booked|Deposit Due|Final Payment|Trip Start|Trip End)$/, ""),
-            tripStart: null,
-            tripEnd: null,
-            eventCount: 0,
+            tripStart: null, tripEnd: null, eventCount: 0,
           });
         }
         const g = groups.get(key)!;
@@ -118,46 +128,214 @@ const BookingManager = () => {
     }
   };
 
+  const createBookingEntries = async (bookingData: {
+    clientName: string; clientEmail?: string; bookingNumber: string;
+    title: string; supplier?: string;
+    dateBooked?: string; depositDue?: string; finalPaymentDue?: string;
+    tripStart?: string; tripEnd?: string;
+  }) => {
+    const entries: any[] = [];
+    const base = {
+      client_name: bookingData.clientName,
+      client_email: bookingData.clientEmail || null,
+      booking_number: bookingData.bookingNumber,
+      supplier: bookingData.supplier || null,
+    };
+
+    if (bookingData.dateBooked) entries.push({ ...base, event_type: "booking" as const, event_date: bookingData.dateBooked, title: `${bookingData.title} - Booked` });
+    if (bookingData.depositDue) entries.push({ ...base, event_type: "deposit_due" as const, event_date: bookingData.depositDue, title: `${bookingData.title} - Deposit Due` });
+    if (bookingData.finalPaymentDue) entries.push({ ...base, event_type: "final_payment" as const, event_date: bookingData.finalPaymentDue, title: `${bookingData.title} - Final Payment` });
+    if (bookingData.tripStart) entries.push({ ...base, event_type: "trip_start" as const, event_date: bookingData.tripStart, title: `${bookingData.title} - Trip Start` });
+    if (bookingData.tripEnd) entries.push({ ...base, event_type: "trip_end" as const, event_date: bookingData.tripEnd, title: `${bookingData.title} - Trip End` });
+
+    // If no dates at all, create at least a booking entry for today
+    if (entries.length === 0) {
+      entries.push({ ...base, event_type: "booking" as const, event_date: format(new Date(), "yyyy-MM-dd"), title: `${bookingData.title} - Booked` });
+    }
+
+    const { error } = await supabase.from("bookings").insert(entries);
+    if (error) throw error;
+    return entries.length;
+  };
+
   const handleSave = async () => {
     if (!form.clientName.trim() || !form.bookingNumber.trim() || !form.title.trim()) {
       toast({ title: "Missing fields", description: "Client name, booking number, and title are required.", variant: "destructive" });
       return;
     }
     setSaving(true);
-    const entries: any[] = [];
-    const base = { client_name: form.clientName, client_email: form.clientEmail || null, booking_number: form.bookingNumber, supplier: form.supplier || null };
-
-    if (form.dateBooked) entries.push({ ...base, event_type: "booking", event_date: format(form.dateBooked, "yyyy-MM-dd"), title: `${form.title} - Booked` });
-    if (form.depositDue) entries.push({ ...base, event_type: "deposit_due", event_date: format(form.depositDue, "yyyy-MM-dd"), title: `${form.title} - Deposit Due` });
-    if (form.finalPaymentDue) entries.push({ ...base, event_type: "final_payment", event_date: format(form.finalPaymentDue, "yyyy-MM-dd"), title: `${form.title} - Final Payment` });
-    if (form.tripStart) entries.push({ ...base, event_type: "trip_start", event_date: format(form.tripStart, "yyyy-MM-dd"), title: `${form.title} - Trip Start` });
-    if (form.tripEnd) entries.push({ ...base, event_type: "trip_end", event_date: format(form.tripEnd, "yyyy-MM-dd"), title: `${form.title} - Trip End` });
-
-    if (entries.length === 0) {
-      toast({ title: "Add at least one date", variant: "destructive" });
-      setSaving(false);
-      return;
-    }
-
-    const { error } = await supabase.from("bookings").insert(entries);
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Booking created!", description: `${entries.length} calendar entries added.` });
+    try {
+      const count = await createBookingEntries({
+        clientName: form.clientName, clientEmail: form.clientEmail, bookingNumber: form.bookingNumber,
+        title: form.title, supplier: form.supplier,
+        dateBooked: form.dateBooked ? format(form.dateBooked, "yyyy-MM-dd") : undefined,
+        depositDue: form.depositDue ? format(form.depositDue, "yyyy-MM-dd") : undefined,
+        finalPaymentDue: form.finalPaymentDue ? format(form.finalPaymentDue, "yyyy-MM-dd") : undefined,
+        tripStart: form.tripStart ? format(form.tripStart, "yyyy-MM-dd") : undefined,
+        tripEnd: form.tripEnd ? format(form.tripEnd, "yyyy-MM-dd") : undefined,
+      });
+      toast({ title: "Booking created!", description: `${count} calendar entries added.` });
       setDialogOpen(false);
       fetchBookings();
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     }
     setSaving(false);
   };
 
+  // --- Chat / AI logic ---
+
+  const handleFileAttach = () => fileInputRef.current?.click();
+
+  const handleFilesSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const newAttached: AttachedFile[] = files.map((file) => ({
+      file,
+      preview: file.type.startsWith("image/") ? URL.createObjectURL(file) : undefined,
+    }));
+    setAttachedFiles((prev) => [...prev, ...newAttached]);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const removeFile = (index: number) => {
+    setAttachedFiles((prev) => {
+      const removed = prev[index];
+      if (removed.preview) URL.revokeObjectURL(removed.preview);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  const fileToBase64 = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string;
+        resolve(result.split(",")[1]);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+  const slugify = (name: string) =>
+    name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+  const handleChatSend = async () => {
+    if (!chatMessage.trim() && attachedFiles.length === 0) return;
+
+    setAiProcessing(true);
+    setAiStatus("Reading documents...");
+
+    try {
+      // Convert files to base64
+      const filesPayload = await Promise.all(
+        attachedFiles.map(async (af) => ({
+          name: af.file.name,
+          mimeType: af.file.type,
+          base64: await fileToBase64(af.file),
+        }))
+      );
+
+      setAiStatus("Analyzing with AI...");
+
+      // Call edge function
+      const { data: result, error } = await supabase.functions.invoke("booking-assistant", {
+        body: {
+          message: chatMessage,
+          files: filesPayload,
+          existing_bookings: bookings,
+          existing_clients: clientList,
+        },
+      });
+
+      if (error) throw error;
+
+      if (result.error) {
+        toast({ title: "AI Error", description: result.error, variant: "destructive" });
+        return;
+      }
+
+      if (result.action === "create_booking") {
+        setAiStatus("Creating booking...");
+        const d = result.data;
+
+        // Upload files to storage
+        const clientSlug = slugify(d.client_name);
+        for (const af of attachedFiles) {
+          const path = `${clientSlug}/${af.file.name}`;
+          await supabase.storage.from("booking-documents").upload(path, af.file, { upsert: true });
+        }
+
+        const count = await createBookingEntries({
+          clientName: d.client_name,
+          clientEmail: d.client_email || undefined,
+          bookingNumber: d.booking_number,
+          title: d.resort_or_trip,
+          supplier: d.supplier || undefined,
+          dateBooked: d.date_booked || format(new Date(), "yyyy-MM-dd"),
+          depositDue: d.deposit_due || undefined,
+          finalPaymentDue: d.final_payment_due || undefined,
+          tripStart: d.trip_start || undefined,
+          tripEnd: d.trip_end || undefined,
+        });
+
+        toast({
+          title: "Booking created!",
+          description: `${d.resort_or_trip} for ${d.client_name} (${d.booking_number}) — ${count} calendar events added.`,
+        });
+        fetchBookings();
+      } else if (result.action === "add_to_booking") {
+        setAiStatus("Adding files to booking...");
+        const d = result.data;
+        const clientSlug = slugify(d.client_name);
+
+        for (const af of attachedFiles) {
+          const path = `${clientSlug}/${af.file.name}`;
+          await supabase.storage.from("booking-documents").upload(path, af.file, { upsert: true });
+        }
+
+        toast({
+          title: "Files added!",
+          description: `${attachedFiles.length} file(s) added to booking ${d.booking_number}.`,
+        });
+      } else {
+        // No action — just a text response
+        toast({
+          title: "AI Response",
+          description: result.message || "No action taken.",
+        });
+      }
+
+      // Clear inputs
+      setChatMessage("");
+      setAttachedFiles([]);
+    } catch (err: any) {
+      console.error("AI booking error:", err);
+      toast({ title: "Error", description: err.message || "Something went wrong.", variant: "destructive" });
+    } finally {
+      setAiProcessing(false);
+      setAiStatus("");
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleChatSend();
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
         <h1 className="font-display text-2xl font-bold text-foreground">Bookings</h1>
-        <Button onClick={openNewBooking} className="gap-2"><Plus className="h-4 w-4" /> Add Booking</Button>
+        <Button onClick={openNewBooking} variant="outline" size="sm" className="gap-2">
+          <Plus className="h-4 w-4" /> Manual Add
+        </Button>
       </div>
 
-      <Card>
+      {/* Bookings Table */}
+      <Card className="flex-1 min-h-0 overflow-auto mb-4">
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center gap-2"><ClipboardList className="h-5 w-5" /> All Bookings</CardTitle>
         </CardHeader>
@@ -165,7 +343,7 @@ const BookingManager = () => {
           {loading ? (
             <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
           ) : bookings.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-8 text-center">No bookings yet. Click "Add Booking" to create one.</p>
+            <p className="text-sm text-muted-foreground py-8 text-center">No bookings yet. Attach documents below or click "Manual Add".</p>
           ) : (
             <Table>
               <TableHeader>
@@ -197,9 +375,7 @@ const BookingManager = () => {
                         ? `From ${format(new Date(b.tripStart), "MMM d, yyyy")}`
                         : "—"}
                     </TableCell>
-                    <TableCell className="text-right">
-                      <Badge variant="secondary">{b.eventCount}</Badge>
-                    </TableCell>
+                    <TableCell className="text-right"><Badge variant="secondary">{b.eventCount}</Badge></TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -208,7 +384,74 @@ const BookingManager = () => {
         </CardContent>
       </Card>
 
-      {/* Add Booking Dialog */}
+      {/* Chat Input Bar */}
+      <div className="border border-border rounded-xl bg-card shadow-sm p-3 space-y-2">
+        {/* Attached files */}
+        {attachedFiles.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {attachedFiles.map((af, i) => (
+              <div key={i} className="flex items-center gap-1.5 bg-muted rounded-lg px-2.5 py-1.5 text-xs">
+                {af.preview ? (
+                  <img src={af.preview} alt="" className="h-6 w-6 rounded object-cover" />
+                ) : (
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                )}
+                <span className="max-w-[120px] truncate">{af.file.name}</span>
+                <button onClick={() => removeFile(i)} className="text-muted-foreground hover:text-foreground">
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Processing indicator */}
+        {aiProcessing && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>{aiStatus}</span>
+          </div>
+        )}
+
+        {/* Input row */}
+        <div className="flex items-center gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            className="hidden"
+            multiple
+            accept="image/*,.pdf"
+            onChange={handleFilesSelected}
+          />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="shrink-0 h-9 w-9"
+            onClick={handleFileAttach}
+            disabled={aiProcessing}
+          >
+            <Paperclip className="h-4 w-4" />
+          </Button>
+          <Input
+            value={chatMessage}
+            onChange={(e) => setChatMessage(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Attach booking docs and describe what to do..."
+            className="border-0 shadow-none focus-visible:ring-0 bg-transparent"
+            disabled={aiProcessing}
+          />
+          <Button
+            size="icon"
+            className="shrink-0 h-9 w-9"
+            onClick={handleChatSend}
+            disabled={aiProcessing || (!chatMessage.trim() && attachedFiles.length === 0)}
+          >
+            <Send className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Manual Add Booking Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
