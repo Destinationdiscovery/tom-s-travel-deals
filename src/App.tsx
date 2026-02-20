@@ -25,6 +25,7 @@ import Promo from "./pages/Promo";
 import TravelSearch from "./pages/TravelSearch";
 
 import BookingReport from "./pages/BookingReport";
+import ClientFile from "./pages/ClientFile";
 import PublicQuote from "./pages/PublicQuote";
 import NotFound from "./pages/NotFound";
 
@@ -58,6 +59,7 @@ const App = () => (
               <Route path="/promo" element={<Promo />} />
               <Route path="/search" element={<TravelSearch />} />
               <Route path="/booking/:bookingNumber" element={<BookingReport />} />
+              <Route path="/client/:clientSlug" element={<ClientFile />} />
               <Route path="/quote/:token" element={<PublicQuote />} />
               
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
