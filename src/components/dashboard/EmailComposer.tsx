@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Mail, ExternalLink, Link2 } from "lucide-react";
+import { Mail, ExternalLink, Link2, Send, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,9 +14,11 @@ import { format } from "date-fns";
 const EmailComposer = () => {
   const [selectedTemplate, setSelectedTemplate] = useState("quote");
   const [to, setTo] = useState("");
+  const [from, setFrom] = useState("info@mail.travelonly.com");
   const [clientName, setClientName] = useState("");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
+  const [isSending, setIsSending] = useState(false);
   const [emailLog, setEmailLog] = useState<any[]>([]);
   
   const [quotes, setQuotes] = useState<any[]>([]);
@@ -67,6 +69,35 @@ const EmailComposer = () => {
     toast({ title: "Quote link inserted" });
   };
 
+  const handleSendViaResend = async () => {
+    if (!to.trim()) {
+      toast({ title: "Missing email", description: "Please enter a recipient email.", variant: "destructive" });
+      return;
+    }
+    setIsSending(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-email", {
+        body: { from, to, subject, text: body },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      await supabase.from("email_log").insert({
+        client_name: clientName || to,
+        client_email: to,
+        email_type: selectedTemplate as any,
+        subject,
+      } as any);
+
+      toast({ title: "Email sent!", description: `Delivered to ${to} via Resend.` });
+      fetchEmailLog();
+    } catch (err: any) {
+      toast({ title: "Failed to send", description: err.message || "Check your Resend configuration.", variant: "destructive" });
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   const handleSendViaOutlook = async () => {
     if (!to.trim()) {
       toast({ title: "Missing email", description: "Please enter a recipient email.", variant: "destructive" });
@@ -112,6 +143,7 @@ const EmailComposer = () => {
                 </div>
               </div>
               <div><Label>To</Label><Input type="email" value={to} onChange={(e) => setTo(e.target.value)} placeholder="client@email.com" /></div>
+              <div><Label>From</Label><Input type="email" value={from} onChange={(e) => setFrom(e.target.value)} placeholder="info@mail.travelonly.com" /></div>
               <div><Label>Subject</Label><Input value={subject} onChange={(e) => setSubject(e.target.value)} /></div>
               <div><Label>Body</Label><Textarea value={body} onChange={(e) => setBody(e.target.value)} className="min-h-[250px] font-mono text-sm" /></div>
 
@@ -140,7 +172,11 @@ const EmailComposer = () => {
               )}
 
               <div className="flex gap-2">
-                <Button onClick={handleSendViaOutlook} className="gap-2"><Mail className="h-4 w-4" /> Send via Outlook</Button>
+                <Button onClick={handleSendViaResend} disabled={isSending} className="gap-2">
+                  {isSending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                  {isSending ? "Sending..." : "Send Email"}
+                </Button>
+                <Button variant="outline" onClick={handleSendViaOutlook} className="gap-2"><Mail className="h-4 w-4" /> Send via Outlook</Button>
               </div>
             </CardContent>
           </Card>
