@@ -1,19 +1,19 @@
 
 
-# Update Resend API Key
+# Fix: Merge Duplicate Client Files (Case-Insensitive Matching)
 
-## Overview
-Replace the existing `RESEND_API_KEY` secret with the new key from your Resend account registered under `tlaracy@travelonly.com`.
+## Problem
+The Clients tab groups entries by exact `client_name` match, so "tom mercante" and "Tom Mercante" appear as two separate client files. The same issue would occur with any minor capitalization differences.
 
-## Steps
+## Solution
+Update the `ClientList` component to group clients using a **case-insensitive key** (lowercase name) while preserving the most recent or best-formatted display name.
 
-### 1. Update the RESEND_API_KEY secret
-- Replace the current API key with your new one
-- You'll be prompted to paste it in
+## Technical Details
 
-### 2. Test the integration
-- Send a test email to `tlaracy@travelonly.com` using `onboarding@resend.dev` as the sender
-- Verify delivery
+**File: `src/components/dashboard/ClientList.tsx`**
 
-No code changes are needed -- the existing edge function and email composer will work with the new key automatically.
+- Change the grouping key from `q.client_name` to `q.client_name.toLowerCase().trim()` (and same for bookings)
+- Use the original casing from the most recent record as the display name
+- This merges "tom mercante", "Tom Mercante", "TOM MERCANTE" etc. into a single client file automatically
+- No database changes required -- this is purely a display/grouping fix
 
