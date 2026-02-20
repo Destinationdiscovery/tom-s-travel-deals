@@ -1,100 +1,95 @@
 
 
-# Trip Report -- Full-Page Booking Presentation
+# Consolidated Client Files
 
-## The Problem
+## Overview
 
-The AI review page gathers web data and presents a beautiful, magazine-style report. The booking system gathers document data and presents... a list of key-value rows in a small dialog. Same AI extraction concept, completely different presentation quality.
-
-## The Solution
-
-Replace the current booking detail dialog with a full-page Trip Report that mirrors the design language of the AI review page. The AI already extracts the data -- this is purely about how we present it.
+Right now, the Bookings tab shows one row per booking number -- so Tom Mercante appears as two separate rows (one for each booking). You want one row per client, and clicking that row opens a single "Client File" page showing all their bookings inside it.
 
 ## What Changes
 
-### 1. New dedicated route: `/booking/:bookingNumber`
+### 1. BookingManager table -- group by client instead of booking number
 
-Instead of a cramped dialog, booking details get their own full page -- just like reviews get `/review/:slug`. This gives room for a proper report layout.
+The table currently groups by `booking_number`. It will be changed to group by `client_name` (case-insensitive), showing:
+- Client name and email
+- Number of bookings they have
+- Their upcoming trip (nearest future date)
+- Clicking navigates to `/client/:clientSlug`
 
-### 2. Trip Report page layout (mirrors the AI review page)
+### 2. New Client File page at `/client/:clientSlug`
+
+A full-page view similar in style to the existing Trip Report, but structured around the client rather than a single booking. Layout:
 
 ```text
 +--------------------------------------------------+
-|  HEADER BANNER                                    |
-|  Resort Name (large)          Booking # badge     |
-|  Supplier  |  Destination  |  Trip Dates          |
+|  HEADER                                           |
+|  Client Name (large)             Email badge      |
+|  "2 bookings  |  4 documents"                     |
 +--------------------------------------------------+
 |                                                    |
-|  MAIN COLUMN (left ~60%)   |  SIDEBAR (right ~40%)|
-|                            |                       |
-|  -- Trip Summary Card --   |  -- Quick Facts --    |
-|  Client, Room Type,        |  Travellers           |
-|  Meal Plan, Transfers,     |  Room Type            |
-|  Insurance, any extras     |  Supplier             |
-|  presented as organized    |  Booking #            |
-|  sections, not raw rows    |  Dates                |
-|                            |                       |
-|  -- Flight Itinerary --    |  -- Pricing --        |
-|  Departure card with       |  Total (large)        |
-|  airline, flight #,        |  Deposit bar          |
-|  airports, times           |  Taxes                |
-|  Return card same format   |  Per person           |
-|                            |                       |
-|  -- Events Timeline --     |  -- Documents --      |
-|  Visual timeline with      |  Thumbnail grid       |
-|  completion toggles        |  of uploaded files     |
-|                            |                       |
-|  -- Uploaded Documents --  |  -- Actions --        |
-|  Full image previews       |  Re-scan button       |
-|  File downloads            |  Add docs (chat)      |
-|                            |  Delete booking       |
+|  BOOKING CARDS (stacked)                          |
+|                                                    |
+|  +----------------------------------------------+ |
+|  | Booking 1: Hotel Villa Igea Sorrento          | |
+|  | #73378097887271  |  Supplier  |  Trip Dates   | |
+|  | Flight / Pricing / Extras summary             | |
+|  | [View Full Report]                            | |
+|  +----------------------------------------------+ |
+|                                                    |
+|  +----------------------------------------------+ |
+|  | Booking 2: Hotel Sassi Matera                 | |
+|  | #73378100371257  |  Supplier  |  Trip Dates   | |
+|  | Flight / Pricing / Extras summary             | |
+|  | [View Full Report]                            | |
+|  +----------------------------------------------+ |
+|                                                    |
+|  DOCUMENTS SECTION                                |
+|  All files from booking-documents/{client-slug}   |
+|                                                    |
 +--------------------------------------------------+
-|  IN-BOOKING CHAT BAR (sticky bottom)              |
-|  [paperclip] Type to add info...         [send]   |
+|  CHAT BAR (attach docs / add booking to client)   |
+|  [paperclip] Upload docs or describe booking...   |
 +--------------------------------------------------+
 ```
 
-### 3. Design elements borrowed from AI review page
+- Each booking card is a summary with a "View Full Report" button linking to the existing `/booking/:bookingNumber` page
+- Documents section shows all files in the client's storage folder (shared across bookings)
+- Chat bar lets you upload new documents and the AI creates a new booking under this client or adds to an existing one
+- Re-scan button processes all documents for all bookings
 
-- **Rating-bar style** for pricing breakdown (progress bars showing deposit paid vs total)
-- **Photo gallery grid** for uploaded document images (same `PhotoGallery` lightbox component)
-- **Section cards with icons** (same card styling as review sections)
-- **Badge/tag chips** for extras (meal plan, transfers, insurance) -- same style as "Best For" tags on reviews
-- **2-column responsive layout** that collapses to single column on mobile
+### 3. BookingReport stays as-is
 
-### 4. Data flow stays the same
+The existing `/booking/:bookingNumber` page remains for deep-diving into a single booking. The back button will navigate back to the client file instead of the bookings list.
 
-No database or edge function changes needed. The `booking_details` table and `booking-assistant` function already extract everything. This is a pure frontend presentation upgrade.
+### 4. Calendar navigation updated
 
-### 5. Navigation updates
+Calendar event clicks will navigate to `/client/:clientSlug` instead of `/booking/:bookingNumber`, keeping the consolidated approach consistent.
 
-- Clicking a booking row in the table navigates to `/booking/:bookingNumber` instead of opening a dialog
-- Back button returns to the bookings tab
-- Calendar booking clicks also navigate to the full page
+### 5. Storage stays the same
+
+Documents are already stored per-client slug (`booking-documents/{client-slug}/`), which aligns perfectly with this approach. No storage changes needed.
 
 ## Technical Details
 
-### New file: `src/pages/BookingReport.tsx`
-- Full-page component with Header/Footer
-- Fetches from both `bookings` (events) and `booking_details` (metadata) tables by booking number
-- 2-column layout using existing Tailwind grid patterns
-- Reuses existing components: `PhotoGallery`, `Badge`, `Card`, `ScrollArea`
-- Includes the in-booking chat bar (same logic currently in BookingManager)
-- Includes re-scan functionality
-- Responsive: 2 columns on desktop, single column stacked on mobile
+### New file: `src/pages/ClientFile.tsx`
+- Route param: `clientSlug` (e.g., "tom-mercante")
+- Fetches all bookings where `lower(trim(client_name))` slugifies to the param
+- Fetches all `booking_details` rows for those booking numbers
+- Fetches all documents from `booking-documents/{clientSlug}/`
+- Includes chat bar with AI processing (reuses same `booking-assistant` edge function)
+- Includes re-scan functionality across all bookings
 
 ### Modified: `src/components/dashboard/BookingManager.tsx`
-- Remove the detail dialog entirely (the large Dialog with all the cards)
-- Keep the bookings table and chat input bar
-- `openBookingDetail` now navigates to `/booking/:bookingNumber` using `react-router-dom`
+- Change grouping from `booking_number` to `client_name` (case-insensitive)
+- Table columns: Client, Bookings count, Upcoming Trip, Last Activity
+- Row click navigates to `/client/:clientSlug`
 
 ### Modified: `src/components/dashboard/BookingCalendar.tsx`
-- Calendar event clicks navigate to `/booking/:bookingNumber` instead of opening the dialog
+- Event clicks navigate to `/client/:clientSlug` instead of `/booking/:bookingNumber`
 
 ### Modified: `src/App.tsx`
-- Add route: `/booking/:bookingNumber` pointing to `BookingReport.tsx`
+- Add route: `/client/:clientSlug` pointing to `ClientFile.tsx`
+- Keep existing `/booking/:bookingNumber` route
 
-### Shared components extracted
-- `FlightLeg`, `DetailRow` helpers moved to a shared file or kept in `BookingReport.tsx`
-- `upsertBookingDetails` logic shared between BookingManager (for new bookings) and BookingReport (for re-scans/chat updates)
-
+### No database or edge function changes needed
+The `bookings`, `booking_details` tables, and `booking-assistant` edge function all work as-is. This is purely a frontend restructuring of how data is presented.
