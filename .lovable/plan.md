@@ -1,95 +1,31 @@
 
 
-# Consolidated Client Files
+# Route Updates to Full Report After Chat Updates
 
-## Overview
+## Problem
+When you upload new documents via the chat bar on the Client File page, the AI extracts the data and saves it correctly to `booking_details`, but you stay on the Client File page which only shows a condensed summary card with extras as small badge "bubbles." The full report at `/booking/:bookingNumber` has the rich, magazine-style layout -- but you never get taken there after an update.
 
-Right now, the Bookings tab shows one row per booking number -- so Tom Mercante appears as two separate rows (one for each booking). You want one row per client, and clicking that row opens a single "Client File" page showing all their bookings inside it.
+## Solution
+After a successful `add_to_booking` update from the chat bar on the Client File page, automatically navigate to the full Trip Report page (`/booking/:bookingNumber`) so you immediately see all the extracted information in the beautiful full-page layout.
 
 ## What Changes
 
-### 1. BookingManager table -- group by client instead of booking number
+### `src/pages/ClientFile.tsx`
+In the `handleChatSend` function, after a successful `add_to_booking` action:
+- After uploading files and upserting booking details, navigate to `/booking/{bookingNumber}` instead of just refreshing the Client File page
+- The toast will confirm the update, then the full report opens with all the newly merged data displayed in the rich layout
 
-The table currently groups by `booking_number`. It will be changed to group by `client_name` (case-insensitive), showing:
-- Client name and email
-- Number of bookings they have
-- Their upcoming trip (nearest future date)
-- Clicking navigates to `/client/:clientSlug`
+For `create_booking` action:
+- Same behavior -- after creating the new booking and saving details, navigate to the new booking's full report page
 
-### 2. New Client File page at `/client/:clientSlug`
-
-A full-page view similar in style to the existing Trip Report, but structured around the client rather than a single booking. Layout:
-
-```text
-+--------------------------------------------------+
-|  HEADER                                           |
-|  Client Name (large)             Email badge      |
-|  "2 bookings  |  4 documents"                     |
-+--------------------------------------------------+
-|                                                    |
-|  BOOKING CARDS (stacked)                          |
-|                                                    |
-|  +----------------------------------------------+ |
-|  | Booking 1: Hotel Villa Igea Sorrento          | |
-|  | #73378097887271  |  Supplier  |  Trip Dates   | |
-|  | Flight / Pricing / Extras summary             | |
-|  | [View Full Report]                            | |
-|  +----------------------------------------------+ |
-|                                                    |
-|  +----------------------------------------------+ |
-|  | Booking 2: Hotel Sassi Matera                 | |
-|  | #73378100371257  |  Supplier  |  Trip Dates   | |
-|  | Flight / Pricing / Extras summary             | |
-|  | [View Full Report]                            | |
-|  +----------------------------------------------+ |
-|                                                    |
-|  DOCUMENTS SECTION                                |
-|  All files from booking-documents/{client-slug}   |
-|                                                    |
-+--------------------------------------------------+
-|  CHAT BAR (attach docs / add booking to client)   |
-|  [paperclip] Upload docs or describe booking...   |
-+--------------------------------------------------+
-```
-
-- Each booking card is a summary with a "View Full Report" button linking to the existing `/booking/:bookingNumber` page
-- Documents section shows all files in the client's storage folder (shared across bookings)
-- Chat bar lets you upload new documents and the AI creates a new booking under this client or adds to an existing one
-- Re-scan button processes all documents for all bookings
-
-### 3. BookingReport stays as-is
-
-The existing `/booking/:bookingNumber` page remains for deep-diving into a single booking. The back button will navigate back to the client file instead of the bookings list.
-
-### 4. Calendar navigation updated
-
-Calendar event clicks will navigate to `/client/:clientSlug` instead of `/booking/:bookingNumber`, keeping the consolidated approach consistent.
-
-### 5. Storage stays the same
-
-Documents are already stored per-client slug (`booking-documents/{client-slug}/`), which aligns perfectly with this approach. No storage changes needed.
+### No other file changes needed
+The BookingReport page already fetches fresh data on mount, so navigating there will display the latest merged information automatically.
 
 ## Technical Details
 
-### New file: `src/pages/ClientFile.tsx`
-- Route param: `clientSlug` (e.g., "tom-mercante")
-- Fetches all bookings where `lower(trim(client_name))` slugifies to the param
-- Fetches all `booking_details` rows for those booking numbers
-- Fetches all documents from `booking-documents/{clientSlug}/`
-- Includes chat bar with AI processing (reuses same `booking-assistant` edge function)
-- Includes re-scan functionality across all bookings
+The change is small -- in the `handleChatSend` function:
+- After `add_to_booking`: replace `await fetchAll()` with `navigate(\`/booking/\${encodeURIComponent(d.booking_number)}\`)`
+- After `create_booking`: replace `await fetchAll()` with `navigate(\`/booking/\${encodeURIComponent(d.booking_number)}\`)`
 
-### Modified: `src/components/dashboard/BookingManager.tsx`
-- Change grouping from `booking_number` to `client_name` (case-insensitive)
-- Table columns: Client, Bookings count, Upcoming Trip, Last Activity
-- Row click navigates to `/client/:clientSlug`
+This mirrors the same pattern as the "Full Report" button already on each booking card, just automated after a successful AI update.
 
-### Modified: `src/components/dashboard/BookingCalendar.tsx`
-- Event clicks navigate to `/client/:clientSlug` instead of `/booking/:bookingNumber`
-
-### Modified: `src/App.tsx`
-- Add route: `/client/:clientSlug` pointing to `ClientFile.tsx`
-- Keep existing `/booking/:bookingNumber` route
-
-### No database or edge function changes needed
-The `bookings`, `booking_details` tables, and `booking-assistant` edge function all work as-is. This is purely a frontend restructuring of how data is presented.
