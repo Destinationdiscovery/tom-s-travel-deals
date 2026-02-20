@@ -1,12 +1,13 @@
-import { LayoutDashboard, FileText, Calendar, Mail, ImageIcon, Users, Megaphone } from "lucide-react";
+import { LayoutDashboard, FileText, Calendar, Mail, ImageIcon, Users, Megaphone, ClipboardList } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export type DashboardTab = "overview" | "quotes" | "calendar" | "emails" | "gear" | "clients" | "deals";
+export type DashboardTab = "overview" | "quotes" | "calendar" | "emails" | "gear" | "clients" | "deals" | "bookings";
 
 const tabs = [
   { id: "overview" as const, label: "Dashboard", icon: LayoutDashboard },
   { id: "quotes" as const, label: "Quote Builder", icon: FileText },
   { id: "clients" as const, label: "Clients", icon: Users },
+  { id: "bookings" as const, label: "Bookings", icon: ClipboardList },
   { id: "calendar" as const, label: "Calendar", icon: Calendar },
   { id: "emails" as const, label: "Emails", icon: Mail },
   { id: "deals" as const, label: "Deal Maker", icon: Megaphone },
