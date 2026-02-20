@@ -1,37 +1,43 @@
 
-# Clickable Booking Detail View
+
+# Rich Booking Detail View + Clickable Calendar Events
 
 ## What Changes
 
-Each booking row in the table becomes clickable. Clicking it opens a detail dialog showing all the booking information: client details, supplier, booking number, all calendar events with their dates and completion status, and any uploaded documents from the storage bucket.
+Two improvements to make bookings fully accessible from everywhere:
 
-## Detail Dialog Contents
+### 1. Calendar events become clickable to open booking details
+Currently, clicking a calendar event toggles its completion. Instead, clicking an event that has a `booking_number` will open the full booking detail dialog (the same one from the Bookings tab). Events without a booking number will still open the single-event edit dialog as they do now.
 
-- **Header**: Trip/resort name with booking number badge
-- **Client Info**: Name and email
-- **Supplier**: Travel provider
-- **Events Timeline**: A list of all calendar events for this booking (Booked, Deposit Due, Final Payment, Trip Start, Trip End) with dates, completion checkboxes, and notes
-- **Documents**: List of uploaded files from the `booking-documents` storage bucket under the client's folder, with download links
-- **Actions**: Edit and delete options
+### 2. Richer booking detail dialog
+The existing detail dialog gets expanded to show everything about the booking in one place:
+- Client name, email
+- Supplier
+- Booking number
+- Resort/trip name
+- Trip date range prominently displayed
+- Events timeline with completion toggles (already exists)
+- Documents section with image previews for image files (not just file names)
+- Download links for all docs
 
 ## Technical Details
 
+### File: `src/components/dashboard/BookingCalendar.tsx`
+
+1. Import and reuse the booking detail dialog pattern from BookingManager
+2. Add state for `detailOpen`, `selectedBooking`, `detailEvents`, `detailDocuments`
+3. Add the `openBookingDetail` function (same logic as BookingManager -- fetches events by booking_number and docs from storage)
+4. Modify the grid view event click handler: if the event has a `booking_number`, call `openBookingDetail` instead of `toggleComplete`. If no booking_number, open the edit dialog as before
+5. Modify the list view: add a click handler on the row that opens the detail if there is a booking_number
+6. Add the detail dialog JSX (same structure as BookingManager's detail dialog)
+7. Fix the duplicate "Add Event" button (line 184 is a duplicate of line 183)
+
 ### File: `src/components/dashboard/BookingManager.tsx`
 
-1. **Add state** for selected booking: `selectedBooking: BookingGroup | null` and a detail dialog open flag
+1. Enhance the detail dialog to show document image previews inline (for .jpg, .png, .webp files) instead of just file names with download icons
+2. Use signed URLs for images so they render in the detail view
+3. Add a visual header section with the trip date range displayed prominently
 
-2. **Make table rows clickable** by adding `onClick` and `cursor-pointer` styling to each `TableRow`
+### No database changes needed
+Everything uses existing tables and storage bucket.
 
-3. **Fetch full event details** when a booking is clicked: query `bookings` table filtered by `booking_number` to get all individual events (dates, types, completion status, notes)
-
-4. **Fetch documents** from the `booking-documents` storage bucket by listing files under the client's slugified name folder
-
-5. **New detail dialog** showing:
-   - Client name, email, supplier, booking number at the top
-   - Events list with date, type label, completion toggle (updates `is_completed` in DB), and notes
-   - Documents section with file names and download links (using `getPublicUrl` or `createSignedUrl`)
-   - A delete booking button that removes all events for that booking number
-
-6. **Toggle event completion** inline -- clicking a checkbox updates `is_completed` on that specific booking row
-
-No new files, no database changes -- everything uses the existing `bookings` table and `booking-documents` storage bucket.
