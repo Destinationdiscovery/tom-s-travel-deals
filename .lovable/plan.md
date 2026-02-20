@@ -1,19 +1,26 @@
 
 
-# Fix: Merge Duplicate Client Files (Case-Insensitive Matching)
+# Add "Supplier" Field to Bookings
 
-## Problem
-The Clients tab groups entries by exact `client_name` match, so "tom mercante" and "Tom Mercante" appear as two separate client files. The same issue would occur with any minor capitalization differences.
+## What Changes
+A new "Supplier" text field will be added to the bookings table and all related forms/views in the Calendar tab. This lets you track which supplier (e.g., Sunwing, WestJet Vacations, Sandals) each booking is through.
 
-## Solution
-Update the `ClientList` component to group clients using a **case-insensitive key** (lowercase name) while preserving the most recent or best-formatted display name.
+## Where It Will Appear
+- **List view**: Shown alongside client name and booking number
+- **Single Event dialog**: New input field for Supplier
+- **Full Booking dialog**: New input field for Supplier (applied to all generated calendar entries)
+- **Grid view**: No change (too compact), but visible when you click into an event
 
 ## Technical Details
 
-**File: `src/components/dashboard/ClientList.tsx`**
+### Database
+- Add a nullable `supplier` text column to the existing `bookings` table via migration
 
-- Change the grouping key from `q.client_name` to `q.client_name.toLowerCase().trim()` (and same for bookings)
-- Use the original casing from the most recent record as the display name
-- This merges "tom mercante", "Tom Mercante", "TOM MERCANTE" etc. into a single client file automatically
-- No database changes required -- this is purely a display/grouping fix
+### Code Changes (1 file)
+**`src/components/dashboard/BookingCalendar.tsx`**
+- Add `supplier` to the `BookingEvent` interface
+- Add `supplier` to the single-event `form` state and the `fullBooking` state
+- Add a Supplier input field in both the single-event dialog and the full booking dialog
+- Include `supplier` in the save/update payloads
+- Show supplier in the list view (next to client name)
 
