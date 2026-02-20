@@ -1,43 +1,19 @@
 
-# Send Emails Directly via Resend API
+
+# Update Resend API Key
 
 ## Overview
-Replace the current "Send via Outlook" (mailto link) approach with direct email sending through Resend's REST API. Emails will be sent from your Resend-verified domain via a backend function.
+Replace the existing `RESEND_API_KEY` secret with the new key from your Resend account registered under `tlaracy@travelonly.com`.
 
 ## Steps
 
-### 1. Store Your Resend API Key
-- Securely store your Resend API key as a backend secret called `RESEND_API_KEY`
-- You'll be prompted to paste it in during implementation
+### 1. Update the RESEND_API_KEY secret
+- Replace the current API key with your new one
+- You'll be prompted to paste it in
 
-### 2. Create a Backend Function (`send-email`)
-- New backend function that receives `to`, `subject`, `body`, and `from` fields
-- Calls Resend's REST API (`https://api.resend.com/emails`) to send the email
-- Returns success/error status
-- The "from" address will use your verified domain (e.g., `you@mail.travelonly.com`)
+### 2. Test the integration
+- Send a test email to `tlaracy@travelonly.com` using `onboarding@resend.dev` as the sender
+- Verify delivery
 
-### 3. Update the Email Composer
-- Add a **"Send Email"** button alongside the existing "Send via Outlook" button (keeping Outlook as a fallback)
-- Clicking "Send Email" calls the backend function directly
-- Shows loading state while sending
-- On success: logs the email and shows a confirmation
-- On failure: shows error message with details
-- Add a "From" email field so you can customize the sender address
+No code changes are needed -- the existing edge function and email composer will work with the new key automatically.
 
-## Technical Details
-
-**Backend function (`send-email`):**
-- Endpoint: Resend REST API `POST https://api.resend.com/emails`
-- Headers: `Authorization: Bearer RESEND_API_KEY`
-- Body: `{ from, to, subject, text }`
-- JWT verification disabled (matches existing function patterns)
-
-**EmailComposer changes:**
-- New `from` state field defaulting to `info@mail.travelonly.com`
-- New `isSending` loading state
-- New `handleSendViaResend` function that invokes the edge function
-- Both send buttons available: "Send via Resend" (primary) and "Send via Outlook" (secondary)
-- Email log updated with a `sent_via` indicator
-
-**Config update:**
-- Add `[functions.send-email]` with `verify_jwt = false` to config
