@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Plus, Loader2, CalendarIcon, ClipboardList, Paperclip, Send, X, FileText, Image as ImageIcon } from "lucide-react";
+import { Plus, Loader2, CalendarIcon, ClipboardList, Paperclip, Send, X, FileText, Image as ImageIcon, Download, Trash2, CheckCircle2, Circle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,13 +7,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import type { Tables } from "@/integrations/supabase/types";
 
 interface BookingGroup {
   bookingNumber: string;
@@ -30,6 +35,23 @@ interface AttachedFile {
   file: File;
   preview?: string;
 }
+
+interface StorageFile {
+  name: string;
+  url: string;
+}
+
+const EVENT_TYPE_LABELS: Record<string, string> = {
+  booking: "Booked",
+  deposit_due: "Deposit Due",
+  final_payment: "Final Payment",
+  trip_start: "Trip Start",
+  trip_end: "Trip End",
+  departure: "Departure",
+  return: "Return",
+};
+
+const EVENT_TYPE_ORDER = ["booking", "deposit_due", "final_payment", "departure", "trip_start", "trip_end", "return"];
 
 const DatePickerField = ({ label, date, onSelect }: { label: string; date: Date | undefined; onSelect: (d: Date | undefined) => void }) => (
   <div>
@@ -54,6 +76,14 @@ const BookingManager = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [clientList, setClientList] = useState<{ name: string; email: string }[]>([]);
+
+  // Detail dialog state
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<BookingGroup | null>(null);
+  const [detailEvents, setDetailEvents] = useState<Tables<"bookings">[]>([]);
+  const [detailDocuments, setDetailDocuments] = useState<StorageFile[]>([]);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [deletingBooking, setDeletingBooking] = useState(false);
 
   // Chat input state
   const [chatMessage, setChatMessage] = useState("");
@@ -100,7 +130,7 @@ const BookingManager = () => {
             clientName: row.client_name,
             clientEmail: row.client_email,
             supplier: row.supplier,
-            title: row.title.replace(/ - (Booked|Deposit Due|Final Payment|Trip Start|Trip End)$/, ""),
+            title: row.title.replace(/ - (Booked|Deposit Due|Final Payment|Trip Start|Trip End|Departure|Return)$/, ""),
             tripStart: null, tripEnd: null, eventCount: 0,
           });
         }
@@ -113,6 +143,107 @@ const BookingManager = () => {
     }
     setLoading(false);
   };
+
+  const slugify = (name: string) =>
+    name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+  // --- Detail dialog logic ---
+
+  const openBookingDetail = async (booking: BookingGroup) => {
+    setSelectedBooking(booking);
+    setDetailOpen(true);
+    setDetailLoading(true);
+    setDetailEvents([]);
+    setDetailDocuments([]);
+
+    // Fetch events and documents in parallel
+    const [eventsResult, docsResult] = await Promise.all([
+      supabase
+        .from("bookings")
+        .select("*")
+        .eq("booking_number", booking.bookingNumber)
+        .order("event_date", { ascending: true }),
+      supabase.storage
+        .from("booking-documents")
+        .list(slugify(booking.clientName), { limit: 100 }),
+    ]);
+
+    if (eventsResult.data) {
+      // Sort by event type order
+      const sorted = [...eventsResult.data].sort((a, b) => {
+        const ai = EVENT_TYPE_ORDER.indexOf(a.event_type);
+        const bi = EVENT_TYPE_ORDER.indexOf(b.event_type);
+        return ai - bi;
+      });
+      setDetailEvents(sorted);
+    }
+
+    if (docsResult.data && docsResult.data.length > 0) {
+      const clientSlug = slugify(booking.clientName);
+      const files: StorageFile[] = docsResult.data
+        .filter((f) => f.name !== ".emptyFolderPlaceholder")
+        .map((f) => {
+          const { data: urlData } = supabase.storage
+            .from("booking-documents")
+            .getPublicUrl(`${clientSlug}/${f.name}`);
+          return { name: f.name, url: urlData.publicUrl };
+        });
+      setDetailDocuments(files);
+    }
+
+    setDetailLoading(false);
+  };
+
+  const toggleEventCompletion = async (event: Tables<"bookings">) => {
+    const newValue = !event.is_completed;
+    const { error } = await supabase
+      .from("bookings")
+      .update({ is_completed: newValue })
+      .eq("id", event.id);
+
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      return;
+    }
+
+    setDetailEvents((prev) =>
+      prev.map((e) => (e.id === event.id ? { ...e, is_completed: newValue } : e))
+    );
+  };
+
+  const handleDeleteBooking = async () => {
+    if (!selectedBooking) return;
+    setDeletingBooking(true);
+
+    const { error } = await supabase
+      .from("bookings")
+      .delete()
+      .eq("booking_number", selectedBooking.bookingNumber);
+
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Booking deleted", description: `All events for ${selectedBooking.bookingNumber} removed.` });
+      setDetailOpen(false);
+      setSelectedBooking(null);
+      fetchBookings();
+    }
+    setDeletingBooking(false);
+  };
+
+  const getSignedUrl = async (fileName: string, clientName: string) => {
+    const clientSlug = slugify(clientName);
+    const { data, error } = await supabase.storage
+      .from("booking-documents")
+      .createSignedUrl(`${clientSlug}/${fileName}`, 3600);
+    if (data?.signedUrl) {
+      window.open(data.signedUrl, "_blank");
+    } else {
+      toast({ title: "Error", description: "Could not generate download link.", variant: "destructive" });
+    }
+  };
+
+  // --- Form / manual add logic ---
 
   const openNewBooking = () => {
     setForm({ clientName: "", clientEmail: "", bookingNumber: "", title: "", supplier: "", dateBooked: new Date(), depositDue: undefined, finalPaymentDue: undefined, tripStart: undefined, tripEnd: undefined });
@@ -148,7 +279,6 @@ const BookingManager = () => {
     if (bookingData.tripStart) entries.push({ ...base, event_type: "trip_start" as const, event_date: bookingData.tripStart, title: `${bookingData.title} - Trip Start` });
     if (bookingData.tripEnd) entries.push({ ...base, event_type: "trip_end" as const, event_date: bookingData.tripEnd, title: `${bookingData.title} - Trip End` });
 
-    // If no dates at all, create at least a booking entry for today
     if (entries.length === 0) {
       entries.push({ ...base, event_type: "booking" as const, event_date: format(new Date(), "yyyy-MM-dd"), title: `${bookingData.title} - Booked` });
     }
@@ -216,9 +346,6 @@ const BookingManager = () => {
       reader.readAsDataURL(file);
     });
 
-  const slugify = (name: string) =>
-    name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-
   const handleChatSend = async () => {
     if (!chatMessage.trim() && attachedFiles.length === 0) return;
 
@@ -226,7 +353,6 @@ const BookingManager = () => {
     setAiStatus("Reading documents...");
 
     try {
-      // Convert files to base64
       const filesPayload = await Promise.all(
         attachedFiles.map(async (af) => ({
           name: af.file.name,
@@ -237,7 +363,6 @@ const BookingManager = () => {
 
       setAiStatus("Analyzing with AI...");
 
-      // Call edge function
       const { data: result, error } = await supabase.functions.invoke("booking-assistant", {
         body: {
           message: chatMessage,
@@ -258,7 +383,6 @@ const BookingManager = () => {
         setAiStatus("Creating booking...");
         const d = result.data;
 
-        // Upload files to storage
         const clientSlug = slugify(d.client_name);
         for (const af of attachedFiles) {
           const path = `${clientSlug}/${af.file.name}`;
@@ -298,14 +422,12 @@ const BookingManager = () => {
           description: `${attachedFiles.length} file(s) added to booking ${d.booking_number}.`,
         });
       } else {
-        // No action — just a text response
         toast({
           title: "AI Response",
           description: result.message || "No action taken.",
         });
       }
 
-      // Clear inputs
       setChatMessage("");
       setAttachedFiles([]);
     } catch (err: any) {
@@ -358,7 +480,11 @@ const BookingManager = () => {
               </TableHeader>
               <TableBody>
                 {bookings.map((b) => (
-                  <TableRow key={b.bookingNumber}>
+                  <TableRow
+                    key={b.bookingNumber}
+                    className="cursor-pointer hover:bg-accent/50 transition-colors"
+                    onClick={() => openBookingDetail(b)}
+                  >
                     <TableCell>
                       <div>
                         <span className="font-medium">{b.clientName}</span>
@@ -386,7 +512,6 @@ const BookingManager = () => {
 
       {/* Chat Input Bar */}
       <div className="border border-border rounded-xl bg-card shadow-sm p-3 space-y-2">
-        {/* Attached files */}
         {attachedFiles.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {attachedFiles.map((af, i) => (
@@ -405,7 +530,6 @@ const BookingManager = () => {
           </div>
         )}
 
-        {/* Processing indicator */}
         {aiProcessing && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -413,7 +537,6 @@ const BookingManager = () => {
           </div>
         )}
 
-        {/* Input row */}
         <div className="flex items-center gap-2">
           <input
             ref={fileInputRef}
@@ -487,6 +610,146 @@ const BookingManager = () => {
               Save Booking
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Booking Detail Dialog */}
+      <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
+        <DialogContent className="max-w-xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <span>{selectedBooking?.title}</span>
+              {selectedBooking && (
+                <Badge variant="outline" className="font-mono text-xs">{selectedBooking.bookingNumber}</Badge>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+
+          {detailLoading ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <ScrollArea className="flex-1 -mx-6 px-6">
+              <div className="space-y-6 pb-4">
+                {/* Client & Supplier Info */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Client</p>
+                    <p className="font-medium text-sm">{selectedBooking?.clientName}</p>
+                    {selectedBooking?.clientEmail && (
+                      <p className="text-xs text-muted-foreground">{selectedBooking.clientEmail}</p>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Supplier</p>
+                    <p className="font-medium text-sm">{selectedBooking?.supplier || "—"}</p>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Events Timeline */}
+                <div>
+                  <h3 className="text-sm font-semibold mb-3">Events Timeline</h3>
+                  <div className="space-y-2">
+                    {detailEvents.map((event) => (
+                      <div
+                        key={event.id}
+                        className="flex items-start gap-3 p-3 rounded-lg border border-border bg-muted/30 hover:bg-muted/50 transition-colors"
+                      >
+                        <button
+                          onClick={() => toggleEventCompletion(event)}
+                          className="mt-0.5 shrink-0"
+                        >
+                          {event.is_completed ? (
+                            <CheckCircle2 className="h-5 w-5 text-primary" />
+                          ) : (
+                            <Circle className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors" />
+                          )}
+                        </button>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className={cn(
+                              "text-sm font-medium",
+                              event.is_completed && "line-through text-muted-foreground"
+                            )}>
+                              {EVENT_TYPE_LABELS[event.event_type] || event.event_type}
+                            </span>
+                            <span className="text-xs text-muted-foreground shrink-0">
+                              {format(new Date(event.event_date), "MMM d, yyyy")}
+                            </span>
+                          </div>
+                          {event.notes && (
+                            <p className="text-xs text-muted-foreground mt-1">{event.notes}</p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                    {detailEvents.length === 0 && (
+                      <p className="text-sm text-muted-foreground text-center py-4">No events found.</p>
+                    )}
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Documents */}
+                <div>
+                  <h3 className="text-sm font-semibold mb-3">Documents</h3>
+                  {detailDocuments.length > 0 ? (
+                    <div className="space-y-2">
+                      {detailDocuments.map((doc, i) => (
+                        <div
+                          key={i}
+                          className="flex items-center gap-3 p-2.5 rounded-lg border border-border hover:bg-muted/50 transition-colors"
+                        >
+                          <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                          <span className="text-sm flex-1 truncate">{doc.name}</span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 shrink-0"
+                            onClick={() => selectedBooking && getSignedUrl(doc.name, selectedBooking.clientName)}
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">No documents uploaded.</p>
+                  )}
+                </div>
+
+                <Separator />
+
+                {/* Delete action */}
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="sm" className="w-full gap-2">
+                      <Trash2 className="h-4 w-4" /> Delete Entire Booking
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete this booking?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will permanently remove all {detailEvents.length} calendar events for booking {selectedBooking?.bookingNumber}. This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDeleteBooking} disabled={deletingBooking}>
+                        {deletingBooking ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </ScrollArea>
+          )}
         </DialogContent>
       </Dialog>
     </div>
