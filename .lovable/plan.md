@@ -1,98 +1,89 @@
 
-# Add Flight Button for Manual Flight Entry
 
-## Problem
+# Attach Documents and Additional Line Item Types in Quote Builder
 
-The AI extraction only captures the outbound flight when uploading two separate one-way flight documents. There's no manual way to add or edit individual flight legs, so the return flight never gets populated.
+## Overview
 
-## Solution
+Two enhancements to the Quote Builder's Pricing section (Step 3):
 
-Add an "Add Flight" button next to the Flight Itinerary card (or shown when no flights exist) that opens a dialog for manually entering outbound and/or return flight details. This mirrors the existing "Add Room" pattern.
+1. **Attach Document** -- Upload a full quote PDF or image to the quote record, stored in the existing `booking-documents` bucket
+2. **Line Item Categories** -- Add a type/category selector to each line item so you can clearly label things as Hotel, Transfer, Excursion, Insurance, etc.
 
 ## Changes
 
-### File: `src/pages/BookingReport.tsx`
+### File: `src/components/dashboard/QuoteBuilder.tsx`
 
-**1. Add state for the Add Flight dialog**
+**1. Update LineItem interface to include a category field**
 
-New state variables alongside the existing Add Room state:
-- `addFlightOpen` (boolean)
-- `addFlightForm` (object with outbound/return leg fields)
-
-**2. Create an Edit Flight Dialog component**
-
-A dialog with two sections (Outbound and Return), each containing fields for:
-- Airline
-- Flight Number
-- Departure Airport
-- Departure Time
-- Arrival Airport
-- Arrival Time
-
-Pre-populated with existing flight data if available, so users can also edit/add the missing return leg.
-
-**3. Save handler**
-
-On save, merge the form data into `bookingDetails.flight_details` and update the database:
 ```typescript
-const handleSaveFlight = async () => {
-  const flightDetails = {
-    outbound: hasValues(outboundForm) ? outboundForm : existingOutbound,
-    return: hasValues(returnForm) ? returnForm : existingReturn,
-  };
-  await supabase.from("booking_details").update({ flight_details: flightDetails }).eq("booking_number", bookingNumber);
-  // refresh data
-};
+interface LineItem {
+  description: string;
+  amount: number;
+  category?: string;
+}
 ```
 
-**4. UI placement**
+Categories available via a dropdown: Hotel, Transfer, Excursion, Insurance, Flights, Car Rental, Other.
 
-- Always show the Flight Itinerary card (not conditionally on `hasFlightDetails`)
-- Inside the card header, add an edit/add button
-- If no flights exist, show the "Add Flight" button as a dashed outline button (same style as "Add Room")
-- If flights exist, show a small pencil/edit icon in the card header to open the same dialog
+**2. Add attachment state and upload handler**
 
-This ensures:
-- Users can manually add either or both flight legs
-- Users can edit existing flight data
-- The return flight can be added independently of the outbound
-- No dependency on the AI correctly merging two one-way flights
+- New state: `attachmentUrl` (string), `uploading` (boolean)
+- Upload handler uploads to `booking-documents` bucket under a `quotes/` prefix
+- The URL is stored on the quote record in a new `attachment_url` column
+
+**3. Update the Pricing section UI (Step 3)**
+
+- Each line item row gets a small category `Select` dropdown before the description input
+- Below the line items, add an "Attach Document" area with a file input (accepts PDF, images)
+- Show the attached file name with a remove button if one is already attached
+
+**4. Save/load the attachment URL and line item categories**
+
+- `handleSave` includes `attachment_url` in the payload
+- `loadQuote` restores `attachmentUrl` from the saved record
+- Line item categories are already stored in the `line_items` JSONB column, no schema change needed for that
+
+### Database Migration
+
+Add an `attachment_url` column to `client_quotes`:
+
+```sql
+ALTER TABLE public.client_quotes ADD COLUMN IF NOT EXISTS attachment_url text;
+```
+
+### File: `src/components/dashboard/QuotePreview.tsx`
+
+- Show attached document as a download link in the preview
+- Show line item categories in the pricing breakdown if present
 
 ## Technical Details
 
-### New State (near line 384)
-```typescript
-const [addFlightOpen, setAddFlightOpen] = useState(false);
+### Line Item Category Dropdown
+
+Each line item row will have a compact category selector:
+
+```
+[Hotel v] [Sonya Hotel 3 rooms___________] [$___]  [x]
+[Transfer v] [Airport roundtrip___________] [$___]  [x]
+[Excursion v] [Snorkeling tour____________] [$___]  [x]
 ```
 
-### Flight Dialog (after the Add Room Dialog, near line 1591)
-A `Dialog` with form fields for outbound and return legs, pre-filled from existing `bookingDetails?.flight_details`.
+Categories: Hotel, Transfer, Excursion, Insurance, Flights, Car Rental, Spa, Other
 
-### Flight Card Update (lines 1109-1122)
-Replace the conditional rendering to always show the card, with an add/edit button in the header:
-```typescript
-<Card className="overflow-hidden">
-  <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-    <h3 className="text-sm font-semibold flex items-center gap-2">
-      <Plane className="h-4 w-4 text-primary" /> Flight Itinerary
-    </h3>
-    <Button variant="ghost" size="sm" onClick={() => setAddFlightOpen(true)}>
-      {hasFlightDetails ? <Pencil className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5 mr-1" />}
-      {hasFlightDetails ? "Edit" : "Add Flight"}
-    </Button>
-  </div>
-  <CardContent className="p-5 space-y-4">
-    {hasFlightDetails ? (
-      <>
-        <FlightLeg label="Outbound" leg={bookingDetails.flight_details.outbound} />
-        <FlightLeg label="Return" leg={bookingDetails.flight_details.return} />
-      </>
-    ) : (
-      <p className="text-sm text-muted-foreground text-center py-4">No flights added yet.</p>
-    )}
-  </CardContent>
-</Card>
+### Attach Document Section
+
+Below the line items total, a bordered area:
+
+```
+Attach Document
+[Choose File] quote-document.pdf  [x Remove]
 ```
 
-### Save Logic
-Updates the `flight_details` JSONB column on `booking_details`, preserving any existing leg data while allowing individual legs to be added or edited.
+- Uploads to `booking-documents/quotes/{quoteId || timestamp}-{filename}`
+- Accepts: PDF, JPG, PNG, WEBP
+- Max display: shows filename with a link to view/download
+
+### QuoteData Interface Update
+
+Add `attachmentUrl?: string` to the `QuoteData` interface so it flows through to preview and save/load.
+
