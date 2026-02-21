@@ -1,81 +1,70 @@
 
 
-# Add Booking Numbers to Room Cards
+# Fix Room Booking Numbers Display and Chat Room Updates
 
-## Overview
+## Problem 1: Booking Numbers Not Showing on Room Cards
 
-Each room in a multi-room booking can have its own unique booking numbers (e.g., an Encore number and a cruise line booking number). These need to be stored per-room and always displayed beside the room label, even when they are the same across rooms.
+The existing rooms in the database were created before the `booking_number` and `cruise_line_booking_number` fields were added to the room structure. The auto-migration only runs for legacy data with no rooms array, so existing rooms remain without these fields.
+
+## Problem 2: Chat Creates New Booking Instead of Updating Room
+
+When you upload a document via the chat and say "add this to Room 3", two things go wrong:
+
+- The AI receives `existing_bookings: []` (an empty array), so it has no context about the current booking and treats the document's unique booking number as a brand-new booking
+- The chat handler has no room-aware logic -- it merges data at the booking level, not into a specific room
 
 ## Changes
 
-### 1. Update RoomData Interface
-
-Add `booking_number` and `cruise_line_booking_number` fields to the `RoomData` interface.
-
-### 2. Update RoomCard Display
-
-Show the booking numbers right beside the room label (e.g., "Room 1 -- 60013383 / CL-12345"). They will always be displayed regardless of whether they match other rooms.
-
-### 3. Update Auto-Migration
-
-When migrating legacy data into Room 1, carry over the top-level `booking_number` and `cruise_line_booking_number` fields into the room object.
-
-### 4. AI Extraction
-
-When the "Add Room" dialog processes uploaded documents, the AI already extracts booking numbers. The frontend will slot `booking_number` and `cruise_line_booking_number` from the AI response into the new room entry.
-
-## Technical Details
-
 ### File: `src/pages/BookingReport.tsx`
 
-**RoomData interface (line 25)** -- add two fields:
+**1. Pass existing bookings context to the chat AI call (line 787)**
+
+Send the current booking number and all room booking numbers as `existing_bookings` so the AI knows this trip already exists. This prevents it from calling `create_booking`.
 
 ```typescript
-interface RoomData {
-  room_number: number;
-  label: string;
-  passengers: any[];
-  cabin_number?: string;
-  cabin_category?: string;
-  deck?: string;
-  bed_configuration?: string;
-  pricing?: any;
-  booking_number?: string;
-  cruise_line_booking_number?: string;
-}
+existing_bookings: [
+  { bookingNumber: bookingNumber, clientName: clientName, title: resortName },
+  ...rooms.map(r => ({
+    bookingNumber: r.booking_number,
+    clientName: clientName,
+    title: `${resortName} - ${r.label}`
+  })).filter(r => r.bookingNumber)
+]
 ```
 
-**RoomCard component (line 260-278)** -- add booking numbers beside the room label:
+**2. Add room-aware handling in the chat response (lines 792-803)**
 
-```typescript
-<h3 className="text-sm font-semibold flex items-center gap-2">
-  <BedDouble className="h-4 w-4 text-primary" /> {room.label}
-</h3>
-{(room.booking_number || room.cruise_line_booking_number) && (
-  <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-    {room.booking_number && (
-      <Badge variant="secondary" className="text-[10px] font-mono">
-        #{room.booking_number}
-      </Badge>
-    )}
-    {room.cruise_line_booking_number && (
-      <Badge variant="outline" className="text-[10px] font-mono">
-        CL: {room.cruise_line_booking_number}
-      </Badge>
-    )}
-  </div>
-)}
+When the AI returns `add_to_booking` with data, check if the user's message references a specific room (e.g., "room 3"). If so, merge the extracted passengers, cabin info, pricing, and booking numbers into that room's entry in the `rooms` array, rather than the top-level booking.
+
+Logic:
+- Parse the chat message for a room number reference (e.g., "room 3", "Room 3")
+- If a room number is found and that room exists, update that room's fields (passengers, cabin details, pricing, booking_number, cruise_line_booking_number)
+- Also merge any top-level data (flight details, extras) into the booking as before
+
+**3. Also pass existing bookings to the Add Room AI call (line 647)**
+
+Same fix for the "Add Room" dialog -- pass existing bookings so the AI uses `add_to_booking` or at minimum returns extracted data without conflicting.
+
+### File: `supabase/functions/booking-assistant/index.ts`
+
+**4. Update the system prompt to be smarter about room context**
+
+Add instructions telling the AI that when the user says "add this to Room X" for an existing booking, it should always use `add_to_booking` with the existing booking number (the trip-level one), not treat the document's booking number as a new booking. The room-level booking numbers are metadata to store, not trip identifiers.
+
+Add to the system prompt:
+```
+ROOM UPDATES FOR EXISTING BOOKINGS:
+When the user explicitly says to add data to a specific room (e.g., "add this to Room 3") 
+for an existing booking, ALWAYS use add_to_booking with the EXISTING booking number from 
+the context, not the booking number found in the uploaded document. The document's booking 
+number is a room-level reference to be stored as metadata, not a trip identifier.
+Include the extracted booking_number and cruise_line_booking_number in the response so the 
+frontend can store them on the specific room.
 ```
 
-**Auto-migration (line 431-440)** -- include booking numbers when building Room 1:
+## Summary of Behavior After Fix
 
-```typescript
-const room1: RoomData = {
-  // ...existing fields...
-  booking_number: details.booking_number || undefined,
-  cruise_line_booking_number: details.cruise_line_booking_number || undefined,
-};
-```
-
-**Add Room handler** -- when appending a new room from AI results, also map `booking_number` and `cruise_line_booking_number` from the AI response into the new room object.
+1. When you upload a document via chat and say "add this to Room 3", the AI will use `add_to_booking` with the existing trip booking number
+2. The frontend will detect the "Room 3" reference and merge passengers, cabin info, pricing, and booking numbers into Room 3
+3. Each room card will display its specific booking numbers (Encore and cruise line) as badges
 
