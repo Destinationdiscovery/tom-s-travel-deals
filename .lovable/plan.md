@@ -1,52 +1,110 @@
 
 
-# Add Edit and Delete Passenger Functions
+# Add Room Button with Room-Based Passenger Display
 
-## What Changes
+## Overview
 
-### 1. Delete Passenger
+Replace the complex multi-cabin AI logic with a simple, manual "Add Room" workflow. Passengers are organized into rooms within a single booking record. The first upload always goes to Room 1, and the agent clicks "Add Room" to create additional rooms and upload their documents.
 
-Add a trash icon button to each passenger card. Clicking it shows a confirmation dialog. On confirm, the passenger is removed from the `passengers` JSONB array in the database and the UI updates immediately.
+## How It Works
 
-### 2. Edit Passenger
+### Data Model
 
-Add a pencil/edit icon button to each passenger card. Clicking it opens a dialog pre-filled with the passenger's current details (name, DOB, citizenship, passport number, passport expiry, traveller type, gender). The agent can update any field and save, which updates the specific passenger entry in the JSONB array.
+Add a `rooms` JSONB column to `booking_details`. Each room stores its own passengers and cabin-specific info:
 
-### How It Works
+```text
+rooms: [
+  {
+    room_number: 1,
+    label: "Room 1",
+    passengers: [{ name: "...", dob: "...", ... }],
+    cabin_number: "GUAR",
+    cabin_category: "Interior (IE)",
+    deck: "8",
+    bed_configuration: "QUEEN",
+    pricing: { total: 2499, deposit: 350, ... }
+  },
+  {
+    room_number: 2,
+    label: "Room 2",
+    passengers: [{ name: "...", ... }],
+    cabin_number: "B304",
+    cabin_category: "Balcony (BF)",
+    ...
+  }
+]
+```
 
-Both operations work directly on the `passengers` JSONB array stored in `booking_details`:
+### Migration from Current Data
 
-- **Delete**: Filter out the passenger by index, then update the database
-- **Edit**: Replace the passenger object at that index with updated values, then update the database
+When the page loads and `rooms` is empty but `passengers` exists, auto-migrate: move the existing passengers, cabin info, and pricing into Room 1. This is done in-memory on load and saved back to the database so existing bookings seamlessly adopt the new format.
 
-No database migration needed -- this is purely UI + existing column updates.
+### UI Changes on BookingReport
+
+1. **Passengers card becomes Rooms section** -- each room gets its own card labeled "Room 1", "Room 2", etc., showing its passengers, cabin category, deck, and pricing
+2. **"Add Room" button** -- appears below the last room card. Clicking it opens a dialog with:
+   - File upload area (for the new room's booking confirmation screenshots)
+   - A text input for additional instructions
+   - A "Process" button that sends the files to the booking-assistant AI with instructions to extract only the new room's data
+3. The AI response populates a new room entry in the `rooms` array
+4. Each room card retains the existing edit/delete passenger buttons
+5. A "Delete Room" button on each room card (except Room 1) removes that room
+
+### Edge Function Update
+
+No changes to the edge function schema. The frontend will handle room assignment by telling the AI "extract passengers and cabin info for this room" and then slotting the response into the correct room in the `rooms` array.
 
 ## Technical Details
 
-### Files Modified
+### Database Migration
 
-- `src/pages/BookingReport.tsx`
-  - Convert `PassengerCard` from a simple display component to one that accepts `onEdit` and `onDelete` callback props
-  - Add edit (Pencil) and delete (Trash2) icon buttons to the passenger card header
-  - Add an `EditPassengerDialog` component with form fields for: name, DOB, citizenship, passport number, passport expiry, traveller type, gender
-  - Add a delete confirmation using the existing `AlertDialog` component
-  - Add handler functions `handleDeletePassenger(index)` and `handleEditPassenger(index, updatedData)` that:
-    1. Update the `passengers` array in local state
-    2. Persist the change to the `booking_details` table via Supabase update
-    3. Show a toast confirmation
-
-### UI Layout
-
-Each passenger card gets two small icon buttons in the top-right corner:
-
-```text
-+-----------------------------------------------+
-|  [Avatar] Passenger Name        [Edit] [Delete]|
-|           Adult (Male)                         |
-|  DOB: Jan 1, 1990                              |
-|  Passport: ****1234                            |
-+-----------------------------------------------+
+```sql
+ALTER TABLE booking_details
+  ADD COLUMN IF NOT EXISTS rooms jsonb DEFAULT '[]'::jsonb;
 ```
 
-The edit dialog contains a simple form with labeled inputs for each passenger field, plus Save and Cancel buttons.
+### Files Modified
+
+- **New migration** -- adds `rooms` column
+- **`src/pages/BookingReport.tsx`** -- main changes:
+  - Auto-migration logic: on load, if `rooms` is empty and `passengers` has data, build Room 1 from existing top-level fields
+  - Replace single Passengers card with per-room cards
+  - Add "Add Room" button and dialog component
+  - Room-level edit/delete passenger functions (operating on `rooms[roomIndex].passengers[passengerIndex]`)
+  - "Delete Room" confirmation dialog
+  - Save rooms array back to `booking_details` on any change
+
+### Room Card Layout
+
+```text
++--------------------------------------------------+
+|  Room 1                              [Delete Room]|
+|  Interior (IE) · Deck 8 · QUEEN                  |
+|  ------------------------------------------------|
+|  [Avatar] Pat Mastrogiacomo    [Edit] [Delete]    |
+|           Adult (Male)                            |
+|  [Avatar] Jane Doe             [Edit] [Delete]    |
+|           Adult (Female)                          |
+|  Pricing: CA$2,499.68                             |
++--------------------------------------------------+
+|  Room 2                              [Delete Room]|
+|  Balcony (BF) · Deck 12 · TWIN                   |
+|  ------------------------------------------------|
+|  [Avatar] John Smith           [Edit] [Delete]    |
+|           Adult (Male)                            |
+|  Pricing: CA$3,199.00                             |
++--------------------------------------------------+
+|         [+ Add Room]                              |
++--------------------------------------------------+
+```
+
+### Add Room Dialog Flow
+
+1. Agent clicks "+ Add Room"
+2. Dialog opens with file upload and optional message field
+3. Agent uploads the new room's confirmation screenshots
+4. Clicks "Process" -- files are sent to the AI
+5. AI extracts passengers, cabin info, pricing
+6. A new room entry is appended to the `rooms` array
+7. Dialog closes, new room card appears immediately
 
