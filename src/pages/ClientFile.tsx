@@ -27,7 +27,35 @@ interface BookingDetails {
   pricing: any;
   num_travellers: number | null;
   extras: any[];
+  [key: string]: any; // allow new cruise fields
 }
+
+const CRUISE_FIELDS = [
+  "itinerary", "passengers", "payment_history", "agency", "booking_agent",
+  "cabin_number", "cabin_category", "deck", "bed_configuration", "rate_code",
+  "ship_name", "cruise_line_booking_number", "balance_due", "balance_due_date",
+  "duration_nights", "booking_status",
+] as const;
+
+const buildMergeData = (d: any): Partial<BookingDetails> => {
+  const mergeData: Partial<BookingDetails> = {};
+  if (d.destination) mergeData.destination = d.destination;
+  if (d.room_type) mergeData.room_type = d.room_type;
+  if (d.num_travellers) mergeData.num_travellers = d.num_travellers;
+  if (d.flight_details) mergeData.flight_details = d.flight_details;
+  if (d.pricing) mergeData.pricing = d.pricing;
+  if (d.extras) mergeData.extras = d.extras;
+  if (d.supplier) mergeData.supplier = d.supplier;
+  if (d.resort_or_trip || d.resort_name) mergeData.resort_name = d.resort_or_trip || d.resort_name;
+  if (d.client_name) mergeData.client_name = d.client_name;
+  if (d.client_email) mergeData.client_email = d.client_email;
+  for (const field of CRUISE_FIELDS) {
+    if (d[field] !== undefined && d[field] !== null) {
+      (mergeData as any)[field] = d[field];
+    }
+  }
+  return mergeData;
+};
 
 interface BookingEvent {
   id: string;
@@ -285,19 +313,7 @@ const ClientFile = () => {
             tripEnd: d.trip_end || undefined,
           });
         }
-        const mergeData: Partial<BookingDetails> = {};
-        if (d.destination) mergeData.destination = d.destination;
-        if (d.room_type) mergeData.room_type = d.room_type;
-        if (d.num_travellers) mergeData.num_travellers = d.num_travellers;
-        if (d.flight_details) mergeData.flight_details = d.flight_details;
-        if (d.pricing) mergeData.pricing = d.pricing;
-        if (d.extras) mergeData.extras = d.extras;
-        if (d.supplier) mergeData.supplier = d.supplier;
-        if (d.resort_or_trip || d.resort_name) mergeData.resort_name = d.resort_or_trip || d.resort_name;
-        if (d.client_name) mergeData.client_name = d.client_name;
-        if (d.client_email) mergeData.client_email = d.client_email;
-
-        await upsertBookingDetails(d.booking_number, mergeData);
+        await upsertBookingDetails(d.booking_number, buildMergeData(d));
         toast({ title: "Re-scan complete!", description: "Client file has been updated." });
         await fetchAll();
       } else {
@@ -366,18 +382,11 @@ const ClientFile = () => {
           tripStart: d.trip_start || undefined,
           tripEnd: d.trip_end || undefined,
         });
-        await upsertBookingDetails(d.booking_number, {
-          client_name: d.client_name || clientName,
-          client_email: d.client_email || clientEmail || null,
-          supplier: d.supplier || null,
-          resort_name: d.resort_or_trip,
-          destination: d.destination || null,
-          room_type: d.room_type || null,
-          flight_details: d.flight_details || [],
-          pricing: d.pricing || {},
-          num_travellers: d.num_travellers || null,
-          extras: d.extras || [],
-        });
+        const fullMerge = buildMergeData(d);
+        fullMerge.client_name = d.client_name || clientName;
+        fullMerge.client_email = d.client_email || clientEmail || null;
+        fullMerge.resort_name = d.resort_or_trip || d.resort_name;
+        await upsertBookingDetails(d.booking_number, fullMerge);
         toast({ title: "New booking created!", description: `${d.resort_or_trip} added to ${clientName}'s file.` });
         navigate(`/booking/${encodeURIComponent(d.booking_number)}`);
       } else if (result?.action === "add_to_booking") {
@@ -385,13 +394,7 @@ const ClientFile = () => {
         for (const af of chatFiles) {
           await supabase.storage.from("booking-documents").upload(`${clientSlug}/${af.file.name}`, af.file, { upsert: true });
         }
-        const mergeData: Partial<BookingDetails> = {};
-        if (d.destination) mergeData.destination = d.destination;
-        if (d.room_type) mergeData.room_type = d.room_type;
-        if (d.num_travellers) mergeData.num_travellers = d.num_travellers;
-        if (d.flight_details) mergeData.flight_details = d.flight_details;
-        if (d.pricing) mergeData.pricing = d.pricing;
-        if (d.extras) mergeData.extras = d.extras;
+        const mergeData = buildMergeData(d);
         if (Object.keys(mergeData).length > 0) {
           await upsertBookingDetails(d.booking_number, mergeData);
         }

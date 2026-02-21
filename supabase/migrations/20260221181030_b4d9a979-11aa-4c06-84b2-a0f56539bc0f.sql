@@ -1,0 +1,17 @@
+ALTER TABLE booking_details
+  ADD COLUMN IF NOT EXISTS itinerary jsonb DEFAULT '[]',
+  ADD COLUMN IF NOT EXISTS passengers jsonb DEFAULT '[]',
+  ADD COLUMN IF NOT EXISTS payment_history jsonb DEFAULT '[]',
+  ADD COLUMN IF NOT EXISTS agency text,
+  ADD COLUMN IF NOT EXISTS booking_agent text,
+  ADD COLUMN IF NOT EXISTS cabin_number text,
+  ADD COLUMN IF NOT EXISTS cabin_category text,
+  ADD COLUMN IF NOT EXISTS deck text,
+  ADD COLUMN IF NOT EXISTS bed_configuration text,
+  ADD COLUMN IF NOT EXISTS rate_code text,
+  ADD COLUMN IF NOT EXISTS ship_name text,
+  ADD COLUMN IF NOT EXISTS cruise_line_booking_number text,
+  ADD COLUMN IF NOT EXISTS balance_due numeric,
+  ADD COLUMN IF NOT EXISTS balance_due_date text,
+  ADD COLUMN IF NOT EXISTS duration_nights integer,
+  ADD COLUMN IF NOT EXISTS booking_status text;
