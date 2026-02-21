@@ -43,6 +43,7 @@ export type Database = {
           rate_code: string | null
           resort_name: string | null
           room_type: string | null
+          rooms: Json | null
           ship_name: string | null
           supplier: string | null
           trip_group_id: string | null
@@ -76,6 +77,7 @@ export type Database = {
           rate_code?: string | null
           resort_name?: string | null
           room_type?: string | null
+          rooms?: Json | null
           ship_name?: string | null
           supplier?: string | null
           trip_group_id?: string | null
@@ -109,6 +111,7 @@ export type Database = {
           rate_code?: string | null
           resort_name?: string | null
           room_type?: string | null
+          rooms?: Json | null
           ship_name?: string | null
           supplier?: string | null
           trip_group_id?: string | null
