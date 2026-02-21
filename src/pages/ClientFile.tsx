@@ -205,21 +205,34 @@ const ClientFile = () => {
     setLoading(false);
   };
 
-  // Upsert helper
+  // Smart array merge helpers
+  const mergeByKey = (existing: any[], incoming: any[], keyFn: (item: any) => string): any[] => {
+    const merged = [...existing];
+    for (const item of incoming) {
+      const key = keyFn(item);
+      const idx = merged.findIndex(e => keyFn(e) === key);
+      if (idx >= 0) merged[idx] = { ...merged[idx], ...item };
+      else merged.push(item);
+    }
+    return merged;
+  };
+
+  // Upsert helper with smart array merging
   const upsertBookingDetails = async (bn: string, details: Partial<BookingDetails>) => {
-    const { data: existing } = await supabase.from("booking_details" as any).select("booking_number").eq("booking_number", bn).maybeSingle();
+    const { data: existing } = await supabase.from("booking_details" as any).select("*").eq("booking_number", bn).maybeSingle();
     if ((existing as any)) {
+      const current = existing as any;
       const updates: any = {};
       for (const [k, v] of Object.entries(details)) {
         if (v !== null && v !== undefined && k !== "booking_number") {
           if (k === "extras" && Array.isArray(v)) {
-            const { data: currentRow } = await supabase.from("booking_details" as any).select("extras").eq("booking_number", bn).single();
-            const currentExtras = (currentRow as any)?.extras || [];
-            const merged = [...currentExtras];
-            for (const ext of v as any[]) {
-              if (!merged.some((e: any) => e.label === ext.label)) merged.push(ext);
-            }
-            updates.extras = merged;
+            updates.extras = mergeByKey(current.extras || [], v, (e: any) => e.label || "");
+          } else if (k === "passengers" && Array.isArray(v)) {
+            updates.passengers = mergeByKey(current.passengers || [], v, (p: any) => (p.name || "").toLowerCase().trim());
+          } else if (k === "itinerary" && Array.isArray(v)) {
+            updates.itinerary = mergeByKey(current.itinerary || [], v, (i: any) => `${i.date}|${i.port}`);
+          } else if (k === "payment_history" && Array.isArray(v)) {
+            updates.payment_history = mergeByKey(current.payment_history || [], v, (p: any) => `${p.date}|${p.amount}`);
           } else {
             updates[k] = v;
           }
@@ -297,24 +310,28 @@ const ClientFile = () => {
       });
       if (error) throw error;
 
-      if (result?.action === "create_booking" || result?.action === "add_to_booking") {
-        const d = result.data;
-        if (result.action === "create_booking") {
-          await createBookingEntries({
-            clientName: d.client_name || clientName,
-            clientEmail: d.client_email || clientEmail || undefined,
-            bookingNumber: d.booking_number,
-            title: d.resort_or_trip,
-            supplier: d.supplier || undefined,
-            dateBooked: d.date_booked || format(new Date(), "yyyy-MM-dd"),
-            depositDue: d.deposit_due || undefined,
-            finalPaymentDue: d.final_payment_due || undefined,
-            tripStart: d.trip_start || undefined,
-            tripEnd: d.trip_end || undefined,
-          });
+      // Process all actions (multi-cabin support)
+      const actions = result?.actions || (result?.action ? [{ action: result.action, data: result.data }] : []);
+      if (actions.length > 0) {
+        for (const act of actions) {
+          const d = act.data;
+          if (act.action === "create_booking") {
+            await createBookingEntries({
+              clientName: d.client_name || clientName,
+              clientEmail: d.client_email || clientEmail || undefined,
+              bookingNumber: d.booking_number,
+              title: d.resort_or_trip,
+              supplier: d.supplier || undefined,
+              dateBooked: d.date_booked || format(new Date(), "yyyy-MM-dd"),
+              depositDue: d.deposit_due || undefined,
+              finalPaymentDue: d.final_payment_due || undefined,
+              tripStart: d.trip_start || undefined,
+              tripEnd: d.trip_end || undefined,
+            });
+          }
+          await upsertBookingDetails(d.booking_number, buildMergeData(d));
         }
-        await upsertBookingDetails(d.booking_number, buildMergeData(d));
-        toast({ title: "Re-scan complete!", description: "Client file has been updated." });
+        toast({ title: "Re-scan complete!", description: `${actions.length} booking(s) processed.` });
         await fetchAll();
       } else {
         toast({ title: "No details extracted", description: result?.message || "AI couldn't extract structured data." });
@@ -364,42 +381,49 @@ const ClientFile = () => {
       });
       if (error) throw error;
 
-      if (result?.action === "create_booking") {
-        const d = result.data;
-        // Upload files
+      // Process all actions (multi-cabin support)
+      const actions = result?.actions || (result?.action ? [{ action: result.action, data: result.data }] : []);
+      if (actions.length > 0) {
+        // Upload files once
         for (const af of chatFiles) {
           await supabase.storage.from("booking-documents").upload(`${clientSlug}/${af.file.name}`, af.file, { upsert: true });
         }
-        await createBookingEntries({
-          clientName: d.client_name || clientName,
-          clientEmail: d.client_email || clientEmail || undefined,
-          bookingNumber: d.booking_number,
-          title: d.resort_or_trip,
-          supplier: d.supplier || undefined,
-          dateBooked: d.date_booked || format(new Date(), "yyyy-MM-dd"),
-          depositDue: d.deposit_due || undefined,
-          finalPaymentDue: d.final_payment_due || undefined,
-          tripStart: d.trip_start || undefined,
-          tripEnd: d.trip_end || undefined,
-        });
-        const fullMerge = buildMergeData(d);
-        fullMerge.client_name = d.client_name || clientName;
-        fullMerge.client_email = d.client_email || clientEmail || null;
-        fullMerge.resort_name = d.resort_or_trip || d.resort_name;
-        await upsertBookingDetails(d.booking_number, fullMerge);
-        toast({ title: "New booking created!", description: `${d.resort_or_trip} added to ${clientName}'s file.` });
-        navigate(`/booking/${encodeURIComponent(d.booking_number)}`);
-      } else if (result?.action === "add_to_booking") {
-        const d = result.data;
-        for (const af of chatFiles) {
-          await supabase.storage.from("booking-documents").upload(`${clientSlug}/${af.file.name}`, af.file, { upsert: true });
+
+        let lastBookingNumber = "";
+        for (const act of actions) {
+          const d = act.data;
+          if (act.action === "create_booking") {
+            await createBookingEntries({
+              clientName: d.client_name || clientName,
+              clientEmail: d.client_email || clientEmail || undefined,
+              bookingNumber: d.booking_number,
+              title: d.resort_or_trip,
+              supplier: d.supplier || undefined,
+              dateBooked: d.date_booked || format(new Date(), "yyyy-MM-dd"),
+              depositDue: d.deposit_due || undefined,
+              finalPaymentDue: d.final_payment_due || undefined,
+              tripStart: d.trip_start || undefined,
+              tripEnd: d.trip_end || undefined,
+            });
+            const fullMerge = buildMergeData(d);
+            fullMerge.client_name = d.client_name || clientName;
+            fullMerge.client_email = d.client_email || clientEmail || null;
+            fullMerge.resort_name = d.resort_or_trip || d.resort_name;
+            await upsertBookingDetails(d.booking_number, fullMerge);
+          } else if (act.action === "add_to_booking") {
+            const mergeData = buildMergeData(d);
+            if (Object.keys(mergeData).length > 0) {
+              await upsertBookingDetails(d.booking_number, mergeData);
+            }
+          }
+          lastBookingNumber = d.booking_number;
         }
-        const mergeData = buildMergeData(d);
-        if (Object.keys(mergeData).length > 0) {
-          await upsertBookingDetails(d.booking_number, mergeData);
+        toast({ title: `${actions.length} booking(s) processed!`, description: `Files added to ${clientName}'s file.` });
+        if (actions.length === 1 && lastBookingNumber) {
+          navigate(`/booking/${encodeURIComponent(lastBookingNumber)}`);
+        } else {
+          await fetchAll();
         }
-        toast({ title: "Booking updated!", description: `${chatFiles.length} file(s) added.` });
-        navigate(`/booking/${encodeURIComponent(d.booking_number)}`);
       } else {
         toast({ title: "AI Response", description: result?.message || "No action taken." });
       }
