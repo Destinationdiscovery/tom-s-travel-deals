@@ -1,0 +1,1 @@
+ALTER TABLE public.client_quotes ADD COLUMN IF NOT EXISTS attachment_url text;
