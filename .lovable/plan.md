@@ -1,62 +1,47 @@
 
+# Fix Balance Due Aggregation and Flight Upload Clarification
 
-# Update Quick Facts and Pricing to Aggregate Across All Rooms
+## Problem 1: Balance Due Not Aggregated
 
-## Problem
+The "Balance Due" currently reads from the top-level `bookingDetails.balance_due` field (which only reflects Room 1's balance of $2,149.68) instead of computing the total balance across all rooms. With a total of $7,499.04 and deposit of $700, the actual balance due should be $6,799.04.
 
-The "Travellers" count in Quick Facts shows the static `num_travellers` field (currently 2) instead of the actual total passengers across all rooms. The Pricing card shows only the top-level `pricing` object (Room 1's pricing) instead of the combined total across all 3 rooms.
+## Fix
 
-## Changes
+Update the `balanceDue` calculation on line 825 to use the aggregated totals instead of the top-level `balance_due` field:
 
-### 1. Travellers Count -- Sum passengers from all rooms
+```
+Before:  balanceDue = bookingDetails?.balance_due || (pricingTotal - pricingDeposit)
+After:   balanceDue = pricingTotal - pricingDeposit  (always use aggregated values)
+```
 
-Replace the static `num_travellers` display with a computed total that counts all passengers across all rooms in the `rooms` array. If rooms exist, sum `room.passengers.length` for each room. Fall back to `num_travellers` if no rooms data.
+The aggregated deposit will also need to sum `balance_due` from each room if available, or simply fall back to `total - deposit` which is the correct calculation regardless.
 
-### 2. Pricing -- Aggregate totals from all rooms
+## Problem 2: Flight Info -- Already Supported
 
-Update the pricing helpers to sum `total`, `deposit`, and `taxes` across all room-level pricing objects. The logic:
+Flight information is already extracted by the AI when you upload booking confirmation documents through the chat panel at the bottom of the booking page. If the document contains flight details (airline, flight numbers, departure/arrival airports and times), the AI will automatically extract and display them in the "Flight Itinerary" card.
 
-- Loop through `rooms` and sum each room's `pricing.total`, `pricing.deposit`, `pricing.taxes`
-- If rooms have no pricing, fall back to the top-level `pricing` field
-- Balance due = aggregated total minus aggregated deposit (or use top-level `balance_due` if set)
-- Per-person = aggregated total / total passenger count
+No additional "Add Flight" button is needed -- just upload the flight confirmation via the existing chat/document upload area and the AI will pick it up.
 
 ## Technical Details
 
 ### File Modified
 
-- `src/pages/BookingReport.tsx`
+- `src/pages/BookingReport.tsx` (line 825)
 
-### Pricing Helpers Update (around line 810)
+### Change
 
-Replace the current single-source pricing helpers with aggregation logic:
-
-```typescript
-// Aggregate pricing across all rooms
-const aggregatedPricing = rooms.length > 0
-  ? rooms.reduce((acc, room) => {
-      const p = room.pricing || {};
-      acc.total += Number(p.total) || 0;
-      acc.deposit += Number(p.deposit) || 0;
-      acc.taxes += Number(p.taxes) || 0;
-      return acc;
-    }, { total: 0, deposit: 0, taxes: 0 })
-  : null;
-
-const pricingTotal = aggregatedPricing?.total || (hasPricing ? Number(bookingDetails!.pricing.total) || 0 : 0);
-const pricingDeposit = aggregatedPricing?.deposit || (hasPricing ? Number(bookingDetails!.pricing.deposit) || 0 : 0);
-// ... etc
-```
-
-### Travellers Count Update (around line 1146)
-
-Replace `bookingDetails.num_travellers` with a computed value:
+Replace the balance due calculation to always use aggregated pricing math rather than the stale top-level `balance_due` field:
 
 ```typescript
-const totalPassengers = rooms.length > 0
-  ? rooms.reduce((sum, room) => sum + (room.passengers?.length || 0), 0)
-  : bookingDetails?.num_travellers || 0;
+// Before
+const balanceDue = bookingDetails?.balance_due 
+  ? Number(bookingDetails.balance_due) 
+  : (pricingTotal - pricingDeposit > 0 ? pricingTotal - pricingDeposit : 0);
+
+// After
+const balanceDue = pricingTotal - pricingDeposit > 0 
+  ? pricingTotal - pricingDeposit 
+  : 0;
 ```
 
-Display `totalPassengers` in both the Quick Facts "Travellers" row and use it for per-person calculation.
-
+This ensures the balance due reflects the sum of all rooms' totals minus the sum of all rooms' deposits.
