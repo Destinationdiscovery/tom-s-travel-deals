@@ -31,6 +31,8 @@ interface RoomData {
   deck?: string;
   bed_configuration?: string;
   pricing?: any;
+  booking_number?: string;
+  cruise_line_booking_number?: string;
 }
 
 interface BookingDetails {
@@ -262,6 +264,20 @@ const RoomCard = ({ room, roomIndex, totalRooms, onEditPassenger, onDeletePassen
           <h3 className="text-sm font-semibold flex items-center gap-2">
             <BedDouble className="h-4 w-4 text-primary" /> {room.label}
           </h3>
+          {(room.booking_number || room.cruise_line_booking_number) && (
+            <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+              {room.booking_number && (
+                <Badge variant="secondary" className="text-[10px] font-mono">
+                  #{room.booking_number}
+                </Badge>
+              )}
+              {room.cruise_line_booking_number && (
+                <Badge variant="outline" className="text-[10px] font-mono">
+                  CL: {room.cruise_line_booking_number}
+                </Badge>
+              )}
+            </div>
+          )}
           <div className="flex items-center gap-2 mt-1 flex-wrap">
             {room.cabin_category && (
               <span className="text-xs text-muted-foreground">{room.cabin_category}</span>
@@ -437,6 +453,8 @@ const BookingReport = () => {
         deck: details.deck || undefined,
         bed_configuration: details.bed_configuration || undefined,
         pricing: details.pricing || undefined,
+        booking_number: details.booking_number || undefined,
+        cruise_line_booking_number: details.cruise_line_booking_number || undefined,
       };
       const updatedRooms = [room1];
       await supabase.from("booking_details" as any).update({ rooms: updatedRooms }).eq("booking_number", details.booking_number);
@@ -649,6 +667,8 @@ const BookingReport = () => {
           deck: d.deck || undefined,
           bed_configuration: d.bed_configuration || undefined,
           pricing: d.pricing || undefined,
+          booking_number: d.booking_number || undefined,
+          cruise_line_booking_number: d.cruise_line_booking_number || undefined,
         };
         const updatedRooms = [...rooms, newRoom];
         await saveRooms(updatedRooms);
