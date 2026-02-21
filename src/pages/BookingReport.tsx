@@ -822,7 +822,7 @@ const BookingReport = () => {
   const pricingDeposit = aggregatedPricing && aggregatedPricing.deposit > 0 ? aggregatedPricing.deposit : (hasPricing ? Number(bookingDetails!.pricing.deposit) || 0 : 0);
   const pricingTaxes = aggregatedPricing && aggregatedPricing.taxes > 0 ? aggregatedPricing.taxes : (hasPricing ? Number(bookingDetails!.pricing.taxes) || 0 : 0);
   const depositPercent = pricingTotal > 0 ? Math.round((pricingDeposit / pricingTotal) * 100) : 0;
-  const balanceDue = bookingDetails?.balance_due ? Number(bookingDetails.balance_due) : (pricingTotal - pricingDeposit > 0 ? pricingTotal - pricingDeposit : 0);
+  const balanceDue = pricingTotal - pricingDeposit > 0 ? pricingTotal - pricingDeposit : 0;
   const currency = hasPricing ? bookingDetails!.pricing.currency || "CA$" : "CA$";
 
   // Aggregate total passengers across all rooms
