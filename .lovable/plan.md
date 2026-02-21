@@ -1,133 +1,89 @@
 
-# Enhanced Trip Report with Rich Cruise Data
 
-## Overview
+# Multi-Cabin / Multi-Room Booking Support
 
-The current Trip Report page only displays basic fields: resort name, destination, room type, flights, pricing, and a generic "extras" badge list. You pasted a cruise booking with rich data -- itinerary ports, passenger details with passport info, payment history, cabin category/deck info, agency info, rate codes, and a detailed payment schedule. The report needs to capture and display all of this beautifully.
+## The Problem
 
-This requires three changes:
-1. Add new JSONB columns to `booking_details` for itinerary, passengers, and payment_history
-2. Expand the AI edge function tool schemas to extract these new fields
-3. Redesign the BookingReport page with new visual sections
+You have 3 cabins on the same cruise, each with its own Encore booking number. When you upload docs for cabin 2, the AI sees it's the same trip (same ship, same dates, same client) and merges the data into the existing cabin 1 record instead of creating a separate record. You need each cabin to have its own booking_details record while being visually grouped as one trip.
 
 ## What Changes
 
-### 1. Database Migration -- 3 new JSONB columns on `booking_details`
+### 1. Database -- New `trip_group_id` column
 
-Add three nullable JSONB columns:
-- `itinerary` -- array of port stops with date, port name, arrival/departure times
-- `passengers` -- array of traveller objects with name, DOB, citizenship, passport, options
-- `payment_history` -- array of payment records with date, type, amount, method, status
+Add a nullable text column `trip_group_id` to `booking_details`. When multiple cabins belong to the same trip, they share the same group ID (e.g., the first booking number becomes the group ID). This lets the system know "these 3 booking numbers are all part of one trip."
 
-Also add text columns for:
-- `agency` -- agency name
-- `booking_agent` -- agent name
-- `cabin_number` -- cabin assignment
-- `cabin_category` -- category name (e.g. "Interior (IE)")
-- `deck` -- deck assignment
-- `bed_configuration` -- bed config (e.g. "QUEEN")
-- `rate_code` -- rate code description
-- `ship_name` -- ship name (e.g. "Sun Princess")
-- `cruise_line_booking_number` -- secondary booking reference
-- `balance_due` -- amount still owing
-- `balance_due_date` -- when balance is due
-- `duration_nights` -- trip duration in nights
-- `booking_status` -- e.g. "Confirmed"
+### 2. AI Edge Function -- Teach it about multi-cabin trips
 
-### 2. Edge Function Update -- `booking-assistant/index.ts`
+Update the `booking-assistant` system prompt with explicit multi-cabin instructions:
 
-Expand both `create_booking` and `add_to_booking` tool parameter schemas to include:
-- `itinerary` array (date, port, arrival, departure)
-- `passengers` array (name, dob, citizenship, passport info, options)
-- `payment_history` array (date, type, amount, method, status)
-- `agency`, `booking_agent`, `cabin_number`, `cabin_category`, `deck`, `bed_configuration`, `rate_code`, `ship_name`, `cruise_line_booking_number`, `balance_due`, `balance_due_date`, `duration_nights`, `booking_status`
+- If a document contains a **different booking number** than existing ones, ALWAYS use `create_booking` even if the trip/ship/dates are the same
+- Add a `trip_group_id` parameter to both tools so the AI can link cabins together
+- When the AI sees documents for the same ship/dates/client but a different booking number, it sets `trip_group_id` to the first cabin's booking number
 
-Update the system prompt to instruct the AI to extract these additional fields.
+### 3. Client File -- Group cabins visually
 
-### 3. BookingReport Page Redesign
-
-New sections added to the report layout:
+On the Client File page, booking cards with the same `trip_group_id` are grouped under a shared trip header showing the ship name, dates, and destination once, with individual cabin cards nested underneath showing:
+- Cabin-specific booking number
+- Cabin category, deck, bed config
+- Passengers in that cabin
+- Pricing for that cabin
 
 ```text
 +--------------------------------------------------+
-|  HEADER BANNER                                    |
-|  Sun Princess - 7 Night Mediterranean             |
-|  Princess Cruises  |  #60013383  |  CONFIRMED     |
-|  Aug 15 - Aug 22, 2026  |  Rome, Italy            |
-+--------------------------------------------------+
+|  TRIP GROUP: Sun Princess Mediterranean           |
+|  Aug 15-22, 2026 | Princess Cruises | 3 cabins   |
 |                                                    |
-|  LEFT COLUMN (3/5)           RIGHT COLUMN (2/5)   |
+|  [Cabin 1: #60013383]  [Cabin 2: #60013384]      |
+|  Interior (IE) GUAR     Balcony (BF) GUAR        |
+|  2 travellers            2 travellers              |
+|  CA$2,499.68             CA$3,199.00              |
+|  > Full Report           > Full Report             |
 |                                                    |
-|  TRIP OVERVIEW               QUICK FACTS          |
-|  Client, Agency, Agent       Booking #             |
-|  Cabin, Deck, Bed Config     Cruise Line Ref      |
-|  Rate Code, Duration         Supplier              |
-|                              Ship                  |
-|  PASSENGERS                  Cabin / Deck          |
-|  Card per traveller          Duration              |
-|  Name, DOB, Age, Citizenship                      |
-|  Passport # / Expiry         PRICING              |
-|  Special Options             Total, Deposit,       |
-|                              Balance Due,          |
-|  PORT-BY-PORT ITINERARY      Taxes, Per Person     |
-|  Visual timeline with                             |
-|  day number, date, port,     PAYMENT HISTORY      |
-|  arrival/departure times     Date, Type, Amount   |
-|  Sea day styling             Method, Status        |
-|                                                    |
-|  FLIGHT ITINERARY            ACTIONS              |
-|  (if applicable)             Re-scan, Delete       |
-|                                                    |
-|  EVENTS TIMELINE                                  |
-|  DOCUMENTS & PHOTOS                               |
-+--------------------------------------------------+
-|  CHAT BAR                                         |
+|  [Cabin 3: #60013385]                             |
+|  Interior (IE) GUAR                               |
+|  1 traveller                                       |
+|  CA$1,249.84                                      |
+|  > Full Report                                     |
 +--------------------------------------------------+
 ```
 
-**Passengers Section**: A card per traveller showing name, date of birth with age, citizenship flag, passport number (partially masked) and expiry, and any special options/requests.
+### 4. Booking Report -- Sibling cabin navigation
 
-**Itinerary Section**: A visual day-by-day timeline. Each port day shows the port name prominently with arrival/departure times. "At Sea" days are styled differently with a wave icon. Day numbers are shown (Day 1, Day 2, etc.).
-
-**Payment History Section**: A clean table in the sidebar showing each payment with date, type (Deposit/Balance), amount, payment method, and status badge (Processed/Pending).
-
-**Balance Due**: Prominently displayed in the pricing card with the due date highlighted.
-
-### 4. ClientFile + BookingReport Data Flow
-
-Both `ClientFile.tsx` and `BookingReport.tsx` `upsertBookingDetails` and merge logic will be updated to handle the new fields -- passing through itinerary, passengers, payment_history, and all new text fields from the AI response to the database.
+On each individual Trip Report page, show a small "Other Cabins" section linking to the sibling bookings in the same trip group, so the agent can quickly jump between cabins.
 
 ## Technical Details
 
-### Database Migration SQL
+### Database Migration
 
 ```sql
 ALTER TABLE booking_details
-  ADD COLUMN IF NOT EXISTS itinerary jsonb DEFAULT '[]',
-  ADD COLUMN IF NOT EXISTS passengers jsonb DEFAULT '[]',
-  ADD COLUMN IF NOT EXISTS payment_history jsonb DEFAULT '[]',
-  ADD COLUMN IF NOT EXISTS agency text,
-  ADD COLUMN IF NOT EXISTS booking_agent text,
-  ADD COLUMN IF NOT EXISTS cabin_number text,
-  ADD COLUMN IF NOT EXISTS cabin_category text,
-  ADD COLUMN IF NOT EXISTS deck text,
-  ADD COLUMN IF NOT EXISTS bed_configuration text,
-  ADD COLUMN IF NOT EXISTS rate_code text,
-  ADD COLUMN IF NOT EXISTS ship_name text,
-  ADD COLUMN IF NOT EXISTS cruise_line_booking_number text,
-  ADD COLUMN IF NOT EXISTS balance_due numeric,
-  ADD COLUMN IF NOT EXISTS balance_due_date text,
-  ADD COLUMN IF NOT EXISTS duration_nights integer,
-  ADD COLUMN IF NOT EXISTS booking_status text;
+  ADD COLUMN IF NOT EXISTS trip_group_id text;
 ```
+
+### Edge Function Changes
+
+- Add `trip_group_id` to both `create_booking` and `add_to_booking` tool schemas
+- Update system prompt: "If the document has a booking number that does NOT match any existing booking, use create_booking. Different booking numbers = different cabins, even if same ship/dates. Set trip_group_id to the booking number of the first cabin in the group."
+
+### ClientFile.tsx Changes
+
+- After fetching booking cards, group them by `trip_group_id`
+- Render grouped cards under a shared trip header
+- Ungrouped bookings (no trip_group_id) render as they do today
+
+### BookingReport.tsx Changes
+
+- Query sibling bookings: `SELECT * FROM booking_details WHERE trip_group_id = ? AND booking_number != ?`
+- Display a small "Other Cabins in This Trip" card with links
 
 ### Files Modified
 
-- `supabase/functions/booking-assistant/index.ts` -- expanded tool schemas and system prompt
-- `src/pages/BookingReport.tsx` -- new Passengers, Itinerary, Payment History sections; enhanced pricing with balance due
-- `src/pages/ClientFile.tsx` -- updated merge logic for new fields
-- Database migration for new columns
+- Database migration (1 new column)
+- `supabase/functions/booking-assistant/index.ts` -- multi-cabin prompt and schema
+- `src/pages/ClientFile.tsx` -- trip grouping UI
+- `src/pages/BookingReport.tsx` -- sibling cabin navigation
 
 ### No breaking changes
 
-All new columns are nullable with defaults. Existing bookings continue to display as before -- the new sections only render when data is present.
+The new column is nullable. Existing single-cabin bookings display exactly as they do now. Grouping only activates when `trip_group_id` is populated.
+
