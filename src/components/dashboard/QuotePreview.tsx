@@ -1,8 +1,9 @@
-import { ChevronLeft, Download, Link2, Mail, Save, Loader2 } from "lucide-react";
+import { ChevronLeft, Download, Link2, Mail, Save, Loader2, Paperclip, ExternalLink } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import type { QuoteData } from "./QuoteBuilder";
 import { format } from "date-fns";
 import QuoteReviewSection from "./QuoteReviewSection";
@@ -103,7 +104,10 @@ const QuotePreview = ({ quote, totalPrice, onBack, onSave, saving, editingId }: 
             <div className="space-y-1">
               {quote.lineItems.filter((li) => li.description).map((li, i) => (
                 <div key={i} className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">{li.description}</span>
+                  <span className="text-muted-foreground">
+                    {li.category && <span className="font-medium text-foreground">{li.category}: </span>}
+                    {li.description}
+                  </span>
                   <span className="text-foreground">{currencySymbol}{li.amount.toLocaleString()}</span>
                 </div>
               ))}
@@ -131,6 +135,23 @@ const QuotePreview = ({ quote, totalPrice, onBack, onSave, saving, editingId }: 
 
           {quote.notes && (
             <div className="text-sm"><p className="text-muted-foreground text-xs mb-1">Notes</p><p className="text-foreground">{quote.notes}</p></div>
+          )}
+
+          {quote.attachmentUrl && (
+            <div className="text-sm">
+              <p className="text-muted-foreground text-xs mb-1">Attached Document</p>
+              <button
+                onClick={async () => {
+                  const { data } = await supabase.storage.from("booking-documents").createSignedUrl(quote.attachmentUrl!, 3600);
+                  if (data?.signedUrl) window.open(data.signedUrl, "_blank");
+                }}
+                className="inline-flex items-center gap-1.5 text-primary hover:underline"
+              >
+                <Paperclip className="h-3.5 w-3.5" />
+                {quote.attachmentUrl.split("/").pop()}
+                <ExternalLink className="h-3 w-3" />
+              </button>
+            </div>
           )}
         </CardContent>
       </Card>

@@ -204,6 +204,7 @@ export type Database = {
       }
       client_quotes: {
         Row: {
+          attachment_url: string | null
           check_in: string | null
           check_out: string | null
           client_email: string | null
@@ -226,6 +227,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          attachment_url?: string | null
           check_in?: string | null
           check_out?: string | null
           client_email?: string | null
@@ -248,6 +250,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          attachment_url?: string | null
           check_in?: string | null
           check_out?: string | null
           client_email?: string | null

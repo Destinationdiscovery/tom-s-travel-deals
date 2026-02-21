@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Search, ChevronRight, ChevronLeft, Plus, Trash2, Save, Loader2, Users, FileText, Star, MapPin, CalendarIcon, Copy } from "lucide-react";
+import { Search, ChevronRight, ChevronLeft, Plus, Trash2, Save, Loader2, Users, FileText, Star, MapPin, CalendarIcon, Copy, Upload, X, Paperclip } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +24,10 @@ import MultiTagInput from "./MultiTagInput";
 interface LineItem {
   description: string;
   amount: number;
+  category?: string;
 }
+
+const LINE_ITEM_CATEGORIES = ["Hotel", "Transfer", "Excursion", "Insurance", "Flights", "Car Rental", "Spa", "Other"];
 
 interface FlightDetail {
   airline: string;
@@ -56,6 +59,7 @@ export interface QuoteData {
   reviewSummary?: string;
   includeReview: boolean;
   reviewData: any | null;
+  attachmentUrl?: string;
 }
 
 const INCLUSION_PRESETS = [
@@ -65,7 +69,7 @@ const INCLUSION_PRESETS = [
 ];
 
 const emptyFlight: FlightDetail = { airline: "", flightNumber: "", departureAirport: "", arrivalAirport: "", departureTime: "", arrivalTime: "" };
-const emptyLineItem: LineItem = { description: "", amount: 0 };
+const emptyLineItem: LineItem = { description: "", amount: 0, category: "" };
 
 // --- Date Picker Helper ---
 const DatePickerField = ({ label, date, onSelect }: { label: string; date: Date | undefined; onSelect: (d: Date | undefined) => void }) => (
@@ -202,6 +206,9 @@ const QuoteBuilder = () => {
   const [includeReview, setIncludeReview] = useState(false);
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
   const [bookingQuote, setBookingQuote] = useState<any>(null);
+  const [attachmentUrl, setAttachmentUrl] = useState<string>("");
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedClient, setSelectedClient] = useState<string>("__new__");
 
   const [quote, setQuote] = useState<QuoteData>({
@@ -209,7 +216,7 @@ const QuoteBuilder = () => {
     checkIn: "", checkOut: "", numTravellers: 2, roomType: "", inclusions: [],
     flights: [{ ...emptyFlight }], lineItems: [{ ...emptyLineItem }],
     notes: "", currency: "CAD", status: "draft", reviewSummary: "",
-    includeReview: false, reviewData: null,
+    includeReview: false, reviewData: null, attachmentUrl: "",
   });
 
   useEffect(() => {
@@ -314,6 +321,7 @@ const QuoteBuilder = () => {
       status: quote.status,
       include_review: quote.includeReview,
       review_data: quote.includeReview ? quote.reviewData : null,
+      attachment_url: attachmentUrl || null,
     };
 
     let result;
@@ -347,7 +355,9 @@ const QuoteBuilder = () => {
       reviewSummary: "",
       includeReview: q.include_review || false,
       reviewData: q.review_data || null,
+      attachmentUrl: q.attachment_url || "",
     });
+    setAttachmentUrl(q.attachment_url || "");
     setIncludeReview(q.include_review || false);
     setStep(2);
   };
@@ -356,12 +366,13 @@ const QuoteBuilder = () => {
     setEditingId(null);
     setIncludeReview(false);
     setSelectedClient("__new__");
+    setAttachmentUrl("");
     setQuote({
       clientName: "", clientEmail: "", resortName: "", resortReviewSlug: "", destination: "",
       checkIn: "", checkOut: "", numTravellers: 2, roomType: "", inclusions: [],
       flights: [{ ...emptyFlight }], lineItems: [{ ...emptyLineItem }],
       notes: "", currency: "CAD", status: "draft", reviewSummary: "",
-      includeReview: false, reviewData: null,
+      includeReview: false, reviewData: null, attachmentUrl: "",
     });
     setStep(1);
   };
@@ -393,6 +404,7 @@ const QuoteBuilder = () => {
       lineItems: q.line_items || [{ ...emptyLineItem }], notes: q.notes || "",
       currency: q.currency || "CAD", status: "draft", reviewSummary: "",
       includeReview: q.include_review || false, reviewData: q.review_data || null,
+      attachmentUrl: "",
     });
     setIncludeReview(q.include_review || false);
     setStep(2);
@@ -669,7 +681,15 @@ const QuoteBuilder = () => {
               </div>
               {quote.lineItems.map((li, i) => (
                 <div key={i} className="flex gap-2 items-center">
-                  <Input placeholder="Description (e.g. Hotel)" value={li.description} onChange={(e) => { const lineItems = [...quote.lineItems]; lineItems[i] = { ...li, description: e.target.value }; setQuote({ ...quote, lineItems }); }} className="flex-1" />
+                  <Select value={li.category || ""} onValueChange={(v) => { const lineItems = [...quote.lineItems]; lineItems[i] = { ...li, category: v }; setQuote({ ...quote, lineItems }); }}>
+                    <SelectTrigger className="w-[120px] shrink-0"><SelectValue placeholder="Type" /></SelectTrigger>
+                    <SelectContent>
+                      {LINE_ITEM_CATEGORIES.map((cat) => (
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Input placeholder="Description" value={li.description} onChange={(e) => { const lineItems = [...quote.lineItems]; lineItems[i] = { ...li, description: e.target.value }; setQuote({ ...quote, lineItems }); }} className="flex-1" />
                   <Input type="number" placeholder="Amount" value={li.amount || ""} onChange={(e) => { const lineItems = [...quote.lineItems]; lineItems[i] = { ...li, amount: parseFloat(e.target.value) || 0 }; setQuote({ ...quote, lineItems }); }} className="w-32" />
                   {quote.lineItems.length > 1 && (
                     <button onClick={() => setQuote({ ...quote, lineItems: quote.lineItems.filter((_, j) => j !== i) })} className="text-muted-foreground hover:text-destructive">
@@ -681,6 +701,56 @@ const QuoteBuilder = () => {
               <div className="flex justify-end pt-2 border-t border-border">
                 <p className="text-lg font-bold text-foreground">Total: {quote.currency} ${totalPrice.toLocaleString()}</p>
               </div>
+            </div>
+
+            {/* Attach Document */}
+            <div className="rounded-lg border border-dashed border-border p-4 space-y-3">
+              <Label className="flex items-center gap-2"><Paperclip className="h-4 w-4" /> Attach Document</Label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png,.webp"
+                className="hidden"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  setUploading(true);
+                  const prefix = editingId || Date.now().toString();
+                  const path = `quotes/${prefix}-${file.name}`;
+                  const { data, error } = await supabase.storage.from("booking-documents").upload(path, file, { upsert: true });
+                  if (error) {
+                    toast({ title: "Upload failed", description: error.message, variant: "destructive" });
+                  } else {
+                    setAttachmentUrl(data.path);
+                    toast({ title: "Document attached" });
+                  }
+                  setUploading(false);
+                  if (fileInputRef.current) fileInputRef.current.value = "";
+                }}
+              />
+              {attachmentUrl ? (
+                <div className="flex items-center gap-2 text-sm">
+                  <Paperclip className="h-3.5 w-3.5 text-muted-foreground" />
+                  <button
+                    onClick={async () => {
+                      const { data } = await supabase.storage.from("booking-documents").createSignedUrl(attachmentUrl, 3600);
+                      if (data?.signedUrl) window.open(data.signedUrl, "_blank");
+                    }}
+                    className="text-primary hover:underline truncate max-w-[300px] text-left"
+                  >
+                    {attachmentUrl.split("/").pop()}
+                  </button>
+                  <button onClick={() => setAttachmentUrl("")} className="text-muted-foreground hover:text-destructive">
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={uploading} className="gap-2">
+                  {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+                  {uploading ? "Uploading..." : "Choose File"}
+                </Button>
+              )}
+              <p className="text-xs text-muted-foreground">PDF, JPG, PNG, or WEBP</p>
             </div>
 
             <div className="flex justify-between">
