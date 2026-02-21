@@ -59,7 +59,7 @@ export interface QuoteData {
   reviewSummary?: string;
   includeReview: boolean;
   reviewData: any | null;
-  attachmentUrl?: string;
+  attachmentUrls?: string[];
 }
 
 const INCLUSION_PRESETS = [
@@ -206,7 +206,7 @@ const QuoteBuilder = () => {
   const [includeReview, setIncludeReview] = useState(false);
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
   const [bookingQuote, setBookingQuote] = useState<any>(null);
-  const [attachmentUrl, setAttachmentUrl] = useState<string>("");
+  const [attachmentUrls, setAttachmentUrls] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedClient, setSelectedClient] = useState<string>("__new__");
@@ -216,7 +216,7 @@ const QuoteBuilder = () => {
     checkIn: "", checkOut: "", numTravellers: 2, roomType: "", inclusions: [],
     flights: [{ ...emptyFlight }], lineItems: [{ ...emptyLineItem }],
     notes: "", currency: "CAD", status: "draft", reviewSummary: "",
-    includeReview: false, reviewData: null, attachmentUrl: "",
+    includeReview: false, reviewData: null, attachmentUrls: [],
   });
 
   useEffect(() => {
@@ -321,7 +321,7 @@ const QuoteBuilder = () => {
       status: quote.status,
       include_review: quote.includeReview,
       review_data: quote.includeReview ? quote.reviewData : null,
-      attachment_url: attachmentUrl || null,
+      attachment_urls: attachmentUrls.length > 0 ? attachmentUrls : null,
     };
 
     let result;
@@ -355,9 +355,9 @@ const QuoteBuilder = () => {
       reviewSummary: "",
       includeReview: q.include_review || false,
       reviewData: q.review_data || null,
-      attachmentUrl: q.attachment_url || "",
+      attachmentUrls: q.attachment_urls || [],
     });
-    setAttachmentUrl(q.attachment_url || "");
+    setAttachmentUrls(q.attachment_urls || []);
     setIncludeReview(q.include_review || false);
     setStep(2);
   };
@@ -366,13 +366,13 @@ const QuoteBuilder = () => {
     setEditingId(null);
     setIncludeReview(false);
     setSelectedClient("__new__");
-    setAttachmentUrl("");
+    setAttachmentUrls([]);
     setQuote({
       clientName: "", clientEmail: "", resortName: "", resortReviewSlug: "", destination: "",
       checkIn: "", checkOut: "", numTravellers: 2, roomType: "", inclusions: [],
       flights: [{ ...emptyFlight }], lineItems: [{ ...emptyLineItem }],
       notes: "", currency: "CAD", status: "draft", reviewSummary: "",
-      includeReview: false, reviewData: null, attachmentUrl: "",
+      includeReview: false, reviewData: null, attachmentUrls: [],
     });
     setStep(1);
   };
@@ -404,7 +404,7 @@ const QuoteBuilder = () => {
       lineItems: q.line_items || [{ ...emptyLineItem }], notes: q.notes || "",
       currency: q.currency || "CAD", status: "draft", reviewSummary: "",
       includeReview: q.include_review || false, reviewData: q.review_data || null,
-      attachmentUrl: "",
+      attachmentUrls: [],
     });
     setIncludeReview(q.include_review || false);
     setStep(2);
@@ -721,35 +721,38 @@ const QuoteBuilder = () => {
                   if (error) {
                     toast({ title: "Upload failed", description: error.message, variant: "destructive" });
                   } else {
-                    setAttachmentUrl(data.path);
+                    setAttachmentUrls((prev) => [...prev, data.path]);
                     toast({ title: "Document attached" });
                   }
                   setUploading(false);
                   if (fileInputRef.current) fileInputRef.current.value = "";
                 }}
               />
-              {attachmentUrl ? (
-                <div className="flex items-center gap-2 text-sm">
-                  <Paperclip className="h-3.5 w-3.5 text-muted-foreground" />
-                  <button
-                    onClick={async () => {
-                      const { data } = await supabase.storage.from("booking-documents").createSignedUrl(attachmentUrl, 3600);
-                      if (data?.signedUrl) window.open(data.signedUrl, "_blank");
-                    }}
-                    className="text-primary hover:underline truncate max-w-[300px] text-left"
-                  >
-                    {attachmentUrl.split("/").pop()}
-                  </button>
-                  <button onClick={() => setAttachmentUrl("")} className="text-muted-foreground hover:text-destructive">
-                    <X className="h-3.5 w-3.5" />
-                  </button>
+              {attachmentUrls.length > 0 && (
+                <div className="space-y-1.5">
+                  {attachmentUrls.map((url, i) => (
+                    <div key={i} className="flex items-center gap-2 text-sm">
+                      <Paperclip className="h-3.5 w-3.5 text-muted-foreground" />
+                      <button
+                        onClick={async () => {
+                          const { data } = await supabase.storage.from("booking-documents").createSignedUrl(url, 3600);
+                          if (data?.signedUrl) window.open(data.signedUrl, "_blank");
+                        }}
+                        className="text-primary hover:underline truncate max-w-[300px] text-left"
+                      >
+                        {url.split("/").pop()}
+                      </button>
+                      <button onClick={() => setAttachmentUrls((prev) => prev.filter((_, j) => j !== i))} className="text-muted-foreground hover:text-destructive">
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              ) : (
-                <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={uploading} className="gap-2">
-                  {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
-                  {uploading ? "Uploading..." : "Choose File"}
-                </Button>
               )}
+              <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={uploading} className="gap-2">
+                {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+                {uploading ? "Uploading..." : "Choose File"}
+              </Button>
               <p className="text-xs text-muted-foreground">PDF, JPG, PNG, or WEBP</p>
             </div>
 

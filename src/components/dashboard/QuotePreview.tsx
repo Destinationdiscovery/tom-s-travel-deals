@@ -137,20 +137,25 @@ const QuotePreview = ({ quote, totalPrice, onBack, onSave, saving, editingId }: 
             <div className="text-sm"><p className="text-muted-foreground text-xs mb-1">Notes</p><p className="text-foreground">{quote.notes}</p></div>
           )}
 
-          {quote.attachmentUrl && (
+          {quote.attachmentUrls && quote.attachmentUrls.length > 0 && (
             <div className="text-sm">
-              <p className="text-muted-foreground text-xs mb-1">Attached Document</p>
-              <button
-                onClick={async () => {
-                  const { data } = await supabase.storage.from("booking-documents").createSignedUrl(quote.attachmentUrl!, 3600);
-                  if (data?.signedUrl) window.open(data.signedUrl, "_blank");
-                }}
-                className="inline-flex items-center gap-1.5 text-primary hover:underline"
-              >
-                <Paperclip className="h-3.5 w-3.5" />
-                {quote.attachmentUrl.split("/").pop()}
-                <ExternalLink className="h-3 w-3" />
-              </button>
+              <p className="text-muted-foreground text-xs mb-1">Attached Documents</p>
+              <div className="space-y-1">
+                {quote.attachmentUrls.map((url, i) => (
+                  <button
+                    key={i}
+                    onClick={async () => {
+                      const { data } = await supabase.storage.from("booking-documents").createSignedUrl(url, 3600);
+                      if (data?.signedUrl) window.open(data.signedUrl, "_blank");
+                    }}
+                    className="inline-flex items-center gap-1.5 text-primary hover:underline"
+                  >
+                    <Paperclip className="h-3.5 w-3.5" />
+                    {url.split("/").pop()}
+                    <ExternalLink className="h-3 w-3" />
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </CardContent>
