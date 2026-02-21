@@ -16,50 +16,98 @@ export type Database = {
     Tables: {
       booking_details: {
         Row: {
+          agency: string | null
+          balance_due: number | null
+          balance_due_date: string | null
+          bed_configuration: string | null
+          booking_agent: string | null
           booking_number: string
+          booking_status: string | null
+          cabin_category: string | null
+          cabin_number: string | null
           client_email: string | null
           client_name: string | null
           created_at: string
+          cruise_line_booking_number: string | null
+          deck: string | null
           destination: string | null
+          duration_nights: number | null
           extras: Json | null
           flight_details: Json | null
           id: string
+          itinerary: Json | null
           num_travellers: number | null
+          passengers: Json | null
+          payment_history: Json | null
           pricing: Json | null
+          rate_code: string | null
           resort_name: string | null
           room_type: string | null
+          ship_name: string | null
           supplier: string | null
           updated_at: string
         }
         Insert: {
+          agency?: string | null
+          balance_due?: number | null
+          balance_due_date?: string | null
+          bed_configuration?: string | null
+          booking_agent?: string | null
           booking_number: string
+          booking_status?: string | null
+          cabin_category?: string | null
+          cabin_number?: string | null
           client_email?: string | null
           client_name?: string | null
           created_at?: string
+          cruise_line_booking_number?: string | null
+          deck?: string | null
           destination?: string | null
+          duration_nights?: number | null
           extras?: Json | null
           flight_details?: Json | null
           id?: string
+          itinerary?: Json | null
           num_travellers?: number | null
+          passengers?: Json | null
+          payment_history?: Json | null
           pricing?: Json | null
+          rate_code?: string | null
           resort_name?: string | null
           room_type?: string | null
+          ship_name?: string | null
           supplier?: string | null
           updated_at?: string
         }
         Update: {
+          agency?: string | null
+          balance_due?: number | null
+          balance_due_date?: string | null
+          bed_configuration?: string | null
+          booking_agent?: string | null
           booking_number?: string
+          booking_status?: string | null
+          cabin_category?: string | null
+          cabin_number?: string | null
           client_email?: string | null
           client_name?: string | null
           created_at?: string
+          cruise_line_booking_number?: string | null
+          deck?: string | null
           destination?: string | null
+          duration_nights?: number | null
           extras?: Json | null
           flight_details?: Json | null
           id?: string
+          itinerary?: Json | null
           num_travellers?: number | null
+          passengers?: Json | null
+          payment_history?: Json | null
           pricing?: Json | null
+          rate_code?: string | null
           resort_name?: string | null
           room_type?: string | null
+          ship_name?: string | null
           supplier?: string | null
           updated_at?: string
         }

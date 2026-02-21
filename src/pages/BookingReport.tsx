@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, CalendarIcon, MapPin, Plane, DollarSign, Users, Hotel, Tag, RefreshCw, Loader2, CheckCircle2, Circle, FileText, Download, Trash2, Paperclip, Send, X, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, CalendarIcon, MapPin, Plane, DollarSign, Users, Hotel, Tag, RefreshCw, Loader2, CheckCircle2, Circle, FileText, Download, Trash2, Paperclip, Send, X, Image as ImageIcon, Anchor, Ship, CreditCard, User, Waves, Clock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,6 +31,23 @@ interface BookingDetails {
   pricing: any;
   num_travellers: number | null;
   extras: any[];
+  // New cruise fields
+  itinerary: any[];
+  passengers: any[];
+  payment_history: any[];
+  agency: string | null;
+  booking_agent: string | null;
+  cabin_number: string | null;
+  cabin_category: string | null;
+  deck: string | null;
+  bed_configuration: string | null;
+  rate_code: string | null;
+  ship_name: string | null;
+  cruise_line_booking_number: string | null;
+  balance_due: number | null;
+  balance_due_date: string | null;
+  duration_nights: number | null;
+  booking_status: string | null;
 }
 
 interface StorageFile {
@@ -64,6 +82,13 @@ const fileToBase64 = (file: File): Promise<string> =>
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
+
+const NEW_FIELDS = [
+  "itinerary", "passengers", "payment_history", "agency", "booking_agent",
+  "cabin_number", "cabin_category", "deck", "bed_configuration", "rate_code",
+  "ship_name", "cruise_line_booking_number", "balance_due", "balance_due_date",
+  "duration_nights", "booking_status",
+] as const;
 
 /* ─── Sub-components ─── */
 
@@ -101,6 +126,105 @@ const DetailRow = ({ label, value, icon }: { label: string; value: React.ReactNo
       {label}
     </span>
     <div className="text-sm font-medium">{value || "—"}</div>
+  </div>
+);
+
+const maskPassport = (num: string) => {
+  if (!num || num.length <= 4) return num;
+  return "•".repeat(num.length - 4) + num.slice(-4);
+};
+
+/* ─── Passenger Card ─── */
+const PassengerCard = ({ p, index }: { p: any; index: number }) => (
+  <div className="p-4 rounded-xl border border-border bg-muted/20 space-y-3">
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-2">
+        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+          <User className="h-4 w-4 text-primary" />
+        </div>
+        <div>
+          <p className="text-sm font-semibold">{p.name}</p>
+          {p.traveller_type && <span className="text-[11px] text-muted-foreground">{p.traveller_type}{p.gender ? ` (${p.gender})` : ""}</span>}
+        </div>
+      </div>
+      {p.citizenship && (
+        <Badge variant="outline" className="text-[11px] gap-1">
+          🌐 {p.citizenship}
+        </Badge>
+      )}
+    </div>
+    <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
+      {p.dob && (
+        <>
+          <span className="text-muted-foreground">Date of Birth</span>
+          <span className="font-medium">{p.dob}{p.age ? ` (${p.age})` : ""}</span>
+        </>
+      )}
+      {p.passport_number && (
+        <>
+          <span className="text-muted-foreground">Passport</span>
+          <span className="font-mono font-medium">{maskPassport(p.passport_number)}</span>
+        </>
+      )}
+      {p.passport_expiry && (
+        <>
+          <span className="text-muted-foreground">Expires</span>
+          <span className="font-medium">{p.passport_expiry}</span>
+        </>
+      )}
+    </div>
+    {p.options && p.options.length > 0 && (
+      <div className="flex flex-wrap gap-1.5 pt-1">
+        {p.options.map((opt: string, i: number) => (
+          <Badge key={i} variant="secondary" className="text-[10px] font-normal">{opt}</Badge>
+        ))}
+      </div>
+    )}
+  </div>
+);
+
+/* ─── Itinerary Timeline ─── */
+const ItineraryTimeline = ({ itinerary }: { itinerary: any[] }) => (
+  <div className="space-y-0">
+    {itinerary.map((stop, i) => {
+      const isSeaDay = stop.port?.toUpperCase().includes("AT SEA");
+      return (
+        <div key={i} className="flex gap-4 group">
+          {/* Day number column */}
+          <div className="w-14 shrink-0 text-right pt-3">
+            <span className="text-[11px] font-bold text-muted-foreground">Day {i + 1}</span>
+          </div>
+          {/* Timeline dot & line */}
+          <div className="flex flex-col items-center">
+            <div className={cn(
+              "h-3 w-3 rounded-full mt-4 shrink-0 border-2",
+              isSeaDay ? "border-muted-foreground bg-background" : "border-primary bg-primary"
+            )} />
+            {i < itinerary.length - 1 && <div className="w-px flex-1 bg-border" />}
+          </div>
+          {/* Content */}
+          <div className={cn(
+            "flex-1 py-3 pr-2",
+            i < itinerary.length - 1 && "border-b border-border/50"
+          )}>
+            <p className="text-[11px] text-muted-foreground">{stop.date}</p>
+            <p className={cn(
+              "text-sm font-semibold mt-0.5 flex items-center gap-1.5",
+              isSeaDay && "text-muted-foreground italic"
+            )}>
+              {isSeaDay && <Waves className="h-3.5 w-3.5" />}
+              {stop.port}
+            </p>
+            {(!isSeaDay && (stop.arrival || stop.departure)) && (
+              <div className="flex items-center gap-3 mt-1 text-[11px] text-muted-foreground">
+                {stop.arrival && <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> Arrive {stop.arrival}</span>}
+                {stop.departure && <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> Depart {stop.departure}</span>}
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    })}
   </div>
 );
 
@@ -144,6 +268,10 @@ const BookingReport = () => {
     typeof bookingDetails.pricing === "object" &&
     (bookingDetails.pricing.total || bookingDetails.pricing.deposit);
 
+  const hasItinerary = bookingDetails?.itinerary && Array.isArray(bookingDetails.itinerary) && bookingDetails.itinerary.length > 0;
+  const hasPassengers = bookingDetails?.passengers && Array.isArray(bookingDetails.passengers) && bookingDetails.passengers.length > 0;
+  const hasPaymentHistory = bookingDetails?.payment_history && Array.isArray(bookingDetails.payment_history) && bookingDetails.payment_history.length > 0;
+
   const imageFiles = documents.filter(d => /\.(jpg|jpeg|png|webp|gif|avif)$/i.test(d.name));
   const otherFiles = documents.filter(d => !/\.(jpg|jpeg|png|webp|gif|avif)$/i.test(d.name));
 
@@ -171,7 +299,6 @@ const BookingReport = () => {
       const sorted = [...eventsResult.data].sort((a, b) => EVENT_TYPE_ORDER.indexOf(a.event_type) - EVENT_TYPE_ORDER.indexOf(b.event_type));
       setEvents(sorted);
 
-      // Fetch documents using client name from events
       const cName = (detailsResult as any)?.data?.client_name || eventsResult.data[0]?.client_name;
       if (cName) {
         const clientSlug = slugify(cName);
@@ -199,7 +326,7 @@ const BookingReport = () => {
     setEvents(prev => prev.map(e => e.id === event.id ? { ...e, is_completed: newValue } : e));
   };
 
-  const upsertBookingDetails = async (bn: string, details: Partial<BookingDetails>) => {
+  const upsertBookingDetails = async (bn: string, details: Record<string, any>) => {
     const { data: existing } = await supabase.from("booking_details" as any).select("booking_number").eq("booking_number", bn).maybeSingle();
     if ((existing as any)) {
       const updates: any = {};
@@ -224,6 +351,28 @@ const BookingReport = () => {
     } else {
       await supabase.from("booking_details" as any).insert({ booking_number: bn, ...details });
     }
+  };
+
+  // Build merge data from AI response, including new fields
+  const buildMergeData = (d: any): Record<string, any> => {
+    const mergeData: Record<string, any> = {};
+    if (d.destination) mergeData.destination = d.destination;
+    if (d.room_type) mergeData.room_type = d.room_type;
+    if (d.num_travellers) mergeData.num_travellers = d.num_travellers;
+    if (d.flight_details) mergeData.flight_details = d.flight_details;
+    if (d.pricing) mergeData.pricing = d.pricing;
+    if (d.extras) mergeData.extras = d.extras;
+    if (d.supplier) mergeData.supplier = d.supplier;
+    if (d.client_name) mergeData.client_name = d.client_name;
+    if (d.client_email) mergeData.client_email = d.client_email;
+    if (d.resort_or_trip || d.resort_name) mergeData.resort_name = d.resort_or_trip || d.resort_name;
+    // New fields
+    for (const field of NEW_FIELDS) {
+      if (d[field] !== undefined && d[field] !== null) {
+        mergeData[field] = d[field];
+      }
+    }
+    return mergeData;
   };
 
   // Re-scan
@@ -264,20 +413,7 @@ const BookingReport = () => {
       if (error) throw error;
 
       if (result?.action === "add_to_booking" || result?.action === "create_booking") {
-        const d = result.data;
-        const mergeData: Partial<BookingDetails> = {};
-        if (d.destination) mergeData.destination = d.destination;
-        if (d.room_type) mergeData.room_type = d.room_type;
-        if (d.num_travellers) mergeData.num_travellers = d.num_travellers;
-        if (d.flight_details) mergeData.flight_details = d.flight_details;
-        if (d.pricing) mergeData.pricing = d.pricing;
-        if (d.extras) mergeData.extras = d.extras;
-        if (d.supplier) mergeData.supplier = d.supplier;
-        if (d.client_name) mergeData.client_name = d.client_name;
-        if (d.client_email) mergeData.client_email = d.client_email;
-        if (d.resort_or_trip || d.resort_name) mergeData.resort_name = d.resort_or_trip || d.resort_name;
-
-        await upsertBookingDetails(bookingNumber, mergeData);
+        await upsertBookingDetails(bookingNumber, buildMergeData(result.data));
         toast({ title: "Re-scan complete!", description: "Booking details have been updated." });
         await fetchAll();
       } else {
@@ -339,20 +475,12 @@ const BookingReport = () => {
 
       if (result?.action === "add_to_booking" || result?.action === "create_booking") {
         const d = result.data;
-        // Upload files to storage
         const clientSlug = slugify(d.client_name || clientName);
         for (const af of chatFiles) {
           await supabase.storage.from("booking-documents").upload(`${clientSlug}/${af.file.name}`, af.file, { upsert: true });
         }
 
-        const mergeData: Partial<BookingDetails> = {};
-        if (d.destination) mergeData.destination = d.destination;
-        if (d.room_type) mergeData.room_type = d.room_type;
-        if (d.num_travellers) mergeData.num_travellers = d.num_travellers;
-        if (d.flight_details) mergeData.flight_details = d.flight_details;
-        if (d.pricing) mergeData.pricing = d.pricing;
-        if (d.extras) mergeData.extras = d.extras;
-
+        const mergeData = buildMergeData(d);
         if (Object.keys(mergeData).length > 0) {
           await upsertBookingDetails(bookingNumber, mergeData);
         }
@@ -386,6 +514,8 @@ const BookingReport = () => {
   const pricingTotal = hasPricing ? Number(bookingDetails!.pricing.total) || 0 : 0;
   const pricingDeposit = hasPricing ? Number(bookingDetails!.pricing.deposit) || 0 : 0;
   const depositPercent = pricingTotal > 0 ? Math.round((pricingDeposit / pricingTotal) * 100) : 0;
+  const balanceDue = bookingDetails?.balance_due ? Number(bookingDetails.balance_due) : (pricingTotal - pricingDeposit > 0 ? pricingTotal - pricingDeposit : 0);
+  const currency = hasPricing ? bookingDetails!.pricing.currency || "CA$" : "CA$";
 
   if (loading) {
     return (
@@ -444,12 +574,27 @@ const BookingReport = () => {
             <div className="flex items-start justify-between gap-4 flex-wrap">
               <div className="space-y-3">
                 <div className="flex items-center gap-3 flex-wrap">
-                  <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">{resortName}</h1>
-                  <Badge className="font-mono text-xs">{bookingNumber}</Badge>
+                  {bookingDetails?.ship_name && (
+                    <div className="flex items-center gap-1.5 text-primary">
+                      <Ship className="h-5 w-5" />
+                    </div>
+                  )}
+                  <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">
+                    {bookingDetails?.ship_name ? `${bookingDetails.ship_name} — ` : ""}{resortName}
+                  </h1>
                 </div>
-                {supplier && (
-                  <p className="text-sm text-muted-foreground">via <span className="font-medium text-foreground">{supplier}</span></p>
-                )}
+                <div className="flex items-center gap-2 flex-wrap">
+                  {supplier && (
+                    <Badge variant="outline" className="text-xs">{supplier}</Badge>
+                  )}
+                  <Badge className="font-mono text-xs">{bookingNumber}</Badge>
+                  {bookingDetails?.cruise_line_booking_number && (
+                    <Badge variant="secondary" className="font-mono text-xs">{bookingDetails.cruise_line_booking_number}</Badge>
+                  )}
+                  {bookingDetails?.booking_status && (
+                    <Badge variant="default" className="text-xs">{bookingDetails.booking_status}</Badge>
+                  )}
+                </div>
                 <div className="flex items-center gap-4 flex-wrap">
                   {tripStart && (
                     <div className="flex items-center gap-2 text-sm">
@@ -465,6 +610,9 @@ const BookingReport = () => {
                       <MapPin className="h-4 w-4 text-primary" />
                       <span className="font-medium">{bookingDetails.destination}</span>
                     </div>
+                  )}
+                  {bookingDetails?.duration_nights && (
+                    <span className="text-sm text-muted-foreground">{bookingDetails.duration_nights} nights</span>
                   )}
                 </div>
               </div>
@@ -497,7 +645,15 @@ const BookingReport = () => {
                       {clientEmail && <p className="text-xs text-muted-foreground font-normal">{clientEmail}</p>}
                     </div>
                   } />
-                  {bookingDetails?.room_type && <DetailRow label="Room Type" value={bookingDetails.room_type} />}
+                  {bookingDetails?.agency && <DetailRow label="Agency" value={bookingDetails.agency} />}
+                  {bookingDetails?.booking_agent && <DetailRow label="Agent" value={bookingDetails.booking_agent} />}
+                  {bookingDetails?.cabin_category && <DetailRow label="Cabin" value={
+                    <span>{bookingDetails.cabin_category}{bookingDetails.cabin_number ? ` — ${bookingDetails.cabin_number}` : ""}</span>
+                  } />}
+                  {bookingDetails?.deck && <DetailRow label="Deck" value={bookingDetails.deck} />}
+                  {bookingDetails?.bed_configuration && <DetailRow label="Bed Config" value={bookingDetails.bed_configuration} />}
+                  {bookingDetails?.rate_code && <DetailRow label="Rate Code" value={bookingDetails.rate_code} />}
+                  {bookingDetails?.room_type && !bookingDetails?.cabin_category && <DetailRow label="Room Type" value={bookingDetails.room_type} />}
                   {bookingDetails?.num_travellers && (
                     <DetailRow label="Travellers" value={
                       <div className="flex items-center gap-1.5">
@@ -525,6 +681,36 @@ const BookingReport = () => {
                   )}
                 </div>
               </Card>
+
+              {/* Passengers Card */}
+              {hasPassengers && (
+                <Card className="overflow-hidden">
+                  <div className="px-5 py-4 border-b border-border">
+                    <h3 className="text-sm font-semibold flex items-center gap-2">
+                      <Users className="h-4 w-4 text-primary" /> Passengers
+                    </h3>
+                  </div>
+                  <CardContent className="p-5 space-y-3">
+                    {bookingDetails!.passengers.map((p: any, i: number) => (
+                      <PassengerCard key={i} p={p} index={i} />
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Port-by-Port Itinerary Card */}
+              {hasItinerary && (
+                <Card className="overflow-hidden">
+                  <div className="px-5 py-4 border-b border-border">
+                    <h3 className="text-sm font-semibold flex items-center gap-2">
+                      <Anchor className="h-4 w-4 text-primary" /> Port-by-Port Itinerary
+                    </h3>
+                  </div>
+                  <CardContent className="p-5">
+                    <ItineraryTimeline itinerary={bookingDetails!.itinerary} />
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Flight Details Card */}
               {hasFlightDetails && (
@@ -637,9 +823,17 @@ const BookingReport = () => {
                 </div>
                 <div className="divide-y divide-border">
                   <DetailRow label="Booking #" value={<span className="font-mono">{bookingNumber}</span>} />
+                  {bookingDetails?.cruise_line_booking_number && (
+                    <DetailRow label="Cruise Line Ref" value={<span className="font-mono">{bookingDetails.cruise_line_booking_number}</span>} />
+                  )}
                   {supplier && <DetailRow label="Supplier" value={supplier} />}
+                  {bookingDetails?.ship_name && <DetailRow label="Ship" value={bookingDetails.ship_name} icon={<Ship className="h-3 w-3" />} />}
                   {bookingDetails?.destination && <DetailRow label="Destination" value={bookingDetails.destination} icon={<MapPin className="h-3 w-3" />} />}
-                  {bookingDetails?.room_type && <DetailRow label="Room" value={bookingDetails.room_type} />}
+                  {(bookingDetails?.cabin_category || bookingDetails?.room_type) && (
+                    <DetailRow label="Cabin / Room" value={bookingDetails.cabin_category || bookingDetails.room_type} />
+                  )}
+                  {bookingDetails?.deck && <DetailRow label="Deck" value={bookingDetails.deck} />}
+                  {bookingDetails?.duration_nights && <DetailRow label="Duration" value={`${bookingDetails.duration_nights} nights`} />}
                   {bookingDetails?.num_travellers && <DetailRow label="Travellers" value={`${bookingDetails.num_travellers}`} icon={<Users className="h-3 w-3" />} />}
                   {tripStart && (
                     <DetailRow label="Dates" value={
@@ -665,17 +859,26 @@ const BookingReport = () => {
                       <div className="text-center">
                         <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Total</p>
                         <p className="text-3xl font-bold font-display">
-                          {bookingDetails!.pricing.currency || "$"}{pricingTotal.toLocaleString()}
+                          {currency}{pricingTotal.toLocaleString()}
                         </p>
                       </div>
                     )}
                     {pricingDeposit > 0 && pricingTotal > 0 && (
                       <div>
                         <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
-                          <span>Deposit</span>
-                          <span>{bookingDetails!.pricing.currency || "$"}{pricingDeposit.toLocaleString()} ({depositPercent}%)</span>
+                          <span>Deposit Paid</span>
+                          <span>{currency}{pricingDeposit.toLocaleString()} ({depositPercent}%)</span>
                         </div>
                         <Progress value={depositPercent} className="h-2.5" />
+                      </div>
+                    )}
+                    {balanceDue > 0 && (
+                      <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-center">
+                        <p className="text-xs text-destructive uppercase tracking-wider font-semibold mb-1">Balance Due</p>
+                        <p className="text-xl font-bold text-destructive">{currency}{balanceDue.toLocaleString()}</p>
+                        {bookingDetails?.balance_due_date && (
+                          <p className="text-xs text-destructive/80 mt-1">Due by {bookingDetails.balance_due_date}</p>
+                        )}
                       </div>
                     )}
                     <Separator />
@@ -683,16 +886,53 @@ const BookingReport = () => {
                       {bookingDetails!.pricing.taxes && (
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">Taxes / Fees</span>
-                          <span className="font-medium">{bookingDetails!.pricing.currency || "$"}{Number(bookingDetails!.pricing.taxes).toLocaleString()}</span>
+                          <span className="font-medium">{currency}{Number(bookingDetails!.pricing.taxes).toLocaleString()}</span>
                         </div>
                       )}
                       {bookingDetails!.pricing.per_person && (
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">Per Person</span>
-                          <span className="font-medium">{bookingDetails!.pricing.currency || "$"}{Number(bookingDetails!.pricing.per_person).toLocaleString()}</span>
+                          <span className="font-medium">{currency}{Number(bookingDetails!.pricing.per_person).toLocaleString()}</span>
                         </div>
                       )}
                     </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Payment History Card */}
+              {hasPaymentHistory && (
+                <Card className="overflow-hidden">
+                  <div className="px-5 py-4 border-b border-border">
+                    <h3 className="text-sm font-semibold flex items-center gap-2">
+                      <CreditCard className="h-4 w-4 text-primary" /> Payment History
+                    </h3>
+                  </div>
+                  <CardContent className="p-0">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="text-xs">Date</TableHead>
+                          <TableHead className="text-xs">Type</TableHead>
+                          <TableHead className="text-xs text-right">Amount</TableHead>
+                          <TableHead className="text-xs">Status</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {bookingDetails!.payment_history.map((p: any, i: number) => (
+                          <TableRow key={i}>
+                            <TableCell className="text-xs py-2">{p.date}</TableCell>
+                            <TableCell className="text-xs py-2">{p.type || "—"}</TableCell>
+                            <TableCell className="text-xs py-2 text-right font-medium">{p.amount}</TableCell>
+                            <TableCell className="py-2">
+                              <Badge variant={p.status?.toLowerCase() === "processed" ? "default" : "secondary"} className="text-[10px]">
+                                {p.status || "—"}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </CardContent>
                 </Card>
               )}
