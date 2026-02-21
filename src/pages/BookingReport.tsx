@@ -643,8 +643,17 @@ const BookingReport = () => {
       const contextMsg = `This is for existing booking ${bookingNumber} (${resortName}) for client ${clientName}. Extract ONLY the passengers, cabin info, and pricing for a NEW additional room (Room ${newRoomNumber}). Do NOT include passengers already in Room 1. ${addRoomMessage}`;
       setAddRoomStatus("Analyzing with AI...");
 
+      const existingBookings = [
+        { bookingNumber: bookingNumber, clientName: clientName, title: resortName },
+        ...rooms.map(r => ({
+          bookingNumber: r.booking_number,
+          clientName: clientName,
+          title: `${resortName} - ${r.label}`
+        })).filter(r => r.bookingNumber)
+      ];
+
       const { data: result, error } = await supabase.functions.invoke("booking-assistant", {
-        body: { message: contextMsg, files: filesPayload, existing_bookings: [], existing_clients: [] },
+        body: { message: contextMsg, files: filesPayload, existing_bookings: existingBookings, existing_clients: [] },
       });
       if (error) throw error;
 
@@ -783,25 +792,65 @@ const BookingReport = () => {
       const contextMsg = `This is for existing booking ${bookingNumber} (${resortName}) for client ${clientName}. ${chatMessage}`;
       setChatStatus("Analyzing with AI...");
 
+      const existingBookings = [
+        { bookingNumber: bookingNumber, clientName: clientName, title: resortName },
+        ...rooms.map(r => ({
+          bookingNumber: r.booking_number,
+          clientName: clientName,
+          title: `${resortName} - ${r.label}`
+        })).filter(r => r.bookingNumber)
+      ];
+
       const { data: result, error } = await supabase.functions.invoke("booking-assistant", {
-        body: { message: contextMsg, files: filesPayload, existing_bookings: [], existing_clients: [] },
+        body: { message: contextMsg, files: filesPayload, existing_bookings: existingBookings, existing_clients: [] },
       });
       if (error) throw error;
 
       const actions = result?.actions || (result?.action ? [{ action: result.action, data: result.data }] : []);
       if (actions.length > 0) {
+        // Check if chat message references a specific room
+        const roomMatch = chatMessage.match(/room\s*(\d+)/i);
+        const targetRoomNumber = roomMatch ? parseInt(roomMatch[1], 10) : null;
+        const targetRoomIndex = targetRoomNumber ? rooms.findIndex(r => r.room_number === targetRoomNumber) : -1;
+
         for (const act of actions) {
           const d = act.data;
           const cs = slugify(d.client_name || clientName);
           for (const af of chatFiles) {
             await supabase.storage.from("booking-documents").upload(`${cs}/${af.file.name}`, af.file, { upsert: true });
           }
-          const mergeData = buildMergeData(d);
-          if (Object.keys(mergeData).length > 0) {
-            await upsertBookingDetails(d.booking_number || bookingNumber, mergeData);
+
+          if (targetRoomIndex >= 0) {
+            // Merge into specific room
+            const updatedRooms = [...rooms];
+            const room = { ...updatedRooms[targetRoomIndex] };
+            if (d.passengers?.length) room.passengers = d.passengers;
+            if (d.cabin_number) room.cabin_number = d.cabin_number;
+            if (d.cabin_category) room.cabin_category = d.cabin_category;
+            if (d.deck) room.deck = d.deck;
+            if (d.bed_configuration) room.bed_configuration = d.bed_configuration;
+            if (d.pricing) room.pricing = d.pricing;
+            if (d.booking_number) room.booking_number = d.booking_number;
+            if (d.cruise_line_booking_number) room.cruise_line_booking_number = d.cruise_line_booking_number;
+            updatedRooms[targetRoomIndex] = room;
+            await saveRooms(updatedRooms);
+
+            // Also merge top-level fields (flights, extras, itinerary) into the booking
+            const topLevelMerge: Record<string, any> = {};
+            if (d.flight_details) topLevelMerge.flight_details = d.flight_details;
+            if (d.extras?.length) topLevelMerge.extras = d.extras;
+            if (d.itinerary?.length) topLevelMerge.itinerary = d.itinerary;
+            if (Object.keys(topLevelMerge).length > 0) {
+              await supabase.from("booking_details" as any).update(topLevelMerge).eq("booking_number", bookingNumber);
+            }
+          } else {
+            const mergeData = buildMergeData(d);
+            if (Object.keys(mergeData).length > 0) {
+              await upsertBookingDetails(d.booking_number || bookingNumber, mergeData);
+            }
           }
         }
-        toast({ title: "Booking updated!", description: `${chatFiles.length} file(s) added.` });
+        toast({ title: "Booking updated!", description: targetRoomIndex >= 0 ? `Room ${targetRoomNumber} updated!` : `${chatFiles.length} file(s) added.` });
         await fetchAll();
       } else {
         toast({ title: "AI Response", description: result?.message || "No action taken." });

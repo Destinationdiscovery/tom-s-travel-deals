@@ -245,7 +245,12 @@ CRUISE & DETAILED BOOKING FIELDS (extract when present):
 - Payment history: date, type (Deposit/Balance), amount, payment method, status (Processed/Pending)
 
 If the user mentions a client name, use that. If not, try to find it in the documents.
-If you can match to an existing booking by number, prefer add_to_booking. But ONLY if the booking numbers match exactly.`;
+If you can match to an existing booking by number, prefer add_to_booking. But ONLY if the booking numbers match exactly.
+
+ROOM UPDATES FOR EXISTING BOOKINGS:
+When the user explicitly says to add data to a specific room (e.g., "add this to Room 3") for an existing booking, ALWAYS use add_to_booking with the EXISTING booking number from the context (the trip-level one), not the booking number found in the uploaded document. The document's booking number is a room-level reference to be stored as metadata, not a trip identifier.
+Include the extracted booking_number and cruise_line_booking_number in the response so the frontend can store them on the specific room.
+When context shows existing bookings, treat those as the current trip — do NOT create a new booking just because the document has a different booking number. Use add_to_booking instead.`;
 
 /* ── Handler ── */
 
