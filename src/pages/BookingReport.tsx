@@ -343,20 +343,33 @@ const BookingReport = () => {
     setEvents(prev => prev.map(e => e.id === event.id ? { ...e, is_completed: newValue } : e));
   };
 
+  // Smart array merge helpers
+  const mergeByKey = (existing: any[], incoming: any[], keyFn: (item: any) => string): any[] => {
+    const merged = [...existing];
+    for (const item of incoming) {
+      const key = keyFn(item);
+      const idx = merged.findIndex(e => keyFn(e) === key);
+      if (idx >= 0) merged[idx] = { ...merged[idx], ...item };
+      else merged.push(item);
+    }
+    return merged;
+  };
+
   const upsertBookingDetails = async (bn: string, details: Record<string, any>) => {
-    const { data: existing } = await supabase.from("booking_details" as any).select("booking_number").eq("booking_number", bn).maybeSingle();
+    const { data: existing } = await supabase.from("booking_details" as any).select("*").eq("booking_number", bn).maybeSingle();
     if ((existing as any)) {
+      const current = existing as any;
       const updates: any = {};
       for (const [k, v] of Object.entries(details)) {
         if (v !== null && v !== undefined && k !== "booking_number") {
           if (k === "extras" && Array.isArray(v)) {
-            const { data: currentRow } = await supabase.from("booking_details" as any).select("extras").eq("booking_number", bn).single();
-            const currentExtras = (currentRow as any)?.extras || [];
-            const merged = [...currentExtras];
-            for (const ext of v as any[]) {
-              if (!merged.some((e: any) => e.label === ext.label)) merged.push(ext);
-            }
-            updates.extras = merged;
+            updates.extras = mergeByKey(current.extras || [], v, (e: any) => e.label || "");
+          } else if (k === "passengers" && Array.isArray(v)) {
+            updates.passengers = mergeByKey(current.passengers || [], v, (p: any) => (p.name || "").toLowerCase().trim());
+          } else if (k === "itinerary" && Array.isArray(v)) {
+            updates.itinerary = mergeByKey(current.itinerary || [], v, (i: any) => `${i.date}|${i.port}`);
+          } else if (k === "payment_history" && Array.isArray(v)) {
+            updates.payment_history = mergeByKey(current.payment_history || [], v, (p: any) => `${p.date}|${p.amount}`);
           } else {
             updates[k] = v;
           }
@@ -429,8 +442,12 @@ const BookingReport = () => {
       });
       if (error) throw error;
 
-      if (result?.action === "add_to_booking" || result?.action === "create_booking") {
-        await upsertBookingDetails(bookingNumber, buildMergeData(result.data));
+      // Process all actions (multi-cabin support)
+      const actions = result?.actions || (result?.action ? [{ action: result.action, data: result.data }] : []);
+      if (actions.length > 0) {
+        for (const act of actions) {
+          await upsertBookingDetails(act.data.booking_number || bookingNumber, buildMergeData(act.data));
+        }
         toast({ title: "Re-scan complete!", description: "Booking details have been updated." });
         await fetchAll();
       } else {
@@ -490,16 +507,19 @@ const BookingReport = () => {
       });
       if (error) throw error;
 
-      if (result?.action === "add_to_booking" || result?.action === "create_booking") {
-        const d = result.data;
-        const clientSlug = slugify(d.client_name || clientName);
-        for (const af of chatFiles) {
-          await supabase.storage.from("booking-documents").upload(`${clientSlug}/${af.file.name}`, af.file, { upsert: true });
-        }
-
-        const mergeData = buildMergeData(d);
-        if (Object.keys(mergeData).length > 0) {
-          await upsertBookingDetails(bookingNumber, mergeData);
+      // Process all actions (multi-cabin support)
+      const actions = result?.actions || (result?.action ? [{ action: result.action, data: result.data }] : []);
+      if (actions.length > 0) {
+        for (const act of actions) {
+          const d = act.data;
+          const cs = slugify(d.client_name || clientName);
+          for (const af of chatFiles) {
+            await supabase.storage.from("booking-documents").upload(`${cs}/${af.file.name}`, af.file, { upsert: true });
+          }
+          const mergeData = buildMergeData(d);
+          if (Object.keys(mergeData).length > 0) {
+            await upsertBookingDetails(d.booking_number || bookingNumber, mergeData);
+          }
         }
         toast({ title: "Booking updated!", description: `${chatFiles.length} file(s) added.` });
         await fetchAll();

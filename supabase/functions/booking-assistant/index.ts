@@ -347,13 +347,18 @@ serve(async (req) => {
     const choice = data.choices?.[0];
 
     if (choice?.message?.tool_calls?.length) {
-      const toolCall = choice.message.tool_calls[0];
-      const args = JSON.parse(toolCall.function.arguments);
+      const actions = choice.message.tool_calls.map((tc: any) => ({
+        action: tc.function.name,
+        data: JSON.parse(tc.function.arguments),
+      }));
 
+      // Return all tool calls as an actions array, plus backward-compat single action/data
+      const first = actions[0];
       return new Response(
         JSON.stringify({
-          action: toolCall.function.name,
-          data: args,
+          action: first.action,
+          data: first.data,
+          actions,
           message: choice.message.content || null,
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
