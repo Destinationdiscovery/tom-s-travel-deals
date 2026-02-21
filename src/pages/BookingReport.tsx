@@ -1,12 +1,14 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, CalendarIcon, MapPin, Plane, DollarSign, Users, Hotel, Tag, RefreshCw, Loader2, CheckCircle2, Circle, FileText, Download, Trash2, Paperclip, Send, X, Image as ImageIcon, Anchor, Ship, CreditCard, User, Waves, Clock } from "lucide-react";
+import { ArrowLeft, CalendarIcon, MapPin, Plane, DollarSign, Users, Hotel, Tag, RefreshCw, Loader2, CheckCircle2, Circle, FileText, Download, Trash2, Paperclip, Send, X, Image as ImageIcon, Anchor, Ship, CreditCard, User, Waves, Clock, Pencil } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
@@ -134,8 +136,42 @@ const maskPassport = (num: string) => {
   return "•".repeat(num.length - 4) + num.slice(-4);
 };
 
+/* ─── Edit Passenger Dialog ─── */
+const EditPassengerDialog = ({ open, onOpenChange, passenger, onSave }: { open: boolean; onOpenChange: (o: boolean) => void; passenger: any; onSave: (data: any) => void }) => {
+  const [form, setForm] = useState({ ...passenger });
+  useEffect(() => { if (open) setForm({ ...passenger }); }, [open, passenger]);
+  const set = (k: string, v: string) => setForm((prev: any) => ({ ...prev, [k]: v }));
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogHeader><DialogTitle>Edit Passenger</DialogTitle></DialogHeader>
+        <div className="space-y-3">
+          {[
+            { key: "name", label: "Full Name" },
+            { key: "dob", label: "Date of Birth" },
+            { key: "citizenship", label: "Citizenship" },
+            { key: "passport_number", label: "Passport Number" },
+            { key: "passport_expiry", label: "Passport Expiry" },
+            { key: "traveller_type", label: "Traveller Type" },
+            { key: "gender", label: "Gender" },
+          ].map(({ key, label }) => (
+            <div key={key} className="space-y-1">
+              <Label className="text-xs">{label}</Label>
+              <Input value={form[key] || ""} onChange={e => set(key, e.target.value)} />
+            </div>
+          ))}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button onClick={() => { onSave(form); onOpenChange(false); }}>Save</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 /* ─── Passenger Card ─── */
-const PassengerCard = ({ p, index }: { p: any; index: number }) => (
+const PassengerCard = ({ p, index, onEdit, onDelete }: { p: any; index: number; onEdit?: () => void; onDelete?: () => void }) => (
   <div className="p-4 rounded-xl border border-border bg-muted/20 space-y-3">
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2">
@@ -147,11 +183,23 @@ const PassengerCard = ({ p, index }: { p: any; index: number }) => (
           {p.traveller_type && <span className="text-[11px] text-muted-foreground">{p.traveller_type}{p.gender ? ` (${p.gender})` : ""}</span>}
         </div>
       </div>
-      {p.citizenship && (
-        <Badge variant="outline" className="text-[11px] gap-1">
-          🌐 {p.citizenship}
-        </Badge>
-      )}
+      <div className="flex items-center gap-1">
+        {p.citizenship && (
+          <Badge variant="outline" className="text-[11px] gap-1 mr-1">
+            🌐 {p.citizenship}
+          </Badge>
+        )}
+        {onEdit && (
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onEdit}>
+            <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+          </Button>
+        )}
+        {onDelete && (
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onDelete}>
+            <Trash2 className="h-3.5 w-3.5 text-destructive" />
+          </Button>
+        )}
+      </div>
     </div>
     <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
       {p.dob && (
@@ -241,6 +289,10 @@ const BookingReport = () => {
   const [siblingCabins, setSiblingCabins] = useState<BookingDetails[]>([]);
   const [rescanning, setRescanning] = useState(false);
   const [deletingBooking, setDeletingBooking] = useState(false);
+
+  // Passenger edit/delete
+  const [editingPassenger, setEditingPassenger] = useState<{ index: number; data: any } | null>(null);
+  const [deletePassengerIndex, setDeletePassengerIndex] = useState<number | null>(null);
 
   // Lightbox
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -473,6 +525,26 @@ const BookingReport = () => {
       navigate(-1);
     }
     setDeletingBooking(false);
+  };
+
+  // Passenger edit/delete handlers
+  const handleEditPassenger = async (index: number, updatedData: any) => {
+    if (!bookingDetails || !bookingNumber) return;
+    const updatedPassengers = [...bookingDetails.passengers];
+    updatedPassengers[index] = { ...updatedPassengers[index], ...updatedData };
+    await supabase.from("booking_details" as any).update({ passengers: updatedPassengers }).eq("booking_number", bookingNumber);
+    setBookingDetails({ ...bookingDetails, passengers: updatedPassengers });
+    toast({ title: "Passenger updated", description: `${updatedData.name} has been updated.` });
+  };
+
+  const handleDeletePassenger = async (index: number) => {
+    if (!bookingDetails || !bookingNumber) return;
+    const removed = bookingDetails.passengers[index];
+    const updatedPassengers = bookingDetails.passengers.filter((_: any, i: number) => i !== index);
+    await supabase.from("booking_details" as any).update({ passengers: updatedPassengers }).eq("booking_number", bookingNumber);
+    setBookingDetails({ ...bookingDetails, passengers: updatedPassengers });
+    setDeletePassengerIndex(null);
+    toast({ title: "Passenger removed", description: `${removed?.name || "Passenger"} has been removed.` });
   };
 
   // Chat
@@ -729,7 +801,13 @@ const BookingReport = () => {
                   </div>
                   <CardContent className="p-5 space-y-3">
                     {bookingDetails!.passengers.map((p: any, i: number) => (
-                      <PassengerCard key={i} p={p} index={i} />
+                      <PassengerCard
+                        key={i}
+                        p={p}
+                        index={i}
+                        onEdit={() => setEditingPassenger({ index: i, data: p })}
+                        onDelete={() => setDeletePassengerIndex(i)}
+                      />
                     ))}
                   </CardContent>
                 </Card>
@@ -1095,6 +1173,34 @@ const BookingReport = () => {
       />
 
       <Footer />
+
+      {/* Edit Passenger Dialog */}
+      {editingPassenger && (
+        <EditPassengerDialog
+          open={!!editingPassenger}
+          onOpenChange={(o) => { if (!o) setEditingPassenger(null); }}
+          passenger={editingPassenger.data}
+          onSave={(data) => handleEditPassenger(editingPassenger.index, data)}
+        />
+      )}
+
+      {/* Delete Passenger Confirmation */}
+      <AlertDialog open={deletePassengerIndex !== null} onOpenChange={(o) => { if (!o) setDeletePassengerIndex(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Passenger</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove {deletePassengerIndex !== null && bookingDetails?.passengers?.[deletePassengerIndex]?.name ? `"${bookingDetails.passengers[deletePassengerIndex].name}"` : "this passenger"}? This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => deletePassengerIndex !== null && handleDeletePassenger(deletePassengerIndex)}>
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
