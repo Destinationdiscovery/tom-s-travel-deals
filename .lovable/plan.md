@@ -1,89 +1,64 @@
 
 
-# Multi-Cabin / Multi-Room Booking Support
+# Fix Multi-Cabin: Return All Tool Calls and Merge Arrays Properly
 
 ## The Problem
 
-You have 3 cabins on the same cruise, each with its own Encore booking number. When you upload docs for cabin 2, the AI sees it's the same trip (same ship, same dates, same client) and merges the data into the existing cabin 1 record instead of creating a separate record. You need each cabin to have its own booking_details record while being visually grouped as one trip.
+Two bugs are preventing multi-cabin support from working:
+
+1. **Edge function drops extra cabins**: When the AI sees documents for 3 different booking numbers, it may return 3 separate `create_booking` tool calls in one response. But the edge function only returns the first one (`tool_calls[0]`), so cabins 2 and 3 are silently lost.
+
+2. **Rescan overwrites instead of creating**: The rescan and chat handlers only process a single action response. Even when the AI correctly identifies a new booking number, the client code has no loop to handle multiple actions. And the upsert logic blindly overwrites `passengers`, `itinerary`, and `payment_history` arrays instead of merging them (only `extras` has merge logic).
 
 ## What Changes
 
-### 1. Database -- New `trip_group_id` column
+### 1. Edge Function -- Return ALL tool calls
 
-Add a nullable text column `trip_group_id` to `booking_details`. When multiple cabins belong to the same trip, they share the same group ID (e.g., the first booking number becomes the group ID). This lets the system know "these 3 booking numbers are all part of one trip."
+Instead of returning only `tool_calls[0]`, return the full array of tool calls so the client can process each cabin independently.
 
-### 2. AI Edge Function -- Teach it about multi-cabin trips
-
-Update the `booking-assistant` system prompt with explicit multi-cabin instructions:
-
-- If a document contains a **different booking number** than existing ones, ALWAYS use `create_booking` even if the trip/ship/dates are the same
-- Add a `trip_group_id` parameter to both tools so the AI can link cabins together
-- When the AI sees documents for the same ship/dates/client but a different booking number, it sets `trip_group_id` to the first cabin's booking number
-
-### 3. Client File -- Group cabins visually
-
-On the Client File page, booking cards with the same `trip_group_id` are grouped under a shared trip header showing the ship name, dates, and destination once, with individual cabin cards nested underneath showing:
-- Cabin-specific booking number
-- Cabin category, deck, bed config
-- Passengers in that cabin
-- Pricing for that cabin
-
-```text
-+--------------------------------------------------+
-|  TRIP GROUP: Sun Princess Mediterranean           |
-|  Aug 15-22, 2026 | Princess Cruises | 3 cabins   |
-|                                                    |
-|  [Cabin 1: #60013383]  [Cabin 2: #60013384]      |
-|  Interior (IE) GUAR     Balcony (BF) GUAR        |
-|  2 travellers            2 travellers              |
-|  CA$2,499.68             CA$3,199.00              |
-|  > Full Report           > Full Report             |
-|                                                    |
-|  [Cabin 3: #60013385]                             |
-|  Interior (IE) GUAR                               |
-|  1 traveller                                       |
-|  CA$1,249.84                                      |
-|  > Full Report                                     |
-+--------------------------------------------------+
+**Response shape changes from:**
+```
+{ action: "create_booking", data: {...}, message: "..." }
 ```
 
-### 4. Booking Report -- Sibling cabin navigation
+**To:**
+```
+{ 
+  actions: [
+    { action: "create_booking", data: {...} },
+    { action: "create_booking", data: {...} },
+    { action: "add_to_booking", data: {...} }
+  ],
+  message: "..."
+}
+```
 
-On each individual Trip Report page, show a small "Other Cabins" section linking to the sibling bookings in the same trip group, so the agent can quickly jump between cabins.
+The old single-action format (`action` + `data`) is kept as a fallback for backward compatibility.
+
+### 2. ClientFile -- Process multiple actions
+
+Both the rescan handler and the chat handler are updated to loop through the `actions` array, creating or updating each booking independently. Each `create_booking` action creates its own `booking_details` record and calendar entries. Each `add_to_booking` merges into the matching record.
+
+### 3. Upsert Logic -- Merge arrays, don't overwrite
+
+The `upsertBookingDetails` function gets smart merge logic for `passengers`, `itinerary`, and `payment_history` -- matching the existing pattern used for `extras`:
+
+- **Passengers**: Merge by name (don't duplicate if a passenger with the same name already exists, but update their details)
+- **Itinerary**: Merge by date+port (avoid duplicate port entries)
+- **Payment History**: Merge by date+amount (avoid duplicate payment records)
+
+### 4. BookingReport -- Same upsert fix
+
+The BookingReport page has its own rescan logic that also needs the same array-merge fix.
 
 ## Technical Details
 
-### Database Migration
-
-```sql
-ALTER TABLE booking_details
-  ADD COLUMN IF NOT EXISTS trip_group_id text;
-```
-
-### Edge Function Changes
-
-- Add `trip_group_id` to both `create_booking` and `add_to_booking` tool schemas
-- Update system prompt: "If the document has a booking number that does NOT match any existing booking, use create_booking. Different booking numbers = different cabins, even if same ship/dates. Set trip_group_id to the booking number of the first cabin in the group."
-
-### ClientFile.tsx Changes
-
-- After fetching booking cards, group them by `trip_group_id`
-- Render grouped cards under a shared trip header
-- Ungrouped bookings (no trip_group_id) render as they do today
-
-### BookingReport.tsx Changes
-
-- Query sibling bookings: `SELECT * FROM booking_details WHERE trip_group_id = ? AND booking_number != ?`
-- Display a small "Other Cabins in This Trip" card with links
-
 ### Files Modified
 
-- Database migration (1 new column)
-- `supabase/functions/booking-assistant/index.ts` -- multi-cabin prompt and schema
-- `src/pages/ClientFile.tsx` -- trip grouping UI
-- `src/pages/BookingReport.tsx` -- sibling cabin navigation
+- `supabase/functions/booking-assistant/index.ts` -- return all tool calls in an `actions` array
+- `src/pages/ClientFile.tsx` -- loop through `actions`, smart array merging in upsert
+- `src/pages/BookingReport.tsx` -- same smart array merging in its upsert logic
 
-### No breaking changes
+### No database changes needed
 
-The new column is nullable. Existing single-cabin bookings display exactly as they do now. Grouping only activates when `trip_group_id` is populated.
-
+The schema already supports this. The fix is purely in the data flow logic.
