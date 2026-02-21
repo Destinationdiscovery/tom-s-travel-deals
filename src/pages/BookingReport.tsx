@@ -388,6 +388,14 @@ const BookingReport = () => {
   const [addRoomStatus, setAddRoomStatus] = useState("");
   const addRoomFileRef = useRef<HTMLInputElement>(null);
 
+  // Add/Edit Flight dialog
+  const [addFlightOpen, setAddFlightOpen] = useState(false);
+  const [flightForm, setFlightForm] = useState({
+    outbound: { airline: "", flight_number: "", departure_airport: "", departure_time: "", arrival_airport: "", arrival_time: "" },
+    return: { airline: "", flight_number: "", departure_airport: "", departure_time: "", arrival_airport: "", arrival_time: "" },
+  });
+  const [savingFlight, setSavingFlight] = useState(false);
+
   // Lightbox
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -1107,19 +1115,48 @@ const BookingReport = () => {
               )}
 
               {/* Flight Details Card */}
-              {hasFlightDetails && (
-                <Card className="overflow-hidden">
-                  <div className="px-5 py-4 border-b border-border">
-                    <h3 className="text-sm font-semibold flex items-center gap-2">
-                      <Plane className="h-4 w-4 text-primary" /> Flight Itinerary
-                    </h3>
-                  </div>
-                  <CardContent className="p-5 space-y-4">
-                    <FlightLeg label="Outbound" leg={bookingDetails!.flight_details.outbound} />
-                    <FlightLeg label="Return" leg={bookingDetails!.flight_details.return} />
-                  </CardContent>
-                </Card>
-              )}
+              <Card className="overflow-hidden">
+                <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+                  <h3 className="text-sm font-semibold flex items-center gap-2">
+                    <Plane className="h-4 w-4 text-primary" /> Flight Itinerary
+                  </h3>
+                  <Button variant="ghost" size="sm" onClick={() => {
+                    const existing = bookingDetails?.flight_details;
+                    setFlightForm({
+                      outbound: {
+                        airline: existing?.outbound?.airline || "",
+                        flight_number: existing?.outbound?.flight_number || "",
+                        departure_airport: existing?.outbound?.departure_airport || "",
+                        departure_time: existing?.outbound?.departure_time || "",
+                        arrival_airport: existing?.outbound?.arrival_airport || "",
+                        arrival_time: existing?.outbound?.arrival_time || "",
+                      },
+                      return: {
+                        airline: existing?.return?.airline || "",
+                        flight_number: existing?.return?.flight_number || "",
+                        departure_airport: existing?.return?.departure_airport || "",
+                        departure_time: existing?.return?.departure_time || "",
+                        arrival_airport: existing?.return?.arrival_airport || "",
+                        arrival_time: existing?.return?.arrival_time || "",
+                      },
+                    });
+                    setAddFlightOpen(true);
+                  }}>
+                    {hasFlightDetails ? <Pencil className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5 mr-1" />}
+                    {hasFlightDetails ? "Edit" : "Add Flight"}
+                  </Button>
+                </div>
+                <CardContent className="p-5 space-y-4">
+                  {hasFlightDetails ? (
+                    <>
+                      <FlightLeg label="Outbound" leg={bookingDetails!.flight_details.outbound} />
+                      <FlightLeg label="Return" leg={bookingDetails!.flight_details.return} />
+                    </>
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">No flights added yet.</p>
+                  )}
+                </CardContent>
+              </Card>
 
               {/* Events Timeline Card */}
               <Card className="overflow-hidden">
@@ -1585,6 +1622,76 @@ const BookingReport = () => {
             <Button onClick={handleAddRoom} disabled={addRoomProcessing || addRoomFiles.length === 0}>
               {addRoomProcessing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Process
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add/Edit Flight Dialog */}
+      <Dialog open={addFlightOpen} onOpenChange={setAddFlightOpen}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Plane className="h-5 w-5" /> {hasFlightDetails ? "Edit Flights" : "Add Flights"}</DialogTitle>
+            <DialogDescription>Enter outbound and/or return flight details.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-5">
+            {(["outbound", "return"] as const).map(leg => (
+              <div key={leg} className="space-y-3">
+                <h4 className="text-sm font-semibold capitalize">{leg} Flight</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs">Airline</Label>
+                    <Input value={flightForm[leg].airline} onChange={e => setFlightForm(f => ({ ...f, [leg]: { ...f[leg], airline: e.target.value } }))} placeholder="e.g. WestJet" />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Flight #</Label>
+                    <Input value={flightForm[leg].flight_number} onChange={e => setFlightForm(f => ({ ...f, [leg]: { ...f[leg], flight_number: e.target.value } }))} placeholder="e.g. WS 123" />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Departure Airport</Label>
+                    <Input value={flightForm[leg].departure_airport} onChange={e => setFlightForm(f => ({ ...f, [leg]: { ...f[leg], departure_airport: e.target.value } }))} placeholder="e.g. YYZ" />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Departure Time</Label>
+                    <Input value={flightForm[leg].departure_time} onChange={e => setFlightForm(f => ({ ...f, [leg]: { ...f[leg], departure_time: e.target.value } }))} placeholder="e.g. Mar 15, 8:30 AM" />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Arrival Airport</Label>
+                    <Input value={flightForm[leg].arrival_airport} onChange={e => setFlightForm(f => ({ ...f, [leg]: { ...f[leg], arrival_airport: e.target.value } }))} placeholder="e.g. CUN" />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Arrival Time</Label>
+                    <Input value={flightForm[leg].arrival_time} onChange={e => setFlightForm(f => ({ ...f, [leg]: { ...f[leg], arrival_time: e.target.value } }))} placeholder="e.g. Mar 15, 1:45 PM" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddFlightOpen(false)} disabled={savingFlight}>Cancel</Button>
+            <Button onClick={async () => {
+              setSavingFlight(true);
+              try {
+                const hasOutbound = Object.values(flightForm.outbound).some(v => v.trim());
+                const hasReturn = Object.values(flightForm.return).some(v => v.trim());
+                const existing = bookingDetails?.flight_details || {};
+                const flightDetails = {
+                  ...existing,
+                  ...(hasOutbound ? { outbound: flightForm.outbound } : {}),
+                  ...(hasReturn ? { return: flightForm.return } : {}),
+                };
+                await supabase.from("booking_details").update({ flight_details: flightDetails } as any).eq("booking_number", bookingNumber);
+                toast({ title: "Flights saved" });
+                setAddFlightOpen(false);
+                fetchAll();
+              } catch (err) {
+                toast({ title: "Error saving flights", variant: "destructive" });
+              } finally {
+                setSavingFlight(false);
+              }
+            }} disabled={savingFlight}>
+              {savingFlight ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Save
             </Button>
           </DialogFooter>
         </DialogContent>
