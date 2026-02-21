@@ -1,70 +1,98 @@
 
+# Add Flight Button for Manual Flight Entry
 
-# Fix Room Booking Numbers Display and Chat Room Updates
+## Problem
 
-## Problem 1: Booking Numbers Not Showing on Room Cards
+The AI extraction only captures the outbound flight when uploading two separate one-way flight documents. There's no manual way to add or edit individual flight legs, so the return flight never gets populated.
 
-The existing rooms in the database were created before the `booking_number` and `cruise_line_booking_number` fields were added to the room structure. The auto-migration only runs for legacy data with no rooms array, so existing rooms remain without these fields.
+## Solution
 
-## Problem 2: Chat Creates New Booking Instead of Updating Room
-
-When you upload a document via the chat and say "add this to Room 3", two things go wrong:
-
-- The AI receives `existing_bookings: []` (an empty array), so it has no context about the current booking and treats the document's unique booking number as a brand-new booking
-- The chat handler has no room-aware logic -- it merges data at the booking level, not into a specific room
+Add an "Add Flight" button next to the Flight Itinerary card (or shown when no flights exist) that opens a dialog for manually entering outbound and/or return flight details. This mirrors the existing "Add Room" pattern.
 
 ## Changes
 
 ### File: `src/pages/BookingReport.tsx`
 
-**1. Pass existing bookings context to the chat AI call (line 787)**
+**1. Add state for the Add Flight dialog**
 
-Send the current booking number and all room booking numbers as `existing_bookings` so the AI knows this trip already exists. This prevents it from calling `create_booking`.
+New state variables alongside the existing Add Room state:
+- `addFlightOpen` (boolean)
+- `addFlightForm` (object with outbound/return leg fields)
 
+**2. Create an Edit Flight Dialog component**
+
+A dialog with two sections (Outbound and Return), each containing fields for:
+- Airline
+- Flight Number
+- Departure Airport
+- Departure Time
+- Arrival Airport
+- Arrival Time
+
+Pre-populated with existing flight data if available, so users can also edit/add the missing return leg.
+
+**3. Save handler**
+
+On save, merge the form data into `bookingDetails.flight_details` and update the database:
 ```typescript
-existing_bookings: [
-  { bookingNumber: bookingNumber, clientName: clientName, title: resortName },
-  ...rooms.map(r => ({
-    bookingNumber: r.booking_number,
-    clientName: clientName,
-    title: `${resortName} - ${r.label}`
-  })).filter(r => r.bookingNumber)
-]
+const handleSaveFlight = async () => {
+  const flightDetails = {
+    outbound: hasValues(outboundForm) ? outboundForm : existingOutbound,
+    return: hasValues(returnForm) ? returnForm : existingReturn,
+  };
+  await supabase.from("booking_details").update({ flight_details: flightDetails }).eq("booking_number", bookingNumber);
+  // refresh data
+};
 ```
 
-**2. Add room-aware handling in the chat response (lines 792-803)**
+**4. UI placement**
 
-When the AI returns `add_to_booking` with data, check if the user's message references a specific room (e.g., "room 3"). If so, merge the extracted passengers, cabin info, pricing, and booking numbers into that room's entry in the `rooms` array, rather than the top-level booking.
+- Always show the Flight Itinerary card (not conditionally on `hasFlightDetails`)
+- Inside the card header, add an edit/add button
+- If no flights exist, show the "Add Flight" button as a dashed outline button (same style as "Add Room")
+- If flights exist, show a small pencil/edit icon in the card header to open the same dialog
 
-Logic:
-- Parse the chat message for a room number reference (e.g., "room 3", "Room 3")
-- If a room number is found and that room exists, update that room's fields (passengers, cabin details, pricing, booking_number, cruise_line_booking_number)
-- Also merge any top-level data (flight details, extras) into the booking as before
+This ensures:
+- Users can manually add either or both flight legs
+- Users can edit existing flight data
+- The return flight can be added independently of the outbound
+- No dependency on the AI correctly merging two one-way flights
 
-**3. Also pass existing bookings to the Add Room AI call (line 647)**
+## Technical Details
 
-Same fix for the "Add Room" dialog -- pass existing bookings so the AI uses `add_to_booking` or at minimum returns extracted data without conflicting.
-
-### File: `supabase/functions/booking-assistant/index.ts`
-
-**4. Update the system prompt to be smarter about room context**
-
-Add instructions telling the AI that when the user says "add this to Room X" for an existing booking, it should always use `add_to_booking` with the existing booking number (the trip-level one), not treat the document's booking number as a new booking. The room-level booking numbers are metadata to store, not trip identifiers.
-
-Add to the system prompt:
-```
-ROOM UPDATES FOR EXISTING BOOKINGS:
-When the user explicitly says to add data to a specific room (e.g., "add this to Room 3") 
-for an existing booking, ALWAYS use add_to_booking with the EXISTING booking number from 
-the context, not the booking number found in the uploaded document. The document's booking 
-number is a room-level reference to be stored as metadata, not a trip identifier.
-Include the extracted booking_number and cruise_line_booking_number in the response so the 
-frontend can store them on the specific room.
+### New State (near line 384)
+```typescript
+const [addFlightOpen, setAddFlightOpen] = useState(false);
 ```
 
-## Summary of Behavior After Fix
+### Flight Dialog (after the Add Room Dialog, near line 1591)
+A `Dialog` with form fields for outbound and return legs, pre-filled from existing `bookingDetails?.flight_details`.
 
-1. When you upload a document via chat and say "add this to Room 3", the AI will use `add_to_booking` with the existing trip booking number
-2. The frontend will detect the "Room 3" reference and merge passengers, cabin info, pricing, and booking numbers into Room 3
-3. Each room card will display its specific booking numbers (Encore and cruise line) as badges
+### Flight Card Update (lines 1109-1122)
+Replace the conditional rendering to always show the card, with an add/edit button in the header:
+```typescript
+<Card className="overflow-hidden">
+  <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+    <h3 className="text-sm font-semibold flex items-center gap-2">
+      <Plane className="h-4 w-4 text-primary" /> Flight Itinerary
+    </h3>
+    <Button variant="ghost" size="sm" onClick={() => setAddFlightOpen(true)}>
+      {hasFlightDetails ? <Pencil className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5 mr-1" />}
+      {hasFlightDetails ? "Edit" : "Add Flight"}
+    </Button>
+  </div>
+  <CardContent className="p-5 space-y-4">
+    {hasFlightDetails ? (
+      <>
+        <FlightLeg label="Outbound" leg={bookingDetails.flight_details.outbound} />
+        <FlightLeg label="Return" leg={bookingDetails.flight_details.return} />
+      </>
+    ) : (
+      <p className="text-sm text-muted-foreground text-center py-4">No flights added yet.</p>
+    )}
+  </CardContent>
+</Card>
+```
 
+### Save Logic
+Updates the `flight_details` JSONB column on `booking_details`, preserving any existing leg data while allowing individual legs to be added or edited.
