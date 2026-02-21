@@ -807,12 +807,28 @@ const BookingReport = () => {
     if (data?.signedUrl) window.open(data.signedUrl, "_blank");
   };
 
-  // Pricing helpers
-  const pricingTotal = hasPricing ? Number(bookingDetails!.pricing.total) || 0 : 0;
-  const pricingDeposit = hasPricing ? Number(bookingDetails!.pricing.deposit) || 0 : 0;
+  // Aggregate pricing across all rooms
+  const aggregatedPricing = rooms.length > 0
+    ? rooms.reduce((acc, room) => {
+        const p = (room as any).pricing || {};
+        acc.total += Number(p.total) || 0;
+        acc.deposit += Number(p.deposit) || 0;
+        acc.taxes += Number(p.taxes) || 0;
+        return acc;
+      }, { total: 0, deposit: 0, taxes: 0 })
+    : null;
+
+  const pricingTotal = aggregatedPricing && aggregatedPricing.total > 0 ? aggregatedPricing.total : (hasPricing ? Number(bookingDetails!.pricing.total) || 0 : 0);
+  const pricingDeposit = aggregatedPricing && aggregatedPricing.deposit > 0 ? aggregatedPricing.deposit : (hasPricing ? Number(bookingDetails!.pricing.deposit) || 0 : 0);
+  const pricingTaxes = aggregatedPricing && aggregatedPricing.taxes > 0 ? aggregatedPricing.taxes : (hasPricing ? Number(bookingDetails!.pricing.taxes) || 0 : 0);
   const depositPercent = pricingTotal > 0 ? Math.round((pricingDeposit / pricingTotal) * 100) : 0;
   const balanceDue = bookingDetails?.balance_due ? Number(bookingDetails.balance_due) : (pricingTotal - pricingDeposit > 0 ? pricingTotal - pricingDeposit : 0);
   const currency = hasPricing ? bookingDetails!.pricing.currency || "CA$" : "CA$";
+
+  // Aggregate total passengers across all rooms
+  const totalPassengers = rooms.length > 0
+    ? rooms.reduce((sum, room) => sum + ((room as any).passengers?.length || 0), 0)
+    : bookingDetails?.num_travellers || 0;
 
   if (loading) {
     return (
@@ -952,11 +968,11 @@ const BookingReport = () => {
                   {!hasRooms && bookingDetails?.bed_configuration && <DetailRow label="Bed Config" value={bookingDetails.bed_configuration} />}
                   {bookingDetails?.rate_code && <DetailRow label="Rate Code" value={bookingDetails.rate_code} />}
                   {bookingDetails?.room_type && !bookingDetails?.cabin_category && <DetailRow label="Room Type" value={bookingDetails.room_type} />}
-                  {bookingDetails?.num_travellers && (
+                  {totalPassengers > 0 && (
                     <DetailRow label="Travellers" value={
                       <div className="flex items-center gap-1.5">
                         <Users className="h-3.5 w-3.5 text-muted-foreground" />
-                        <span>{bookingDetails.num_travellers}</span>
+                        <span>{totalPassengers}</span>
                       </div>
                     } />
                   )}
@@ -1143,7 +1159,7 @@ const BookingReport = () => {
                   )}
                   {bookingDetails?.deck && <DetailRow label="Deck" value={bookingDetails.deck} />}
                   {bookingDetails?.duration_nights && <DetailRow label="Duration" value={`${bookingDetails.duration_nights} nights`} />}
-                  {bookingDetails?.num_travellers && <DetailRow label="Travellers" value={`${bookingDetails.num_travellers}`} icon={<Users className="h-3 w-3" />} />}
+                  {totalPassengers > 0 && <DetailRow label="Travellers" value={`${totalPassengers}`} icon={<Users className="h-3 w-3" />} />}
                   {hasRooms && <DetailRow label="Rooms" value={`${rooms.length}`} icon={<BedDouble className="h-3 w-3" />} />}
                   {tripStart && (
                     <DetailRow label="Dates" value={
@@ -1193,16 +1209,16 @@ const BookingReport = () => {
                     )}
                     <Separator />
                     <div className="space-y-2">
-                      {bookingDetails!.pricing.taxes && (
+                      {pricingTaxes > 0 && (
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">Taxes / Fees</span>
-                          <span className="font-medium">{currency}{Number(bookingDetails!.pricing.taxes).toLocaleString()}</span>
+                          <span className="font-medium">{currency}{pricingTaxes.toLocaleString()}</span>
                         </div>
                       )}
-                      {bookingDetails!.pricing.per_person && (
+                      {pricingTotal > 0 && totalPassengers > 0 && (
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">Per Person</span>
-                          <span className="font-medium">{currency}{Number(bookingDetails!.pricing.per_person).toLocaleString()}</span>
+                          <span className="font-medium">{currency}{Math.round(pricingTotal / totalPassengers).toLocaleString()}</span>
                         </div>
                       )}
                     </div>
