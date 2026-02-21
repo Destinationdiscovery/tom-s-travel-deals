@@ -87,7 +87,7 @@ const NEW_FIELDS = [
   "itinerary", "passengers", "payment_history", "agency", "booking_agent",
   "cabin_number", "cabin_category", "deck", "bed_configuration", "rate_code",
   "ship_name", "cruise_line_booking_number", "balance_due", "balance_due_date",
-  "duration_nights", "booking_status",
+  "duration_nights", "booking_status", "trip_group_id",
 ] as const;
 
 /* ─── Sub-components ─── */
@@ -238,6 +238,7 @@ const BookingReport = () => {
   const [bookingDetails, setBookingDetails] = useState<BookingDetails | null>(null);
   const [events, setEvents] = useState<Tables<"bookings">[]>([]);
   const [documents, setDocuments] = useState<StorageFile[]>([]);
+  const [siblingCabins, setSiblingCabins] = useState<BookingDetails[]>([]);
   const [rescanning, setRescanning] = useState(false);
   const [deletingBooking, setDeletingBooking] = useState(false);
 
@@ -314,7 +315,23 @@ const BookingReport = () => {
     }
 
     if ((detailsResult as any)?.data) {
-      setBookingDetails((detailsResult as any).data as BookingDetails);
+      const details = (detailsResult as any).data as BookingDetails;
+      setBookingDetails(details);
+
+      // Fetch sibling cabins if part of a trip group
+      const tripGroupId = (details as any).trip_group_id;
+      if (tripGroupId) {
+        const { data: siblings } = await supabase
+          .from("booking_details" as any)
+          .select("*")
+          .eq("trip_group_id", tripGroupId)
+          .neq("booking_number", bookingNumber);
+        if ((siblings as any)?.length) {
+          setSiblingCabins((siblings as any) as BookingDetails[]);
+        }
+      } else {
+        setSiblingCabins([]);
+      }
     }
 
     setLoading(false);
@@ -933,6 +950,38 @@ const BookingReport = () => {
                         ))}
                       </TableBody>
                     </Table>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Other Cabins in This Trip */}
+              {siblingCabins.length > 0 && (
+                <Card className="overflow-hidden">
+                  <div className="px-5 py-4 border-b border-border">
+                    <h3 className="text-sm font-semibold flex items-center gap-2">
+                      <Ship className="h-4 w-4 text-primary" /> Other Cabins in This Trip
+                    </h3>
+                  </div>
+                  <CardContent className="p-4 space-y-2">
+                    {siblingCabins.map((cabin) => (
+                      <button
+                        key={cabin.booking_number}
+                        onClick={() => navigate(`/booking/${encodeURIComponent(cabin.booking_number)}`)}
+                        className="w-full text-left p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-semibold font-mono">{cabin.booking_number}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {cabin.cabin_category || cabin.room_type || "Cabin"}
+                              {cabin.deck ? ` · Deck ${cabin.deck}` : ""}
+                              {cabin.num_travellers ? ` · ${cabin.num_travellers} traveller${cabin.num_travellers > 1 ? "s" : ""}` : ""}
+                            </p>
+                          </div>
+                          <ArrowLeft className="h-3.5 w-3.5 text-muted-foreground rotate-180" />
+                        </div>
+                      </button>
+                    ))}
                   </CardContent>
                 </Card>
               )}

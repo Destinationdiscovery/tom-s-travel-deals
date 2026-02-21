@@ -45,6 +45,7 @@ export type Database = {
           room_type: string | null
           ship_name: string | null
           supplier: string | null
+          trip_group_id: string | null
           updated_at: string
         }
         Insert: {
@@ -77,6 +78,7 @@ export type Database = {
           room_type?: string | null
           ship_name?: string | null
           supplier?: string | null
+          trip_group_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -109,6 +111,7 @@ export type Database = {
           room_type?: string | null
           ship_name?: string | null
           supplier?: string | null
+          trip_group_id?: string | null
           updated_at?: string
         }
         Relationships: []

@@ -142,13 +142,14 @@ const tools = [
     function: {
       name: "create_booking",
       description:
-        "Create a new booking from extracted document data. Extract EVERY detail you can find including cruise itinerary, passenger details with passport info, payment history, cabin/deck info, agency details, and rate codes.",
+        "Create a new booking from extracted document data. Extract EVERY detail you can find including cruise itinerary, passenger details with passport info, payment history, cabin/deck info, agency details, and rate codes. IMPORTANT: Use this tool whenever the document contains a booking number that does NOT match any existing booking — even if the trip, ship, dates, or client are the same. Different booking numbers = different cabins/rooms.",
       parameters: {
         type: "object",
         properties: {
           client_name: { type: "string", description: "Full name of the client / traveller" },
           client_email: { type: "string", description: "Client email if found" },
           booking_number: { type: "string", description: "Booking confirmation / reference number" },
+          trip_group_id: { type: "string", description: "Set this to link multiple cabins/rooms under one trip. Use the booking number of the FIRST cabin in the group. If this is a new cabin for the same trip (same ship, dates, client), set this to the existing cabin's booking number." },
           supplier: { type: "string", description: "Travel supplier or tour operator (e.g. Sunwing, Princess Cruises)" },
           resort_or_trip: { type: "string", description: "Resort name, hotel name, or trip description" },
           destination: { type: "string", description: "Destination city, region, or country" },
@@ -182,6 +183,7 @@ const tools = [
         type: "object",
         properties: {
           booking_number: { type: "string", description: "The booking number to add files to" },
+          trip_group_id: { type: "string", description: "Trip group ID to link cabins/rooms together" },
           client_name: { type: "string", description: "Client name for folder organization" },
           notes: { type: "string", description: "Any additional details extracted from the documents" },
           destination: { type: "string", description: "Destination if newly found" },
@@ -208,6 +210,13 @@ const systemPrompt = `You are a travel agent's booking assistant. You analyze up
 
 When the user asks to create a new booking, use the create_booking tool with ALL the details you can extract from the documents.
 When the user asks to add files to an existing booking, use the add_to_booking tool with the matching booking number AND any new details found.
+
+CRITICAL MULTI-CABIN / MULTI-ROOM RULE:
+- The BOOKING NUMBER is the unique identifier. If the document contains a booking number that does NOT match any existing booking in the context, you MUST use create_booking — even if the trip name, ship, dates, destination, or client are identical.
+- Different booking numbers = different cabins or rooms. NEVER merge data from one booking number into a different booking number's record.
+- When creating a new cabin/room for the same trip, set trip_group_id to the booking number of the FIRST existing cabin in that group. This links them visually as one trip with multiple cabins.
+- If this is the very first booking for a trip, you may leave trip_group_id empty.
+- Only use add_to_booking when the document's booking number EXACTLY matches an existing booking number.
 
 EXTRACT EVERYTHING YOU CAN FIND:
 - Client name and email
@@ -236,7 +245,7 @@ CRUISE & DETAILED BOOKING FIELDS (extract when present):
 - Payment history: date, type (Deposit/Balance), amount, payment method, status (Processed/Pending)
 
 If the user mentions a client name, use that. If not, try to find it in the documents.
-If you can match to an existing booking by number or client name, prefer add_to_booking.`;
+If you can match to an existing booking by number, prefer add_to_booking. But ONLY if the booking numbers match exactly.`;
 
 /* ── Handler ── */
 

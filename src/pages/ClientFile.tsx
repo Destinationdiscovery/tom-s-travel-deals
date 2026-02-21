@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, CalendarIcon, MapPin, Plane, DollarSign, Users, Hotel, Tag, RefreshCw, Loader2, FileText, Download, Paperclip, Send, X, Image as ImageIcon, ExternalLink } from "lucide-react";
+import { ArrowLeft, CalendarIcon, MapPin, Plane, DollarSign, Users, Hotel, Tag, RefreshCw, Loader2, FileText, Download, Paperclip, Send, X, Image as ImageIcon, ExternalLink, Ship } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,7 @@ const CRUISE_FIELDS = [
   "itinerary", "passengers", "payment_history", "agency", "booking_agent",
   "cabin_number", "cabin_category", "deck", "bed_configuration", "rate_code",
   "ship_name", "cruise_line_booking_number", "balance_due", "balance_due_date",
-  "duration_nights", "booking_status",
+  "duration_nights", "booking_status", "trip_group_id",
 ] as const;
 
 const buildMergeData = (d: any): Partial<BookingDetails> => {
@@ -494,94 +494,134 @@ const ClientFile = () => {
               <p className="text-sm text-muted-foreground">Upload documents below to create a booking.</p>
             </Card>
           ) : (
-            bookingCards.map((card) => {
-              const hasPricing = card.details?.pricing && typeof card.details.pricing === "object" && (card.details.pricing.total || card.details.pricing.deposit);
-              const hasFlights = card.details?.flight_details && typeof card.details.flight_details === "object" && (card.details.flight_details.outbound || card.details.flight_details.return);
-              const pricingTotal = hasPricing ? Number(card.details!.pricing.total) || 0 : 0;
+            (() => {
+              // Group cards by trip_group_id
+              const grouped: Record<string, BookingCard[]> = {};
+              const ungrouped: BookingCard[] = [];
+              for (const card of bookingCards) {
+                const gid = (card.details as any)?.trip_group_id;
+                if (gid) {
+                  if (!grouped[gid]) grouped[gid] = [];
+                  grouped[gid].push(card);
+                } else {
+                  ungrouped.push(card);
+                }
+              }
+
+              const renderCabinCard = (card: BookingCard, compact = false) => {
+                const hasPricing = card.details?.pricing && typeof card.details.pricing === "object" && (card.details.pricing.total || card.details.pricing.deposit);
+                const pricingTotal = hasPricing ? Number(card.details!.pricing.total) || 0 : 0;
+                return (
+                  <Card key={card.bookingNumber} className={cn("overflow-hidden", compact && "border-border/60")}>
+                    <div className={cn("p-5", compact ? "md:p-4" : "md:p-6")}>
+                      <div className="flex items-start justify-between gap-4 mb-3">
+                        <div className="space-y-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {!compact && <Hotel className="h-4 w-4 text-primary shrink-0" />}
+                            <h2 className={cn("font-display font-bold text-foreground", compact ? "text-base" : "text-lg")}>{compact ? `Cabin: ${card.bookingNumber}` : card.resortName}</h2>
+                          </div>
+                          <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
+                            {!compact && <Badge variant="outline" className="font-mono text-xs">{card.bookingNumber}</Badge>}
+                            {card.supplier && !compact && <span>via {card.supplier}</span>}
+                            {card.details?.cabin_category && <span>{card.details.cabin_category}</span>}
+                            {card.details?.deck && <span>Deck {card.details.deck}</span>}
+                            {card.details?.bed_configuration && <span>{card.details.bed_configuration}</span>}
+                            {card.details?.destination && !compact && (
+                              <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{card.details.destination}</span>
+                            )}
+                          </div>
+                        </div>
+                        <Button variant="outline" size="sm" className="gap-1.5 shrink-0" asChild>
+                          <Link to={`/booking/${encodeURIComponent(card.bookingNumber)}`}>
+                            <ExternalLink className="h-3.5 w-3.5" /> Full Report
+                          </Link>
+                        </Button>
+                      </div>
+
+                      <div className={cn("grid gap-4 p-4 rounded-xl bg-muted/30 border border-border", compact ? "grid-cols-2 md:grid-cols-3" : "grid-cols-2 md:grid-cols-4")}>
+                        {!compact && (
+                          <div>
+                            <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1">Trip Dates</p>
+                            <p className="text-sm font-medium">
+                              {card.tripStart && card.tripEnd
+                                ? `${format(new Date(card.tripStart), "MMM d")} – ${format(new Date(card.tripEnd), "MMM d, yyyy")}`
+                                : card.tripStart
+                                ? `From ${format(new Date(card.tripStart), "MMM d, yyyy")}`
+                                : "—"}
+                            </p>
+                          </div>
+                        )}
+                        <div>
+                          <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1">{compact ? "Cabin" : "Room"}</p>
+                          <p className="text-sm font-medium">{card.details?.cabin_category || card.details?.room_type || "—"}</p>
+                        </div>
+                        <div>
+                          <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1">Travellers</p>
+                          <p className="text-sm font-medium">{card.details?.num_travellers || "—"}</p>
+                        </div>
+                        <div>
+                          <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1">Total</p>
+                          <p className="text-sm font-bold">
+                            {pricingTotal > 0 ? `${card.details?.pricing?.currency || "$"}${pricingTotal.toLocaleString()}` : "—"}
+                          </p>
+                        </div>
+                      </div>
+
+                      {!compact && card.details?.extras && Array.isArray(card.details.extras) && card.details.extras.length > 0 && (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {card.details.extras.map((ext: any, i: number) => (
+                            <Badge key={i} variant="secondary" className="gap-1 text-xs">
+                              <Tag className="h-2.5 w-2.5" /> {ext.label}: {ext.value}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                );
+              };
 
               return (
-                <Card key={card.bookingNumber} className="overflow-hidden">
-                  <div className="p-5 md:p-6">
-                    {/* Booking Header */}
-                    <div className="flex items-start justify-between gap-4 mb-4">
-                      <div className="space-y-1.5 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <Hotel className="h-4 w-4 text-primary shrink-0" />
-                          <h2 className="text-lg font-display font-bold text-foreground">{card.resortName}</h2>
+                <>
+                  {/* Grouped trip cards */}
+                  {Object.entries(grouped).map(([groupId, cabins]) => {
+                    const first = cabins[0];
+                    const tripName = first.resortName || first.details?.ship_name || "Trip";
+                    const supplier = first.supplier || first.details?.supplier || "";
+                    const tripDates = first.tripStart && first.tripEnd
+                      ? `${format(new Date(first.tripStart), "MMM d")} – ${format(new Date(first.tripEnd), "MMM d, yyyy")}`
+                      : first.tripStart
+                      ? `From ${format(new Date(first.tripStart), "MMM d, yyyy")}`
+                      : "";
+
+                    return (
+                      <Card key={groupId} className="overflow-hidden border-primary/20">
+                        <div className="p-5 md:p-6 bg-primary/5 border-b border-border">
+                          <div className="flex items-center gap-3 flex-wrap">
+                            <Ship className="h-5 w-5 text-primary shrink-0" />
+                            <div>
+                              <h2 className="text-lg font-display font-bold text-foreground">{tripName}</h2>
+                              <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap mt-0.5">
+                                {tripDates && <span className="flex items-center gap-1"><CalendarIcon className="h-3 w-3" />{tripDates}</span>}
+                                {supplier && <span>via {supplier}</span>}
+                                {first.details?.destination && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{first.details.destination}</span>}
+                                <Badge variant="secondary" className="text-xs">{cabins.length} {cabins.length === 1 ? "cabin" : "cabins"}</Badge>
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
-                          <Badge variant="outline" className="font-mono text-xs">{card.bookingNumber}</Badge>
-                          {card.supplier && <span>via {card.supplier}</span>}
-                          {card.details?.destination && (
-                            <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{card.details.destination}</span>
-                          )}
+                        <div className="p-4 md:p-5 space-y-3">
+                          {cabins.map(cabin => renderCabinCard(cabin, true))}
                         </div>
-                      </div>
-                      <Button variant="outline" size="sm" className="gap-1.5 shrink-0" asChild>
-                        <Link to={`/booking/${encodeURIComponent(card.bookingNumber)}`}>
-                          <ExternalLink className="h-3.5 w-3.5" /> Full Report
-                        </Link>
-                      </Button>
-                    </div>
+                      </Card>
+                    );
+                  })}
 
-                    {/* Key Info Row */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 rounded-xl bg-muted/30 border border-border">
-                      {/* Dates */}
-                      <div>
-                        <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1">Trip Dates</p>
-                        <p className="text-sm font-medium">
-                          {card.tripStart && card.tripEnd
-                            ? `${format(new Date(card.tripStart), "MMM d")} – ${format(new Date(card.tripEnd), "MMM d, yyyy")}`
-                            : card.tripStart
-                            ? `From ${format(new Date(card.tripStart), "MMM d, yyyy")}`
-                            : "—"}
-                        </p>
-                      </div>
-                      {/* Room */}
-                      <div>
-                        <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1">Room</p>
-                        <p className="text-sm font-medium">{card.details?.room_type || "—"}</p>
-                      </div>
-                      {/* Travellers */}
-                      <div>
-                        <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1">Travellers</p>
-                        <p className="text-sm font-medium">{card.details?.num_travellers || "—"}</p>
-                      </div>
-                      {/* Price */}
-                      <div>
-                        <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1">Total</p>
-                        <p className="text-sm font-bold">
-                          {pricingTotal > 0 ? `${card.details?.pricing?.currency || "$"}${pricingTotal.toLocaleString()}` : "—"}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Flight summary */}
-                    {hasFlights && (
-                      <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
-                        <Plane className="h-3.5 w-3.5 text-primary" />
-                        <span>
-                          {card.details!.flight_details.outbound?.airline} {card.details!.flight_details.outbound?.flight_number}
-                          {" · "}
-                          {card.details!.flight_details.outbound?.departure_airport} → {card.details!.flight_details.outbound?.arrival_airport}
-                        </span>
-                      </div>
-                    )}
-
-                    {/* Extras */}
-                    {card.details?.extras && Array.isArray(card.details.extras) && card.details.extras.length > 0 && (
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {card.details.extras.map((ext: any, i: number) => (
-                          <Badge key={i} variant="secondary" className="gap-1 text-xs">
-                            <Tag className="h-2.5 w-2.5" /> {ext.label}: {ext.value}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </Card>
+                  {/* Ungrouped booking cards */}
+                  {ungrouped.map(card => renderCabinCard(card, false))}
+                </>
               );
-            })
+            })()
           )}
 
           {/* Documents Section */}
