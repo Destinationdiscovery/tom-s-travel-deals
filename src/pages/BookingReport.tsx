@@ -1,13 +1,14 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, CalendarIcon, MapPin, Plane, DollarSign, Users, Hotel, Tag, RefreshCw, Loader2, CheckCircle2, Circle, FileText, Download, Trash2, Paperclip, Send, X, Image as ImageIcon, Anchor, Ship, CreditCard, User, Waves, Clock, Pencil } from "lucide-react";
+import { ArrowLeft, CalendarIcon, MapPin, Plane, DollarSign, Users, Hotel, Tag, RefreshCw, Loader2, CheckCircle2, Circle, FileText, Download, Trash2, Paperclip, Send, X, Image as ImageIcon, Anchor, Ship, CreditCard, User, Waves, Clock, Pencil, Plus, BedDouble } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,6 +22,17 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
 
+interface RoomData {
+  room_number: number;
+  label: string;
+  passengers: any[];
+  cabin_number?: string;
+  cabin_category?: string;
+  deck?: string;
+  bed_configuration?: string;
+  pricing?: any;
+}
+
 interface BookingDetails {
   booking_number: string;
   client_name: string | null;
@@ -33,7 +45,6 @@ interface BookingDetails {
   pricing: any;
   num_travellers: number | null;
   extras: any[];
-  // New cruise fields
   itinerary: any[];
   passengers: any[];
   payment_history: any[];
@@ -50,6 +61,7 @@ interface BookingDetails {
   balance_due_date: string | null;
   duration_nights: number | null;
   booking_status: string | null;
+  rooms: RoomData[];
 }
 
 interface StorageFile {
@@ -231,6 +243,67 @@ const PassengerCard = ({ p, index, onEdit, onDelete }: { p: any; index: number; 
   </div>
 );
 
+/* ─── Room Card ─── */
+const RoomCard = ({ room, roomIndex, totalRooms, onEditPassenger, onDeletePassenger, onDeleteRoom }: {
+  room: RoomData;
+  roomIndex: number;
+  totalRooms: number;
+  onEditPassenger: (roomIndex: number, passengerIndex: number, data: any) => void;
+  onDeletePassenger: (roomIndex: number, passengerIndex: number) => void;
+  onDeleteRoom: (roomIndex: number) => void;
+}) => {
+  const currency = room.pricing?.currency || "CA$";
+  const total = room.pricing?.total ? Number(room.pricing.total) : 0;
+
+  return (
+    <Card className="overflow-hidden">
+      <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+        <div>
+          <h3 className="text-sm font-semibold flex items-center gap-2">
+            <BedDouble className="h-4 w-4 text-primary" /> {room.label}
+          </h3>
+          <div className="flex items-center gap-2 mt-1 flex-wrap">
+            {room.cabin_category && (
+              <span className="text-xs text-muted-foreground">{room.cabin_category}</span>
+            )}
+            {room.deck && (
+              <span className="text-xs text-muted-foreground">· Deck {room.deck}</span>
+            )}
+            {room.bed_configuration && (
+              <span className="text-xs text-muted-foreground">· {room.bed_configuration}</span>
+            )}
+            {room.cabin_number && (
+              <Badge variant="outline" className="text-[10px] font-mono">{room.cabin_number}</Badge>
+            )}
+          </div>
+        </div>
+        {totalRooms > 1 && (
+          <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-1 text-xs" onClick={() => onDeleteRoom(roomIndex)}>
+            <Trash2 className="h-3.5 w-3.5" /> Remove
+          </Button>
+        )}
+      </div>
+      <CardContent className="p-5 space-y-3">
+        {room.passengers.map((p: any, i: number) => (
+          <PassengerCard
+            key={i}
+            p={p}
+            index={i}
+            onEdit={() => onEditPassenger(roomIndex, i, p)}
+            onDelete={() => onDeletePassenger(roomIndex, i)}
+          />
+        ))}
+        {total > 0 && (
+          <div className="flex items-center justify-between pt-2 border-t border-border">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider">Room Pricing</span>
+            <span className="text-sm font-bold">{currency}{total.toLocaleString()}</span>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
 /* ─── Itinerary Timeline ─── */
 const ItineraryTimeline = ({ itinerary }: { itinerary: any[] }) => (
   <div className="space-y-0">
@@ -238,11 +311,9 @@ const ItineraryTimeline = ({ itinerary }: { itinerary: any[] }) => (
       const isSeaDay = stop.port?.toUpperCase().includes("AT SEA");
       return (
         <div key={i} className="flex gap-4 group">
-          {/* Day number column */}
           <div className="w-14 shrink-0 text-right pt-3">
             <span className="text-[11px] font-bold text-muted-foreground">Day {i + 1}</span>
           </div>
-          {/* Timeline dot & line */}
           <div className="flex flex-col items-center">
             <div className={cn(
               "h-3 w-3 rounded-full mt-4 shrink-0 border-2",
@@ -250,7 +321,6 @@ const ItineraryTimeline = ({ itinerary }: { itinerary: any[] }) => (
             )} />
             {i < itinerary.length - 1 && <div className="w-px flex-1 bg-border" />}
           </div>
-          {/* Content */}
           <div className={cn(
             "flex-1 py-3 pr-2",
             i < itinerary.length - 1 && "border-b border-border/50"
@@ -290,9 +360,17 @@ const BookingReport = () => {
   const [rescanning, setRescanning] = useState(false);
   const [deletingBooking, setDeletingBooking] = useState(false);
 
-  // Passenger edit/delete
-  const [editingPassenger, setEditingPassenger] = useState<{ index: number; data: any } | null>(null);
-  const [deletePassengerIndex, setDeletePassengerIndex] = useState<number | null>(null);
+  // Room-based passenger edit/delete
+  const [editingPassenger, setEditingPassenger] = useState<{ roomIndex: number; passengerIndex: number; data: any } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ type: "passenger"; roomIndex: number; passengerIndex: number } | { type: "room"; roomIndex: number } | null>(null);
+
+  // Add Room dialog
+  const [addRoomOpen, setAddRoomOpen] = useState(false);
+  const [addRoomFiles, setAddRoomFiles] = useState<AttachedFile[]>([]);
+  const [addRoomMessage, setAddRoomMessage] = useState("");
+  const [addRoomProcessing, setAddRoomProcessing] = useState(false);
+  const [addRoomStatus, setAddRoomStatus] = useState("");
+  const addRoomFileRef = useRef<HTMLInputElement>(null);
 
   // Lightbox
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -322,8 +400,13 @@ const BookingReport = () => {
     (bookingDetails.pricing.total || bookingDetails.pricing.deposit);
 
   const hasItinerary = bookingDetails?.itinerary && Array.isArray(bookingDetails.itinerary) && bookingDetails.itinerary.length > 0;
-  const hasPassengers = bookingDetails?.passengers && Array.isArray(bookingDetails.passengers) && bookingDetails.passengers.length > 0;
   const hasPaymentHistory = bookingDetails?.payment_history && Array.isArray(bookingDetails.payment_history) && bookingDetails.payment_history.length > 0;
+
+  // Rooms
+  const rooms: RoomData[] = bookingDetails?.rooms && Array.isArray(bookingDetails.rooms) && bookingDetails.rooms.length > 0
+    ? bookingDetails.rooms
+    : [];
+  const hasRooms = rooms.length > 0;
 
   const imageFiles = documents.filter(d => /\.(jpg|jpeg|png|webp|gif|avif)$/i.test(d.name));
   const otherFiles = documents.filter(d => !/\.(jpg|jpeg|png|webp|gif|avif)$/i.test(d.name));
@@ -338,6 +421,29 @@ const BookingReport = () => {
     }
     return () => { document.title = "ReviewThenGo.com | Honest Reviews, Tested Gear & Travel Insights"; };
   }, [resortName]);
+
+  // Auto-migrate: if rooms is empty but passengers exist, build Room 1
+  const autoMigrateToRooms = async (details: BookingDetails) => {
+    const hasLegacyPassengers = details.passengers && Array.isArray(details.passengers) && details.passengers.length > 0;
+    const hasExistingRooms = details.rooms && Array.isArray(details.rooms) && details.rooms.length > 0;
+
+    if (hasLegacyPassengers && !hasExistingRooms) {
+      const room1: RoomData = {
+        room_number: 1,
+        label: "Room 1",
+        passengers: details.passengers,
+        cabin_number: details.cabin_number || undefined,
+        cabin_category: details.cabin_category || undefined,
+        deck: details.deck || undefined,
+        bed_configuration: details.bed_configuration || undefined,
+        pricing: details.pricing || undefined,
+      };
+      const updatedRooms = [room1];
+      await supabase.from("booking_details" as any).update({ rooms: updatedRooms }).eq("booking_number", details.booking_number);
+      return { ...details, rooms: updatedRooms };
+    }
+    return details;
+  };
 
   const fetchAll = async () => {
     if (!bookingNumber) return;
@@ -367,7 +473,9 @@ const BookingReport = () => {
     }
 
     if ((detailsResult as any)?.data) {
-      const details = (detailsResult as any).data as BookingDetails;
+      let details = (detailsResult as any).data as BookingDetails;
+      // Auto-migrate legacy passengers to rooms
+      details = await autoMigrateToRooms(details);
       setBookingDetails(details);
 
       // Fetch sibling cabins if part of a trip group
@@ -448,13 +556,115 @@ const BookingReport = () => {
     if (d.client_name) mergeData.client_name = d.client_name;
     if (d.client_email) mergeData.client_email = d.client_email;
     if (d.resort_or_trip || d.resort_name) mergeData.resort_name = d.resort_or_trip || d.resort_name;
-    // New fields
     for (const field of NEW_FIELDS) {
       if (d[field] !== undefined && d[field] !== null) {
         mergeData[field] = d[field];
       }
     }
     return mergeData;
+  };
+
+  // Save rooms to DB
+  const saveRooms = async (updatedRooms: RoomData[]) => {
+    if (!bookingNumber) return;
+    await supabase.from("booking_details" as any).update({ rooms: updatedRooms }).eq("booking_number", bookingNumber);
+    setBookingDetails(prev => prev ? { ...prev, rooms: updatedRooms } : prev);
+  };
+
+  // Room-level passenger edit
+  const handleEditPassenger = async (roomIndex: number, passengerIndex: number, updatedData: any) => {
+    if (!bookingDetails) return;
+    const updatedRooms = [...rooms];
+    updatedRooms[roomIndex] = {
+      ...updatedRooms[roomIndex],
+      passengers: updatedRooms[roomIndex].passengers.map((p: any, i: number) =>
+        i === passengerIndex ? { ...p, ...updatedData } : p
+      ),
+    };
+    await saveRooms(updatedRooms);
+    toast({ title: "Passenger updated", description: `${updatedData.name} has been updated.` });
+  };
+
+  // Room-level passenger delete
+  const handleDeletePassenger = async (roomIndex: number, passengerIndex: number) => {
+    if (!bookingDetails) return;
+    const removed = rooms[roomIndex].passengers[passengerIndex];
+    const updatedRooms = [...rooms];
+    updatedRooms[roomIndex] = {
+      ...updatedRooms[roomIndex],
+      passengers: updatedRooms[roomIndex].passengers.filter((_: any, i: number) => i !== passengerIndex),
+    };
+    await saveRooms(updatedRooms);
+    setDeleteTarget(null);
+    toast({ title: "Passenger removed", description: `${removed?.name || "Passenger"} has been removed.` });
+  };
+
+  // Delete room
+  const handleDeleteRoom = async (roomIndex: number) => {
+    const updatedRooms = rooms.filter((_, i) => i !== roomIndex).map((r, i) => ({
+      ...r,
+      room_number: i + 1,
+      label: `Room ${i + 1}`,
+    }));
+    await saveRooms(updatedRooms);
+    setDeleteTarget(null);
+    toast({ title: "Room removed" });
+  };
+
+  // Add Room — process uploaded files
+  const handleAddRoom = async () => {
+    if (!bookingNumber || addRoomFiles.length === 0) return;
+    setAddRoomProcessing(true);
+    setAddRoomStatus("Reading documents...");
+    try {
+      const filesPayload = await Promise.all(addRoomFiles.map(async af => ({
+        name: af.file.name, mimeType: af.file.type, base64: await fileToBase64(af.file),
+      })));
+
+      const newRoomNumber = rooms.length + 1;
+      const contextMsg = `This is for existing booking ${bookingNumber} (${resortName}) for client ${clientName}. Extract ONLY the passengers, cabin info, and pricing for a NEW additional room (Room ${newRoomNumber}). Do NOT include passengers already in Room 1. ${addRoomMessage}`;
+      setAddRoomStatus("Analyzing with AI...");
+
+      const { data: result, error } = await supabase.functions.invoke("booking-assistant", {
+        body: { message: contextMsg, files: filesPayload, existing_bookings: [], existing_clients: [] },
+      });
+      if (error) throw error;
+
+      const actions = result?.actions || (result?.action ? [{ action: result.action, data: result.data }] : []);
+      if (actions.length > 0) {
+        const d = actions[0].data;
+
+        // Upload files to storage
+        const cs = slugify(d.client_name || clientName);
+        for (const af of addRoomFiles) {
+          await supabase.storage.from("booking-documents").upload(`${cs}/${af.file.name}`, af.file, { upsert: true });
+        }
+
+        const newRoom: RoomData = {
+          room_number: newRoomNumber,
+          label: `Room ${newRoomNumber}`,
+          passengers: d.passengers || [],
+          cabin_number: d.cabin_number || undefined,
+          cabin_category: d.cabin_category || undefined,
+          deck: d.deck || undefined,
+          bed_configuration: d.bed_configuration || undefined,
+          pricing: d.pricing || undefined,
+        };
+        const updatedRooms = [...rooms, newRoom];
+        await saveRooms(updatedRooms);
+        toast({ title: `Room ${newRoomNumber} added!`, description: `${newRoom.passengers.length} passenger(s) extracted.` });
+        setAddRoomOpen(false);
+        setAddRoomFiles([]);
+        setAddRoomMessage("");
+      } else {
+        toast({ title: "No data extracted", description: result?.message || "AI couldn't extract room data.", variant: "destructive" });
+      }
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message || "Failed to add room.", variant: "destructive" });
+    } finally {
+      setAddRoomProcessing(false);
+      setAddRoomStatus("");
+    }
   };
 
   // Re-scan
@@ -494,7 +704,6 @@ const BookingReport = () => {
       });
       if (error) throw error;
 
-      // Process all actions (multi-cabin support)
       const actions = result?.actions || (result?.action ? [{ action: result.action, data: result.data }] : []);
       if (actions.length > 0) {
         for (const act of actions) {
@@ -512,7 +721,7 @@ const BookingReport = () => {
     }
   };
 
-  // Delete
+  // Delete booking
   const handleDeleteBooking = async () => {
     if (!bookingNumber) return;
     setDeletingBooking(true);
@@ -525,26 +734,6 @@ const BookingReport = () => {
       navigate(-1);
     }
     setDeletingBooking(false);
-  };
-
-  // Passenger edit/delete handlers
-  const handleEditPassenger = async (index: number, updatedData: any) => {
-    if (!bookingDetails || !bookingNumber) return;
-    const updatedPassengers = [...bookingDetails.passengers];
-    updatedPassengers[index] = { ...updatedPassengers[index], ...updatedData };
-    await supabase.from("booking_details" as any).update({ passengers: updatedPassengers }).eq("booking_number", bookingNumber);
-    setBookingDetails({ ...bookingDetails, passengers: updatedPassengers });
-    toast({ title: "Passenger updated", description: `${updatedData.name} has been updated.` });
-  };
-
-  const handleDeletePassenger = async (index: number) => {
-    if (!bookingDetails || !bookingNumber) return;
-    const removed = bookingDetails.passengers[index];
-    const updatedPassengers = bookingDetails.passengers.filter((_: any, i: number) => i !== index);
-    await supabase.from("booking_details" as any).update({ passengers: updatedPassengers }).eq("booking_number", bookingNumber);
-    setBookingDetails({ ...bookingDetails, passengers: updatedPassengers });
-    setDeletePassengerIndex(null);
-    toast({ title: "Passenger removed", description: `${removed?.name || "Passenger"} has been removed.` });
   };
 
   // Chat
@@ -579,7 +768,6 @@ const BookingReport = () => {
       });
       if (error) throw error;
 
-      // Process all actions (multi-cabin support)
       const actions = result?.actions || (result?.action ? [{ action: result.action, data: result.data }] : []);
       if (actions.length > 0) {
         for (const act of actions) {
@@ -756,11 +944,12 @@ const BookingReport = () => {
                   } />
                   {bookingDetails?.agency && <DetailRow label="Agency" value={bookingDetails.agency} />}
                   {bookingDetails?.booking_agent && <DetailRow label="Agent" value={bookingDetails.booking_agent} />}
-                  {bookingDetails?.cabin_category && <DetailRow label="Cabin" value={
+                  {/* Only show cabin info at top level if no rooms exist */}
+                  {!hasRooms && bookingDetails?.cabin_category && <DetailRow label="Cabin" value={
                     <span>{bookingDetails.cabin_category}{bookingDetails.cabin_number ? ` — ${bookingDetails.cabin_number}` : ""}</span>
                   } />}
-                  {bookingDetails?.deck && <DetailRow label="Deck" value={bookingDetails.deck} />}
-                  {bookingDetails?.bed_configuration && <DetailRow label="Bed Config" value={bookingDetails.bed_configuration} />}
+                  {!hasRooms && bookingDetails?.deck && <DetailRow label="Deck" value={bookingDetails.deck} />}
+                  {!hasRooms && bookingDetails?.bed_configuration && <DetailRow label="Bed Config" value={bookingDetails.bed_configuration} />}
                   {bookingDetails?.rate_code && <DetailRow label="Rate Code" value={bookingDetails.rate_code} />}
                   {bookingDetails?.room_type && !bookingDetails?.cabin_category && <DetailRow label="Room Type" value={bookingDetails.room_type} />}
                   {bookingDetails?.num_travellers && (
@@ -791,26 +980,31 @@ const BookingReport = () => {
                 </div>
               </Card>
 
-              {/* Passengers Card */}
-              {hasPassengers && (
-                <Card className="overflow-hidden">
-                  <div className="px-5 py-4 border-b border-border">
-                    <h3 className="text-sm font-semibold flex items-center gap-2">
-                      <Users className="h-4 w-4 text-primary" /> Passengers
-                    </h3>
-                  </div>
-                  <CardContent className="p-5 space-y-3">
-                    {bookingDetails!.passengers.map((p: any, i: number) => (
-                      <PassengerCard
-                        key={i}
-                        p={p}
-                        index={i}
-                        onEdit={() => setEditingPassenger({ index: i, data: p })}
-                        onDelete={() => setDeletePassengerIndex(i)}
-                      />
-                    ))}
-                  </CardContent>
-                </Card>
+              {/* Rooms Section */}
+              {hasRooms && (
+                <div className="space-y-4">
+                  {rooms.map((room, roomIndex) => (
+                    <RoomCard
+                      key={roomIndex}
+                      room={room}
+                      roomIndex={roomIndex}
+                      totalRooms={rooms.length}
+                      onEditPassenger={(ri, pi, data) => setEditingPassenger({ roomIndex: ri, passengerIndex: pi, data })}
+                      onDeletePassenger={(ri, pi) => setDeleteTarget({ type: "passenger", roomIndex: ri, passengerIndex: pi })}
+                      onDeleteRoom={(ri) => setDeleteTarget({ type: "room", roomIndex: ri })}
+                    />
+                  ))}
+                  <Button variant="outline" className="w-full gap-2 border-dashed" onClick={() => setAddRoomOpen(true)}>
+                    <Plus className="h-4 w-4" /> Add Room
+                  </Button>
+                </div>
+              )}
+
+              {/* Fallback: show Add Room button even when no rooms exist yet and no legacy passengers */}
+              {!hasRooms && (!bookingDetails?.passengers || !Array.isArray(bookingDetails.passengers) || bookingDetails.passengers.length === 0) && (
+                <Button variant="outline" className="w-full gap-2 border-dashed" onClick={() => setAddRoomOpen(true)}>
+                  <Plus className="h-4 w-4" /> Add Room
+                </Button>
               )}
 
               {/* Port-by-Port Itinerary Card */}
@@ -950,6 +1144,7 @@ const BookingReport = () => {
                   {bookingDetails?.deck && <DetailRow label="Deck" value={bookingDetails.deck} />}
                   {bookingDetails?.duration_nights && <DetailRow label="Duration" value={`${bookingDetails.duration_nights} nights`} />}
                   {bookingDetails?.num_travellers && <DetailRow label="Travellers" value={`${bookingDetails.num_travellers}`} icon={<Users className="h-3 w-3" />} />}
+                  {hasRooms && <DetailRow label="Rooms" value={`${rooms.length}`} icon={<BedDouble className="h-3 w-3" />} />}
                   {tripStart && (
                     <DetailRow label="Dates" value={
                       <span>
@@ -1180,27 +1375,135 @@ const BookingReport = () => {
           open={!!editingPassenger}
           onOpenChange={(o) => { if (!o) setEditingPassenger(null); }}
           passenger={editingPassenger.data}
-          onSave={(data) => handleEditPassenger(editingPassenger.index, data)}
+          onSave={(data) => {
+            handleEditPassenger(editingPassenger.roomIndex, editingPassenger.passengerIndex, data);
+            setEditingPassenger(null);
+          }}
         />
       )}
 
-      {/* Delete Passenger Confirmation */}
-      <AlertDialog open={deletePassengerIndex !== null} onOpenChange={(o) => { if (!o) setDeletePassengerIndex(null); }}>
+      {/* Delete Passenger / Room Confirmation */}
+      <AlertDialog open={deleteTarget !== null} onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Remove Passenger</AlertDialogTitle>
+            <AlertDialogTitle>
+              {deleteTarget?.type === "room" ? "Remove Room" : "Remove Passenger"}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to remove {deletePassengerIndex !== null && bookingDetails?.passengers?.[deletePassengerIndex]?.name ? `"${bookingDetails.passengers[deletePassengerIndex].name}"` : "this passenger"}? This cannot be undone.
+              {deleteTarget?.type === "room"
+                ? `Are you sure you want to remove ${rooms[deleteTarget.roomIndex]?.label || "this room"} and all its passengers? This cannot be undone.`
+                : deleteTarget?.type === "passenger"
+                  ? `Are you sure you want to remove "${rooms[deleteTarget.roomIndex]?.passengers?.[deleteTarget.passengerIndex]?.name || "this passenger"}"? This cannot be undone.`
+                  : ""
+              }
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => deletePassengerIndex !== null && handleDeletePassenger(deletePassengerIndex)}>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (deleteTarget?.type === "passenger") {
+                  handleDeletePassenger(deleteTarget.roomIndex, deleteTarget.passengerIndex);
+                } else if (deleteTarget?.type === "room") {
+                  handleDeleteRoom(deleteTarget.roomIndex);
+                }
+              }}
+            >
               Remove
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Add Room Dialog */}
+      <Dialog open={addRoomOpen} onOpenChange={(o) => { if (!o && !addRoomProcessing) { setAddRoomOpen(false); setAddRoomFiles([]); setAddRoomMessage(""); } }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5 text-primary" /> Add Room {rooms.length + 1}
+            </DialogTitle>
+            <DialogDescription>
+              Upload the booking confirmation for the new room. The AI will extract passenger and cabin details.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-xs mb-2 block">Upload Documents</Label>
+              <input
+                ref={addRoomFileRef}
+                type="file"
+                className="hidden"
+                multiple
+                accept="image/*,.pdf"
+                onChange={(e) => {
+                  const files = Array.from(e.target.files || []);
+                  setAddRoomFiles(prev => [...prev, ...files.map(file => ({
+                    file,
+                    preview: file.type.startsWith("image/") ? URL.createObjectURL(file) : undefined,
+                  }))]);
+                  if (addRoomFileRef.current) addRoomFileRef.current.value = "";
+                }}
+              />
+              <Button
+                variant="outline"
+                className="w-full gap-2 border-dashed h-20"
+                onClick={() => addRoomFileRef.current?.click()}
+                disabled={addRoomProcessing}
+              >
+                <Paperclip className="h-4 w-4" />
+                {addRoomFiles.length > 0 ? `${addRoomFiles.length} file(s) selected` : "Click to upload screenshots or PDFs"}
+              </Button>
+              {addRoomFiles.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {addRoomFiles.map((af, i) => (
+                    <div key={i} className="flex items-center gap-1.5 bg-muted rounded-lg px-2.5 py-1.5 text-xs">
+                      {af.preview ? <img src={af.preview} alt="" className="h-6 w-6 rounded object-cover" /> : <FileText className="h-4 w-4 text-muted-foreground" />}
+                      <span className="max-w-[120px] truncate">{af.file.name}</span>
+                      <button
+                        onClick={() => {
+                          setAddRoomFiles(prev => {
+                            const removed = prev[i];
+                            if (removed.preview) URL.revokeObjectURL(removed.preview);
+                            return prev.filter((_, idx) => idx !== i);
+                          });
+                        }}
+                        className="text-muted-foreground hover:text-foreground"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div>
+              <Label className="text-xs mb-2 block">Additional Instructions (optional)</Label>
+              <Textarea
+                value={addRoomMessage}
+                onChange={e => setAddRoomMessage(e.target.value)}
+                placeholder="e.g. This is for the Johnson family..."
+                className="min-h-[60px]"
+                disabled={addRoomProcessing}
+              />
+            </div>
+            {addRoomProcessing && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" /> <span>{addRoomStatus}</span>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setAddRoomOpen(false); setAddRoomFiles([]); setAddRoomMessage(""); }} disabled={addRoomProcessing}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddRoom} disabled={addRoomProcessing || addRoomFiles.length === 0}>
+              {addRoomProcessing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Process
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
