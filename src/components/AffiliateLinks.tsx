@@ -52,8 +52,8 @@ export function buildDeepLinks(country: CountryCode, propertyName?: string) {
   }
   const q = encodeURIComponent(propertyName);
   return {
-    expedia: EXPEDIA_LINKS[country] + `&destination=${q}`,
-    hotels: HOTELS_LINKS[country] + `&q-destination=${q}`,
+    expedia: EXPEDIA_LINKS[country] + `?destination=${q}`,
+    hotels: HOTELS_LINKS[country] + `?q-destination=${q}`,
     vrbo: VRBO_CJ_BASE + encodeURIComponent(`https://www.vrbo.com/search?query=${propertyName}`),
   };
 }
