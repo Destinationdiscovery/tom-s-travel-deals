@@ -1,59 +1,38 @@
 
 
-# Support Multiple Document Attachments in Quote Builder
+# Email Quote with Provider Choice
 
 ## Overview
 
-Convert the single-document attachment feature to support multiple documents per quote. The current `attachment_url` (text) column will be migrated to `attachment_urls` (text array).
+Replace the single "Send via Outlook" button in the Quote Preview with a dropdown that lets you choose your email provider (Outlook, Gmail, Yahoo, or send directly via Resend API).
 
-## Changes
+## What You'll See
 
-### Database Migration
+The current "Send via Outlook" button will become a split action:
 
-Migrate the column from single text to text array, preserving existing data:
+- **Send Email** (primary button) -- Opens a dropdown with provider choices:
+  - **Outlook** -- Opens Outlook mailto link (current behavior)
+  - **Gmail** -- Opens Gmail compose window in browser
+  - **Yahoo Mail** -- Opens Yahoo compose window in browser
+  - **Send Direct** -- Sends via the existing Resend API integration (no email client needed)
 
-```sql
-ALTER TABLE public.client_quotes ADD COLUMN IF NOT EXISTS attachment_urls text[];
-UPDATE public.client_quotes SET attachment_urls = ARRAY[attachment_url] WHERE attachment_url IS NOT NULL AND attachment_url != '';
-ALTER TABLE public.client_quotes DROP COLUMN IF EXISTS attachment_url;
-```
-
-### File: `src/components/dashboard/QuoteBuilder.tsx`
-
-1. **State change**: Replace `attachmentUrl` (string) with `attachmentUrls` (string array) and keep `uploading` boolean.
-
-2. **Upload handler**: On file select, upload to storage and append the new path to the `attachmentUrls` array (instead of replacing).
-
-3. **Attach Document UI**: Show a list of all attached files, each with a view link and remove (X) button. The "Choose File" button is always visible below the list so you can keep adding more.
-
-4. **Save/load**: Write `attachment_urls` (the array) to the database. On load, restore the array.
-
-5. **QuoteData interface**: Change `attachmentUrl?: string` to `attachmentUrls?: string[]`.
-
-6. **Reset**: Clear to empty array on new quote.
-
-### File: `src/components/dashboard/QuotePreview.tsx`
-
-1. Replace `quote.attachmentUrl` single-document rendering with a loop over `quote.attachmentUrls`, showing each as a clickable download link with a paperclip icon.
+Each option pre-fills the recipient, subject, and body with the quote details and share link, just like the current Outlook button does.
 
 ## Technical Details
 
-### Attach Document Section (updated layout)
+### File: `src/components/dashboard/QuotePreview.tsx`
 
-```
-Attach Document
-  [paperclip] hotel-quote.pdf         [x]
-  [paperclip] transfer-invoice.pdf    [x]
-  [Choose File]
-  PDF, JPG, PNG, or WEBP
-```
+1. Replace the "Send via Outlook" `Button` with a `DropdownMenu` containing the four provider options.
 
-- Each uploaded file gets its own row with view/remove
-- "Choose File" always visible for adding more
-- Upload path: `quotes/{quoteId|timestamp}-{filename}`
+2. Add provider-specific compose URL builders:
+   - **Outlook**: `mailto:` link (existing logic)
+   - **Gmail**: `https://mail.google.com/mail/?view=cm&to=...&su=...&body=...`
+   - **Yahoo**: `https://compose.mail.yahoo.com/?to=...&subject=...&body=...`
+   - **Resend**: Calls the existing `send-email` edge function with the quote template, same as the Email Composer does
 
-### Data Flow
+3. For the Resend "Send Direct" option, add a loading state and toast feedback on success/failure.
 
-- Builder state: `attachmentUrls: string[]`
-- Database column: `attachment_urls text[]`
-- Preview receives the array via `QuoteData.attachmentUrls`
+4. Import `DropdownMenu` components from the existing UI library.
+
+### No database or backend changes required -- this uses the existing `send-email` edge function and email templates.
+
