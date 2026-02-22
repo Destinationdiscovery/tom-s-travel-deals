@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -34,6 +35,35 @@ const statusColors: Record<string, string> = {
   expired: "bg-rose-500/10 text-rose-400 border-rose-500/20",
 };
 
+const QUOTE_STATUSES = ["draft", "sent", "accepted", "booked", "expired"];
+
+const buildClientMap = (quotes: any[], bookings: any[]) => {
+  const map = new Map<string, ClientInfo>();
+  quotes.forEach((q) => {
+    const key = q.client_name.toLowerCase().trim();
+    if (!map.has(key)) {
+      map.set(key, { name: q.client_name, email: q.client_email || "", quoteCount: 0, bookedCount: 0, lastActivity: q.created_at, quotes: [], bookings: [] });
+    }
+    const client = map.get(key)!;
+    if (new Date(q.created_at) > new Date(client.lastActivity)) {
+      client.name = q.client_name;
+      client.lastActivity = q.created_at;
+    }
+    if (q.client_email) client.email = q.client_email;
+    client.quoteCount++;
+    if (q.status === "booked") client.bookedCount++;
+    client.quotes.push(q);
+  });
+  bookings.forEach((b) => {
+    const key = b.client_name.toLowerCase().trim();
+    if (!map.has(key)) {
+      map.set(key, { name: b.client_name, email: b.client_email || "", quoteCount: 0, bookedCount: 0, lastActivity: b.created_at, quotes: [], bookings: [] });
+    }
+    map.get(key)!.bookings.push(b);
+  });
+  return Array.from(map.values()).sort((a, b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime());
+};
+
 const ClientList = ({ onNavigate }: ClientListProps) => {
   const [clients, setClients] = useState<ClientInfo[]>([]);
   const [search, setSearch] = useState("");
@@ -45,47 +75,20 @@ const ClientList = ({ onNavigate }: ClientListProps) => {
   const [newNotes, setNewNotes] = useState("");
   const [saving, setSaving] = useState(false);
 
+  const fetchAll = async () => {
+    const [quotesRes, bookingsRes] = await Promise.all([
+      supabase.from("client_quotes").select("*").order("created_at", { ascending: false }),
+      supabase.from("bookings").select("*").order("event_date", { ascending: false }),
+    ]);
+    return { quotes: quotesRes.data || [], bookings: bookingsRes.data || [] };
+  };
+
   useEffect(() => {
-    const fetchClients = async () => {
-      setLoading(true);
-      const [quotesRes, bookingsRes] = await Promise.all([
-        supabase.from("client_quotes").select("*").order("created_at", { ascending: false }),
-        supabase.from("bookings").select("*").order("event_date", { ascending: false }),
-      ]);
-
-      const quotes = quotesRes.data || [];
-      const bookings = bookingsRes.data || [];
-
-      const map = new Map<string, ClientInfo>();
-      quotes.forEach((q) => {
-        const key = q.client_name.toLowerCase().trim();
-        if (!map.has(key)) {
-          map.set(key, { name: q.client_name, email: q.client_email || "", quoteCount: 0, bookedCount: 0, lastActivity: q.created_at, quotes: [], bookings: [] });
-        }
-        const client = map.get(key)!;
-        // Use the most recent record's casing as display name
-        if (new Date(q.created_at) > new Date(client.lastActivity)) {
-          client.name = q.client_name;
-          client.lastActivity = q.created_at;
-        }
-        if (q.client_email) client.email = q.client_email;
-        client.quoteCount++;
-        if (q.status === "booked") client.bookedCount++;
-        client.quotes.push(q);
-      });
-
-      bookings.forEach((b) => {
-        const key = b.client_name.toLowerCase().trim();
-        if (!map.has(key)) {
-          map.set(key, { name: b.client_name, email: b.client_email || "", quoteCount: 0, bookedCount: 0, lastActivity: b.created_at, quotes: [], bookings: [] });
-        }
-        map.get(key)!.bookings.push(b);
-      });
-
-      setClients(Array.from(map.values()).sort((a, b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
+    setLoading(true);
+    fetchAll().then(({ quotes, bookings }) => {
+      setClients(buildClientMap(quotes, bookings));
       setLoading(false);
-    };
-    fetchClients();
+    });
   }, []);
 
   const handleAddClient = async () => {
@@ -106,33 +109,25 @@ const ClientList = ({ onNavigate }: ClientListProps) => {
     }
     toast({ title: "Client added", description: `${newName.trim()} has been added.` });
     setNewName(""); setNewEmail(""); setNewNotes(""); setAddOpen(false);
-    // re-fetch
-    const [quotesRes, bookingsRes] = await Promise.all([
-      supabase.from("client_quotes").select("*").order("created_at", { ascending: false }),
-      supabase.from("bookings").select("*").order("event_date", { ascending: false }),
-    ]);
-    const quotes = quotesRes.data || [];
-    const bookings = bookingsRes.data || [];
-    const map = new Map<string, ClientInfo>();
-    quotes.forEach((q) => {
-      const key = q.client_name.toLowerCase().trim();
-      if (!map.has(key)) map.set(key, { name: q.client_name, email: q.client_email || "", quoteCount: 0, bookedCount: 0, lastActivity: q.created_at, quotes: [], bookings: [] });
-      const client = map.get(key)!;
-      if (new Date(q.created_at) > new Date(client.lastActivity)) {
-        client.name = q.client_name;
-        client.lastActivity = q.created_at;
-      }
-      if (q.client_email) client.email = q.client_email;
-      client.quoteCount++;
-      if (q.status === "booked") client.bookedCount++;
-      client.quotes.push(q);
-    });
-    bookings.forEach((b) => {
-      const key = b.client_name.toLowerCase().trim();
-      if (!map.has(key)) map.set(key, { name: b.client_name, email: b.client_email || "", quoteCount: 0, bookedCount: 0, lastActivity: b.created_at, quotes: [], bookings: [] });
-      map.get(key)!.bookings.push(b);
-    });
-    setClients(Array.from(map.values()).sort((a, b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()));
+    const { quotes, bookings } = await fetchAll();
+    setClients(buildClientMap(quotes, bookings));
+  };
+
+  const handleStatusChange = async (quoteId: string, newStatus: string) => {
+    const { error } = await supabase.from("client_quotes").update({ status: newStatus } as any).eq("id", quoteId);
+    if (error) {
+      toast({ title: "Error", description: "Failed to update status.", variant: "destructive" });
+      return;
+    }
+    // Update local state
+    setClients((prev) =>
+      prev.map((c) => ({
+        ...c,
+        quotes: c.quotes.map((q) => q.id === quoteId ? { ...q, status: newStatus } : q),
+        bookedCount: c.quotes.reduce((count, q) => count + (q.id === quoteId ? (newStatus === "booked" ? 1 : 0) : (q.status === "booked" ? 1 : 0)), 0),
+      }))
+    );
+    toast({ title: "Status updated", description: `Quote status changed to ${newStatus}.` });
   };
 
   const filtered = search.trim()
@@ -214,7 +209,16 @@ const ClientList = ({ onNavigate }: ClientListProps) => {
                               <span className="text-foreground">{q.resort_name}</span>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Badge variant="outline" className={`text-xs capitalize ${statusColors[q.status] || ""}`}>{q.status}</Badge>
+                              <Select value={q.status} onValueChange={(v) => handleStatusChange(q.id, v)}>
+                                <SelectTrigger className={`h-7 w-[100px] text-xs capitalize border ${statusColors[q.status] || ""}`}>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {QUOTE_STATUSES.map((s) => (
+                                    <SelectItem key={s} value={s} className="text-xs capitalize">{s}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                               {q.total_price > 0 && <span className="text-xs text-muted-foreground">${Number(q.total_price).toLocaleString()}</span>}
                               <span className="text-xs text-muted-foreground">{format(new Date(q.created_at), "MMM d")}</span>
                             </div>

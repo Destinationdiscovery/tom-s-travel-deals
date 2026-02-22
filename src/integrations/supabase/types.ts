@@ -403,6 +403,33 @@ export type Database = {
         }
         Relationships: []
       }
+      quote_templates: {
+        Row: {
+          created_at: string | null
+          currency: string | null
+          id: string
+          inclusions: string[] | null
+          line_items: Json | null
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          inclusions?: string[] | null
+          line_items?: Json | null
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          inclusions?: string[] | null
+          line_items?: Json | null
+          name?: string
+        }
+        Relationships: []
+      }
       search_suggestions: {
         Row: {
           created_at: string
