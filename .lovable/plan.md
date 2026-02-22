@@ -1,38 +1,23 @@
 
 
-# Email Quote with Provider Choice
+# Add Email Button to Quote Preview
 
-## Overview
+## Problem
 
-Replace the single "Send via Outlook" button in the Quote Preview with a dropdown that lets you choose your email provider (Outlook, Gmail, Yahoo, or send directly via Resend API).
+The "Send Email" dropdown button in the Quote Preview only appears when a client email address has been entered. If the email field was left blank, the button is completely hidden -- which is what's happening in your case.
 
-## What You'll See
+## Solution
 
-The current "Send via Outlook" button will become a split action:
-
-- **Send Email** (primary button) -- Opens a dropdown with provider choices:
-  - **Outlook** -- Opens Outlook mailto link (current behavior)
-  - **Gmail** -- Opens Gmail compose window in browser
-  - **Yahoo Mail** -- Opens Yahoo compose window in browser
-  - **Send Direct** -- Sends via the existing Resend API integration (no email client needed)
-
-Each option pre-fills the recipient, subject, and body with the quote details and share link, just like the current Outlook button does.
+Make the "Send Email" dropdown always visible in the Quote Preview action bar (alongside Back, Save, Print/PDF, and Copy Link). When no client email is on file, the email providers (Outlook, Gmail, Yahoo) will open with an empty "to" field so you can type it in manually. The "Send Direct" option will show a toast asking you to add an email first.
 
 ## Technical Details
 
 ### File: `src/components/dashboard/QuotePreview.tsx`
 
-1. Replace the "Send via Outlook" `Button` with a `DropdownMenu` containing the four provider options.
+- Remove the `{quote.clientEmail && (...)}` conditional wrapper around the email `DropdownMenu`
+- The button will always render in the action bar
+- mailto/Gmail/Yahoo links already work fine with an empty "to" -- the compose window just opens without a pre-filled recipient
+- The `sendDirect` function already has a guard that toasts "Client email is required" if missing
 
-2. Add provider-specific compose URL builders:
-   - **Outlook**: `mailto:` link (existing logic)
-   - **Gmail**: `https://mail.google.com/mail/?view=cm&to=...&su=...&body=...`
-   - **Yahoo**: `https://compose.mail.yahoo.com/?to=...&subject=...&body=...`
-   - **Resend**: Calls the existing `send-email` edge function with the quote template, same as the Email Composer does
-
-3. For the Resend "Send Direct" option, add a loading state and toast feedback on success/failure.
-
-4. Import `DropdownMenu` components from the existing UI library.
-
-### No database or backend changes required -- this uses the existing `send-email` edge function and email templates.
+This is a one-line change: removing the conditional wrapper.
 
