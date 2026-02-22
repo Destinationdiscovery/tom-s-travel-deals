@@ -4,6 +4,7 @@ import PhotoGallery from "@/components/review/PhotoGallery";
 
 interface QuoteReviewSectionProps {
   reviewData: any;
+  hideHeader?: boolean;
 }
 
 const RatingBar = ({ label, value }: { label: string; value: number }) => (
@@ -21,7 +22,7 @@ const RatingBar = ({ label, value }: { label: string; value: number }) => (
   </div>
 );
 
-const QuoteReviewSection = ({ reviewData }: QuoteReviewSectionProps) => {
+const QuoteReviewSection = ({ reviewData, hideHeader = false }: QuoteReviewSectionProps) => {
   const functionUrl = useMemo(() => {
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
     return supabaseUrl ? `${supabaseUrl}/functions/v1/place-photos` : "";
@@ -47,17 +48,19 @@ const QuoteReviewSection = ({ reviewData }: QuoteReviewSectionProps) => {
   return (
     <div className="space-y-10 animate-fade-up">
       {/* Header */}
-      <div>
-        <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-3">
-          {propertyName}
-        </h2>
-        {location && (
-          <p className="text-muted-foreground text-lg flex items-center gap-2">
-            <MapPin className="h-4 w-4" />
-            {location}
-          </p>
-        )}
-      </div>
+      {!hideHeader && (
+        <div>
+          <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-3">
+            {propertyName}
+          </h2>
+          {location && (
+            <p className="text-muted-foreground text-lg flex items-center gap-2">
+              <MapPin className="h-4 w-4" />
+              {location}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Two-Column Grid */}
       <div className="grid lg:grid-cols-3 gap-10">

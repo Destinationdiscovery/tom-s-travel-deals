@@ -37,7 +37,7 @@ const GearAdmin = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <div className="print:hidden"><Header /></div>
       <div className="pt-16 flex">
         {!previewMode && (
           <div className="print:hidden">
