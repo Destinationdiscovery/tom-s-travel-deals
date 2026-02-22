@@ -215,16 +215,19 @@ export type Database = {
           flight_details: Json | null
           id: string
           include_review: boolean | null
+          inclusions: string[] | null
           line_items: Json | null
           notes: string | null
           num_travellers: number | null
           resort_name: string
           resort_review_slug: string | null
           review_data: Json | null
+          room_type: string | null
           share_token: string | null
           status: Database["public"]["Enums"]["quote_status"] | null
           total_price: number | null
           updated_at: string
+          valid_until: string | null
         }
         Insert: {
           attachment_urls?: string[] | null
@@ -238,16 +241,19 @@ export type Database = {
           flight_details?: Json | null
           id?: string
           include_review?: boolean | null
+          inclusions?: string[] | null
           line_items?: Json | null
           notes?: string | null
           num_travellers?: number | null
           resort_name: string
           resort_review_slug?: string | null
           review_data?: Json | null
+          room_type?: string | null
           share_token?: string | null
           status?: Database["public"]["Enums"]["quote_status"] | null
           total_price?: number | null
           updated_at?: string
+          valid_until?: string | null
         }
         Update: {
           attachment_urls?: string[] | null
@@ -261,16 +267,19 @@ export type Database = {
           flight_details?: Json | null
           id?: string
           include_review?: boolean | null
+          inclusions?: string[] | null
           line_items?: Json | null
           notes?: string | null
           num_travellers?: number | null
           resort_name?: string
           resort_review_slug?: string | null
           review_data?: Json | null
+          room_type?: string | null
           share_token?: string | null
           status?: Database["public"]["Enums"]["quote_status"] | null
           total_price?: number | null
           updated_at?: string
+          valid_until?: string | null
         }
         Relationships: []
       }
