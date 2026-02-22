@@ -15,6 +15,7 @@ import DealMaker from "@/components/dashboard/DealMaker";
 const GearAdmin = () => {
   const { user, isAdmin } = useAuth();
   const [activeTab, setActiveTab] = useState<DashboardTab>("overview");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     document.title = "Agent HQ - ReviewThenGo";
@@ -37,8 +38,8 @@ const GearAdmin = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <div className="pt-16 flex">
-        <DashboardSidebar activeTab={activeTab} onTabChange={setActiveTab} />
-        <main className="flex-1 p-6 max-w-6xl">
+        <DashboardSidebar activeTab={activeTab} onTabChange={setActiveTab} open={sidebarOpen} onOpenChange={setSidebarOpen} />
+        <main className="flex-1 p-6 max-w-6xl pt-16 md:pt-6">
           {activeTab === "overview" && <DashboardOverview onNavigate={setActiveTab} />}
           {activeTab === "quotes" && <QuoteBuilder />}
           {activeTab === "clients" && <ClientList onNavigate={setActiveTab} />}
