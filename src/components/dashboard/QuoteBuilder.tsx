@@ -516,16 +516,18 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-bold text-foreground">Quote Builder</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Create professional vacation quotes for your clients.
-            {autoSaved && <span className="ml-2 text-emerald-400 inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Auto-saved</span>}
-          </p>
+      {step !== 4 && (
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="font-display text-2xl font-bold text-foreground">Quote Builder</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Create professional vacation quotes for your clients.
+              {autoSaved && <span className="ml-2 text-emerald-400 inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Auto-saved</span>}
+            </p>
+          </div>
+          <Button variant="outline" size="sm" onClick={resetQuote}>New Quote</Button>
         </div>
-        <Button variant="outline" size="sm" onClick={resetQuote}>New Quote</Button>
-      </div>
+      )}
 
       {/* Client Files - grouped quotes */}
       {Object.keys(clientGroups).length > 0 && step === 1 && (
@@ -578,13 +580,15 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
       )}
 
       {/* Step indicators */}
-      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-        {["Resort", "Details", "Pricing", "Preview"].map((s, i) => (
-          <button key={s} onClick={() => setStep(i + 1)} className={`px-3 py-1.5 rounded-full transition-colors ${step === i + 1 ? "bg-primary text-primary-foreground" : "bg-muted hover:bg-muted/80"}`}>
-            {i + 1}. {s}
-          </button>
-        ))}
-      </div>
+      {step !== 4 && (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          {["Resort", "Details", "Pricing", "Preview"].map((s, i) => (
+            <button key={s} onClick={() => setStep(i + 1)} className={`px-3 py-1.5 rounded-full transition-colors ${step === i + 1 ? "bg-primary text-primary-foreground" : "bg-muted hover:bg-muted/80"}`}>
+              {i + 1}. {s}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Step 1: Select Resort */}
       {step === 1 && (
