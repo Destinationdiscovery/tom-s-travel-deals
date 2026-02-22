@@ -16,6 +16,7 @@ const GearAdmin = () => {
   const { user, isAdmin } = useAuth();
   const [activeTab, setActiveTab] = useState<DashboardTab>("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [previewMode, setPreviewMode] = useState(false);
 
   useEffect(() => {
     document.title = "Agent HQ - ReviewThenGo";
@@ -38,10 +39,14 @@ const GearAdmin = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <div className="pt-16 flex">
-        <DashboardSidebar activeTab={activeTab} onTabChange={setActiveTab} open={sidebarOpen} onOpenChange={setSidebarOpen} />
+        {!previewMode && (
+          <div className="print:hidden">
+            <DashboardSidebar activeTab={activeTab} onTabChange={setActiveTab} open={sidebarOpen} onOpenChange={setSidebarOpen} />
+          </div>
+        )}
         <main className="flex-1 p-6 max-w-6xl pt-16 md:pt-6">
           {activeTab === "overview" && <DashboardOverview onNavigate={setActiveTab} />}
-          {activeTab === "quotes" && <QuoteBuilder />}
+          {activeTab === "quotes" && <QuoteBuilder onPreviewMode={setPreviewMode} />}
           {activeTab === "clients" && <ClientList onNavigate={setActiveTab} />}
           {activeTab === "bookings" && <BookingManager />}
           {activeTab === "calendar" && <BookingCalendar />}
