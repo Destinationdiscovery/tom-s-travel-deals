@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-import { Search, ChevronRight, ChevronLeft, Plus, Trash2, Save, Loader2, Users, FileText, Star, MapPin, CalendarIcon, Copy, Upload, X, Paperclip } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Search, ChevronRight, ChevronLeft, Plus, Trash2, Save, Loader2, Users, FileText, Star, MapPin, CalendarIcon, Copy, Upload, X, Paperclip, ArrowUp, ArrowDown, BookmarkPlus, BookOpen, CheckCircle2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useGenerateReview } from "@/hooks/useGenerateReview";
 import { useSearchSuggestions } from "@/hooks/useSearchSuggestions";
 import { toast } from "@/hooks/use-toast";
-import { format } from "date-fns";
+import { format, addDays } from "date-fns";
 import { cn } from "@/lib/utils";
 import QuotePreview from "./QuotePreview";
 import MultiTagInput from "./MultiTagInput";
@@ -60,6 +60,7 @@ export interface QuoteData {
   includeReview: boolean;
   reviewData: any | null;
   attachmentUrls?: string[];
+  validUntil: string;
 }
 
 const INCLUSION_PRESETS = [
@@ -148,7 +149,6 @@ const BookingFromQuoteDialog = ({ open, onOpenChange, quoteData, onSaved }: Book
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
-      // Update quote status to booked
       await supabase.from("client_quotes").update({ status: "booked" } as any).eq("id", quoteData.id);
       toast({ title: "Booking created!", description: `${entries.length} calendar entries added.` });
       onOpenChange(false);
@@ -210,6 +210,10 @@ const QuoteBuilder = () => {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedClient, setSelectedClient] = useState<string>("__new__");
+  const [autoSaved, setAutoSaved] = useState(false);
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [templateName, setTemplateName] = useState("");
+  const [showTemplateSave, setShowTemplateSave] = useState(false);
 
   const [quote, setQuote] = useState<QuoteData>({
     clientName: "", clientEmail: "", resortName: "", resortReviewSlug: "", destination: "",
@@ -217,13 +221,20 @@ const QuoteBuilder = () => {
     flights: [{ ...emptyFlight }], lineItems: [{ ...emptyLineItem }],
     notes: "", currency: "CAD", status: "draft", reviewSummary: "",
     includeReview: false, reviewData: null, attachmentUrls: [],
+    validUntil: format(addDays(new Date(), 14), "yyyy-MM-dd"),
   });
 
   useEffect(() => {
     supabase.from("cached_reviews").select("id, property_name, slug, location, review_data, created_at").order("created_at", { ascending: false }).limit(8)
       .then(({ data }) => setCachedReviews(data || []));
     fetchQuotes();
+    fetchTemplates();
   }, []);
+
+  const fetchTemplates = async () => {
+    const { data } = await supabase.from("quote_templates" as any).select("*").order("created_at", { ascending: false });
+    setTemplates(data || []);
+  };
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -234,6 +245,42 @@ const QuoteBuilder = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Auto-save debounce (30s) - only when editing an existing quote
+  const autoSaveRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (!editingId) return;
+    if (autoSaveRef.current) clearTimeout(autoSaveRef.current);
+    autoSaveRef.current = setTimeout(async () => {
+      if (!quote.clientName.trim() || !quote.resortName.trim()) return;
+      const payload: Record<string, any> = {
+        client_name: quote.clientName,
+        client_email: quote.clientEmail || null,
+        resort_name: quote.resortName,
+        resort_review_slug: quote.resortReviewSlug || null,
+        destination: quote.destination || null,
+        check_in: quote.checkIn || null,
+        check_out: quote.checkOut || null,
+        num_travellers: quote.numTravellers,
+        flight_details: quote.flights,
+        line_items: quote.lineItems,
+        total_price: quote.lineItems.reduce((s, li) => s + (li.amount || 0), 0),
+        currency: quote.currency,
+        notes: quote.notes || null,
+        status: quote.status,
+        include_review: quote.includeReview,
+        review_data: quote.includeReview ? quote.reviewData : null,
+        attachment_urls: attachmentUrls.length > 0 ? attachmentUrls : null,
+        room_type: quote.roomType || null,
+        inclusions: quote.inclusions.length > 0 ? quote.inclusions : [],
+        valid_until: quote.validUntil || null,
+      };
+      await supabase.from("client_quotes").update(payload as any).eq("id", editingId);
+      setAutoSaved(true);
+      setTimeout(() => setAutoSaved(false), 3000);
+    }, 30000);
+    return () => { if (autoSaveRef.current) clearTimeout(autoSaveRef.current); };
+  }, [quote, editingId, attachmentUrls]);
 
   const handleSuggestionClick = (name: string) => {
     setSearchQuery(name);
@@ -246,7 +293,6 @@ const QuoteBuilder = () => {
     setExistingQuotes(data || []);
   };
 
-  // Group quotes by client
   const clientGroups = existingQuotes.reduce<Record<string, { email: string; quotes: any[] }>>((acc, q) => {
     const key = q.client_name;
     if (!acc[key]) acc[key] = { email: q.client_email || "", quotes: [] };
@@ -254,7 +300,6 @@ const QuoteBuilder = () => {
     return acc;
   }, {});
 
-  // Unique clients for dropdown
   const uniqueClients = Object.entries(clientGroups).map(([name, { email }]) => ({ name, email }));
 
   const selectReview = async (r: any) => {
@@ -322,6 +367,9 @@ const QuoteBuilder = () => {
       include_review: quote.includeReview,
       review_data: quote.includeReview ? quote.reviewData : null,
       attachment_urls: attachmentUrls.length > 0 ? attachmentUrls : null,
+      room_type: quote.roomType || null,
+      inclusions: quote.inclusions.length > 0 ? quote.inclusions : [],
+      valid_until: quote.validUntil || null,
     };
 
     let result;
@@ -344,18 +392,18 @@ const QuoteBuilder = () => {
 
   const loadQuote = (q: any) => {
     setEditingId(q.id);
-    const inclusions: string[] = [];
     setQuote({
       clientName: q.client_name, clientEmail: q.client_email || "", resortName: q.resort_name,
       resortReviewSlug: q.resort_review_slug || "", destination: q.destination || "",
       checkIn: q.check_in || "", checkOut: q.check_out || "", numTravellers: q.num_travellers || 2,
-      roomType: "", inclusions, flights: q.flight_details || [{ ...emptyFlight }],
+      roomType: q.room_type || "", inclusions: q.inclusions || [], flights: q.flight_details || [{ ...emptyFlight }],
       lineItems: q.line_items || [{ ...emptyLineItem }], notes: q.notes || "",
       currency: q.currency || "CAD", status: q.status || "draft", shareToken: q.share_token,
       reviewSummary: "",
       includeReview: q.include_review || false,
       reviewData: q.review_data || null,
       attachmentUrls: q.attachment_urls || [],
+      validUntil: q.valid_until || format(addDays(new Date(q.created_at), 14), "yyyy-MM-dd"),
     });
     setAttachmentUrls(q.attachment_urls || []);
     setIncludeReview(q.include_review || false);
@@ -373,6 +421,7 @@ const QuoteBuilder = () => {
       flights: [{ ...emptyFlight }], lineItems: [{ ...emptyLineItem }],
       notes: "", currency: "CAD", status: "draft", reviewSummary: "",
       includeReview: false, reviewData: null, attachmentUrls: [],
+      validUntil: format(addDays(new Date(), 14), "yyyy-MM-dd"),
     });
     setStep(1);
   };
@@ -400,15 +449,52 @@ const QuoteBuilder = () => {
       clientName: q.client_name, clientEmail: q.client_email || "", resortName: q.resort_name,
       resortReviewSlug: q.resort_review_slug || "", destination: q.destination || "",
       checkIn: q.check_in || "", checkOut: q.check_out || "", numTravellers: q.num_travellers || 2,
-      roomType: "", inclusions: [], flights: q.flight_details || [{ ...emptyFlight }],
+      roomType: q.room_type || "", inclusions: q.inclusions || [], flights: q.flight_details || [{ ...emptyFlight }],
       lineItems: q.line_items || [{ ...emptyLineItem }], notes: q.notes || "",
       currency: q.currency || "CAD", status: "draft", reviewSummary: "",
       includeReview: q.include_review || false, reviewData: q.review_data || null,
       attachmentUrls: [],
+      validUntil: format(addDays(new Date(), 14), "yyyy-MM-dd"),
     });
     setIncludeReview(q.include_review || false);
     setStep(2);
     toast({ title: "Quote duplicated", description: "Edit and save as a new quote." });
+  };
+
+  const moveLineItem = (index: number, direction: "up" | "down") => {
+    const newItems = [...quote.lineItems];
+    const swapIndex = direction === "up" ? index - 1 : index + 1;
+    if (swapIndex < 0 || swapIndex >= newItems.length) return;
+    [newItems[index], newItems[swapIndex]] = [newItems[swapIndex], newItems[index]];
+    setQuote({ ...quote, lineItems: newItems });
+  };
+
+  const saveAsTemplate = async () => {
+    if (!templateName.trim()) return;
+    const { error } = await supabase.from("quote_templates" as any).insert({
+      name: templateName.trim(),
+      line_items: quote.lineItems,
+      inclusions: quote.inclusions,
+      currency: quote.currency,
+    } as any);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Template saved!", description: `"${templateName}" is ready to use.` });
+      setTemplateName("");
+      setShowTemplateSave(false);
+      fetchTemplates();
+    }
+  };
+
+  const loadTemplate = (t: any) => {
+    setQuote((prev) => ({
+      ...prev,
+      lineItems: t.line_items || [{ ...emptyLineItem }],
+      inclusions: t.inclusions || [],
+      currency: t.currency || prev.currency,
+    }));
+    toast({ title: "Template loaded", description: `"${t.name}" applied to pricing.` });
   };
 
   const statusColors: Record<string, string> = {
@@ -424,7 +510,10 @@ const QuoteBuilder = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-display text-2xl font-bold text-foreground">Quote Builder</h1>
-          <p className="text-sm text-muted-foreground mt-1">Create professional vacation quotes for your clients.</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Create professional vacation quotes for your clients.
+            {autoSaved && <span className="ml-2 text-emerald-400 inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Auto-saved</span>}
+          </p>
         </div>
         <Button variant="outline" size="sm" onClick={resetQuote}>New Quote</Button>
       </div>
@@ -494,7 +583,6 @@ const QuoteBuilder = () => {
           <CardContent className="p-6 space-y-4">
             <h3 className="font-semibold text-foreground">Search or Select a Resort</h3>
 
-            {/* Include Review checkbox */}
             <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 border border-border">
               <Checkbox id="include-review" checked={includeReview} onCheckedChange={(c) => setIncludeReview(!!c)} />
               <label htmlFor="include-review" className="text-sm font-medium text-foreground cursor-pointer">
@@ -583,7 +671,6 @@ const QuoteBuilder = () => {
               <Badge variant="secondary" className="text-xs">✓ Resort review will be included in quote</Badge>
             )}
 
-            {/* Client file dropdown */}
             {uniqueClients.length > 0 && (
               <div>
                 <Label>Select Existing Client</Label>
@@ -606,6 +693,7 @@ const QuoteBuilder = () => {
               <div><Label>Check-Out</Label><Input type="date" value={quote.checkOut} onChange={(e) => setQuote({ ...quote, checkOut: e.target.value })} /></div>
               <div><Label>Travellers</Label><Input type="number" min={1} value={quote.numTravellers} onChange={(e) => setQuote({ ...quote, numTravellers: parseInt(e.target.value) || 1 })} /></div>
               <div><Label>Room Type</Label><Input value={quote.roomType} onChange={(e) => setQuote({ ...quote, roomType: e.target.value })} placeholder="e.g. Ocean View Suite" /></div>
+              <div><Label>Valid Until</Label><Input type="date" value={quote.validUntil} onChange={(e) => setQuote({ ...quote, validUntil: e.target.value })} /></div>
             </div>
 
             <div>
@@ -657,7 +745,7 @@ const QuoteBuilder = () => {
         <Card>
           <CardContent className="p-6 space-y-5">
             <h3 className="font-semibold text-foreground">Pricing</h3>
-            <div className="flex gap-4 items-end">
+            <div className="flex gap-4 items-end flex-wrap">
               <div className="w-32">
                 <Label>Currency</Label>
                 <Select value={quote.currency} onValueChange={(v) => setQuote({ ...quote, currency: v })}>
@@ -670,6 +758,21 @@ const QuoteBuilder = () => {
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Templates */}
+              {templates.length > 0 && (
+                <div>
+                  <Label>Load Template</Label>
+                  <Select onValueChange={(id) => { const t = templates.find((t: any) => t.id === id); if (t) loadTemplate(t); }}>
+                    <SelectTrigger className="w-[180px]"><SelectValue placeholder="Choose..." /></SelectTrigger>
+                    <SelectContent>
+                      {templates.map((t: any) => (
+                        <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -681,6 +784,15 @@ const QuoteBuilder = () => {
               </div>
               {quote.lineItems.map((li, i) => (
                 <div key={i} className="flex gap-2 items-center">
+                  {/* Reorder buttons */}
+                  <div className="flex flex-col gap-0.5">
+                    <button onClick={() => moveLineItem(i, "up")} disabled={i === 0} className="text-muted-foreground hover:text-foreground disabled:opacity-30">
+                      <ArrowUp className="h-3 w-3" />
+                    </button>
+                    <button onClick={() => moveLineItem(i, "down")} disabled={i === quote.lineItems.length - 1} className="text-muted-foreground hover:text-foreground disabled:opacity-30">
+                      <ArrowDown className="h-3 w-3" />
+                    </button>
+                  </div>
                   <Select value={li.category || ""} onValueChange={(v) => { const lineItems = [...quote.lineItems]; lineItems[i] = { ...li, category: v }; setQuote({ ...quote, lineItems }); }}>
                     <SelectTrigger className="w-[120px] shrink-0"><SelectValue placeholder="Type" /></SelectTrigger>
                     <SelectContent>
@@ -699,8 +811,30 @@ const QuoteBuilder = () => {
                 </div>
               ))}
               <div className="flex justify-end pt-2 border-t border-border">
-                <p className="text-lg font-bold text-foreground">Total: {quote.currency} ${totalPrice.toLocaleString()}</p>
+                <div className="text-right">
+                  <p className="text-lg font-bold text-foreground">Total: {quote.currency} ${totalPrice.toLocaleString()}</p>
+                  {quote.numTravellers > 1 && (
+                    <p className="text-xs text-muted-foreground">${(totalPrice / quote.numTravellers).toLocaleString()} per person</p>
+                  )}
+                </div>
               </div>
+            </div>
+
+            {/* Save as Template */}
+            <div className="flex items-center gap-2">
+              {showTemplateSave ? (
+                <>
+                  <Input value={templateName} onChange={(e) => setTemplateName(e.target.value)} placeholder="Template name..." className="w-48" />
+                  <Button size="sm" onClick={saveAsTemplate} disabled={!templateName.trim()} className="gap-1">
+                    <BookmarkPlus className="h-3 w-3" /> Save
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => setShowTemplateSave(false)}>Cancel</Button>
+                </>
+              ) : (
+                <Button variant="ghost" size="sm" onClick={() => setShowTemplateSave(true)} className="gap-1 text-xs">
+                  <BookmarkPlus className="h-3 w-3" /> Save as Template
+                </Button>
+              )}
             </div>
 
             {/* Attach Document */}

@@ -10,6 +10,18 @@ import type { QuoteData } from "./QuoteBuilder";
 import { format } from "date-fns";
 import QuoteReviewSection from "./QuoteReviewSection";
 
+const AGENT_INFO = {
+  name: "Tom Laracy",
+  email: "tlaracy@travelonly.com",
+  agency: "TravelOnly",
+};
+
+const getNights = (checkIn: string, checkOut: string) => {
+  if (!checkIn || !checkOut) return null;
+  const diff = Math.round((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / 86400000);
+  return diff > 0 ? diff : null;
+};
+
 interface QuotePreviewProps {
   quote: QuoteData;
   totalPrice: number;
@@ -24,6 +36,7 @@ const QuotePreview = ({ quote, totalPrice, onBack, onSave, saving, editingId }: 
   const handlePrint = () => window.print();
 
   const shareUrl = quote.shareToken ? `${window.location.origin}/quote/${quote.shareToken}` : null;
+  const nights = getNights(quote.checkIn, quote.checkOut);
 
   const copyShareLink = () => {
     if (shareUrl) {
@@ -43,7 +56,7 @@ const QuotePreview = ({ quote, totalPrice, onBack, onSave, saving, editingId }: 
     `Travellers: ${quote.numTravellers}\n\n` +
     `Total Price: ${quote.currency} $${totalPrice.toLocaleString()}\n\n` +
     (shareUrl ? `View your full quote online: ${shareUrl}\n\n` : "") +
-    `Let me know if you have any questions!\n\nBest regards`;
+    `Let me know if you have any questions!\n\nBest regards,\n${AGENT_INFO.name}\n${AGENT_INFO.agency}`;
 
   const openOutlook = () => {
     window.open(`mailto:${quote.clientEmail}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`);
@@ -78,10 +91,20 @@ const QuotePreview = ({ quote, totalPrice, onBack, onSave, saving, editingId }: 
 
   const currencySymbol = { CAD: "$", USD: "$", EUR: "€", GBP: "£" }[quote.currency] || "$";
 
+  // Try to get a hero image from review data
+  const heroImage = quote.reviewData?.photos?.[0] || quote.reviewData?.heroImage || null;
+
   return (
     <div className="space-y-4">
       <Card className="print:shadow-none print:border-none" id="quote-preview">
         <CardContent className="p-8 space-y-6">
+          {/* Resort Hero Image */}
+          {heroImage && (
+            <div className="rounded-lg overflow-hidden -mx-2 -mt-2 mb-4">
+              <img src={heroImage} alt={quote.resortName} className="w-full h-48 object-cover" />
+            </div>
+          )}
+
           <div className="flex items-start justify-between">
             <div>
               <h2 className="font-display text-2xl font-bold text-foreground">Vacation Quote</h2>
@@ -108,8 +131,24 @@ const QuotePreview = ({ quote, totalPrice, onBack, onSave, saving, editingId }: 
           )}
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
-            {quote.checkIn && <div><p className="text-muted-foreground text-xs">Check-In</p><p className="font-medium text-foreground">{format(new Date(quote.checkIn), "MMM d, yyyy")}</p></div>}
-            {quote.checkOut && <div><p className="text-muted-foreground text-xs">Check-Out</p><p className="font-medium text-foreground">{format(new Date(quote.checkOut), "MMM d, yyyy")}</p></div>}
+            {quote.checkIn && (
+              <div>
+                <p className="text-muted-foreground text-xs">Check-In</p>
+                <p className="font-medium text-foreground">{format(new Date(quote.checkIn), "MMM d, yyyy")}</p>
+              </div>
+            )}
+            {quote.checkOut && (
+              <div>
+                <p className="text-muted-foreground text-xs">Check-Out</p>
+                <p className="font-medium text-foreground">{format(new Date(quote.checkOut), "MMM d, yyyy")}</p>
+              </div>
+            )}
+            {nights && (
+              <div>
+                <p className="text-muted-foreground text-xs">Duration</p>
+                <p className="font-medium text-foreground">{nights} {nights === 1 ? "night" : "nights"}</p>
+              </div>
+            )}
             <div><p className="text-muted-foreground text-xs">Travellers</p><p className="font-medium text-foreground">{quote.numTravellers}</p></div>
             {quote.roomType && <div><p className="text-muted-foreground text-xs">Room Type</p><p className="font-medium text-foreground">{quote.roomType}</p></div>}
           </div>
@@ -188,6 +227,19 @@ const QuotePreview = ({ quote, totalPrice, onBack, onSave, saving, editingId }: 
               </div>
             </div>
           )}
+
+          {/* Valid Until & Agent Contact Footer */}
+          <div className="border-t border-border pt-4 space-y-2">
+            {quote.validUntil && (
+              <p className="text-xs text-muted-foreground text-center">
+                Quote valid until <span className="font-medium text-foreground">{format(new Date(quote.validUntil + "T00:00:00"), "MMM d, yyyy")}</span>
+              </p>
+            )}
+            <div className="text-center text-xs text-muted-foreground">
+              <p className="font-medium text-foreground">{AGENT_INFO.name}</p>
+              <p>{AGENT_INFO.agency} · {AGENT_INFO.email}</p>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
