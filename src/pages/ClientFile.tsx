@@ -1,10 +1,11 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, CalendarIcon, MapPin, Plane, DollarSign, Users, Hotel, Tag, RefreshCw, Loader2, FileText, Download, Paperclip, Send, X, Image as ImageIcon, ExternalLink, Ship } from "lucide-react";
+import { ArrowLeft, CalendarIcon, MapPin, Plane, DollarSign, Users, Hotel, Tag, RefreshCw, Loader2, FileText, Download, Paperclip, Send, X, Image as ImageIcon, ExternalLink, Ship, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
@@ -122,6 +123,20 @@ const ClientFile = () => {
   const [chatProcessing, setChatProcessing] = useState(false);
   const [chatStatus, setChatStatus] = useState("");
   const chatFileRef = useRef<HTMLInputElement>(null);
+
+  // Delete document
+  const [deletingDocName, setDeletingDocName] = useState<string | null>(null);
+  const deleteDocument = async (fileName: string) => {
+    if (!clientSlug) return;
+    try {
+      await supabase.storage.from("booking-documents").remove([`${clientSlug}/${fileName}`]);
+      setDocuments(prev => prev.filter(d => d.name !== fileName));
+      toast({ title: "Document deleted" });
+    } catch (err: any) {
+      toast({ title: "Error deleting document", description: err.message, variant: "destructive" });
+    }
+    setDeletingDocName(null);
+  };
 
   const imageFiles = documents.filter(d => /\.(jpg|jpeg|png|webp|gif|avif)$/i.test(d.name));
   const otherFiles = documents.filter(d => !/\.(jpg|jpeg|png|webp|gif|avif)$/i.test(d.name));
@@ -661,17 +676,24 @@ const ClientFile = () => {
                   {imageFiles.length > 0 && (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                       {imageFiles.map((doc, i) => (
-                        <button
-                          key={i}
-                          onClick={() => { setLightboxIndex(i); setLightboxOpen(true); }}
-                          className="group relative rounded-xl overflow-hidden border border-border hover:ring-2 hover:ring-primary/50 transition-all aspect-[4/3] focus:outline-none focus:ring-2 focus:ring-primary"
-                        >
-                          <img src={doc.url} alt={doc.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
-                          <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors duration-300" />
-                          <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 via-transparent to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <span className="text-xs text-white font-medium truncate block">{doc.name}</span>
-                          </div>
-                        </button>
+                        <div key={i} className="group relative rounded-xl overflow-hidden border border-border hover:ring-2 hover:ring-primary/50 transition-all aspect-[4/3]">
+                          <button
+                            onClick={() => { setLightboxIndex(i); setLightboxOpen(true); }}
+                            className="w-full h-full focus:outline-none focus:ring-2 focus:ring-primary"
+                          >
+                            <img src={doc.url} alt={doc.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
+                            <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors duration-300" />
+                            <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 via-transparent to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <span className="text-xs text-white font-medium truncate block">{doc.name}</span>
+                            </div>
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setDeletingDocName(doc.name); }}
+                            className="absolute top-2 right-2 h-7 w-7 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/20"
+                          >
+                            <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                          </button>
+                        </div>
                       ))}
                     </div>
                   )}
@@ -681,6 +703,9 @@ const ClientFile = () => {
                       <span className="text-sm flex-1 truncate font-medium">{doc.name}</span>
                       <Button variant="outline" size="sm" className="shrink-0 gap-1.5" onClick={() => getSignedUrl(doc.name)}>
                         <Download className="h-3.5 w-3.5" /> Download
+                      </Button>
+                      <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8" onClick={() => setDeletingDocName(doc.name)}>
+                        <Trash2 className="h-3.5 w-3.5 text-destructive" />
                       </Button>
                     </div>
                   ))}
@@ -744,6 +769,24 @@ const ClientFile = () => {
       />
 
       <Footer />
+
+      {/* Delete Document Confirmation */}
+      <AlertDialog open={!!deletingDocName} onOpenChange={(o) => { if (!o) setDeletingDocName(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete document?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently remove "{deletingDocName}" from storage. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => deletingDocName && deleteDocument(deletingDocName)}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

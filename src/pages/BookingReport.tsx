@@ -380,6 +380,24 @@ const BookingReport = () => {
   const [editingPassenger, setEditingPassenger] = useState<{ roomIndex: number; passengerIndex: number; data: any } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ type: "passenger"; roomIndex: number; passengerIndex: number } | { type: "room"; roomIndex: number } | null>(null);
 
+  // Edit Trip Details
+  const [editDetailsOpen, setEditDetailsOpen] = useState(false);
+  const [editDetailsForm, setEditDetailsForm] = useState<Record<string, any>>({});
+  const [savingDetails, setSavingDetails] = useState(false);
+
+  // Edit Event
+  const [editEventTarget, setEditEventTarget] = useState<Tables<"bookings"> | null>(null);
+  const [editEventForm, setEditEventForm] = useState({ event_date: "", notes: "" });
+  const [savingEvent, setSavingEvent] = useState(false);
+
+  // Delete Document
+  const [deletingDocName, setDeletingDocName] = useState<string | null>(null);
+
+  // Add Extra
+  const [addExtraOpen, setAddExtraOpen] = useState(false);
+  const [newExtraLabel, setNewExtraLabel] = useState("");
+  const [newExtraValue, setNewExtraValue] = useState("");
+
   // Add Room dialog
   const [addRoomOpen, setAddRoomOpen] = useState(false);
   const [addRoomFiles, setAddRoomFiles] = useState<AttachedFile[]>([]);
@@ -527,6 +545,119 @@ const BookingReport = () => {
     const newValue = !event.is_completed;
     await supabase.from("bookings").update({ is_completed: newValue }).eq("id", event.id);
     setEvents(prev => prev.map(e => e.id === event.id ? { ...e, is_completed: newValue } : e));
+  };
+
+  // --- Edit Trip Details ---
+  const openEditDetails = () => {
+    if (!bookingDetails) return;
+    setEditDetailsForm({
+      client_name: bookingDetails.client_name || "",
+      client_email: bookingDetails.client_email || "",
+      supplier: bookingDetails.supplier || "",
+      resort_name: bookingDetails.resort_name || "",
+      destination: bookingDetails.destination || "",
+      room_type: bookingDetails.room_type || "",
+      ship_name: bookingDetails.ship_name || "",
+      cabin_category: bookingDetails.cabin_category || "",
+      cabin_number: bookingDetails.cabin_number || "",
+      deck: bookingDetails.deck || "",
+      bed_configuration: bookingDetails.bed_configuration || "",
+      rate_code: bookingDetails.rate_code || "",
+      agency: bookingDetails.agency || "",
+      booking_agent: bookingDetails.booking_agent || "",
+      booking_status: bookingDetails.booking_status || "",
+      duration_nights: bookingDetails.duration_nights || "",
+      balance_due: bookingDetails.balance_due || "",
+      balance_due_date: bookingDetails.balance_due_date || "",
+    });
+    setEditDetailsOpen(true);
+  };
+
+  const saveEditDetails = async () => {
+    if (!bookingNumber) return;
+    setSavingDetails(true);
+    try {
+      const updateData: Record<string, any> = {};
+      for (const [k, v] of Object.entries(editDetailsForm)) {
+        if (k === "duration_nights" || k === "balance_due") {
+          updateData[k] = v === "" ? null : Number(v);
+        } else {
+          updateData[k] = v === "" ? null : v;
+        }
+      }
+      await supabase.from("booking_details" as any).update(updateData).eq("booking_number", bookingNumber);
+      // Sync to bookings table
+      await supabase.from("bookings").update({
+        client_name: updateData.client_name || undefined,
+        client_email: updateData.client_email,
+        supplier: updateData.supplier,
+      } as any).eq("booking_number", bookingNumber);
+      toast({ title: "Trip details updated" });
+      setEditDetailsOpen(false);
+      await fetchAll();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setSavingDetails(false);
+    }
+  };
+
+  // --- Edit Event ---
+  const openEditEvent = (event: Tables<"bookings">) => {
+    setEditEventForm({ event_date: event.event_date, notes: event.notes || "" });
+    setEditEventTarget(event);
+  };
+
+  const saveEditEvent = async () => {
+    if (!editEventTarget) return;
+    setSavingEvent(true);
+    try {
+      await supabase.from("bookings").update({
+        event_date: editEventForm.event_date,
+        notes: editEventForm.notes || null,
+      }).eq("id", editEventTarget.id);
+      toast({ title: "Event updated" });
+      setEditEventTarget(null);
+      await fetchAll();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setSavingEvent(false);
+    }
+  };
+
+  // --- Delete Document ---
+  const deleteDocument = async (fileName: string) => {
+    try {
+      const cs = slugify(clientName);
+      await supabase.storage.from("booking-documents").remove([`${cs}/${fileName}`]);
+      setDocuments(prev => prev.filter(d => d.name !== fileName));
+      toast({ title: "Document deleted" });
+    } catch (err: any) {
+      toast({ title: "Error deleting document", description: err.message, variant: "destructive" });
+    }
+    setDeletingDocName(null);
+  };
+
+  // --- Extras ---
+  const deleteExtra = async (index: number) => {
+    if (!bookingDetails || !bookingNumber) return;
+    const updated = [...(bookingDetails.extras || [])];
+    updated.splice(index, 1);
+    await supabase.from("booking_details" as any).update({ extras: updated }).eq("booking_number", bookingNumber);
+    setBookingDetails(prev => prev ? { ...prev, extras: updated } : prev);
+    toast({ title: "Extra removed" });
+  };
+
+  const addExtra = async () => {
+    if (!bookingNumber || !newExtraLabel.trim()) return;
+    const updated = [...(bookingDetails?.extras || []), { label: newExtraLabel.trim(), value: newExtraValue.trim() }];
+    await supabase.from("booking_details" as any).update({ extras: updated }).eq("booking_number", bookingNumber);
+    setBookingDetails(prev => prev ? { ...prev, extras: updated } : prev);
+    setNewExtraLabel("");
+    setNewExtraValue("");
+    setAddExtraOpen(false);
+    toast({ title: "Extra added" });
   };
 
   // Smart array merge helpers
@@ -1023,10 +1154,13 @@ const BookingReport = () => {
             <div className="lg:col-span-3 space-y-6">
               {/* Trip Overview Card */}
               <Card className="overflow-hidden">
-                <div className="px-5 py-4 border-b border-border">
+                <div className="px-5 py-4 border-b border-border flex items-center justify-between">
                   <h3 className="text-sm font-semibold flex items-center gap-2">
                     <Hotel className="h-4 w-4 text-primary" /> Trip Overview
                   </h3>
+                  <Button variant="ghost" size="sm" className="gap-1.5" onClick={openEditDetails}>
+                    <Pencil className="h-3.5 w-3.5" /> Edit
+                  </Button>
                 </div>
                 <div className="divide-y divide-border">
                   <DetailRow label="Client" value={
@@ -1058,11 +1192,24 @@ const BookingReport = () => {
                       <span className="text-xs text-muted-foreground uppercase tracking-wider block mb-2">Extras</span>
                       <div className="flex flex-wrap gap-2">
                         {bookingDetails.extras.map((ext: any, i: number) => (
-                          <Badge key={i} variant="secondary" className="gap-1">
+                          <Badge key={i} variant="secondary" className="gap-1 pr-1">
                             <Tag className="h-3 w-3" /> {ext.label}: {ext.value}
+                            <button onClick={() => deleteExtra(i)} className="ml-1 rounded-full hover:bg-destructive/20 p-0.5">
+                              <X className="h-3 w-3 text-destructive" />
+                            </button>
                           </Badge>
                         ))}
+                        <Button variant="ghost" size="sm" className="h-6 text-xs gap-1" onClick={() => setAddExtraOpen(true)}>
+                          <Plus className="h-3 w-3" /> Add
+                        </Button>
                       </div>
+                    </div>
+                  )}
+                  {(!bookingDetails?.extras || !Array.isArray(bookingDetails.extras) || bookingDetails.extras.length === 0) && (
+                    <div className="px-4 py-3">
+                      <Button variant="ghost" size="sm" className="h-6 text-xs gap-1" onClick={() => setAddExtraOpen(true)}>
+                        <Plus className="h-3 w-3" /> Add Extra
+                      </Button>
                     </div>
                   )}
                   {events.some(e => e.notes) && (
@@ -1184,9 +1331,14 @@ const BookingReport = () => {
                                 </span>
                                 {event.notes && <p className="text-xs text-muted-foreground mt-0.5 truncate">{event.notes}</p>}
                               </div>
-                              <span className="text-xs text-muted-foreground whitespace-nowrap pt-0.5">
-                                {format(new Date(event.event_date), "MMM d, yyyy")}
-                              </span>
+                              <div className="flex items-center gap-2 shrink-0">
+                                <span className="text-xs text-muted-foreground whitespace-nowrap pt-0.5">
+                                  {format(new Date(event.event_date), "MMM d, yyyy")}
+                                </span>
+                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => openEditEvent(event)}>
+                                  <Pencil className="h-3 w-3 text-muted-foreground" />
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         ))}
@@ -1211,17 +1363,24 @@ const BookingReport = () => {
                       {imageFiles.length > 0 && (
                         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
                           {imageFiles.map((doc, i) => (
-                            <button
-                              key={i}
-                              onClick={() => { setLightboxIndex(i); setLightboxOpen(true); }}
-                              className="group relative rounded-xl overflow-hidden border border-border hover:ring-2 hover:ring-primary/50 transition-all aspect-[4/3] focus:outline-none focus:ring-2 focus:ring-primary"
-                            >
-                              <img src={doc.url} alt={doc.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
-                              <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors duration-300" />
-                              <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 via-transparent to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <span className="text-xs text-white font-medium truncate block">{doc.name}</span>
-                              </div>
-                            </button>
+                            <div key={i} className="group relative rounded-xl overflow-hidden border border-border hover:ring-2 hover:ring-primary/50 transition-all aspect-[4/3]">
+                              <button
+                                onClick={() => { setLightboxIndex(i); setLightboxOpen(true); }}
+                                className="w-full h-full focus:outline-none focus:ring-2 focus:ring-primary"
+                              >
+                                <img src={doc.url} alt={doc.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
+                                <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors duration-300" />
+                                <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 via-transparent to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <span className="text-xs text-white font-medium truncate block">{doc.name}</span>
+                                </div>
+                              </button>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setDeletingDocName(doc.name); }}
+                                className="absolute top-2 right-2 h-7 w-7 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/20"
+                              >
+                                <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                              </button>
+                            </div>
                           ))}
                         </div>
                       )}
@@ -1231,6 +1390,9 @@ const BookingReport = () => {
                           <span className="text-sm flex-1 truncate font-medium">{doc.name}</span>
                           <Button variant="outline" size="sm" className="shrink-0 gap-1.5" onClick={() => getSignedUrl(doc.name)}>
                             <Download className="h-3.5 w-3.5" /> Download
+                          </Button>
+                          <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8" onClick={() => setDeletingDocName(doc.name)}>
+                            <Trash2 className="h-3.5 w-3.5 text-destructive" />
                           </Button>
                         </div>
                       ))}
@@ -1696,6 +1858,122 @@ const BookingReport = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Edit Trip Details Dialog */}
+      <Dialog open={editDetailsOpen} onOpenChange={setEditDetailsOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Trip Details</DialogTitle>
+            <DialogDescription>Update booking details. Changes sync across all related records.</DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4">
+            {[
+              { key: "client_name", label: "Client Name" },
+              { key: "client_email", label: "Client Email" },
+              { key: "supplier", label: "Supplier" },
+              { key: "resort_name", label: "Resort / Trip Name" },
+              { key: "destination", label: "Destination" },
+              { key: "ship_name", label: "Ship Name" },
+              { key: "room_type", label: "Room Type" },
+              { key: "cabin_category", label: "Cabin Category" },
+              { key: "cabin_number", label: "Cabin Number" },
+              { key: "deck", label: "Deck" },
+              { key: "bed_configuration", label: "Bed Configuration" },
+              { key: "rate_code", label: "Rate Code" },
+              { key: "agency", label: "Agency" },
+              { key: "booking_agent", label: "Booking Agent" },
+              { key: "booking_status", label: "Booking Status" },
+              { key: "duration_nights", label: "Duration (Nights)" },
+              { key: "balance_due", label: "Balance Due" },
+              { key: "balance_due_date", label: "Balance Due Date" },
+            ].map(({ key, label }) => (
+              <div key={key} className="space-y-1">
+                <Label className="text-xs">{label}</Label>
+                <Input
+                  value={editDetailsForm[key] || ""}
+                  onChange={e => setEditDetailsForm(prev => ({ ...prev, [key]: e.target.value }))}
+                />
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDetailsOpen(false)} disabled={savingDetails}>Cancel</Button>
+            <Button onClick={saveEditDetails} disabled={savingDetails}>
+              {savingDetails ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Event Dialog */}
+      <Dialog open={!!editEventTarget} onOpenChange={(o) => { if (!o) setEditEventTarget(null); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Event</DialogTitle>
+            <DialogDescription>Update the date and notes for this event.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <Label className="text-xs">Event Date</Label>
+              <Input type="date" value={editEventForm.event_date} onChange={e => setEditEventForm(prev => ({ ...prev, event_date: e.target.value }))} />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Notes</Label>
+              <Textarea value={editEventForm.notes} onChange={e => setEditEventForm(prev => ({ ...prev, notes: e.target.value }))} placeholder="Optional notes..." />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditEventTarget(null)} disabled={savingEvent}>Cancel</Button>
+            <Button onClick={saveEditEvent} disabled={savingEvent}>
+              {savingEvent ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Extra Dialog */}
+      <Dialog open={addExtraOpen} onOpenChange={setAddExtraOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Add Extra</DialogTitle>
+            <DialogDescription>Add a label/value pair to this booking.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <Label className="text-xs">Label</Label>
+              <Input value={newExtraLabel} onChange={e => setNewExtraLabel(e.target.value)} placeholder="e.g. Beverage Package" />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Value</Label>
+              <Input value={newExtraValue} onChange={e => setNewExtraValue(e.target.value)} placeholder="e.g. Premium" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddExtraOpen(false)}>Cancel</Button>
+            <Button onClick={addExtra} disabled={!newExtraLabel.trim()}>Add</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Document Confirmation */}
+      <AlertDialog open={!!deletingDocName} onOpenChange={(o) => { if (!o) setDeletingDocName(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete document?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently remove "{deletingDocName}" from storage. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => deletingDocName && deleteDocument(deletingDocName)}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
