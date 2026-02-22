@@ -192,7 +192,11 @@ const BookingFromQuoteDialog = ({ open, onOpenChange, quoteData, onSaved }: Book
 };
 
 // --- Main Component ---
-const QuoteBuilder = () => {
+interface QuoteBuilderProps {
+  onPreviewMode?: (active: boolean) => void;
+}
+
+const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
   const [step, setStep] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -245,6 +249,11 @@ const QuoteBuilder = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Notify parent about preview mode
+  useEffect(() => {
+    onPreviewMode?.(step === 4);
+  }, [step, onPreviewMode]);
 
   // Auto-save debounce (30s) - only when editing an existing quote
   const autoSaveRef = useRef<ReturnType<typeof setTimeout> | null>(null);
