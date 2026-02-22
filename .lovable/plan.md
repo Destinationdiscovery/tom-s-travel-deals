@@ -1,102 +1,76 @@
 
 
-# Add Edit & Delete Capabilities to Booking Admin
+# Fix Quote Preview Sidebar & Upgrade Embedded Review
 
-## Overview
+## Problem 1: Sidebar visible in preview/print
+The dashboard sidebar shows alongside the quote preview (step 4) and appears in the printed PDF. The quote preview should take the full width without the sidebar.
 
-Two main areas of work:
-
-1. **Inline editing** for all read-only fields in the Trip Report (BookingReport.tsx) -- client name, email, destination, supplier, resort name, agency, agent, rate code, room type, ship name, duration, booking status, cabin details, extras, and event dates/notes.
-
-2. **Delete attachments** from the Documents & Photos section in both BookingReport and ClientFile.
+## Problem 2: Review looks too simple
+The current `QuoteReviewSection` is a condensed flat list. You want it to match the rich layout from the client-facing review page (photos, ratings card, location map, what travelers say, things to do, travel tips, best for tags) -- minus all affiliate links, "Ready to Book?" cards, "Search on Expedia" banners, and "Save" buttons.
 
 ---
 
-## 1. Editable Trip Overview Fields (BookingReport.tsx)
+## Changes
 
-Currently the "Trip Overview" card and "Quick Facts" sidebar display data as read-only `DetailRow` components. The plan is to add an "Edit Trip Details" button that opens a dialog with all top-level booking fields pre-populated, letting you change any value and save.
+### 1. Hide sidebar when on Preview step (`GearAdmin.tsx`)
+- When the Quote Builder is on step 4 (Preview), hide the sidebar entirely and let the main content go full-width
+- Pass a `fullWidth` flag from `QuoteBuilder` up to `GearAdmin` so it knows to hide the sidebar
+- Add `print:hidden` to the sidebar so it never appears in PDF output
 
-### What changes
+### 2. QuoteBuilder tells parent about preview mode (`QuoteBuilder.tsx`)
+- Accept an optional `onPreviewMode?: (active: boolean) => void` callback
+- Call it whenever `step` changes to/from 4
+- GearAdmin uses this to toggle sidebar visibility
 
-- Add a new `EditBookingDialog` component inside BookingReport.tsx
-- It will contain form fields for: client name, client email, supplier, resort name, destination, room type, ship name, cabin category, cabin number, deck, bed configuration, rate code, agency, booking agent, booking status, duration (nights), balance due, balance due date
-- An "Edit" (pencil) button will be added to the Trip Overview card header
-- On save, it updates the `booking_details` row and also updates corresponding `bookings` rows (client_name, client_email, supplier) so everything stays in sync
-- After save, `fetchAll()` is called to refresh the page
+### 3. Rebuild `QuoteReviewSection` to match `AIReviewResult` layout (`QuoteReviewSection.tsx`)
+Replace the current condensed layout with the full rich review, reusing the same sub-components from `AIReviewResult`:
+- **Header**: Property name, location, star rating, "Compiled from Real Traveler Reviews" badge
+- **Summary card**: Overall rating stars + summary text (no Expedia banner)
+- **Photo gallery**: Using `PhotoGallery` component with lightbox (if `photoReferences` exist in review data)
+- **Rating Breakdown card**: With rating bars and "Best For" tags
+- **What Travelers Say**: Full paragraphs
+- **Things to Do Nearby**: Activity cards with photos (no "Book this" links, no "Explore more" Expedia link)
+- **Travel Tips**: Numbered list
+- **Location Map**: Embedded Google Maps iframe
 
-### Events Timeline -- editable dates and notes
+**Stripped out** (not shown in quote):
+- All `InlineAffiliateCTA` / "Planning a trip?" / "Search on Expedia" banners
+- `AffiliateLinks` sidebar ("Ready to Book?" with Expedia, Hotels.com, VRBO links)
+- `SaveReviewButton` / "Search Another Property" button
+- Any external booking links on Things to Do cards
 
-- Each event in the timeline will get a small pencil icon
-- Clicking it opens a mini dialog to edit the event date and notes
-- Saves directly to the `bookings` table
-
-### Extras -- edit and delete
-
-- Each extras badge gets a small X to delete it
-- An "+ Add Extra" button is added to add new label/value pairs
-
----
-
-## 2. Delete Attachments (BookingReport.tsx + ClientFile.tsx)
-
-### BookingReport.tsx -- Documents & Photos card
-
-- Add a delete (trash) button next to each document and photo
-- Clicking triggers a confirmation dialog
-- On confirm, deletes the file from the `booking-documents` storage bucket using `supabase.storage.from("booking-documents").remove([path])`
-- Refreshes the documents list
-
-### ClientFile.tsx -- Document gallery
-
-- Same pattern: add a delete button on each file/image tile
-- Confirmation dialog before deletion
-- Removes from storage and refreshes
+### 4. Public quote page review (`PublicQuote.tsx`)
+- Update `PublicQuote.tsx` to use the same upgraded `QuoteReviewSection` so clients see the rich review too
 
 ---
 
 ## Technical Details
 
-### New state variables in BookingReport.tsx
-- `editDetailsOpen` (boolean) -- controls the edit dialog
-- `editDetailsForm` (object) -- holds all editable fields
-- `editEventTarget` (object | null) -- event being edited
-- `deletingDocName` (string | null) -- document pending deletion confirmation
+### `src/pages/GearAdmin.tsx`
+- Add `previewMode` state
+- Pass `onPreviewMode` to `QuoteBuilder`
+- Conditionally hide `DashboardSidebar` when `previewMode` is true
+- Add `print:hidden` class to sidebar wrapper
 
-### EditBookingDialog fields
-```text
-client_name, client_email, supplier, resort_name, destination,
-room_type, ship_name, cabin_category, cabin_number, deck,
-bed_configuration, rate_code, agency, booking_agent,
-booking_status, duration_nights, balance_due, balance_due_date
-```
+### `src/components/dashboard/QuoteBuilder.tsx`
+- Accept `onPreviewMode` prop
+- `useEffect` on `step` to call `onPreviewMode(step === 4)`
 
-### Save logic for trip details
-```typescript
-// Update booking_details
-await supabase.from("booking_details").update(editDetailsForm).eq("booking_number", bookingNumber);
+### `src/components/dashboard/QuoteReviewSection.tsx`
+- Full rewrite to render the rich review layout matching `AIReviewResult`
+- Import `PhotoGallery` and render photos
+- Render `RatingBar` components for rating breakdown
+- Render "What Travelers Say" paragraphs
+- Render Things to Do cards (without affiliate links)
+- Render Travel Tips numbered list
+- Render Location Map iframe
+- Render "Best For" tags
+- Compute `functionUrl` from `VITE_SUPABASE_URL` for photo proxying
 
-// Sync client_name/email/supplier to bookings table
-await supabase.from("bookings").update({
-  client_name: editDetailsForm.client_name,
-  client_email: editDetailsForm.client_email,
-  supplier: editDetailsForm.supplier,
-}).eq("booking_number", bookingNumber);
-```
-
-### Delete document logic
-```typescript
-const deleteDocument = async (fileName: string) => {
-  const clientSlug = slugify(clientName);
-  await supabase.storage.from("booking-documents").remove([`${clientSlug}/${fileName}`]);
-  setDocuments(prev => prev.filter(d => d.name !== fileName));
-  toast({ title: "Document deleted" });
-};
-```
+### `src/pages/PublicQuote.tsx`
+- No structural changes needed -- it already uses `QuoteReviewSection`, so it inherits the upgrade automatically
 
 ### Files modified
-- **src/pages/BookingReport.tsx** -- Add EditBookingDialog, edit event dialog, delete document buttons, extras management
-- **src/pages/ClientFile.tsx** -- Add delete document buttons with confirmation
-
-### No database migrations needed
-All editable fields already exist in the `booking_details` and `bookings` tables. Storage deletion uses existing bucket policies (admin-only).
-
+- `src/pages/GearAdmin.tsx`
+- `src/components/dashboard/QuoteBuilder.tsx`
+- `src/components/dashboard/QuoteReviewSection.tsx`
