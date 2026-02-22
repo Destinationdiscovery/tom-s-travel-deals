@@ -199,24 +199,22 @@ const QuotePreview = ({ quote, totalPrice, onBack, onSave, saving, editingId }: 
         </Button>
         <Button variant="outline" onClick={handlePrint} className="gap-2"><Download className="h-4 w-4" /> Print / PDF</Button>
         <Button variant="outline" onClick={copyShareLink} className="gap-2"><Link2 className="h-4 w-4" /> Copy Link</Button>
-        {quote.clientEmail && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button className="gap-2">
-                {sendingDirect ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
-                Send Email <ChevronDown className="h-3 w-3" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-popover">
-              <DropdownMenuItem onClick={openOutlook}><Mail className="h-4 w-4 mr-2" /> Outlook</DropdownMenuItem>
-              <DropdownMenuItem onClick={openGmail}><Mail className="h-4 w-4 mr-2" /> Gmail</DropdownMenuItem>
-              <DropdownMenuItem onClick={openYahoo}><Mail className="h-4 w-4 mr-2" /> Yahoo Mail</DropdownMenuItem>
-              <DropdownMenuItem onClick={sendDirect} disabled={sendingDirect}>
-                <Send className="h-4 w-4 mr-2" /> Send Direct {sendingDirect && <Loader2 className="h-3 w-3 ml-1 animate-spin" />}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button className="gap-2">
+              {sendingDirect ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
+              Send Email <ChevronDown className="h-3 w-3" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="bg-popover">
+            <DropdownMenuItem onClick={openOutlook}><Mail className="h-4 w-4 mr-2" /> Outlook</DropdownMenuItem>
+            <DropdownMenuItem onClick={openGmail}><Mail className="h-4 w-4 mr-2" /> Gmail</DropdownMenuItem>
+            <DropdownMenuItem onClick={openYahoo}><Mail className="h-4 w-4 mr-2" /> Yahoo Mail</DropdownMenuItem>
+            <DropdownMenuItem onClick={sendDirect} disabled={sendingDirect}>
+              <Send className="h-4 w-4 mr-2" /> Send Direct {sendingDirect && <Loader2 className="h-3 w-3 ml-1 animate-spin" />}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
