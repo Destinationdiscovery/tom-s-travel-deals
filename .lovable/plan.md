@@ -1,76 +1,72 @@
 
 
-# Fix Quote Preview Sidebar & Upgrade Embedded Review
+# Professional Quote Output Overhaul
 
-## Problem 1: Sidebar visible in preview/print
-The dashboard sidebar shows alongside the quote preview (step 4) and appears in the printed PDF. The quote preview should take the full width without the sidebar.
+## Problems Identified
 
-## Problem 2: Review looks too simple
-The current `QuoteReviewSection` is a condensed flat list. You want it to match the rich layout from the client-facing review page (photos, ratings card, location map, what travelers say, things to do, travel tips, best for tags) -- minus all affiliate links, "Ready to Book?" cards, "Search on Expedia" banners, and "Save" buttons.
+1. **"Quote Builder" header, step tabs, and "New Quote" button** all appear in the preview and get printed in PDFs
+2. **Duplicate resort name** -- the quote card shows "Hotel Sonya / Rome, Italy" and then the embedded review repeats "Hotel Sonya / Rome, Italy" again right below
+3. **No print styles** -- the site header, sidebar, and other UI chrome all appear in the PDF; text gets cut off across pages
+4. **Email is plain text** -- when sent via "Send Direct" (Resend) or opened in Outlook/Gmail, the email is just flat text with no formatting
 
 ---
 
-## Changes
+## Solution
 
-### 1. Hide sidebar when on Preview step (`GearAdmin.tsx`)
-- When the Quote Builder is on step 4 (Preview), hide the sidebar entirely and let the main content go full-width
-- Pass a `fullWidth` flag from `QuoteBuilder` up to `GearAdmin` so it knows to hide the sidebar
-- Add `print:hidden` to the sidebar so it never appears in PDF output
+### 1. Hide builder chrome in preview (QuoteBuilder.tsx)
 
-### 2. QuoteBuilder tells parent about preview mode (`QuoteBuilder.tsx`)
-- Accept an optional `onPreviewMode?: (active: boolean) => void` callback
-- Call it whenever `step` changes to/from 4
-- GearAdmin uses this to toggle sidebar visibility
+When `step === 4`, hide:
+- The "Quote Builder" / "Create professional vacation quotes" header block
+- The step indicator tabs (1. Resort, 2. Details, etc.)
+- The "New Quote" button
 
-### 3. Rebuild `QuoteReviewSection` to match `AIReviewResult` layout (`QuoteReviewSection.tsx`)
-Replace the current condensed layout with the full rich review, reusing the same sub-components from `AIReviewResult`:
-- **Header**: Property name, location, star rating, "Compiled from Real Traveler Reviews" badge
-- **Summary card**: Overall rating stars + summary text (no Expedia banner)
-- **Photo gallery**: Using `PhotoGallery` component with lightbox (if `photoReferences` exist in review data)
-- **Rating Breakdown card**: With rating bars and "Best For" tags
-- **What Travelers Say**: Full paragraphs
-- **Things to Do Nearby**: Activity cards with photos (no "Book this" links, no "Explore more" Expedia link)
-- **Travel Tips**: Numbered list
-- **Location Map**: Embedded Google Maps iframe
+These elements will get a conditional render so they only show when `step !== 4`.
 
-**Stripped out** (not shown in quote):
-- All `InlineAffiliateCTA` / "Planning a trip?" / "Search on Expedia" banners
-- `AffiliateLinks` sidebar ("Ready to Book?" with Expedia, Hotels.com, VRBO links)
-- `SaveReviewButton` / "Search Another Property" button
-- Any external booking links on Things to Do cards
+### 2. Remove duplicate resort name (QuoteReviewSection.tsx)
 
-### 4. Public quote page review (`PublicQuote.tsx`)
-- Update `PublicQuote.tsx` to use the same upgraded `QuoteReviewSection` so clients see the rich review too
+Add an optional `hideHeader` prop to `QuoteReviewSection`. When `true`, the big property name and location header at the top of the review section is skipped (since QuotePreview already shows it). Both `QuotePreview.tsx` and `PublicQuote.tsx` will pass `hideHeader={true}`.
+
+### 3. Add print styles (index.css + component classes)
+
+Add a `@media print` block to `index.css` that:
+- Hides the site `header` (fixed nav bar)
+- Hides all elements with `print:hidden` (action buttons already have this)
+- Sets white background, removes shadows/borders for clean output
+- Adds proper page-break rules: `break-inside: avoid` on cards and sections so content doesn't get sliced mid-element
+- Forces the quote preview to full-width with no padding from the layout
+
+Also add `print:hidden` to the Header component in `GearAdmin.tsx`.
+
+### 4. HTML email for "Send Direct" (send-email edge function + QuotePreview.tsx)
+
+**QuotePreview.tsx**: Build an `html` string version of the quote (inline-styled HTML table layout) containing:
+- Branded header with ReviewThenGo colors
+- Resort name, destination, dates, travellers
+- Pricing table with line items and total
+- Inclusions as styled badges
+- Notes
+- "View Full Quote" button linking to the share URL
+- Agent contact footer
+
+Pass this `html` field alongside `text` to the edge function.
+
+**send-email/index.ts**: Accept an optional `html` parameter and pass it to Resend's API as the `html` field. This makes the email render beautifully in all clients.
+
+The mailto/Gmail/Yahoo links will keep using plain text (that's a browser limitation), but they'll include the share URL prominently so clients click through to the polished web version.
 
 ---
 
 ## Technical Details
 
-### `src/pages/GearAdmin.tsx`
-- Add `previewMode` state
-- Pass `onPreviewMode` to `QuoteBuilder`
-- Conditionally hide `DashboardSidebar` when `previewMode` is true
-- Add `print:hidden` class to sidebar wrapper
-
-### `src/components/dashboard/QuoteBuilder.tsx`
-- Accept `onPreviewMode` prop
-- `useEffect` on `step` to call `onPreviewMode(step === 4)`
-
-### `src/components/dashboard/QuoteReviewSection.tsx`
-- Full rewrite to render the rich review layout matching `AIReviewResult`
-- Import `PhotoGallery` and render photos
-- Render `RatingBar` components for rating breakdown
-- Render "What Travelers Say" paragraphs
-- Render Things to Do cards (without affiliate links)
-- Render Travel Tips numbered list
-- Render Location Map iframe
-- Render "Best For" tags
-- Compute `functionUrl` from `VITE_SUPABASE_URL` for photo proxying
-
-### `src/pages/PublicQuote.tsx`
-- No structural changes needed -- it already uses `QuoteReviewSection`, so it inherits the upgrade automatically
-
 ### Files modified
-- `src/pages/GearAdmin.tsx`
-- `src/components/dashboard/QuoteBuilder.tsx`
-- `src/components/dashboard/QuoteReviewSection.tsx`
+
+- **`src/components/dashboard/QuoteBuilder.tsx`** -- Wrap header/steps in `{step !== 4 && (...)}`
+- **`src/components/dashboard/QuoteReviewSection.tsx`** -- Add `hideHeader?: boolean` prop, conditionally skip the property name/location header block
+- **`src/components/dashboard/QuotePreview.tsx`** -- Pass `hideHeader` to `QuoteReviewSection`; build HTML email body string; pass `html` to send-email
+- **`src/pages/PublicQuote.tsx`** -- Pass `hideHeader` to `QuoteReviewSection`
+- **`src/pages/GearAdmin.tsx`** -- Add `print:hidden` to the Header wrapper
+- **`src/index.css`** -- Add `@media print` rules for clean PDF output
+- **`supabase/functions/send-email/index.ts`** -- Accept and forward `html` field to Resend API
+
+### No new dependencies needed
+
