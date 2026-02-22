@@ -1,7 +1,9 @@
-import { ChevronLeft, Download, Link2, Mail, Save, Loader2, Paperclip, ExternalLink } from "lucide-react";
+import { useState } from "react";
+import { ChevronLeft, Download, Link2, Mail, Save, Loader2, Paperclip, ExternalLink, ChevronDown, Send } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { QuoteData } from "./QuoteBuilder";
@@ -18,6 +20,7 @@ interface QuotePreviewProps {
 }
 
 const QuotePreview = ({ quote, totalPrice, onBack, onSave, saving, editingId }: QuotePreviewProps) => {
+  const [sendingDirect, setSendingDirect] = useState(false);
   const handlePrint = () => window.print();
 
   const shareUrl = quote.shareToken ? `${window.location.origin}/quote/${quote.shareToken}` : null;
@@ -31,19 +34,46 @@ const QuotePreview = ({ quote, totalPrice, onBack, onSave, saving, editingId }: 
     }
   };
 
-  const openInOutlook = () => {
-    const subject = encodeURIComponent(`Your Vacation Quote — ${quote.resortName}`);
-    const body = encodeURIComponent(
-      `Hi ${quote.clientName},\n\nPlease find your vacation quote details below:\n\n` +
-      `Resort: ${quote.resortName}\n` +
-      `Destination: ${quote.destination}\n` +
-      (quote.checkIn ? `Dates: ${quote.checkIn} to ${quote.checkOut}\n` : "") +
-      `Travellers: ${quote.numTravellers}\n\n` +
-      `Total Price: ${quote.currency} $${totalPrice.toLocaleString()}\n\n` +
-      (shareUrl ? `View your full quote online: ${shareUrl}\n\n` : "") +
-      `Let me know if you have any questions!\n\nBest regards`
-    );
-    window.open(`mailto:${quote.clientEmail}?subject=${subject}&body=${body}`);
+  const emailSubject = `Your Vacation Quote — ${quote.resortName}`;
+  const emailBody =
+    `Hi ${quote.clientName},\n\nPlease find your vacation quote details below:\n\n` +
+    `Resort: ${quote.resortName}\n` +
+    `Destination: ${quote.destination}\n` +
+    (quote.checkIn ? `Dates: ${quote.checkIn} to ${quote.checkOut}\n` : "") +
+    `Travellers: ${quote.numTravellers}\n\n` +
+    `Total Price: ${quote.currency} $${totalPrice.toLocaleString()}\n\n` +
+    (shareUrl ? `View your full quote online: ${shareUrl}\n\n` : "") +
+    `Let me know if you have any questions!\n\nBest regards`;
+
+  const openOutlook = () => {
+    window.open(`mailto:${quote.clientEmail}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`);
+  };
+
+  const openGmail = () => {
+    window.open(`https://mail.google.com/mail/?view=cm&to=${encodeURIComponent(quote.clientEmail || "")}&su=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`);
+  };
+
+  const openYahoo = () => {
+    window.open(`https://compose.mail.yahoo.com/?to=${encodeURIComponent(quote.clientEmail || "")}&subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`);
+  };
+
+  const sendDirect = async () => {
+    if (!quote.clientEmail) {
+      toast({ title: "No email", description: "Client email is required to send directly.", variant: "destructive" });
+      return;
+    }
+    setSendingDirect(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-email", {
+        body: { to: quote.clientEmail, subject: emailSubject, text: emailBody },
+      });
+      if (error) throw error;
+      toast({ title: "Email sent!", description: `Quote emailed to ${quote.clientEmail}.` });
+    } catch (err: any) {
+      toast({ title: "Send failed", description: err.message || "Could not send email.", variant: "destructive" });
+    } finally {
+      setSendingDirect(false);
+    }
   };
 
   const currencySymbol = { CAD: "$", USD: "$", EUR: "€", GBP: "£" }[quote.currency] || "$";
@@ -170,7 +200,22 @@ const QuotePreview = ({ quote, totalPrice, onBack, onSave, saving, editingId }: 
         <Button variant="outline" onClick={handlePrint} className="gap-2"><Download className="h-4 w-4" /> Print / PDF</Button>
         <Button variant="outline" onClick={copyShareLink} className="gap-2"><Link2 className="h-4 w-4" /> Copy Link</Button>
         {quote.clientEmail && (
-          <Button onClick={openInOutlook} className="gap-2"><Mail className="h-4 w-4" /> Send via Outlook</Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="gap-2">
+                {sendingDirect ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
+                Send Email <ChevronDown className="h-3 w-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="bg-popover">
+              <DropdownMenuItem onClick={openOutlook}><Mail className="h-4 w-4 mr-2" /> Outlook</DropdownMenuItem>
+              <DropdownMenuItem onClick={openGmail}><Mail className="h-4 w-4 mr-2" /> Gmail</DropdownMenuItem>
+              <DropdownMenuItem onClick={openYahoo}><Mail className="h-4 w-4 mr-2" /> Yahoo Mail</DropdownMenuItem>
+              <DropdownMenuItem onClick={sendDirect} disabled={sendingDirect}>
+                <Send className="h-4 w-4 mr-2" /> Send Direct {sendingDirect && <Loader2 className="h-3 w-3 ml-1 animate-spin" />}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </div>
     </div>
