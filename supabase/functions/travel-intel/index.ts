@@ -39,7 +39,8 @@ Return your response as valid JSON only (no markdown, no code blocks):
       "source": "Government or organization name",
       "level": "Warning level text",
       "summary": "Brief summary of advisory",
-      "details": "More detailed explanation"
+      "details": "More detailed explanation",
+      "url": "https://direct-link-to-the-official-advisory-page"
     }
   ],
   "healthAlerts": ["Current health alert 1..."],
@@ -60,7 +61,8 @@ Return your response as valid JSON only (no markdown, no code blocks):
       "summary": "2-3 sentence summary of the story",
       "source": "News outlet name",
       "date": "Approximate date (e.g., January 2026)",
-      "category": "Tourism" or "Safety" or "Infrastructure" or "Culture" or "Policy" or "Weather" or "Events"
+      "category": "Tourism" or "Safety" or "Infrastructure" or "Culture" or "Policy" or "Weather" or "Events",
+      "url": "https://direct-link-to-the-full-article"
     }
   ]
 }

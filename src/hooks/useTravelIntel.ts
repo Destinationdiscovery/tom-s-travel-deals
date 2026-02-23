@@ -19,6 +19,7 @@ export interface Advisory {
   level: string;
   summary: string;
   details: string;
+  url?: string;
 }
 
 export interface AdvisoriesData {
@@ -35,6 +36,7 @@ export interface NewsArticle {
   source: string;
   date: string;
   category: string;
+  url?: string;
 }
 
 export interface NewsData {
