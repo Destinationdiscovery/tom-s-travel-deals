@@ -123,7 +123,13 @@ export const AdvisoriesResult = ({ data }: { data: AdvisoriesData }) => (
       {data.advisories?.map((adv, i) => (
         <div key={i} className="mt-5 p-4 rounded-xl bg-muted/50">
           <p className="text-xs text-primary font-medium mb-1">{adv.source} — {adv.level}</p>
-          <p className="font-semibold text-sm mb-1">{adv.summary}</p>
+          {adv.url ? (
+            <a href={adv.url} target="_blank" rel="noopener noreferrer" className="font-semibold text-sm mb-1 text-primary hover:underline inline-flex items-center gap-1">
+              {adv.summary} <ExternalLink className="h-3.5 w-3.5 shrink-0" />
+            </a>
+          ) : (
+            <p className="font-semibold text-sm mb-1">{adv.summary}</p>
+          )}
           <p className="text-sm text-muted-foreground">{adv.details}</p>
         </div>
       ))}
@@ -141,7 +147,13 @@ export const NewsResult = ({ data }: { data: NewsData }) => (
         <div className="flex items-start justify-between gap-3">
           <div>
             <span className="inline-block text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary mb-2">{article.category}</span>
-            <h3 className="font-display font-bold text-lg leading-snug">{article.title}</h3>
+            {article.url ? (
+              <a href={article.url} target="_blank" rel="noopener noreferrer" className="font-display font-bold text-lg leading-snug text-primary hover:underline inline-flex items-center gap-1.5">
+                {article.title} <ExternalLink className="h-4 w-4 shrink-0" />
+              </a>
+            ) : (
+              <h3 className="font-display font-bold text-lg leading-snug">{article.title}</h3>
+            )}
             <p className="text-sm text-muted-foreground mt-2">{article.summary}</p>
             <p className="text-xs text-muted-foreground mt-3">{article.source} · {article.date}</p>
           </div>
