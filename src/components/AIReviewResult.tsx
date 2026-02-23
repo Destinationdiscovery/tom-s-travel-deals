@@ -136,9 +136,6 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview, onReviewReady }
                   </p>
                 </div>
                 <p className="text-lg text-foreground leading-relaxed">{data.summary}</p>
-                <div className="mt-4">
-                  <InlineAffiliateCTA propertyName={data.propertyName} variant="banner" />
-                </div>
               </div>
 
               {/* 2. Photo Gallery */}
