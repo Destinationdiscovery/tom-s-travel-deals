@@ -1,14 +1,14 @@
 import { useState } from "react";
-import { ChevronLeft, Download, Link2, Mail, Save, Loader2, Paperclip, ExternalLink, ChevronDown, Send } from "lucide-react";
+import { ChevronLeft, Download, Link2, Mail, Save, Loader2, ChevronDown, Send } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { QuoteData } from "./QuoteBuilder";
 import { format } from "date-fns";
 import QuoteReviewSection from "./QuoteReviewSection";
+import TripDetailsCard from "./TripDetailsCard";
 
 const AGENT_INFO = {
   name: "Tom Laracy",
@@ -175,103 +175,21 @@ const QuotePreview = ({ quote, totalPrice, onBack, onSave, saving, editingId }: 
             <QuoteReviewSection reviewData={quote.reviewData} hideHeader />
           )}
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
-            {quote.checkIn && (
-              <div>
-                <p className="text-muted-foreground text-xs">Check-In</p>
-                <p className="font-medium text-foreground">{format(new Date(quote.checkIn), "MMM d, yyyy")}</p>
-              </div>
-            )}
-            {quote.checkOut && (
-              <div>
-                <p className="text-muted-foreground text-xs">Check-Out</p>
-                <p className="font-medium text-foreground">{format(new Date(quote.checkOut), "MMM d, yyyy")}</p>
-              </div>
-            )}
-            {nights && (
-              <div>
-                <p className="text-muted-foreground text-xs">Duration</p>
-                <p className="font-medium text-foreground">{nights} {nights === 1 ? "night" : "nights"}</p>
-              </div>
-            )}
-            <div><p className="text-muted-foreground text-xs">Travellers</p><p className="font-medium text-foreground">{quote.numTravellers}</p></div>
-            {quote.roomType && <div><p className="text-muted-foreground text-xs">Room Type</p><p className="font-medium text-foreground">{quote.roomType}</p></div>}
-          </div>
-
-          {/* Flights */}
-          {quote.flights.some((f) => f.airline) && (
-            <div>
-              <h4 className="text-sm font-semibold text-foreground mb-2">Flight Details</h4>
-              {quote.flights.filter((f) => f.airline).map((f, i) => (
-                <div key={i} className="text-sm p-3 rounded-lg bg-muted/50 mb-2">
-                  <p className="font-medium text-foreground">{f.airline} {f.flightNumber}</p>
-                  <p className="text-muted-foreground">{f.departureAirport} → {f.arrivalAirport}</p>
-                  {f.departureTime && <p className="text-xs text-muted-foreground">{format(new Date(f.departureTime), "MMM d, yyyy h:mm a")} → {f.arrivalTime ? format(new Date(f.arrivalTime), "h:mm a") : ""}</p>}
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Pricing */}
-          <div>
-            <h4 className="text-sm font-semibold text-foreground mb-2">Pricing Breakdown</h4>
-            <div className="space-y-1">
-              {quote.lineItems.filter((li) => li.description).map((li, i) => (
-                <div key={i} className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">
-                    {li.category && <span className="font-medium text-foreground">{li.category}: </span>}
-                    {li.description}
-                  </span>
-                  <span className="text-foreground">{currencySymbol}{li.amount.toLocaleString()}</span>
-                </div>
-              ))}
-              <div className="flex justify-between text-base font-bold border-t border-border pt-2 mt-2">
-                <span className="text-foreground">Total</span>
-                <span className="text-foreground">{quote.currency} {currencySymbol}{totalPrice.toLocaleString()}</span>
-              </div>
-              {quote.numTravellers > 1 && (
-                <p className="text-xs text-muted-foreground text-right">{currencySymbol}{(totalPrice / quote.numTravellers).toLocaleString()} per person</p>
-              )}
-            </div>
-          </div>
-
-          {/* Inclusions */}
-          {quote.inclusions.length > 0 && (
-            <div>
-              <h4 className="text-sm font-semibold text-foreground mb-2">Inclusions</h4>
-              <div className="flex flex-wrap gap-1.5">
-                {quote.inclusions.map((inc, i) => (
-                  <Badge key={i} variant="secondary" className="text-xs">{inc}</Badge>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {quote.notes && (
-            <div className="text-sm"><p className="text-muted-foreground text-xs mb-1">Notes</p><p className="text-foreground">{quote.notes}</p></div>
-          )}
-
-          {quote.attachmentUrls && quote.attachmentUrls.length > 0 && (
-            <div className="text-sm">
-              <p className="text-muted-foreground text-xs mb-1">Attached Documents</p>
-              <div className="space-y-1">
-                {quote.attachmentUrls.map((url, i) => (
-                  <button
-                    key={i}
-                    onClick={async () => {
-                      const { data } = await supabase.storage.from("booking-documents").createSignedUrl(url, 3600);
-                      if (data?.signedUrl) window.open(data.signedUrl, "_blank");
-                    }}
-                    className="inline-flex items-center gap-1.5 text-primary hover:underline"
-                  >
-                    <Paperclip className="h-3.5 w-3.5" />
-                    {url.split("/").pop()}
-                    <ExternalLink className="h-3 w-3" />
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+          <TripDetailsCard
+            resortName={quote.resortName}
+            destination={quote.destination}
+            roomType={quote.roomType}
+            checkIn={quote.checkIn}
+            checkOut={quote.checkOut}
+            numTravellers={quote.numTravellers}
+            flights={quote.flights}
+            lineItems={quote.lineItems}
+            totalPrice={totalPrice}
+            currency={quote.currency}
+            inclusions={quote.inclusions}
+            notes={quote.notes}
+            attachmentUrls={quote.attachmentUrls}
+          />
 
           {/* Valid Until & Agent Contact Footer */}
           <div className="border-t border-border pt-4 space-y-2">
