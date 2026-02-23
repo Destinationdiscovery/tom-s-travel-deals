@@ -1,30 +1,39 @@
 
 
-# Make News & Advisory Summaries Clickable
+# Professional Trip Details Card in Quote Preview
 
 ## What Changes
 
-Add source URLs to news articles and advisory entries so users can click through to read the full story or advisory.
+Replace the current plain layout of trip details (dates, flights, pricing, inclusions, notes) in the Quote Preview and Public Quote with a single, professionally styled "Booking Details" card -- inspired by the Expedia confirmation screenshots you shared. This card sits directly after the review section (below the map), creating one seamless document: review + trip details card.
 
-## Changes Required
+## Design
 
-### 1. Update edge function prompt to request URLs (`supabase/functions/travel-intel/index.ts`)
+The card will feature:
+- A colored header bar with the resort name, destination, and room type
+- Bordered date boxes in a row: **Check-in** | **Check-out** | **Nights** (like the Expedia date layout)
+- Traveller count and room type below dates
+- Flight details section (if any flights entered)
+- Pricing table with category labels, line items, and bold total row
+- Per-person breakdown (when multiple travellers)
+- Inclusion badges
+- Notes section
+- Clean dividers between sections
 
-**News prompt**: Add a `"url"` field to the article schema so Perplexity returns the source link for each article.
+## Technical Details
 
-**Advisories prompt**: Add a `"url"` field to each advisory object so Perplexity returns the official advisory page link.
+### New file: `src/components/dashboard/TripDetailsCard.tsx`
 
-### 2. Update TypeScript types (`src/hooks/useTravelIntel.ts`)
+A presentational component that receives `QuoteData` and `totalPrice` and renders the styled card. Uses existing Card/Badge primitives, date-fns for formatting, and Plane/Users/Calendar icons from lucide-react.
 
-Add an optional `url?: string` field to both the `NewsArticle` and `Advisory` interfaces.
+### Updated files:
 
-### 3. Make titles/summaries clickable in the UI (`src/components/intel/IntelResults.tsx`)
+**`src/components/dashboard/QuotePreview.tsx`** -- Replace the existing trip details grid (lines 178-274: dates grid, flights, pricing, inclusions, notes, attachments) with a single `<TripDetailsCard>` component rendered after the review section.
 
-**NewsResult**: Wrap each article's title in an `<a>` tag linking to `article.url` (when available). Add external link icon. Falls back to plain text if no URL.
+**`src/pages/PublicQuote.tsx`** -- Same replacement: swap the flat details grid, flights, pricing, inclusions, and notes sections with `<TripDetailsCard>`, keeping it consistent with the builder preview.
 
-**AdvisoriesResult**: Wrap each advisory's summary in an `<a>` tag linking to `adv.url` (when available). Same fallback behavior.
-
-### Note on cached data
-
-Existing cached results won't have URLs since they were generated before this change. The UI gracefully falls back to non-clickable text when `url` is missing. Cache entries expire after 7 days, so fresh results will include URLs automatically.
+### What stays the same
+- The hero image, header/branding, and review section remain untouched
+- The "Valid Until" footer and agent contact info stay at the bottom
+- Attachments section stays (moved inside the card)
+- All action buttons (Save, Print, Email, Copy Link) remain unchanged
 
