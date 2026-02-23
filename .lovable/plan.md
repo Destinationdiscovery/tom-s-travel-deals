@@ -1,32 +1,14 @@
 
 
-# Fix Broken Affiliate Links
+# Remove Top "Planning a Trip?" Banner from Reviews
 
-## Root Cause
+## What Changes
 
-The `buildDeepLinks()` function in `AffiliateLinks.tsx` appends query parameters using `&` directly to the base affiliate URLs. However, these base URLs contain no existing query string (no `?`), so the resulting URLs are malformed and return 404 errors.
+Remove the "Planning a trip? / Search on Expedia" banner that appears inside the summary card at the top of every AI review. The other affiliate CTAs on the page (after tips, in the sidebar, on activity cards, etc.) stay untouched.
 
-**Current (broken):**
-```
-https://expedia.com/affiliates/expedia-home.2FNlhXx&destination=Hotel%20Sonya
-```
+## Technical Detail
 
-**Fixed:**
-```
-https://expedia.com/affiliates/expedia-home.2FNlhXx?destination=Hotel%20Sonya
-```
+**File: `src/components/AIReviewResult.tsx`** (lines 139-141)
 
-Same issue affects Hotels.com links (`&q-destination=` should be `?q-destination=`).
+Delete the `<div className="mt-4">` wrapper containing the first `<InlineAffiliateCTA>` that sits directly below the summary paragraph inside the summary card. The second `InlineAffiliateCTA` (after Travel Tips, around line 203) and the sidebar `AffiliateLinks` component remain.
 
-## Fix
-
-**File: `src/components/AffiliateLinks.tsx`** (lines 54-56 in `buildDeepLinks`)
-
-Change `&` to `?` for both Expedia and Hotels.com deep links:
-
-```typescript
-expedia: EXPEDIA_LINKS[country] + `?destination=${q}`,
-hotels: HOTELS_LINKS[country] + `?q-destination=${q}`,
-```
-
-This is a one-line-each fix in the `buildDeepLinks` function. No other files need changes -- every component that uses affiliate links (AIReviewResult, DestinationReview, ThingsToDoSection, RecentReviewsHomepage, MyReviews, MyTrips, etc.) all go through this same function, so fixing it here fixes them everywhere.
