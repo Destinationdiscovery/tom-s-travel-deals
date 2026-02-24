@@ -1,50 +1,23 @@
 
+# Fix Attachment Downloads Being Blocked by Browser
 
-# Move Trip Details Card to the Right Column (Under the Map)
+## Problem
+When clicking a document attachment in the quote, the app opens a new tab pointing directly to the backend storage URL. Microsoft Edge (and some ad-blockers) block this navigation, showing "ERR_BLOCKED_BY_CLIENT".
 
-## What Changes
+## Solution
+Instead of opening the signed URL in a new tab, fetch the file content in the background and trigger a proper file download using a temporary blob URL. This avoids the browser ever navigating to the backend domain.
 
-Instead of the TripDetailsCard sitting at the bottom of the quote as a full-width section, it will be placed inside the review section's right-side column -- directly below the Location map. This creates a single cohesive layout where the left side has the review content and the right side has Ratings, Map, and Booking Details stacked together.
+## Technical Change
 
-On mobile (where the layout is single-column), the card will appear after the review content, maintaining readability.
+**File: `src/components/dashboard/TripDetailsCard.tsx`** (lines 196-198)
 
-## Changes Required
+Replace the `window.open` approach with a fetch-and-download pattern:
 
-### 1. Update `QuoteReviewSection` to accept and render trip details
+1. Get the signed URL (same as now)
+2. `fetch()` the file content from that signed URL
+3. Create a `Blob` from the response
+4. Create a temporary `URL.createObjectURL()` link
+5. Programmatically click a hidden `<a>` element with the `download` attribute to trigger a native browser download
+6. Revoke the blob URL after download starts
 
-Pass trip detail props into `QuoteReviewSection` so it can render `TripDetailsCard` in the right column (desktop) and at the bottom (mobile).
-
-New optional props added to `QuoteReviewSectionProps`:
-- `tripDetailsProps` -- an object containing all `TripDetailsCardProps` fields
-
-When `tripDetailsProps` is provided, render `<TripDetailsCard>` after `<LocationMap>` in both the desktop right column and the mobile layout.
-
-### 2. Update `QuotePreview.tsx`
-
-Remove the standalone `<TripDetailsCard>` below the review section. Instead, pass trip details as a prop to `<QuoteReviewSection>`:
-
-```
-<QuoteReviewSection
-  reviewData={quote.reviewData}
-  hideHeader
-  tripDetailsProps={{
-    resortName: quote.resortName,
-    destination: quote.destination,
-    ...all other fields...
-  }}
-/>
-```
-
-When `includeReview` is false (no review attached), the `TripDetailsCard` remains as a standalone full-width card below the header (current position as fallback).
-
-### 3. Update `PublicQuote.tsx`
-
-Same pattern: pass `tripDetailsProps` into `<QuoteReviewSection>` and remove the standalone `<TripDetailsCard>`. Include the same fallback for quotes without a review.
-
-### What stays the same
-
-- The TripDetailsCard component itself is unchanged
-- The review layout (left column content, ratings, map) is unchanged
-- The "Valid Until" footer and agent contact info stay at the bottom
-- All action buttons remain unchanged
-- Mobile layout continues to stack everything vertically
+This ensures the file downloads correctly regardless of browser security settings or ad-blockers, since the download originates from the page itself rather than navigating to an external domain.
