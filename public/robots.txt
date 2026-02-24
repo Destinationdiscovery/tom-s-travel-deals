@@ -13,4 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://reviewthengo.com/sitemap.xml
+Sitemap: https://iomrjljlydboniioohkv.supabase.co/functions/v1/generate-sitemap

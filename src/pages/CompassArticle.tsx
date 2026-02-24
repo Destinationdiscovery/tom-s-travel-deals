@@ -14,7 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const CompassArticle = () => {
   const { slug } = useParams<{ slug: string }>();
-  const [article, setArticle] = useState<CompassArticleType | undefined>(undefined);
+  const [article, setArticle] = useState<(CompassArticleType & { tags?: string[]; updatedAt?: string }) | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const relatedArticles = slug ? getRelatedArticles(slug, 3) : [];
 
@@ -29,6 +29,7 @@ const CompassArticle = () => {
           categoryColor: data.category_color, image: data.hero_image_url || "",
           excerpt: data.excerpt || "", author: data.author, datePublished: data.date_published,
           readTime: data.read_time, content: [], richContent: data.rich_content || [],
+          tags: data.tags || [], updatedAt: data.updated_at || data.date_published,
         });
       } else {
         setArticle(getArticleBySlug(slug));
@@ -38,25 +39,25 @@ const CompassArticle = () => {
     load();
   }, [slug]);
 
-  // JSON-LD structured data for SEO
-  useEffect(() => {
-    if (!article || !slug) return;
-    const jsonLd = {
-      "@context": "https://schema.org",
-      "@type": "BlogPosting",
-      "headline": article.title,
-      "author": { "@type": "Person", "name": article.author },
-      "datePublished": article.datePublished,
-      "image": article.image,
-      "description": article.content?.[0] || "",
-      "publisher": { "@type": "Organization", "name": "ReviewThenGo" }
-    };
-    const script = document.createElement("script");
-    script.type = "application/ld+json";
-    script.textContent = JSON.stringify(jsonLd);
-    document.head.appendChild(script);
-    return () => { document.head.removeChild(script); };
-  }, [article, slug]);
+  // Build JSON-LD description from best available source
+  const jsonLdDescription = article?.excerpt
+    || (article?.richContent?.find((b: any) => b.type === "text")?.value)
+    || article?.content?.[0]
+    || "";
+
+  // Build BlogPosting JSON-LD (passed to SEOHead below)
+  const blogPostingJsonLd = article ? {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": article.title,
+    "author": { "@type": "Person", "name": article.author },
+    "datePublished": article.datePublished,
+    "dateModified": article.updatedAt || article.datePublished,
+    "image": article.image,
+    "description": jsonLdDescription,
+    "publisher": { "@type": "Organization", "name": "ReviewThenGo" },
+    ...(article.tags?.length ? { "keywords": article.tags.join(", ") } : {}),
+  } : null;
 
   if (loading) {
     return (
@@ -130,7 +131,7 @@ const CompassArticle = () => {
     <div className="min-h-screen bg-background">
       <SEOHead
         title={article.title}
-        description={article.excerpt || article.content?.[0] || ""}
+        description={article.excerpt || jsonLdDescription || ""}
         image={article.image}
         url={`/compass/${slug}`}
         type="article"
@@ -139,6 +140,8 @@ const CompassArticle = () => {
           { name: "Blog", url: "/compass" },
           { name: article.title, url: `/compass/${slug}` },
         ]}
+        jsonLd={blogPostingJsonLd || undefined}
+        keywords={article.tags}
       />
       <Header />
       <ReadingProgress />

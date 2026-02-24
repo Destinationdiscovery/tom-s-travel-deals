@@ -18,13 +18,14 @@ interface SEOHeadProps {
   noindex?: boolean;
   breadcrumbs?: BreadcrumbItem[];
   jsonLd?: JsonLdData | JsonLdData[];
+  keywords?: string[];
 }
 
 const SITE_NAME = "ReviewThenGo";
 const DEFAULT_IMAGE = "https://reviewthengo.lovable.app/og-image.jpg";
 const BASE_URL = "https://reviewthengo.lovable.app";
 
-const SEOHead = ({ title, description, image, url, type = "website", noindex, breadcrumbs, jsonLd }: SEOHeadProps) => {
+const SEOHead = ({ title, description, image, url, type = "website", noindex, breadcrumbs, jsonLd, keywords }: SEOHeadProps) => {
   const fullTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
   const fullUrl = url ? `${BASE_URL}${url}` : BASE_URL;
   const ogImage = image || DEFAULT_IMAGE;
@@ -48,6 +49,7 @@ const SEOHead = ({ title, description, image, url, type = "website", noindex, br
       <meta name="description" content={description} />
       <link rel="canonical" href={fullUrl.split("?")[0]} />
       {noindex && <meta name="robots" content="noindex, nofollow" />}
+      {keywords && keywords.length > 0 && <meta name="keywords" content={keywords.join(", ")} />}
 
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={description} />
