@@ -70,7 +70,7 @@ const BlogPreviewSection = () => {
     dbArticles.forEach((a) => slugMap.set(a.slug, a)); // DB overwrites
 
     return Array.from(slugMap.values())
-      .sort((a, b) => b.datePublished.localeCompare(a.datePublished))
+      .sort((a, b) => new Date(b.datePublished).getTime() - new Date(a.datePublished).getTime())
       .slice(0, 3);
   }, [dbPostsQuery.data]);
 
