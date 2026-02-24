@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Star, ArrowRight } from "lucide-react";
 import { trackAffiliateClick } from "@/lib/analytics";
 import { detectCountry, EXPEDIA_LINKS } from "@/components/AffiliateLinks";
@@ -10,7 +10,7 @@ import dealOutrigger from "@/assets/deal-outrigger-honua-kai.png";
 import dealFlights from "@/assets/deal-flights-clean.jpg";
 import dealGarza from "@/assets/deal-garza-blanca-clean.jpg";
 import dealPhuket from "@/assets/deal-phuket-clean.jpg";
-
+import { supabase } from "@/integrations/supabase/client";
 interface FeaturedDeal {
   image: string;
   name: string;
@@ -88,6 +88,37 @@ const MiniStars = ({ rating }: { rating: number }) => {
 };
 
 const TravelDealsSection = () => {
+  const [mergedDeals, setMergedDeals] = useState<FeaturedDeal[]>(featuredDeals);
+
+  useEffect(() => {
+    const fetchDbDeals = async () => {
+      const { data } = await supabase.from("featured_deals").select("*").order("slot_number") as any;
+      if (data && data.length > 0) {
+        const merged = [...featuredDeals];
+        data.forEach((dbDeal: any) => {
+          const idx = dbDeal.slot_number - 1;
+          if (idx >= 0 && idx < 6) {
+            merged[idx] = {
+              image: dbDeal.image_url,
+              name: dbDeal.name,
+              location: dbDeal.location,
+              affiliateUrl: dbDeal.affiliate_url,
+              originalPrice: Number(dbDeal.original_price),
+              salePrice: Number(dbDeal.sale_price),
+              originalLabel: dbDeal.original_label,
+              saleLabel: dbDeal.sale_label,
+              rating: Number(dbDeal.rating),
+              imagePosition: dbDeal.image_position || "center",
+              expiresAt: dbDeal.expires_at || undefined,
+            };
+          }
+        });
+        setMergedDeals(merged);
+      }
+    };
+    fetchDbDeals();
+  }, []);
+
   return (
     <section id="travel-deals" className="py-12 bg-muted/20">
       <div className="container mx-auto px-4 space-y-8">
@@ -124,7 +155,7 @@ const TravelDealsSection = () => {
             </a>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredDeals.map((deal, i) => (
+            {mergedDeals.map((deal, i) => (
               <a
                 key={i}
                 href={deal.affiliateUrl}

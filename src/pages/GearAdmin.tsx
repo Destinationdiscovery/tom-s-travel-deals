@@ -11,6 +11,8 @@ import EmailComposer from "@/components/dashboard/EmailComposer";
 import GearImageManager from "@/components/dashboard/GearImageManager";
 import ClientList from "@/components/dashboard/ClientList";
 import DealMaker from "@/components/dashboard/DealMaker";
+import BlogPostCreator from "@/components/dashboard/BlogPostCreator";
+import FeaturedDealsManager from "@/components/dashboard/FeaturedDealsManager";
 
 const GearAdmin = () => {
   const { user, isAdmin } = useAuth();
@@ -52,6 +54,8 @@ const GearAdmin = () => {
           {activeTab === "calendar" && <BookingCalendar />}
           {activeTab === "emails" && <EmailComposer />}
           {activeTab === "deals" && <DealMaker />}
+          {activeTab === "featured-deals" && <FeaturedDealsManager />}
+          {activeTab === "blog" && <BlogPostCreator />}
           {activeTab === "gear" && <GearImageManager />}
         </main>
       </div>

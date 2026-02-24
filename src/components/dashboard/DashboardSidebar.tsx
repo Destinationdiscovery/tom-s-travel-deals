@@ -1,9 +1,9 @@
-import { LayoutDashboard, FileText, Calendar, Mail, ImageIcon, Users, Megaphone, ClipboardList, Menu, TrendingUp } from "lucide-react";
+import { LayoutDashboard, FileText, Calendar, Mail, ImageIcon, Users, Megaphone, ClipboardList, Menu, TrendingUp, BookOpen, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
-export type DashboardTab = "overview" | "quotes" | "calendar" | "emails" | "gear" | "clients" | "deals" | "bookings" | "revenue";
+export type DashboardTab = "overview" | "quotes" | "calendar" | "emails" | "gear" | "clients" | "deals" | "bookings" | "revenue" | "blog" | "featured-deals";
 
 const tabs = [
   { id: "overview" as const, label: "Dashboard", icon: LayoutDashboard },
@@ -13,6 +13,8 @@ const tabs = [
   { id: "calendar" as const, label: "Calendar", icon: Calendar },
   { id: "emails" as const, label: "Emails", icon: Mail },
   { id: "deals" as const, label: "Deal Maker", icon: Megaphone },
+  { id: "featured-deals" as const, label: "Featured Deals", icon: Star },
+  { id: "blog" as const, label: "Blog", icon: BookOpen },
   { id: "gear" as const, label: "Gear Images", icon: ImageIcon },
   { id: "revenue" as const, label: "Revenue", icon: TrendingUp },
 ];

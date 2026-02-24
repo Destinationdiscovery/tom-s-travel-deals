@@ -1,20 +1,42 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ReadingProgress from "@/components/ReadingProgress";
-import { getArticleBySlug, getRelatedArticles, ContentBlock } from "@/data/compassArticles";
+import { getArticleBySlug, getRelatedArticles, type ContentBlock, type CompassArticle as CompassArticleType } from "@/data/compassArticles";
 import { ArrowLeft, ArrowRight, Clock, User } from "lucide-react";
 import CommentsSection from "@/components/comments/CommentsSection";
 import InlineAffiliateCTA from "@/components/InlineAffiliateCTA";
 import SEOHead from "@/components/SEOHead";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
 const CompassArticle = () => {
   const { slug } = useParams<{ slug: string }>();
-  const article = slug ? getArticleBySlug(slug) : undefined;
+  const [article, setArticle] = useState<CompassArticleType | undefined>(undefined);
+  const [loading, setLoading] = useState(true);
   const relatedArticles = slug ? getRelatedArticles(slug, 3) : [];
+
+  useEffect(() => {
+    if (!slug) { setLoading(false); return; }
+    const load = async () => {
+      // Try database first
+      const { data } = await supabase.from("blog_posts").select("*").eq("slug", slug).maybeSingle() as any;
+      if (data) {
+        setArticle({
+          id: 9999, slug: data.slug, title: data.title, category: data.category,
+          categoryColor: data.category_color, image: data.hero_image_url || "",
+          excerpt: data.excerpt || "", author: data.author, datePublished: data.date_published,
+          readTime: data.read_time, content: [], richContent: data.rich_content || [],
+        });
+      } else {
+        setArticle(getArticleBySlug(slug));
+      }
+      setLoading(false);
+    };
+    load();
+  }, [slug]);
 
   // JSON-LD structured data for SEO
   useEffect(() => {
@@ -35,6 +57,18 @@ const CompassArticle = () => {
     document.head.appendChild(script);
     return () => { document.head.removeChild(script); };
   }, [article, slug]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-32 text-center">
+          <p className="text-muted-foreground">Loading article...</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!article) {
     return (
