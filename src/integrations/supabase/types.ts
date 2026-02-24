@@ -477,10 +477,14 @@ export type Database = {
           location: string
           name: string
           original_label: string
+          original_label_weekly: string | null
           original_price: number
+          original_price_weekly: number | null
           rating: number
           sale_label: string
+          sale_label_weekly: string | null
           sale_price: number
+          sale_price_weekly: number | null
           slot_number: number
           updated_at: string
         }
@@ -494,10 +498,14 @@ export type Database = {
           location: string
           name: string
           original_label: string
+          original_label_weekly?: string | null
           original_price: number
+          original_price_weekly?: number | null
           rating?: number
           sale_label: string
+          sale_label_weekly?: string | null
           sale_price: number
+          sale_price_weekly?: number | null
           slot_number: number
           updated_at?: string
         }
@@ -511,10 +519,14 @@ export type Database = {
           location?: string
           name?: string
           original_label?: string
+          original_label_weekly?: string | null
           original_price?: number
+          original_price_weekly?: number | null
           rating?: number
           sale_label?: string
+          sale_label_weekly?: string | null
           sale_price?: number
+          sale_price_weekly?: number | null
           slot_number?: number
           updated_at?: string
         }
