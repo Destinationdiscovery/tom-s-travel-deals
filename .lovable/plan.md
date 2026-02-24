@@ -1,143 +1,96 @@
 
+# Dashboard Additions: Blog Post Creator & Featured Deals Manager
 
-# Phase 8: Content Scaling, Dark Mode, Search Enhancement & Conversion Polish
-
-This final phase addresses the remaining gaps to make the site production-ready and fully optimized.
-
----
-
-## Part A: Dark Mode Support
-
-**Problem:** The site has `next-themes` installed but no theme toggle or dark mode styles. Users browsing at night or with system dark mode get no benefit.
-
-### Changes:
-- Wire up the existing `ThemeToggle` component (already exists at `src/components/ThemeToggle.tsx`) into the Header
-- Add `<ThemeProvider>` from `next-themes` wrapping the app in `App.tsx`
-- Verify CSS variables in `index.css` support both light and dark themes (the existing Tailwind config likely has `.dark` variants via `tailwindcss-animate`)
-- Add the toggle button next to the search icon in `Header.tsx`
-
-**Files modified:** `src/App.tsx`, `src/components/Header.tsx`
+Two new admin dashboard modules to manage blog content and homepage featured deals directly from Agent HQ.
 
 ---
 
-## Part B: Search Improvements — Autocomplete on Homepage
+## Part A: Blog Post Creator
 
-**Problem:** The homepage hero search bar has no autocomplete suggestions, unlike the Destinations page which uses `useSearchSuggestions`. Users typing on the homepage get no guidance.
+A new "Blog" tab in the dashboard sidebar that lets you create blog posts matching the existing Compass article format.
 
-### Changes:
-- Add `useSearchSuggestions` hook to `HeroSection.tsx`
-- Show a dropdown of matching suggestions as the user types (same pattern as Destinations page)
-- Clicking a suggestion triggers the review generation immediately
+### How It Works:
+1. Fill in a form: title, slug, category, author, excerpt, read time
+2. Upload a hero image (stored in a new `blog-images` storage bucket)
+3. Build the article body using a block-based editor:
+   - Add **text** blocks (textarea)
+   - Add **heading** blocks (input)
+   - Add **image** blocks (upload image + caption)
+   - Reorder or delete blocks
+4. Click "Publish" to save the article to a new `blog_posts` database table
+5. The Compass page and CompassArticle page will check the database first, then fall back to the hardcoded `compassArticles` array -- so old articles stay, new ones appear alongside them
 
-**Files modified:** `src/components/HeroSection.tsx`
+### Database:
+- New table: `blog_posts` with columns: `id`, `slug` (unique), `title`, `category`, `category_color`, `hero_image_url`, `excerpt`, `author`, `date_published`, `read_time`, `rich_content` (jsonb array of content blocks), `created_at`, `updated_at`
+- RLS: admin can CRUD, anyone can SELECT
+- New storage bucket: `blog-images` (public) for hero and inline images
 
----
-
-## Part C: Related Articles in Blog (Compass)
-
-**Problem:** Blog articles (`CompassArticle.tsx`) are dead ends with no cross-links to other articles. The Related Reviews pattern was added to destination reviews but not to blog posts.
-
-### Changes:
-- Add a "Related Articles" section at the bottom of `CompassArticle.tsx` showing 2-3 articles from the same category or different categories
-- Use the existing `compassArticles` data to find related content
-- Display as compact cards with image, title, and read time
-
-**Files modified:** `src/pages/CompassArticle.tsx`
-
----
-
-## Part D: OG Image for Social Sharing
-
-**Problem:** The Open Graph image is currently `favicon.png` -- a tiny icon. When shared on Twitter/Facebook/LinkedIn, the preview looks unprofessional and gets low engagement.
-
-### Changes:
-- Create a proper 1200x630 OG image file at `public/og-image.jpg` using a branded travel-themed design (will use an existing hero image as base)
-- Update `index.html` to reference the new OG image
-- Update `SEOHead.tsx` default image to use the new OG image
-
-**Files modified:** `index.html`, `src/components/SEOHead.tsx`
+### Files:
+- **Create:** `src/components/dashboard/BlogPostCreator.tsx` -- the form + block editor
+- **Modify:** `src/components/dashboard/DashboardSidebar.tsx` -- add "Blog" tab
+- **Modify:** `src/pages/GearAdmin.tsx` -- render `BlogPostCreator` for the "blog" tab
+- **Modify:** `src/pages/Compass.tsx` -- fetch from `blog_posts` table and merge with `compassArticles`
+- **Modify:** `src/pages/CompassArticle.tsx` -- check `blog_posts` table first when loading by slug, fall back to static data
 
 ---
 
-## Part E: Table of Contents for Long Reviews
+## Part B: Featured Deals Manager
 
-**Problem:** Destination reviews are 2,000+ words with no way to jump to sections. Users on mobile have to scroll extensively to find Tips, Gallery, or Comments.
+A new "Featured Deals" tab that lets you manage the 6 deal cards shown on the homepage.
 
-### Changes:
-- Add a collapsible "Jump to" table of contents at the top of review content in `DestinationReview.tsx`
-- Sections: Summary, My Experience, Tips, Gallery, Comments
-- Each link smooth-scrolls to the section using `id` attributes
-- Collapsed by default on mobile, expanded on desktop sidebar
+### How It Works:
+1. See all 6 current deal slots displayed as a grid with their images, names, and prices
+2. To replace a card, select which slot number (1-6) you want to replace
+3. Fill in: resort name, location, affiliate URL, original price, sale price, rating, expiration date
+4. Upload the resort image (stored in `blog-images` bucket, reused)
+5. Click "Replace Card" and the deal is saved to a `featured_deals` database table
+6. The `TravelDealsSection` component will fetch from the database first; if fewer than 6 rows exist, it fills remaining slots from the current hardcoded array
 
-**Files modified:** `src/pages/DestinationReview.tsx`
+### Database:
+- New table: `featured_deals` with columns: `id`, `slot_number` (integer 1-6, unique), `image_url`, `name`, `location`, `affiliate_url`, `original_price`, `sale_price`, `original_label`, `sale_label`, `rating`, `image_position`, `expires_at`, `created_at`, `updated_at`
+- RLS: admin can CRUD, anyone can SELECT
 
----
-
-## Part F: Reading Progress Bar
-
-**Problem:** Long review and blog pages give no visual feedback on how far the user has read, reducing engagement and increasing bounce.
-
-### Changes:
-- Create a `ReadingProgress` component that shows a thin progress bar at the top of the page (below the fixed header)
-- Only visible on review and article pages
-- Uses scroll position relative to the main content area
-
-**Files created:** `src/components/ReadingProgress.tsx`
-**Files modified:** `src/pages/DestinationReview.tsx`, `src/pages/CompassArticle.tsx`
+### Files:
+- **Create:** `src/components/dashboard/FeaturedDealsManager.tsx` -- slot-based deal editor
+- **Modify:** `src/components/dashboard/DashboardSidebar.tsx` -- add "Featured Deals" tab (rename existing "Deal Maker" stays as-is)
+- **Modify:** `src/pages/GearAdmin.tsx` -- render `FeaturedDealsManager` for the new tab
+- **Modify:** `src/components/TravelDealsSection.tsx` -- fetch from `featured_deals` table, merge with hardcoded fallback
 
 ---
 
-## Part G: Destinations Page — Region Filtering
+## Technical Details
 
-**Problem:** The Destinations page shows all 9 destinations with no way to filter. As more reviews are added, this becomes unwieldy.
+### Database Migration
+```text
+-- New tables
+blog_posts (id uuid PK, slug text UNIQUE, title text, category text, 
+  category_color text, hero_image_url text, excerpt text, author text,
+  date_published text, read_time text, rich_content jsonb, 
+  created_at timestamptz, updated_at timestamptz)
 
-### Changes:
-- Add region filter chips (All, Caribbean, North America, Europe, Southeast Asia, Indian Ocean) above the grid
-- Filter the `destinations` array by the selected region
-- Same pattern as the category filter on the Compass page
+featured_deals (id uuid PK, slot_number integer UNIQUE CHECK 1-6, 
+  image_url text, name text, location text, affiliate_url text, 
+  original_price numeric, sale_price numeric, original_label text, 
+  sale_label text, rating numeric, image_position text, 
+  expires_at timestamptz, created_at timestamptz, updated_at timestamptz)
 
-**Files modified:** `src/pages/Destinations.tsx`
+-- Storage
+blog-images bucket (public)
 
----
+-- RLS on both: admin full CRUD, anon/public SELECT
+```
 
-## Part H: Canonical URLs for SEO
+### Sidebar Updates
+The sidebar gains two new tabs:
+- "Blog" (with a PenTool or BookOpen icon)
+- "Featured Deals" (with a Star or Gift icon)
 
-**Problem:** No `<link rel="canonical">` tags. Search engines may index duplicate URLs (e.g., with query params) and dilute page authority.
-
-### Changes:
-- Add a `canonical` prop to `SEOHead.tsx`
-- Auto-generate canonical URL from the current path (strip query params)
-- Output `<link rel="canonical" href="...">` in the head
-
-**Files modified:** `src/components/SEOHead.tsx`
-
----
-
-## Technical Summary
+Total sidebar tabs after: Overview, Quote Builder, Clients, Bookings, Calendar, Emails, Deal Maker, Featured Deals, Blog, Gear Images, Revenue
 
 ### No New Dependencies
-All required packages (`next-themes`, etc.) are already installed.
-
-### Files Created (1)
-- `src/components/ReadingProgress.tsx` -- scroll-based reading progress bar
-
-### Files Modified (8)
-- `src/App.tsx` -- ThemeProvider wrapper
-- `src/components/Header.tsx` -- dark mode toggle
-- `src/components/HeroSection.tsx` -- search autocomplete
-- `src/pages/DestinationReview.tsx` -- table of contents, reading progress
-- `src/pages/CompassArticle.tsx` -- related articles, reading progress
-- `src/pages/Destinations.tsx` -- region filter chips
-- `src/components/SEOHead.tsx` -- canonical URLs, default OG image
-- `index.html` -- updated OG image path
+Uses existing UI components (Card, Input, Textarea, Button, Tabs), existing storage patterns from GearImageManager, and existing Supabase client.
 
 ### What This Unlocks
-- **Dark mode** for night browsing and user preference
-- **Search autocomplete** on homepage reduces friction and increases review generation
-- **Cross-linked blog articles** increase session duration and reduce bounce
-- **Professional OG images** improve click-through from social shares
-- **Table of contents** on long reviews improves navigation and time-on-page
-- **Reading progress** increases engagement and scroll completion
-- **Region filtering** makes destination discovery scalable
-- **Canonical URLs** prevent duplicate content penalties in search rankings
-
+- Publish new blog posts from the dashboard without touching code
+- Swap homepage featured deals on the fly with fresh resort images and affiliate links
+- Both features use the same visual format already live on the site
