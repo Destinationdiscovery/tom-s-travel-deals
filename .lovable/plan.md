@@ -1,23 +1,35 @@
 
-# Fix Attachment Downloads Being Blocked by Browser
 
-## Problem
-When clicking a document attachment in the quote, the app opens a new tab pointing directly to the backend storage URL. Microsoft Edge (and some ad-blockers) block this navigation, showing "ERR_BLOCKED_BY_CLIENT".
+# Wider Public Quote + Simplified Email with Link
 
-## Solution
-Instead of opening the signed URL in a new tab, fetch the file content in the background and trigger a proper file download using a temporary blob URL. This avoids the browser ever navigating to the backend domain.
+## Two Changes
 
-## Technical Change
+### 1. Make the Public Quote page wider
+The public quote at `/quote/:token` currently uses `max-w-2xl` (672px), which squishes the review and trip details card. This will be changed to `max-w-5xl` (1024px) so it displays at a width much closer to what you see in the builder preview.
 
-**File: `src/components/dashboard/TripDetailsCard.tsx`** (lines 196-198)
+### 2. Simplify all email options to a brief intro + "Click Here" link
+Instead of dumping the full quote details into the email body, all email methods (Outlook, Gmail, Yahoo, Send Direct) will send a short, friendly message like:
 
-Replace the `window.open` approach with a fetch-and-download pattern:
+> Hi Pat & Holly,
+>
+> Your vacation quote for **Hotel Sonya** in **Rome, Italy** is ready!
+>
+> **[View Your Quote](link)**
+>
+> Let me know if you have any questions!
+>
+> Best regards,
+> Tom Laracy - TravelOnly
 
-1. Get the signed URL (same as now)
-2. `fetch()` the file content from that signed URL
-3. Create a `Blob` from the response
-4. Create a temporary `URL.createObjectURL()` link
-5. Programmatically click a hidden `<a>` element with the `download` attribute to trigger a native browser download
-6. Revoke the blob URL after download starts
+The quote must be saved first (to generate a share link) before sending -- if not saved yet, the user will be prompted to save first.
 
-This ensures the file downloads correctly regardless of browser security settings or ad-blockers, since the download originates from the page itself rather than navigating to an external domain.
+## Technical Details
+
+### File: `src/pages/PublicQuote.tsx`
+- Change `max-w-2xl` to `max-w-5xl` on the container div (line 62)
+
+### File: `src/components/dashboard/QuotePreview.tsx`
+- Simplify `emailBody` (plain text) to a brief 3-4 line message with the share URL
+- Simplify `buildHtmlEmail()` to a clean, branded HTML email with just the resort name, destination, dates summary, and a prominent "View Your Quote" button linking to the share URL
+- Remove all the detailed pricing tables, line items, and inclusions from the email
+- Add a guard on all email actions: if the quote hasn't been saved yet (no `shareUrl`), show a toast prompting to save first instead of sending
