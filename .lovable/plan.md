@@ -1,97 +1,152 @@
 
 
-# Phase 1: Foundation — Colors, Fonts, Header, Footer & Light Mode
+# Phase 2: Homepage Redesign — Hero, Sections, CTAs & Trust Elements
 
-This is the first of 3-4 phases to transform ReviewThenGo into a premium, high-converting affiliate travel site. Phase 1 lays the visual foundation that all subsequent phases will build on.
+Building on the Phase 1 foundation (colors, fonts, header, footer), this phase transforms the homepage into a high-converting affiliate funnel with a stunning hero, stronger CTAs, trust badges, and urgency elements.
 
-**What's NOT touched:** All admin/dashboard pages (GearAdmin, BookingReport, ClientFile, QuotePreview, etc.) remain completely unchanged.
-
----
-
-## What Changes in Phase 1
-
-### 1. Switch to Light Mode Only
-- Remove the `ThemeProvider` wrapper and `ThemeToggle` component from the client-facing site
-- Set the default theme to light permanently
-- Update CSS variables to use the new brand color palette
-- The admin dashboard keeps its existing dark styling untouched
-
-### 2. New Brand Color Palette
-All CSS custom properties in `src/index.css` will be updated:
-
-| Role | Current | New |
-|------|---------|-----|
-| Background | Dark slate (#151a23) | Light gray (#F5F5F5) |
-| Foreground (text) | Light gray | Dark charcoal (#1a1a2e) |
-| Primary (links, CTAs) | Sky blue | Deep ocean blue (#003366) |
-| Card background | Dark card | White (#FFFFFF) |
-| CTA buttons | Blue | Warm orange (#FF6600) |
-| Trust accents | Various | Forest green (#228B22) |
-| Muted text | Slate gray | Medium gray (#6B7280) |
-
-### 3. New Fonts
-- Replace **Playfair Display** with **Montserrat** for headings (bold, modern feel)
-- Replace **Inter** with **Open Sans** for body text
-- Set base body font size to 18px with 1.5 line-height
-- Update the Google Fonts import and Tailwind config accordingly
-
-### 4. Redesigned Header
-- Sticky top nav with deep ocean blue (#003366) background
-- Logo "Review Then Go" on the left (keep the colored text branding)
-- Navigation links: **Home | Destinations | Gear | Intel | Blog | Deals**
-  - Add "Deals" link (scrolls to deals section or links to deals page)
-  - Add "Intel" link to nav
-- Mobile: Hamburger menu with slide-out drawer for all links
-- Search icon opens the existing Expedia widget (unchanged behavior)
-- Remove ThemeToggle button from header
-- Admin link stays but is only visible when logged in (unchanged)
-
-### 5. Redesigned Footer
-- Deep ocean blue (#003366) background with white text
-- Three-column layout: Brand + tagline | Quick Links (Home, Reviews, Gear, Intel, Blog, Deals, About, Contact) | Legal (Privacy Policy, Affiliate Disclosure)
-- Social icons row: placeholders for Twitter/X and Instagram (link to # for now)
-- "Powered by Expedia" badge with affiliate link
-- Copyright line: "(c) 2026 Review Then Go. All rights reserved."
-- "Made with heart" line kept
-
-### 6. New Pages: Privacy Policy & Affiliate Disclosure
-- `/privacy-policy` — Standard placeholder privacy policy text
-- `/affiliate-disclosure` — Standard affiliate disclosure explaining commission relationships with Expedia, Hotels.com, VRBO, and Amazon
-- Both pages use the new Header + Footer, simple content layout
-- Added to footer links and App.tsx routes
-
-### 7. Mobile Hamburger Menu
-- On screens smaller than `md` (768px), collapse nav links into a hamburger icon
-- Clicking opens a slide-out sheet/drawer with all nav links stacked vertically
-- Close on link click or outside tap
+**What's NOT touched:** All admin/dashboard pages remain completely unchanged.
 
 ---
 
-## Technical Details
+## 1. Expanded Hero Section with Rotating Background Images
 
-### Files Modified
-- **`src/index.css`** — Replace all CSS custom properties with new light-mode palette; remove `.dark` block; update font imports to Montserrat + Open Sans; set base font-size to 18px
-- **`tailwind.config.ts`** — Update `fontFamily.display` to Montserrat, `fontFamily.body` to Open Sans
-- **`src/App.tsx`** — Remove `ThemeProvider` wrapper (or set to always light); add routes for `/privacy-policy` and `/affiliate-disclosure`
-- **`src/components/Header.tsx`** — Full redesign: ocean blue background, updated nav links (add Deals + Intel), mobile hamburger menu with Sheet component, remove ThemeToggle
-- **`src/components/Footer.tsx`** — Full redesign: three-column layout, legal links, social icons, Expedia badge
-- **`src/components/ThemeToggle.tsx`** — Remove or keep for admin only (won't be imported by client pages)
+**Current:** Small 240-280px hero with static beach image and minimal text.
+
+**New:** Full-impact 420-500px hero with:
+- Rotating background images cycling every 5 seconds with smooth crossfade (using existing assets: `hero-beach.jpg`, `snowbird-beach-sunset.jpg`, `snowbird-caribbean-aerial.jpg`, `deal-santorini.jpg`, `japan-tokyo-skyline.jpg`)
+- Headline: "Honest Travel Reviews, Deals & Insights for Canadians"
+- Subtext: "Real reviews from a Toronto-based travel consultant. Find your perfect trip."
+- Integrated search bar (moved FROM the Reviews section INTO the hero) with placeholder "Search a hotel, resort, or destination..."
+- Large warm-orange CTA button: "Find Your Next Trip" linking to Expedia deals
+- "Powered by Expedia" badge below the CTA
+- Subtle dark gradient overlay for text readability
+
+**File:** `src/components/HeroSection.tsx` -- full rewrite
+
+---
+
+## 2. Trust Badges Bar (New Component)
+
+A horizontal bar just below the hero showing trust signals:
+- "100% Honest Reviews" (with Shield icon)
+- "Canadian Traveler Focused" (with MapPin icon)
+- "Expedia Partner" (with badge icon)
+- "10,000+ Travelers Helped" (with Users icon)
+
+Styled as a clean white bar with subtle icons and text, providing instant credibility.
+
+**File:** `src/components/TrustBadges.tsx` -- new component
+
+---
+
+## 3. Reviews Section Enhancements
+
+**Current:** Has its own search bar + 4-column card grid with text-only cards.
+
+**Changes:**
+- Remove the inline search bar (moved to hero)
+- Keep the review cards but upgrade the "Book on Expedia" link to a prominent warm-orange button: "Book on Expedia -- Save Now"
+- Add hover effect with slight scale and shadow
+- Keep the existing data fetching and suggestion logic -- just pass search state down from Index
+
+**File:** `src/components/RecentReviewsHomepage.tsx` -- refactored
+
+---
+
+## 4. Deals Section Enhancements
+
+**Current:** Grid of deal cards with discount badges.
+
+**Changes:**
+- Add urgency text to deal cards: "Limited Time" badge next to the discount badge
+- Change "View Deal" link to a warm-orange button: "Grab This Deal -- Save X%"
+- Add a subtle pulsing animation to the discount badge
+- Keep all existing data and affiliate links unchanged
+
+**File:** `src/components/TravelDealsSection.tsx` -- enhanced
+
+---
+
+## 5. Gear Section Enhancements
+
+**Current:** Category cards with search bar.
+
+**Changes:**
+- Upgrade "Find Gear" button to warm-orange styling
+- Add "Shop Gear" warm-orange buttons on category cards
+- Keep all existing search/packing list functionality
+
+**File:** `src/components/GearPreviewSection.tsx` -- enhanced
+
+---
+
+## 6. Intel Section Enhancements
+
+**Current:** Tabbed search with category cards.
+
+**Changes:**
+- Style the "Check" buttons in warm-orange
+- Keep all existing search/intel functionality
+
+**File:** `src/components/IntelPreviewSection.tsx` -- minor style updates
+
+---
+
+## 7. Blog Section Enhancements
+
+**Current:** 3-column article cards.
+
+**Changes:**
+- Add embedded "Find Deals" warm-orange button (instead of small text link) when a destination is detected
+- Keep all existing data and routing
+
+**File:** `src/components/BlogPreviewSection.tsx` -- enhanced
+
+---
+
+## 8. Affiliate Disclosure Banner (New Component)
+
+A small, dismissible banner at the top of the homepage (below header):
+- Text: "This site contains affiliate links -- we earn a commission at no extra cost to you."
+- Link to /affiliate-disclosure
+- Dismissible with X button (stored in sessionStorage)
+
+**File:** `src/components/AffiliateDisclosureBanner.tsx` -- new component
+
+---
+
+## 9. Homepage Layout Update
+
+Update Index.tsx to:
+- Add the TrustBadges component below the hero
+- Add the AffiliateDisclosureBanner at the top
+- Pass search state from hero down to RecentReviewsHomepage
+- Add cross-links between sections (e.g., "Related Gear" link from reviews to gear section)
+
+**File:** `src/pages/Index.tsx` -- updated
+
+---
+
+## Technical Summary
 
 ### Files Created
-- **`src/pages/PrivacyPolicy.tsx`** — Privacy policy page with generated placeholder text
-- **`src/pages/AffiliateDisclosure.tsx`** — Affiliate disclosure page with generated text
+- `src/components/TrustBadges.tsx` -- trust signal bar
+- `src/components/AffiliateDisclosureBanner.tsx` -- dismissible affiliate notice
+
+### Files Modified
+- `src/components/HeroSection.tsx` -- full rewrite with rotating images, search bar, CTA
+- `src/components/RecentReviewsHomepage.tsx` -- remove search (moved to hero), upgrade CTA buttons
+- `src/components/TravelDealsSection.tsx` -- urgency text, orange CTA buttons
+- `src/components/GearPreviewSection.tsx` -- orange button styling
+- `src/components/IntelPreviewSection.tsx` -- orange button styling
+- `src/components/BlogPreviewSection.tsx` -- upgrade deal links to buttons
+- `src/pages/Index.tsx` -- add new components, wire search state from hero to reviews
 
 ### Files NOT Touched
 - All files under `src/components/dashboard/`
-- `src/pages/GearAdmin.tsx`, `src/pages/BookingReport.tsx`, `src/pages/ClientFile.tsx`, `src/pages/PublicQuote.tsx`
-- All edge functions
-- All database tables/migrations
-- `src/components/AffiliateLinks.tsx` (affiliate logic stays the same)
-
----
-
-## What Comes Next (Future Phases)
-- **Phase 2:** Homepage redesign — bigger hero with rotating images, search bar in hero, stronger CTA buttons, urgency text on deals, trust badges
-- **Phase 3:** Content pages — review page enhancements, gear comparison tables, intel/blog improvements, email capture popup
-- **Phase 4:** Conversion optimizations — exit-intent popup, email capture DB table, additional CTAs, cross-linking between sections
+- All admin pages (GearAdmin, BookingReport, ClientFile, etc.)
+- All edge functions and database tables
+- `src/components/AffiliateLinks.tsx` (affiliate logic unchanged)
+- `src/index.css`, `tailwind.config.ts` (Phase 1 styling stays)
+- `src/components/Header.tsx`, `src/components/Footer.tsx` (Phase 1 work stays)
 
