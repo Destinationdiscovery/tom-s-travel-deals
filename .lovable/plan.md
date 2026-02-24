@@ -1,27 +1,24 @@
 
-# Style Inline Blog Images to Match Existing Articles
+# Fix: Latest Blog Post Not Appearing on Homepage
 
-## Problem
-When you upload images in the blog post creator, they appear in the article but are unstyled — no rounded corners, no full-width sizing, no consistent look with the hardcoded Compass articles.
+## Root Cause
+
+The sorting logic in `BlogPreviewSection.tsx` uses string comparison (`localeCompare`) on dates like "February 23, 2026" and "January 29, 2026". Alphabetically, "F" comes before "J", so "February" sorts before "January" -- the opposite of what we want.
+
+Your new article dated "February 23, 2026" is being sorted incorrectly and falls below the top 3.
 
 ## Fix
 
-**File:** `src/pages/CompassArticle.tsx`
+**File:** `src/components/BlogPreviewSection.tsx`
 
-Update the image rendering in `renderContentBlock` (the `case "image"` block) to add proper styling classes to the `<img>` tag:
+Replace the alphabetical sort with a proper date sort using `Date.parse()` to convert the human-readable dates into actual timestamps before comparing:
 
-- `w-full` — makes the image span the full article width
-- `rounded-xl` — adds rounded corners matching the site's design language
-- `object-cover` — ensures consistent aspect ratio without distortion
+```typescript
+// Before (broken):
+.sort((a, b) => b.datePublished.localeCompare(a.datePublished))
 
-**Before:**
-```html
-<img src={block.value} alt={...} loading="lazy" />
+// After (correct):
+.sort((a, b) => new Date(b.datePublished).getTime() - new Date(a.datePublished).getTime())
 ```
 
-**After:**
-```html
-<img src={block.value} alt={...} loading="lazy" className="w-full rounded-xl object-cover" />
-```
-
-This is a one-line CSS class addition. All uploaded blog images will immediately look consistent with the rest of the site.
+This is a one-line change on line 73. Since all dates are in standard English format (e.g. "February 23, 2026"), `new Date()` will parse them correctly and sort chronologically, putting your newest post first.
