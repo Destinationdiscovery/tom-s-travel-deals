@@ -3,6 +3,7 @@ import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { detectCountry, EXPEDIA_LINKS } from "@/components/AffiliateLinks";
 import { trackAffiliateClick } from "@/lib/analytics";
+import { useSearchSuggestions } from "@/hooks/useSearchSuggestions";
 import expediaLogo from "@/assets/expedia-logo.png";
 
 import heroBeach from "@/assets/hero-beach.jpg";
@@ -21,6 +22,8 @@ interface HeroSectionProps {
 const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [query, setQuery] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const { suggestions } = useSearchSuggestions(query);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -32,8 +35,15 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
   const handleSearch = useCallback(() => {
     const trimmed = query.trim();
     if (trimmed.length < 2 || !onSearch) return;
+    setShowSuggestions(false);
     onSearch(trimmed);
   }, [query, onSearch]);
+
+  const handleSuggestionClick = (name: string) => {
+    setQuery(name);
+    setShowSuggestions(false);
+    onSearch?.(name);
+  };
 
   return (
     <section className="relative h-[420px] md:h-[500px] flex items-center justify-center overflow-hidden" aria-label="Hero carousel">
@@ -61,17 +71,33 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
 
         {/* Integrated search bar */}
         <div className="max-w-xl mx-auto mb-6">
-          <div className="flex gap-2">
+          <div className="flex gap-2 relative">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
                 type="text"
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => { setQuery(e.target.value); setShowSuggestions(true); }}
+                onFocus={() => query.trim().length >= 2 && setShowSuggestions(true)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                 placeholder="Search a hotel, resort, or destination..."
                 className="w-full h-12 pl-10 pr-4 rounded-lg border-0 bg-white text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-2 focus:ring-secondary/50 shadow-lg"
               />
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-card rounded-lg shadow-lg border border-border overflow-hidden z-20">
+                  {suggestions.map((s) => (
+                    <button
+                      key={s.id}
+                      onMouseDown={() => handleSuggestionClick(s.name)}
+                      className="w-full text-left px-4 py-2.5 hover:bg-muted/50 transition-colors flex items-center gap-2 text-sm"
+                    >
+                      <Search className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                      <span className="text-foreground font-medium">{s.name}</span>
+                      {s.secondaryText && <span className="text-muted-foreground text-xs ml-1">{s.secondaryText}</span>}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
             <Button
               onClick={handleSearch}

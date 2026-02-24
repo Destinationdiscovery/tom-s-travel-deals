@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import AdminLoginDialog from "@/components/auth/AdminLoginDialog";
 import ExpediaSearchWidget from "@/components/ExpediaSearchWidget";
+import ThemeToggle from "@/components/ThemeToggle";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const navLinks = [
@@ -65,6 +66,7 @@ const Header = () => {
           </nav>
 
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <button
               onClick={() => setWidgetOpen((v) => !v)}
               className="p-2 rounded-lg text-primary-foreground/70 hover:text-secondary hover:bg-primary-foreground/10 transition-colors"
