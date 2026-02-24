@@ -36,7 +36,7 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
   }, [query, onSearch]);
 
   return (
-    <section className="relative h-[420px] md:h-[500px] flex items-center justify-center overflow-hidden">
+    <section className="relative h-[420px] md:h-[500px] flex items-center justify-center overflow-hidden" aria-label="Hero carousel">
       {/* Rotating backgrounds */}
       {slides.map((src, i) => (
         <img

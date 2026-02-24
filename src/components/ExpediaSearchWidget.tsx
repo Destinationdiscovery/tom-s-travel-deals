@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { X, ExternalLink } from "lucide-react";
 import expediaLogo from "@/assets/expedia-logo.png";
+import { trackAffiliateClick } from "@/lib/analytics";
 
 interface ExpediaSearchWidgetProps {
   isOpen: boolean;
@@ -44,6 +45,7 @@ const ExpediaSearchWidget = ({ isOpen, onClose }: ExpediaSearchWidgetProps) => {
     if (isOpen) {
       setWidgetFailed(false);
       setMounted(true);
+      trackAffiliateClick("Expedia", window.location.pathname, "search_widget_open");
     } else {
       setMounted(false);
     }

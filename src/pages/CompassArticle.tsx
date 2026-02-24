@@ -99,6 +99,11 @@ const CompassArticle = () => {
         image={article.image}
         url={`/compass/${slug}`}
         type="article"
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Blog", url: "/compass" },
+          { name: article.title, url: `/compass/${slug}` },
+        ]}
       />
       <Header />
       <section className="relative h-[50vh] min-h-[400px]">

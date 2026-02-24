@@ -174,6 +174,18 @@ const Destinations = () => {
         title="Real Destination Reviews"
         description="Explore curated reviews from real traveler experiences. Search any hotel, resort, or destination."
         url="/destinations"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          name: "Destination Reviews",
+          numberOfItems: destinations.length,
+          itemListElement: destinations.map((d, i) => ({
+            "@type": "ListItem",
+            position: i + 1,
+            name: d.destination,
+            url: `https://reviewthengo.lovable.app/review/${d.slug}`,
+          })),
+        }}
       />
       <Header />
       <AffiliateDisclosureBanner />

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { X, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,15 +66,48 @@ const EmailCapturePopup = () => {
     }
   };
 
+  // Focus trap
+  const popupRef = useRef<HTMLDivElement>(null);
+  const emailInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!visible) return;
+    // Focus the email input on open
+    setTimeout(() => emailInputRef.current?.focus(), 100);
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { dismiss(); return; }
+      if (e.key !== "Tab" || !popupRef.current) return;
+      const focusable = popupRef.current.querySelectorAll<HTMLElement>(
+        'button, [href], input, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [visible]);
+
   if (!visible) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in p-4">
-      <div className="relative bg-card rounded-2xl shadow-elevated max-w-md w-full p-8">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in p-4 no-print"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Newsletter signup"
+    >
+      <div ref={popupRef} className="relative bg-card rounded-2xl shadow-elevated max-w-md w-full p-8">
         <button
           onClick={dismiss}
           className="absolute top-4 right-4 p-1 rounded hover:bg-muted transition-colors"
-          aria-label="Close"
+          aria-label="Close newsletter popup"
         >
           <X className="h-5 w-5 text-muted-foreground" />
         </button>
@@ -92,6 +125,7 @@ const EmailCapturePopup = () => {
 
         <form onSubmit={handleSubmit} className="flex gap-2">
           <Input
+            ref={emailInputRef}
             type="email"
             placeholder="Your email address"
             value={email}

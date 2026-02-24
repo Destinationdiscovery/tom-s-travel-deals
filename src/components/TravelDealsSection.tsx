@@ -1,3 +1,4 @@
+import React from "react";
 import { Star, ArrowRight } from "lucide-react";
 import { trackAffiliateClick } from "@/lib/analytics";
 import { detectCountry, EXPEDIA_LINKS } from "@/components/AffiliateLinks";
@@ -21,27 +22,52 @@ interface FeaturedDeal {
   saleLabel: string;
   rating: number;
   imagePosition?: string;
+  expiresAt?: string; // ISO date string
 }
 
 const featuredDeals: FeaturedDeal[] = [
-  { image: dealTemptation, name: "Temptation Cancun Resort All Inclusive — Adults Only", location: "Cancun, Mexico", affiliateUrl: "https://expedia.com/affiliate/sCSkKSm", originalPrice: 389, salePrice: 249, originalLabel: "$389/night", saleLabel: "$249/night", rating: 4.3 },
-  { image: dealRiu, name: "Hotel Riu Plaza Toronto", location: "Toronto, Canada", affiliateUrl: "https://expedia.com/affiliate/4XUFIIR", originalPrice: 279, salePrice: 179, originalLabel: "$279/night", saleLabel: "$179/night", rating: 4.1 },
-  { image: dealOutrigger, name: "OUTRIGGER Honua Kai Resort & Spa", location: "Lahaina, Hawaii", affiliateUrl: "https://expedia.com/affiliate/N2Bmgth", originalPrice: 499, salePrice: 329, originalLabel: "$499/night", saleLabel: "$329/night", rating: 4.6 },
-  { image: dealFlights, name: "Save on Eligible Flights to Top Destinations", location: "Multiple Destinations", affiliateUrl: "https://expedia.com/affiliate/bPJ1N3S", originalPrice: 650, salePrice: 399, originalLabel: "$650", saleLabel: "$399", rating: 4.0 },
-  { image: dealGarza, name: "Garza Blanca Resort & Spa Cancun", location: "Punta Sam, Mexico", affiliateUrl: "https://www.hotels.com/affiliate/gUxIS8k", originalPrice: 459, salePrice: 299, originalLabel: "$459/night", saleLabel: "$299/night", rating: 4.5 },
-  { image: dealPhuket, name: "Phuket Moonlit Bay Seaview Resort & Spa", location: "Ratsada, Thailand", affiliateUrl: "https://expedia.com/affiliate/av1oUFB", originalPrice: 199, salePrice: 119, originalLabel: "$199/night", saleLabel: "$119/night", rating: 4.2 },
+  { image: dealTemptation, name: "Temptation Cancun Resort All Inclusive — Adults Only", location: "Cancun, Mexico", affiliateUrl: "https://expedia.com/affiliate/sCSkKSm", originalPrice: 389, salePrice: 249, originalLabel: "$389/night", saleLabel: "$249/night", rating: 4.3, expiresAt: "2026-04-30T23:59:59Z" },
+  { image: dealRiu, name: "Hotel Riu Plaza Toronto", location: "Toronto, Canada", affiliateUrl: "https://expedia.com/affiliate/4XUFIIR", originalPrice: 279, salePrice: 179, originalLabel: "$279/night", saleLabel: "$179/night", rating: 4.1, expiresAt: "2026-03-31T23:59:59Z" },
+  { image: dealOutrigger, name: "OUTRIGGER Honua Kai Resort & Spa", location: "Lahaina, Hawaii", affiliateUrl: "https://expedia.com/affiliate/N2Bmgth", originalPrice: 499, salePrice: 329, originalLabel: "$499/night", saleLabel: "$329/night", rating: 4.6, expiresAt: "2026-05-15T23:59:59Z" },
+  { image: dealFlights, name: "Save on Eligible Flights to Top Destinations", location: "Multiple Destinations", affiliateUrl: "https://expedia.com/affiliate/bPJ1N3S", originalPrice: 650, salePrice: 399, originalLabel: "$650", saleLabel: "$399", rating: 4.0, expiresAt: "2026-04-15T23:59:59Z" },
+  { image: dealGarza, name: "Garza Blanca Resort & Spa Cancun", location: "Punta Sam, Mexico", affiliateUrl: "https://www.hotels.com/affiliate/gUxIS8k", originalPrice: 459, salePrice: 299, originalLabel: "$459/night", saleLabel: "$299/night", rating: 4.5, expiresAt: "2026-05-01T23:59:59Z" },
+  { image: dealPhuket, name: "Phuket Moonlit Bay Seaview Resort & Spa", location: "Ratsada, Thailand", affiliateUrl: "https://expedia.com/affiliate/av1oUFB", originalPrice: 199, salePrice: 119, originalLabel: "$199/night", saleLabel: "$119/night", rating: 4.2, expiresAt: "2026-04-20T23:59:59Z" },
 ];
 
-const DiscountBadge = ({ original, sale }: { original: number; sale: number }) => {
+function useCountdown(expiresAt?: string) {
+  const [label, setLabel] = React.useState("");
+  const [expired, setExpired] = React.useState(false);
+  React.useEffect(() => {
+    if (!expiresAt) return;
+    const update = () => {
+      const diff = new Date(expiresAt).getTime() - Date.now();
+      if (diff <= 0) { setExpired(true); setLabel("Expired"); return; }
+      const d = Math.floor(diff / 86400000);
+      const h = Math.floor((diff % 86400000) / 3600000);
+      setLabel(d > 0 ? `Ends in ${d}d ${h}h` : `Ends in ${h}h`);
+    };
+    update();
+    const interval = setInterval(update, 60000);
+    return () => clearInterval(interval);
+  }, [expiresAt]);
+  return { label, expired };
+}
+
+
+const DiscountBadge = ({ original, sale, expiresAt }: { original: number; sale: number; expiresAt?: string }) => {
   const pct = Math.round((1 - sale / original) * 100);
+  const { label, expired } = useCountdown(expiresAt);
+  if (expired) return null;
   return (
     <div className="absolute top-3 left-3 flex items-center gap-1.5 z-10">
       <span className="bg-secondary text-secondary-foreground text-xs font-bold px-2.5 py-1 rounded-full shadow-lg animate-pulse">
         {pct}% OFF
       </span>
-      <span className="bg-destructive text-destructive-foreground text-xs font-bold px-2 py-1 rounded-full shadow-lg">
-        Limited Time
-      </span>
+      {label && (
+        <span className="bg-destructive text-destructive-foreground text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+          {label}
+        </span>
+      )}
     </div>
   );
 };
@@ -105,10 +131,10 @@ const TravelDealsSection = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => trackAffiliateClick("Expedia", "homepage", `deals_grid_${deal.name}`)}
-                className="group block rounded-2xl overflow-hidden bg-card shadow-sm hover:shadow-elevated transition-all duration-300 hover:-translate-y-1 border border-border/50"
+                className="group block rounded-2xl overflow-hidden bg-card shadow-sm hover:shadow-elevated transition-all duration-300 hover:-translate-y-1 border border-border/50 min-w-[280px] md:min-w-0 snap-start"
               >
                 <div className="relative">
-                  <DiscountBadge original={deal.originalPrice} sale={deal.salePrice} />
+                  <DiscountBadge original={deal.originalPrice} sale={deal.salePrice} expiresAt={deal.expiresAt} />
                   <img
                     src={deal.image}
                     alt={deal.name}

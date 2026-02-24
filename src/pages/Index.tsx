@@ -56,10 +56,31 @@ const Index = () => {
         title="Honest Travel Reviews, Deals & Insights for Canadians"
         description="Real destination reviews, tested travel gear, and expert insights from an Ontario travel consultant. Plan your perfect trip."
         url="/"
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            name: "ReviewThenGo",
+            url: "https://reviewthengo.lovable.app",
+            logo: "https://reviewthengo.lovable.app/favicon.png",
+            sameAs: ["https://x.com/TomLaracyTravel", "https://www.instagram.com/reviewthengo"]
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: "ReviewThenGo",
+            url: "https://reviewthengo.lovable.app",
+            potentialAction: {
+              "@type": "SearchAction",
+              target: "https://reviewthengo.lovable.app/destinations?q={search_term_string}",
+              "query-input": "required name=search_term_string"
+            }
+          }
+        ]}
       />
       <Header />
       <AffiliateDisclosureBanner />
-      <main>
+      <main id="main-content">
         <HeroSection onSearch={handleHeroSearch} isSearching={isLoading} />
         <TrustBadges />
 
