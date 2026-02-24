@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { email, source_slug } = await req.json();
+    const { email, source_slug, interests } = await req.json();
 
     if (!email || typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
       return new Response(JSON.stringify({ error: "Invalid email" }), {
@@ -26,12 +26,29 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
+    const normalizedEmail = email.trim().toLowerCase();
+
     const { error } = await supabase.from("subscribers").upsert(
-      { email: email.trim().toLowerCase(), source_slug: source_slug || null },
+      {
+        email: normalizedEmail,
+        source_slug: source_slug || null,
+        interests: interests && Array.isArray(interests) ? interests : [],
+      },
       { onConflict: "email" }
     );
 
     if (error) throw error;
+
+    // Trigger welcome email (fire & forget)
+    const funcUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-welcome-email`;
+    fetch(funcUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+      },
+      body: JSON.stringify({ email: normalizedEmail }),
+    }).catch(() => {});
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
