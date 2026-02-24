@@ -36,6 +36,8 @@ const CATEGORIES = [
   { label: "Insurance", color: "bg-red-500" },
   { label: "Timing", color: "bg-amber-500" },
   { label: "Travel Tips", color: "bg-blue-500" },
+  { label: "News", color: "bg-rose-500" },
+  { label: "Other", color: "bg-gray-500" },
 ];
 
 const BlogPostCreator = () => {
@@ -53,6 +55,7 @@ const BlogPostCreator = () => {
   const [excerpt, setExcerpt] = useState("");
   const [readTime, setReadTime] = useState("5 min read");
   const [tags, setTags] = useState("");
+  const [customCategory, setCustomCategory] = useState("");
   const [blocks, setBlocks] = useState<ContentBlock[]>([{ type: "text", value: "" }]);
 
   // Editing
@@ -117,7 +120,7 @@ const BlogPostCreator = () => {
 
   const resetForm = () => {
     setTitle(""); setSlug(""); setCategory("Guides"); setAuthor("Tom");
-    setExcerpt(""); setReadTime("5 min read"); setTags("");
+    setExcerpt(""); setReadTime("5 min read"); setTags(""); setCustomCategory("");
     setBlocks([{ type: "text", value: "" }]);
     setHeroFile(null); setHeroPreview(""); setEditingId(null);
   };
@@ -139,12 +142,13 @@ const BlogPostCreator = () => {
         heroUrl = pub.publicUrl;
       }
 
-      const categoryColor = CATEGORIES.find(c => c.label === category)?.color || "bg-blue-500";
+      const finalCategory = category === "Other" ? customCategory.trim() : category;
+      const categoryColor = CATEGORIES.find(c => c.label === category)?.color || "bg-gray-500";
       const parsedTags = tags.split(",").map(t => t.trim()).filter(Boolean);
       const payload = {
         title: title.trim(),
         slug: slug.trim(),
-        category,
+        category: finalCategory,
         category_color: categoryColor,
         hero_image_url: heroUrl || null,
         excerpt: excerpt.trim() || null,
@@ -218,6 +222,9 @@ const BlogPostCreator = () => {
               <select value={category} onChange={e => setCategory(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
                 {CATEGORIES.map(c => <option key={c.label} value={c.label}>{c.label}</option>)}
               </select>
+              {category === "Other" && (
+                <Input value={customCategory} onChange={e => setCustomCategory(e.target.value)} placeholder="Type custom category name..." className="mt-2" />
+              )}
             </div>
             <div>
               <Label>Author</Label>
