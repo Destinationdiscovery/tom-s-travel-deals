@@ -74,7 +74,7 @@ const GearPreviewSection = () => {
                 className="w-full h-11 pl-10 pr-4 rounded-lg border border-border bg-card text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
             </div>
-            <Button onClick={handleSearch} disabled={gear.loading || query.trim().length < 2} className="h-11 px-6">
+            <Button onClick={handleSearch} disabled={gear.loading || query.trim().length < 2} className="h-11 px-6 bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold">
               {gear.loading && !gear.packingData ? "Searching..." : "Find Gear"}
             </Button>
           </div>

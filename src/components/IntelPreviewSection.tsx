@@ -84,7 +84,7 @@ const IntelPreviewSection = () => {
               <div className="flex flex-col sm:flex-row gap-3">
                 <Input placeholder="Your citizenship (e.g., Canada)" value={reqCitizenship} onChange={(e) => setReqCitizenship(e.target.value)} />
                 <Input placeholder="Destination (e.g., Cuba)" value={reqDestination} onChange={(e) => setReqDestination(e.target.value)} />
-                <Button onClick={() => handleSubmit("requirements")} disabled={intel.loading || reqCitizenship.trim().length < 2 || reqDestination.trim().length < 2} className="whitespace-nowrap">
+                <Button onClick={() => handleSubmit("requirements")} disabled={intel.loading || reqCitizenship.trim().length < 2 || reqDestination.trim().length < 2} className="whitespace-nowrap bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold">
                   {intel.loading && activeTab === "requirements" ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                   Check
                 </Button>
@@ -94,7 +94,7 @@ const IntelPreviewSection = () => {
             <TabsContent value="advisories">
               <div className="flex flex-col sm:flex-row gap-3">
                 <Input placeholder="Destination (e.g., Cuba)" value={advDestination} onChange={(e) => setAdvDestination(e.target.value)} className="flex-1" />
-                <Button onClick={() => handleSubmit("advisories")} disabled={intel.loading || advDestination.trim().length < 2} className="whitespace-nowrap">
+                <Button onClick={() => handleSubmit("advisories")} disabled={intel.loading || advDestination.trim().length < 2} className="whitespace-nowrap bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold">
                   {intel.loading && activeTab === "advisories" ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                   Check
                 </Button>
@@ -104,7 +104,7 @@ const IntelPreviewSection = () => {
             <TabsContent value="news">
               <div className="flex flex-col sm:flex-row gap-3">
                 <Input placeholder="Destination (e.g., Cuba)" value={newsDestination} onChange={(e) => setNewsDestination(e.target.value)} className="flex-1" />
-                <Button onClick={() => handleSubmit("news")} disabled={intel.loading || newsDestination.trim().length < 2} className="whitespace-nowrap">
+                <Button onClick={() => handleSubmit("news")} disabled={intel.loading || newsDestination.trim().length < 2} className="whitespace-nowrap bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold">
                   {intel.loading && activeTab === "news" ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                   Get News
                 </Button>

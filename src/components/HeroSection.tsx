@@ -1,34 +1,108 @@
-import heroBackground from "@/assets/hero-beach.jpg";
+import { useState, useEffect, useCallback } from "react";
+import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { detectCountry, EXPEDIA_LINKS } from "@/components/AffiliateLinks";
 import expediaLogo from "@/assets/expedia-logo.png";
 
-const HeroSection = () => {
-  return (
-    <section className="relative h-[240px] md:h-[280px] flex items-center justify-center">
-      <img
-        src={heroBackground}
-        alt="Overwater villa at sunset"
-        className="absolute inset-0 w-full h-full object-cover"
-      />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60" />
+import heroBeach from "@/assets/hero-beach.jpg";
+import snowbirdBeach from "@/assets/snowbird-beach-sunset.jpg";
+import snowbirdCaribbean from "@/assets/snowbird-caribbean-aerial.jpg";
+import dealSantorini from "@/assets/deal-santorini.jpg";
+import tokyoSkyline from "@/assets/japan-tokyo-skyline.jpg";
 
-      <div className="relative z-10 text-center px-4">
-        <h1 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold mb-2 leading-tight">
-          <span className="text-sky-300">REVIEW</span>{" "}
-          <span className="text-amber-400">THEN</span>{" "}
-          <span className="text-emerald-400 font-black">GO</span>
+const slides = [heroBeach, snowbirdBeach, snowbirdCaribbean, dealSantorini, tokyoSkyline];
+
+interface HeroSectionProps {
+  onSearch?: (query: string) => void;
+  isSearching?: boolean;
+}
+
+const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const handleSearch = useCallback(() => {
+    const trimmed = query.trim();
+    if (trimmed.length < 2 || !onSearch) return;
+    onSearch(trimmed);
+  }, [query, onSearch]);
+
+  return (
+    <section className="relative h-[420px] md:h-[500px] flex items-center justify-center overflow-hidden">
+      {/* Rotating backgrounds */}
+      {slides.map((src, i) => (
+        <img
+          key={i}
+          src={src}
+          alt=""
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+            i === currentSlide ? "opacity-100" : "opacity-0"
+          }`}
+        />
+      ))}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
+
+      <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
+        <h1 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold mb-3 leading-tight text-white">
+          Honest Travel Reviews, Deals &amp; Insights for Canadians
         </h1>
-        <p className="text-white/80 text-sm md:text-base font-light mb-3">
-          Real Reviews by Travellers, for Travellers
+        <p className="text-white/80 text-base md:text-lg font-light mb-6">
+          Real reviews from a Toronto-based travel consultant. Find your perfect trip.
         </p>
+
+        {/* Integrated search bar */}
+        <div className="max-w-xl mx-auto mb-6">
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                placeholder="Search a hotel, resort, or destination..."
+                className="w-full h-12 pl-10 pr-4 rounded-lg border-0 bg-white text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-2 focus:ring-secondary/50 shadow-lg"
+              />
+            </div>
+            <Button
+              onClick={handleSearch}
+              disabled={isSearching || query.trim().length < 2}
+              variant="default"
+              className="h-12 px-6 bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold"
+            >
+              {isSearching ? "Searching..." : "Search"}
+            </Button>
+          </div>
+        </div>
+
+        {/* CTA + Expedia badge */}
         <a
-          href="https://www.expedia.ca/?affcid=ca.network.pz.affiliate.1100l5DpWA"
+          href={EXPEDIA_LINKS[detectCountry()]}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity"
+          className="inline-block mb-4"
         >
-          <span className="text-white/60 text-sm font-light">Powered by:</span>
-          <img src={expediaLogo} alt="Expedia" className="h-8 md:h-10" />
+          <Button variant="default" size="lg" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-bold text-base shadow-lg">
+            Find Your Next Trip
+          </Button>
         </a>
+        <div className="flex items-center justify-center gap-2">
+          <span className="text-white/60 text-sm font-light">Powered by:</span>
+          <a
+            href={EXPEDIA_LINKS[detectCountry()]}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img src={expediaLogo} alt="Expedia" className="h-8 md:h-10" />
+          </a>
+        </div>
       </div>
     </section>
   );

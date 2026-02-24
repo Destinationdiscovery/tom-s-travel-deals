@@ -34,8 +34,13 @@ const featuredDeals: FeaturedDeal[] = [
 const DiscountBadge = ({ original, sale }: { original: number; sale: number }) => {
   const pct = Math.round((1 - sale / original) * 100);
   return (
-    <div className="absolute top-3 left-3 bg-amber-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-lg z-10">
-      {pct}% OFF
+    <div className="absolute top-3 left-3 flex items-center gap-1.5 z-10">
+      <span className="bg-secondary text-secondary-foreground text-xs font-bold px-2.5 py-1 rounded-full shadow-lg animate-pulse">
+        {pct}% OFF
+      </span>
+      <span className="bg-destructive text-destructive-foreground text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+        Limited Time
+      </span>
     </div>
   );
 };
@@ -121,8 +126,8 @@ const TravelDealsSection = () => {
                       <span className="text-sm text-muted-foreground line-through">{deal.originalLabel}</span>
                       <span className="font-bold text-emerald-400 text-lg">{deal.saleLabel}</span>
                     </div>
-                    <span className="text-xs font-semibold text-primary group-hover:underline flex items-center gap-1">
-                      View Deal →
+                    <span className="text-xs font-bold bg-secondary text-secondary-foreground px-3 py-1.5 rounded-full group-hover:bg-secondary/90 transition-colors">
+                      Grab This Deal →
                     </span>
                   </div>
                 </div>
