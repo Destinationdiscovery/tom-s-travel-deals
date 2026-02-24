@@ -109,6 +109,7 @@ const CompassArticle = () => {
               src={block.value}
               alt={block.caption || "Article image"}
               loading="lazy"
+              className="w-full rounded-xl object-cover"
             />
             {block.caption && (
               <figcaption className="text-sm text-muted-foreground mt-3 text-center italic">
