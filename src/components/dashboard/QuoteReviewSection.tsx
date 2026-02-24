@@ -1,10 +1,28 @@
 import { useMemo } from "react";
 import { Star, Sparkles, Lightbulb, MapPin, Camera } from "lucide-react";
 import PhotoGallery from "@/components/review/PhotoGallery";
+import TripDetailsCard from "./TripDetailsCard";
+
+interface TripDetailsProps {
+  resortName: string;
+  destination?: string;
+  roomType?: string;
+  checkIn?: string;
+  checkOut?: string;
+  numTravellers: number;
+  flights: any[];
+  lineItems: any[];
+  totalPrice: number;
+  currency: string;
+  inclusions: string[];
+  notes?: string;
+  attachmentUrls?: string[];
+}
 
 interface QuoteReviewSectionProps {
   reviewData: any;
   hideHeader?: boolean;
+  tripDetailsProps?: TripDetailsProps;
 }
 
 const RatingBar = ({ label, value }: { label: string; value: number }) => (
@@ -22,7 +40,7 @@ const RatingBar = ({ label, value }: { label: string; value: number }) => (
   </div>
 );
 
-const QuoteReviewSection = ({ reviewData, hideHeader = false }: QuoteReviewSectionProps) => {
+const QuoteReviewSection = ({ reviewData, hideHeader = false, tripDetailsProps }: QuoteReviewSectionProps) => {
   const functionUrl = useMemo(() => {
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
     return supabaseUrl ? `${supabaseUrl}/functions/v1/place-photos` : "";
@@ -203,12 +221,20 @@ const QuoteReviewSection = ({ reviewData, hideHeader = false }: QuoteReviewSecti
           <div className="lg:hidden">
             <LocationMap propertyName={propertyName} location={location} />
           </div>
+
+          {/* Trip Details (mobile) */}
+          {tripDetailsProps && (
+            <div className="lg:hidden">
+              <TripDetailsCard {...tripDetailsProps} />
+            </div>
+          )}
         </div>
 
         {/* RIGHT COLUMN (desktop) */}
         <div className="hidden lg:flex flex-col gap-8">
           <RatingsCard ratingEntries={ratingEntries} bestFor={bestFor} />
           <LocationMap propertyName={propertyName} location={location} />
+          {tripDetailsProps && <TripDetailsCard {...tripDetailsProps} />}
         </div>
       </div>
     </div>
