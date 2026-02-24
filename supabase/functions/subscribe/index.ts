@@ -39,16 +39,16 @@ Deno.serve(async (req) => {
 
     if (error) throw error;
 
-    // Trigger welcome email (fire & forget)
-    const funcUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-welcome-email`;
-    fetch(funcUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
-      },
-      body: JSON.stringify({ email: normalizedEmail }),
-    }).catch(() => {});
+    // Welcome email temporarily disabled until domain is verified with Resend
+    // const funcUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-welcome-email`;
+    // fetch(funcUrl, {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //     Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+    //   },
+    //   body: JSON.stringify({ email: normalizedEmail }),
+    // }).catch(() => {});
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
