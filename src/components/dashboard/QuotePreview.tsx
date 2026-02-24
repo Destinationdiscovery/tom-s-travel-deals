@@ -35,7 +35,7 @@ const QuotePreview = ({ quote, totalPrice, onBack, onSave, saving, editingId }: 
   const [sendingDirect, setSendingDirect] = useState(false);
   const handlePrint = () => window.print();
 
-  const shareUrl = quote.shareToken ? `${window.location.origin}/quote/${quote.shareToken}` : null;
+  const shareUrl = quote.shareToken ? `https://reviewthengo.lovable.app/quote/${quote.shareToken}` : null;
   const nights = getNights(quote.checkIn, quote.checkOut);
 
   const copyShareLink = () => {
@@ -49,7 +49,7 @@ const QuotePreview = ({ quote, totalPrice, onBack, onSave, saving, editingId }: 
 
   const emailSubject = `Your Vacation Quote — ${quote.resortName}`;
   const emailBody = shareUrl
-    ? `Hi ${quote.clientName},\n\nYour vacation quote for ${quote.resortName} in ${quote.destination} is ready!\n\nView Your Quote: ${shareUrl}\n\nLet me know if you have any questions!\n\nBest regards,\n${AGENT_INFO.name} - ${AGENT_INFO.agency}`
+    ? `Hi ${quote.clientName},\n\nYour vacation quote for ${quote.resortName} in ${quote.destination} is ready!\n\nClick below to view your quote:\n\n${shareUrl}\n\nLet me know if you have any questions!\n\nBest regards,\n${AGENT_INFO.name} - ${AGENT_INFO.agency}`
     : "";
 
   const requireSaved = () => {
@@ -62,7 +62,7 @@ const QuotePreview = ({ quote, totalPrice, onBack, onSave, saving, editingId }: 
 
   const openOutlook = () => {
     if (requireSaved()) return;
-    window.open(`mailto:${quote.clientEmail}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`);
+    window.location.href = `mailto:${quote.clientEmail}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
   };
 
   const openGmail = () => {
