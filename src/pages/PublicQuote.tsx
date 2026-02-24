@@ -89,26 +89,44 @@ const PublicQuote = () => {
               {quote.destination && <p className="text-sm text-muted-foreground">{quote.destination}</p>}
             </div>
 
-            {/* Embedded Review Section */}
-            {quote.include_review && quote.review_data && (
-              <QuoteReviewSection reviewData={quote.review_data} hideHeader />
+            {/* Embedded Review Section with Trip Details in sidebar */}
+            {quote.include_review && quote.review_data ? (
+              <QuoteReviewSection
+                reviewData={quote.review_data}
+                hideHeader
+                tripDetailsProps={{
+                  resortName: quote.resort_name,
+                  destination: quote.destination,
+                  roomType: quote.room_type,
+                  checkIn: quote.check_in,
+                  checkOut: quote.check_out,
+                  numTravellers: quote.num_travellers,
+                  flights,
+                  lineItems,
+                  totalPrice: quote.total_price,
+                  currency: quote.currency || "CAD",
+                  inclusions,
+                  notes: quote.notes,
+                  attachmentUrls: attachments,
+                }}
+              />
+            ) : (
+              <TripDetailsCard
+                resortName={quote.resort_name}
+                destination={quote.destination}
+                roomType={quote.room_type}
+                checkIn={quote.check_in}
+                checkOut={quote.check_out}
+                numTravellers={quote.num_travellers}
+                flights={flights}
+                lineItems={lineItems}
+                totalPrice={quote.total_price}
+                currency={quote.currency || "CAD"}
+                inclusions={inclusions}
+                notes={quote.notes}
+                attachmentUrls={attachments}
+              />
             )}
-
-            <TripDetailsCard
-              resortName={quote.resort_name}
-              destination={quote.destination}
-              roomType={quote.room_type}
-              checkIn={quote.check_in}
-              checkOut={quote.check_out}
-              numTravellers={quote.num_travellers}
-              flights={flights}
-              lineItems={lineItems}
-              totalPrice={quote.total_price}
-              currency={quote.currency || "CAD"}
-              inclusions={inclusions}
-              notes={quote.notes}
-              attachmentUrls={attachments}
-            />
 
             {/* Footer: Valid Until + Agent Contact */}
             <div className="border-t border-border pt-4 space-y-2">
