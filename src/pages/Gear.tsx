@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Search, Loader2 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useGearIntel } from "@/hooks/useGearIntel";
@@ -43,13 +44,14 @@ const Gear = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      <AffiliateDisclosureBanner />
       <main className="pt-20">
         <section className="relative h-[40vh] min-h-[320px] flex items-center justify-center pt-20">
           <img src={heroImg} alt="Travel gear essentials" className="absolute inset-0 w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60" />
           <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
             <h1 className="font-display text-4xl md:text-6xl font-bold text-white mb-4">
-              <span className="text-sky-300">Travel</span> Gear
+              <span className="text-primary">Travel</span> Gear
             </h1>
             <p className="text-white/80 max-w-2xl mx-auto text-lg mb-8">Tell us where you're going, we'll tell you what to pack.</p>
             <div className="max-w-2xl mx-auto">
@@ -65,7 +67,7 @@ const Gear = () => {
                   />
                   {loading && <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 animate-spin text-primary" />}
                 </div>
-                <Button onClick={handleSearch} size="lg" className="h-14 px-6 rounded-xl" disabled={loading || searchQuery.trim().length < 2}>Search</Button>
+                <Button onClick={handleSearch} size="lg" className="h-14 px-6 rounded-xl bg-secondary text-secondary-foreground hover:bg-secondary/90" disabled={loading || searchQuery.trim().length < 2}>Search</Button>
               </div>
             </div>
           </div>

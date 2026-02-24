@@ -99,6 +99,15 @@ const AffiliateLinks = ({ propertyName }: AffiliateLinksProps) => {
       <p className="text-sm text-muted-foreground mb-5">
         Compare rates across top platforms
       </p>
+      <a
+        href={affiliates[0].url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center justify-center gap-2 w-full rounded-xl bg-secondary text-secondary-foreground font-bold text-sm py-3 mb-4 hover:opacity-90 transition-opacity"
+      >
+        Book on Expedia
+        <ExternalLink className="h-3.5 w-3.5" />
+      </a>
       <div className="flex flex-col gap-3">
         {affiliates.map((affiliate) => (
           <a

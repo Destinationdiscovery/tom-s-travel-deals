@@ -1,13 +1,21 @@
-import { Star, ArrowRight, Play } from "lucide-react";
+import { Star, ArrowRight, Play, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { Destination } from "@/pages/Destinations";
+import { useMemo } from "react";
+import { buildDeepLinks, detectCountry } from "@/components/AffiliateLinks";
 
 interface DestinationCardProps {
   destination: Destination;
   index: number;
 }
 
-const DestinationCard = ({ destination: dest, index }: DestinationCardProps) => (
+const DestinationCard = ({ destination: dest, index }: DestinationCardProps) => {
+  const expediaLink = useMemo(() => {
+    const country = detectCountry();
+    return buildDeepLinks(country, dest.destination).expedia;
+  }, [dest.destination]);
+
+  return (
   <Link to={`/review/${dest.slug}`} className="group block">
     <article
       className="bg-card rounded-2xl overflow-hidden shadow-soft hover:shadow-elevated transition-all duration-500 hover:-translate-y-2 animate-fade-up h-full flex flex-col"
@@ -58,12 +66,25 @@ const DestinationCard = ({ destination: dest, index }: DestinationCardProps) => 
           ))}
         </div>
 
-        <div className="flex items-center text-primary text-sm font-medium group-hover:gap-2 transition-all pt-2">
-          Read Review <ArrowRight className="h-4 w-4 ml-1" />
+        <div className="flex items-center justify-between pt-2">
+          <div className="flex items-center text-primary text-sm font-medium group-hover:gap-2 transition-all">
+            Read Review <ArrowRight className="h-4 w-4 ml-1" />
+          </div>
+          <a
+            href={expediaLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-secondary text-secondary-foreground text-xs font-semibold hover:opacity-90 transition-opacity"
+          >
+            Book on Expedia
+            <ExternalLink className="h-3 w-3" />
+          </a>
         </div>
       </div>
     </article>
   </Link>
-);
+  );
+};
 
 export default DestinationCard;

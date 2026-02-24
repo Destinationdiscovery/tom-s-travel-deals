@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import { Star, ArrowRight, Play, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
@@ -174,6 +175,7 @@ const Destinations = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      <AffiliateDisclosureBanner />
       <main className="pt-24">
         {/* Hero */}
         <section className="relative h-[40vh] min-h-[320px] flex items-center justify-center pt-20">
@@ -181,7 +183,7 @@ const Destinations = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60" />
           <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
             <h1 className="font-display text-4xl md:text-6xl font-bold text-white mb-4">
-              <span className="text-sky-300">Real</span> Destination Reviews
+              <span className="text-primary">Real</span> Destination Reviews
             </h1>
             <p className="text-white/80 text-lg max-w-2xl mx-auto">
               Explore curated reviews from real traveler experiences. Search any hotel, resort, or destination to generate a fresh AI-powered review.
@@ -221,7 +223,7 @@ const Destinations = () => {
                     </div>
                   )}
                 </div>
-                <Button onClick={handleSearch} disabled={isLoading || query.trim().length < 2} className="h-11 px-6">
+                <Button onClick={handleSearch} disabled={isLoading || query.trim().length < 2} className="h-11 px-6 bg-secondary text-secondary-foreground hover:bg-secondary/90">
                   {isLoading ? "Searching..." : "Search"}
                 </Button>
               </div>

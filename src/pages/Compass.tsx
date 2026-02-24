@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import { compassArticles } from "@/data/compassArticles";
 import { ArrowRight, Clock } from "lucide-react";
 import heroImg from "@/assets/japan-cherry-blossoms.webp";
@@ -22,6 +23,7 @@ const Compass = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      <AffiliateDisclosureBanner />
       
       {/* Hero Section */}
       <section className="relative h-[40vh] min-h-[320px] flex items-center justify-center pt-20">
@@ -32,7 +34,7 @@ const Compass = () => {
             Travel Intel
           </span>
           <h1 className="font-display text-4xl md:text-6xl font-bold text-white mb-6">
-            <span className="text-sky-300">Travel</span> Blog
+            <span className="text-primary">Travel</span> Blog
           </h1>
           <p className="text-white/80 text-lg md:text-xl max-w-2xl mx-auto">
             Insider tips and travel wisdom from over a decade of experience as a travel consultant. 

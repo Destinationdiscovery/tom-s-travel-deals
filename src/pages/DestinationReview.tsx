@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import { useParams, Link } from "react-router-dom";
 import { Star, ArrowLeft, Calendar, MapPin, Heart, Share2 } from "lucide-react";
 
@@ -379,6 +380,7 @@ const DestinationReview = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      <AffiliateDisclosureBanner />
       <main className="pt-24">
         {/* Hero Image */}
         <div className="relative h-[50vh] md:h-[60vh]">

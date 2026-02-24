@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import { Phone, Mail, Globe, MessageSquare, Award, MapPin, Heart, Star } from "lucide-react";
 import heroBeach from "@/assets/hero-beach.jpg";
 
@@ -13,6 +14,7 @@ const Contact = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      <AffiliateDisclosureBanner />
       <main className="pt-20">
         <section className="py-24 bg-muted">
           <div className="container mx-auto px-4">

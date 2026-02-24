@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, Star, Trash2, Sparkles, Trophy, Loader2 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import { Button } from "@/components/ui/button";
 import AffiliateLinks from "@/components/AffiliateLinks";
 import { useSavedReviews, type SavedReview } from "@/hooks/useSavedReviews";
@@ -156,6 +157,7 @@ const Compare = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      <AffiliateDisclosureBanner />
       <main className="container mx-auto px-4 pt-28 pb-16">
         {/* Header */}
         <div className="mb-8">
@@ -201,7 +203,7 @@ const Compare = () => {
                 onClick={handleCompare}
                 disabled={savedReviews.length < 2 || isComparing}
                 size="lg"
-                className="gap-2"
+                className="gap-2 bg-secondary text-secondary-foreground hover:bg-secondary/90"
               >
                 {isComparing ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

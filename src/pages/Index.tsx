@@ -11,6 +11,7 @@ import IntelPreviewSection from "@/components/IntelPreviewSection";
 import BlogPreviewSection from "@/components/BlogPreviewSection";
 import ComparisonFloatingBadge from "@/components/ComparisonFloatingBadge";
 import Footer from "@/components/Footer";
+import EmailCapturePopup from "@/components/EmailCapturePopup";
 import AIReviewResult from "@/components/AIReviewResult";
 import { useGenerateReview } from "@/hooks/useGenerateReview";
 
@@ -51,6 +52,7 @@ const Index = () => {
         <BlogPreviewSection />
       </main>
       <ComparisonFloatingBadge />
+      <EmailCapturePopup />
       <Footer />
     </div>
   );
