@@ -103,10 +103,6 @@ const FeaturedDealsManager = () => {
   };
 
   const handleSave = async (slotIdx: number) => {
-    if (!form.name.trim() || !form.affiliateUrl.trim() || !form.originalPrice || !form.salePrice) {
-      toast({ title: "Missing fields", description: "Name, affiliate URL, and prices are required.", variant: "destructive" });
-      return;
-    }
     setSaving(true);
     try {
       let imageUrl = slots[slotIdx].imageUrl;
