@@ -15,8 +15,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import CommentsSection from "@/components/comments/CommentsSection";
-import AffiliateLinks from "@/components/AffiliateLinks";
+import AffiliateLinks, { detectCountry, EXPEDIA_LINKS } from "@/components/AffiliateLinks";
 import InlineAffiliateCTA from "@/components/InlineAffiliateCTA";
+import { trackAffiliateClick } from "@/lib/analytics";
 
 import { Button } from "@/components/ui/button";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
@@ -746,11 +747,34 @@ const DestinationReview = () => {
         </div>
       </main>
 
-      {/* Scroll to top */}
+      {/* Sticky mobile CTA */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-card border-t border-border p-3 flex items-center gap-3 no-print">
+        <a
+          href={EXPEDIA_LINKS[detectCountry()]}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex-1"
+          onClick={() => trackAffiliateClick("Expedia", window.location.pathname, "mobile_sticky_cta")}
+        >
+          <Button className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-bold">
+            Book on Expedia
+          </Button>
+        </a>
+        <Button
+          variant="outline"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          className="px-3"
+          aria-label="Scroll to top"
+        >
+          <ChevronUp className="h-5 w-5" />
+        </Button>
+      </div>
+
+      {/* Scroll to top - desktop only */}
       {showScrollTop && (
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="fixed bottom-6 right-6 z-40 p-3 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors"
+          className="fixed bottom-6 right-6 z-40 p-3 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors hidden md:block no-print"
           aria-label="Scroll to top"
         >
           <ChevronUp className="h-5 w-5" />

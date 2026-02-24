@@ -12,6 +12,7 @@ interface ImageLightboxProps {
 
 const ImageLightbox = ({ images, initialIndex, isOpen, onClose }: ImageLightboxProps) => {
   const [currentIndex, setCurrentIndex] = React.useState(initialIndex);
+  const touchStartX = React.useRef<number | null>(null);
 
   // Reset to initial index when opened
   React.useEffect(() => {
@@ -86,11 +87,21 @@ const ImageLightbox = ({ images, initialIndex, isOpen, onClose }: ImageLightboxP
             </button>
           )}
 
-          {/* Image */}
+          {/* Image with swipe support */}
           <img
             src={images[currentIndex]}
             alt={`Gallery image ${currentIndex + 1}`}
             className="max-h-[85vh] max-w-[90vw] object-contain rounded-lg"
+            onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
+            onTouchEnd={(e) => {
+              if (touchStartX.current === null) return;
+              const diff = e.changedTouches[0].clientX - touchStartX.current;
+              if (Math.abs(diff) > 50) {
+                if (diff > 0) goToPrevious();
+                else goToNext();
+              }
+              touchStartX.current = null;
+            }}
           />
 
           {/* Next button */}

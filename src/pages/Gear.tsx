@@ -43,6 +43,13 @@ const Gear = () => {
         title="Travel Gear"
         description="Tell us where you're going, we'll tell you what to pack. AI-powered packing lists and product reviews."
         url="/gear"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          name: "Travel Gear - ReviewThenGo",
+          description: "AI-powered packing lists and product reviews for travelers.",
+          url: "https://reviewthengo.lovable.app/gear"
+        }}
       />
       <Header />
       <AffiliateDisclosureBanner />
