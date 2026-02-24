@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { X, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,9 +9,17 @@ import { trackEmailSignup } from "@/lib/analytics";
 const STORAGE_KEY = "rtg-email-popup-dismissed";
 const DISMISS_DAYS = 7;
 
+const INTEREST_OPTIONS = [
+  { id: "destinations", label: "Destinations" },
+  { id: "deals", label: "Deals" },
+  { id: "gear", label: "Gear" },
+  { id: "blog", label: "Blog" },
+];
+
 const EmailCapturePopup = () => {
   const [visible, setVisible] = useState(false);
   const [email, setEmail] = useState("");
+  const [interests, setInterests] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
 
@@ -22,7 +30,6 @@ const EmailCapturePopup = () => {
       if (Date.now() - dismissedAt < DISMISS_DAYS * 86400000) return;
     }
 
-    // Exit-intent on desktop
     const handleMouseLeave = (e: MouseEvent) => {
       if (e.clientY <= 0) {
         setVisible(true);
@@ -30,8 +37,6 @@ const EmailCapturePopup = () => {
       }
     };
     document.documentElement.addEventListener("mouseleave", handleMouseLeave);
-
-    // Fallback timer (mobile + desktop)
     const timer = setTimeout(() => setVisible(true), 30000);
 
     return () => {
@@ -45,6 +50,12 @@ const EmailCapturePopup = () => {
     localStorage.setItem(STORAGE_KEY, String(Date.now()));
   };
 
+  const toggleInterest = (id: string) => {
+    setInterests((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = email.trim();
@@ -53,7 +64,7 @@ const EmailCapturePopup = () => {
     setSubmitting(true);
     try {
       const { error } = await supabase.functions.invoke("subscribe", {
-        body: { email: trimmed, source_slug: "popup" },
+        body: { email: trimmed, source_slug: "popup", interests },
       });
       if (error) throw error;
       trackEmailSignup("popup");
@@ -66,13 +77,11 @@ const EmailCapturePopup = () => {
     }
   };
 
-  // Focus trap
   const popupRef = useRef<HTMLDivElement>(null);
   const emailInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!visible) return;
-    // Focus the email input on open
     setTimeout(() => emailInputRef.current?.focus(), 100);
 
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -119,9 +128,27 @@ const EmailCapturePopup = () => {
         <h2 className="font-display text-2xl font-bold text-foreground text-center mb-2">
           Get Weekly Exclusive Deals
         </h2>
-        <p className="text-sm text-muted-foreground text-center mb-6">
+        <p className="text-sm text-muted-foreground text-center mb-4">
           Join 5,000+ Canadian travelers getting the best deals, reviews, and tips delivered weekly.
         </p>
+
+        {/* Interest checkboxes */}
+        <div className="flex flex-wrap gap-2 justify-center mb-4">
+          {INTEREST_OPTIONS.map((opt) => (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => toggleInterest(opt.id)}
+              className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+                interests.includes(opt.id)
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-background text-muted-foreground border-border hover:border-primary/50"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
 
         <form onSubmit={handleSubmit} className="flex gap-2">
           <Input

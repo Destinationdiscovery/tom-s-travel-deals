@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import AIReviewResult from "@/components/AIReviewResult";
 import ComparisonFloatingBadge from "@/components/ComparisonFloatingBadge";
 import Footer from "@/components/Footer";
+import ReviewEngagement from "@/components/ReviewEngagement";
 import type { CachedReview } from "@/hooks/useGenerateReview";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useReviewHistory } from "@/hooks/useReviewHistory";
@@ -83,12 +84,19 @@ const AIReview = () => {
             </div>
           </div>
         ) : (
-          <AIReviewResult
-            review={review}
-            isLoading={false}
-            error={error}
-            onNewReview={handleNewReview}
-          />
+          <>
+            <AIReviewResult
+              review={review}
+              isLoading={false}
+              error={error}
+              onNewReview={handleNewReview}
+            />
+            {slug && (
+              <div className="container mx-auto px-4 py-8 max-w-6xl">
+                <ReviewEngagement slug={slug} pageType="ai-review" />
+              </div>
+            )}
+          </>
         )}
       </main>
       <ComparisonFloatingBadge />

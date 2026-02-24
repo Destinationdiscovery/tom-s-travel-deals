@@ -1,3 +1,5 @@
+import { supabase } from "@/integrations/supabase/client";
+
 declare global {
   interface Window {
     gtag?: (...args: unknown[]) => void;
@@ -13,6 +15,11 @@ export function trackAffiliateClick(platform: string, page: string, position: st
       position,
     });
   }
+
+  // Also track in database (non-blocking)
+  supabase.functions.invoke("track-review-view", {
+    body: { action: "affiliate_click", platform, page, position },
+  }).catch(() => {});
 }
 
 export function trackEmailSignup(source: string) {

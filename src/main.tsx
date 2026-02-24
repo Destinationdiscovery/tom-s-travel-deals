@@ -3,3 +3,8 @@ import App from "./App.tsx";
 import "./index.css";
 
 createRoot(document.getElementById("root")!).render(<App />);
+
+// Initialize Web Vitals tracking in production
+if (import.meta.env.PROD) {
+  import("./lib/vitals").then(({ initVitals }) => initVitals()).catch(() => {});
+}

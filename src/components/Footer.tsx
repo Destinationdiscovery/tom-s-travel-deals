@@ -21,7 +21,7 @@ const Footer = () => {
     setSubmitting(true);
     try {
       const { error } = await supabase.functions.invoke("subscribe", {
-        body: { email: trimmed, source_slug: "footer" },
+        body: { email: trimmed, source_slug: "footer", interests: ["deals"] },
       });
       if (error) throw error;
       trackEmailSignup("footer");

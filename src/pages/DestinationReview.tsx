@@ -18,6 +18,7 @@ import CommentsSection from "@/components/comments/CommentsSection";
 import AffiliateLinks, { detectCountry, EXPEDIA_LINKS } from "@/components/AffiliateLinks";
 import InlineAffiliateCTA from "@/components/InlineAffiliateCTA";
 import { trackAffiliateClick } from "@/lib/analytics";
+import ReviewEngagement from "@/components/ReviewEngagement";
 
 import { Button } from "@/components/ui/button";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
@@ -681,6 +682,9 @@ const DestinationReview = () => {
                   </div>
                 </div>
               )}
+
+              {/* Engagement Widget */}
+              {slug && <ReviewEngagement slug={slug} pageType="destination" />}
 
               {slug && <CommentsSection pageType="destination" pageSlug={slug} />}
             </div>

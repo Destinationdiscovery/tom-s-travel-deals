@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      affiliate_clicks: {
+        Row: {
+          country: string | null
+          created_at: string
+          id: string
+          page: string
+          platform: string
+          position: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string
+          id?: string
+          page: string
+          platform: string
+          position?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          country?: string | null
+          created_at?: string
+          id?: string
+          page?: string
+          platform?: string
+          position?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       booking_details: {
         Row: {
           agency: string | null
@@ -174,31 +204,55 @@ export type Database = {
       }
       cached_reviews: {
         Row: {
+          best_for: string[] | null
           created_at: string
+          date_visited: string | null
+          duration: string | null
+          full_review: string[] | null
+          gallery_urls: string[] | null
           id: string
           location: string | null
           property_name: string
           property_type: string | null
+          ratings: Json | null
           review_data: Json
           slug: string
+          tips: string[] | null
+          video_url: string | null
         }
         Insert: {
+          best_for?: string[] | null
           created_at?: string
+          date_visited?: string | null
+          duration?: string | null
+          full_review?: string[] | null
+          gallery_urls?: string[] | null
           id?: string
           location?: string | null
           property_name: string
           property_type?: string | null
+          ratings?: Json | null
           review_data: Json
           slug: string
+          tips?: string[] | null
+          video_url?: string | null
         }
         Update: {
+          best_for?: string[] | null
           created_at?: string
+          date_visited?: string | null
+          duration?: string | null
+          full_review?: string[] | null
+          gallery_urls?: string[] | null
           id?: string
           location?: string | null
           property_name?: string
           property_type?: string | null
+          ratings?: Json | null
           review_data?: Json
           slug?: string
+          tips?: string[] | null
+          video_url?: string | null
         }
         Relationships: []
       }
@@ -430,6 +484,51 @@ export type Database = {
         }
         Relationships: []
       }
+      review_reactions: {
+        Row: {
+          created_at: string
+          id: string
+          reaction: string
+          session_id: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reaction: string
+          session_id: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reaction?: string
+          session_id?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      review_views: {
+        Row: {
+          id: string
+          last_viewed_at: string
+          slug: string
+          view_count: number
+        }
+        Insert: {
+          id?: string
+          last_viewed_at?: string
+          slug: string
+          view_count?: number
+        }
+        Update: {
+          id?: string
+          last_viewed_at?: string
+          slug?: string
+          view_count?: number
+        }
+        Relationships: []
+      }
       search_suggestions: {
         Row: {
           created_at: string
@@ -459,18 +558,21 @@ export type Database = {
           created_at: string
           email: string
           id: string
+          interests: string[] | null
           source_slug: string | null
         }
         Insert: {
           created_at?: string
           email: string
           id?: string
+          interests?: string[] | null
           source_slug?: string | null
         }
         Update: {
           created_at?: string
           email?: string
           id?: string
+          interests?: string[] | null
           source_slug?: string | null
         }
         Relationships: []
@@ -589,6 +691,30 @@ export type Database = {
           summary?: string
           trip_name?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      web_vitals: {
+        Row: {
+          created_at: string
+          id: string
+          metric_name: string
+          page: string
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metric_name: string
+          page: string
+          value: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metric_name?: string
+          page?: string
+          value?: number
         }
         Relationships: []
       }
