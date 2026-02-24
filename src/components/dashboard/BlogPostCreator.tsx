@@ -52,6 +52,7 @@ const BlogPostCreator = () => {
   const [author, setAuthor] = useState("Tom");
   const [excerpt, setExcerpt] = useState("");
   const [readTime, setReadTime] = useState("5 min read");
+  const [tags, setTags] = useState("");
   const [blocks, setBlocks] = useState<ContentBlock[]>([{ type: "text", value: "" }]);
 
   // Editing
@@ -116,7 +117,7 @@ const BlogPostCreator = () => {
 
   const resetForm = () => {
     setTitle(""); setSlug(""); setCategory("Guides"); setAuthor("Tom");
-    setExcerpt(""); setReadTime("5 min read");
+    setExcerpt(""); setReadTime("5 min read"); setTags("");
     setBlocks([{ type: "text", value: "" }]);
     setHeroFile(null); setHeroPreview(""); setEditingId(null);
   };
@@ -139,6 +140,7 @@ const BlogPostCreator = () => {
       }
 
       const categoryColor = CATEGORIES.find(c => c.label === category)?.color || "bg-blue-500";
+      const parsedTags = tags.split(",").map(t => t.trim()).filter(Boolean);
       const payload = {
         title: title.trim(),
         slug: slug.trim(),
@@ -149,6 +151,7 @@ const BlogPostCreator = () => {
         author: author.trim(),
         read_time: readTime.trim(),
         rich_content: blocks.filter(b => b.value.trim()),
+        tags: parsedTags,
         date_published: new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
       };
 
@@ -178,6 +181,7 @@ const BlogPostCreator = () => {
     setExcerpt(post.excerpt || "");
     setReadTime(post.read_time);
     setBlocks(post.rich_content?.length ? post.rich_content : [{ type: "text", value: "" }]);
+    setTags((post as any).tags?.join(", ") || "");
     setHeroPreview(post.hero_image_url || "");
     setHeroFile(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -236,6 +240,12 @@ const BlogPostCreator = () => {
           <div>
             <Label>Excerpt</Label>
             <Textarea value={excerpt} onChange={e => setExcerpt(e.target.value)} placeholder="Short summary for the card..." className="min-h-[60px]" />
+          </div>
+
+          <div>
+            <Label>SEO Tags / Keywords</Label>
+            <Input value={tags} onChange={e => setTags(e.target.value)} placeholder="Mexico all-inclusive 2026, best Cancun resorts, ..." />
+            <p className="text-xs text-muted-foreground mt-1">Comma-separated keywords to help Google rank this article.</p>
           </div>
 
           {/* Block Editor */}

@@ -57,6 +57,7 @@ export type Database = {
           read_time: string
           rich_content: Json
           slug: string
+          tags: string[] | null
           title: string
           updated_at: string
         }
@@ -72,6 +73,7 @@ export type Database = {
           read_time?: string
           rich_content?: Json
           slug: string
+          tags?: string[] | null
           title: string
           updated_at?: string
         }
@@ -87,6 +89,7 @@ export type Database = {
           read_time?: string
           rich_content?: Json
           slug?: string
+          tags?: string[] | null
           title?: string
           updated_at?: string
         }
