@@ -1,152 +1,172 @@
 
 
-# Phase 2: Homepage Redesign — Hero, Sections, CTAs & Trust Elements
+# Phase 3: Content Pages — Styling Consistency, Enhanced CTAs & Email Capture
 
-Building on the Phase 1 foundation (colors, fonts, header, footer), this phase transforms the homepage into a high-converting affiliate funnel with a stunning hero, stronger CTAs, trust badges, and urgency elements.
+Building on Phase 1 (colors, fonts, header, footer) and Phase 2 (homepage redesign), this phase brings the new brand styling to all client-facing content pages and adds an email capture system.
 
 **What's NOT touched:** All admin/dashboard pages remain completely unchanged.
 
 ---
 
-## 1. Expanded Hero Section with Rotating Background Images
+## 1. Destinations Page (`src/pages/Destinations.tsx`)
 
-**Current:** Small 240-280px hero with static beach image and minimal text.
+- Replace the old `text-sky-300` accent in the hero heading with the brand primary color
+- Upgrade the search button to warm-orange (`bg-secondary`) styling
+- Add the `AffiliateDisclosureBanner` at the top
+- Add a "Book on Expedia" warm-orange button to each `DestinationCard`
 
-**New:** Full-impact 420-500px hero with:
-- Rotating background images cycling every 5 seconds with smooth crossfade (using existing assets: `hero-beach.jpg`, `snowbird-beach-sunset.jpg`, `snowbird-caribbean-aerial.jpg`, `deal-santorini.jpg`, `japan-tokyo-skyline.jpg`)
-- Headline: "Honest Travel Reviews, Deals & Insights for Canadians"
-- Subtext: "Real reviews from a Toronto-based travel consultant. Find your perfect trip."
-- Integrated search bar (moved FROM the Reviews section INTO the hero) with placeholder "Search a hotel, resort, or destination..."
-- Large warm-orange CTA button: "Find Your Next Trip" linking to Expedia deals
-- "Powered by Expedia" badge below the CTA
-- Subtle dark gradient overlay for text readability
-
-**File:** `src/components/HeroSection.tsx` -- full rewrite
+**File:** `src/pages/Destinations.tsx` -- updated styling
+**File:** `src/components/destinations/DestinationCard.tsx` -- add Expedia CTA button
 
 ---
 
-## 2. Trust Badges Bar (New Component)
+## 2. Destination Review Page (`src/pages/DestinationReview.tsx`)
 
-A horizontal bar just below the hero showing trust signals:
-- "100% Honest Reviews" (with Shield icon)
-- "Canadian Traveler Focused" (with MapPin icon)
-- "Expedia Partner" (with badge icon)
-- "10,000+ Travelers Helped" (with Users icon)
+- Replace the inline affiliate CTA banner buttons with warm-orange styling (the `InlineAffiliateCTA` component)
+- Upgrade the sidebar `AffiliateLinks` "Ready to Book?" buttons to use warm-orange for Expedia
+- Add "Tom's Take" personal note section after the summary card (styled callout box with quote icon)
+- Add the `AffiliateDisclosureBanner` at the top
 
-Styled as a clean white bar with subtle icons and text, providing instant credibility.
-
-**File:** `src/components/TrustBadges.tsx` -- new component
+**File:** `src/pages/DestinationReview.tsx` -- enhanced
+**File:** `src/components/InlineAffiliateCTA.tsx` -- warm-orange CTA button styling
 
 ---
 
-## 3. Reviews Section Enhancements
+## 3. Gear Page (`src/pages/Gear.tsx`)
 
-**Current:** Has its own search bar + 4-column card grid with text-only cards.
+- Replace `text-sky-300` accent with brand primary
+- Upgrade the search button to warm-orange
+- Add the `AffiliateDisclosureBanner` at the top
 
-**Changes:**
-- Remove the inline search bar (moved to hero)
-- Keep the review cards but upgrade the "Book on Expedia" link to a prominent warm-orange button: "Book on Expedia -- Save Now"
-- Add hover effect with slight scale and shadow
-- Keep the existing data fetching and suggestion logic -- just pass search state down from Index
-
-**File:** `src/components/RecentReviewsHomepage.tsx` -- refactored
+**File:** `src/pages/Gear.tsx` -- updated styling
 
 ---
 
-## 4. Deals Section Enhancements
+## 4. Travel Intel Page (`src/pages/TravelIntel.tsx`)
 
-**Current:** Grid of deal cards with discount badges.
+- Upgrade "Check" and "Get News" buttons to warm-orange
+- Add the `AffiliateDisclosureBanner` at the top
 
-**Changes:**
-- Add urgency text to deal cards: "Limited Time" badge next to the discount badge
-- Change "View Deal" link to a warm-orange button: "Grab This Deal -- Save X%"
-- Add a subtle pulsing animation to the discount badge
-- Keep all existing data and affiliate links unchanged
-
-**File:** `src/components/TravelDealsSection.tsx` -- enhanced
+**File:** `src/pages/TravelIntel.tsx` -- updated styling
 
 ---
 
-## 5. Gear Section Enhancements
+## 5. Blog / Compass Page (`src/pages/Compass.tsx`)
 
-**Current:** Category cards with search bar.
+- Replace `text-sky-300` accent with brand primary
+- Add the `AffiliateDisclosureBanner` at the top
 
-**Changes:**
-- Upgrade "Find Gear" button to warm-orange styling
-- Add "Shop Gear" warm-orange buttons on category cards
-- Keep all existing search/packing list functionality
-
-**File:** `src/components/GearPreviewSection.tsx` -- enhanced
+**File:** `src/pages/Compass.tsx` -- updated styling
 
 ---
 
-## 6. Intel Section Enhancements
+## 6. Compare Page (`src/pages/Compare.tsx`)
 
-**Current:** Tabbed search with category cards.
+- Upgrade "Generate Verdict" button to warm-orange
+- Add the `AffiliateDisclosureBanner` at the top
 
-**Changes:**
-- Style the "Check" buttons in warm-orange
-- Keep all existing search/intel functionality
-
-**File:** `src/components/IntelPreviewSection.tsx` -- minor style updates
+**File:** `src/pages/Compare.tsx` -- updated styling
 
 ---
 
-## 7. Blog Section Enhancements
+## 7. About Page (`src/pages/About.tsx`)
 
-**Current:** 3-column article cards.
+- Add a hero section with a travel image background (reuse existing asset) to match other pages
+- Add the `AffiliateDisclosureBanner` at the top
+- Add a "Toronto-based travel consultant" subtitle under the heading
 
-**Changes:**
-- Add embedded "Find Deals" warm-orange button (instead of small text link) when a destination is detected
-- Keep all existing data and routing
-
-**File:** `src/components/BlogPreviewSection.tsx` -- enhanced
+**File:** `src/pages/About.tsx` -- enhanced
 
 ---
 
-## 8. Affiliate Disclosure Banner (New Component)
+## 8. Contact Page (`src/pages/Contact.tsx`)
 
-A small, dismissible banner at the top of the homepage (below header):
-- Text: "This site contains affiliate links -- we earn a commission at no extra cost to you."
-- Link to /affiliate-disclosure
-- Dismissible with X button (stored in sessionStorage)
+- Add the `AffiliateDisclosureBanner` at the top
+- Upgrade the "Why Book With Tom" card accents to use brand colors
 
-**File:** `src/components/AffiliateDisclosureBanner.tsx` -- new component
+**File:** `src/pages/Contact.tsx` -- minor updates
 
 ---
 
-## 9. Homepage Layout Update
+## 9. InlineAffiliateCTA Component Enhancement
 
-Update Index.tsx to:
-- Add the TrustBadges component below the hero
-- Add the AffiliateDisclosureBanner at the top
-- Pass search state from hero down to RecentReviewsHomepage
-- Add cross-links between sections (e.g., "Related Gear" link from reviews to gear section)
+- Change the banner variant button from `bg-primary` to `bg-secondary` (warm orange)
+- Update button text to "Search Deals on Expedia" for stronger conversion language
 
-**File:** `src/pages/Index.tsx` -- updated
+**File:** `src/components/InlineAffiliateCTA.tsx` -- CTA upgrade
+
+---
+
+## 10. AffiliateLinks Component Enhancement
+
+- Add a prominent warm-orange "Book on Expedia" button as the primary CTA above the platform comparison cards
+- Keep the three platform cards as secondary options below
+
+**File:** `src/components/AffiliateLinks.tsx` -- enhanced with primary CTA
+
+---
+
+## 11. Email Capture Popup (New Feature)
+
+Create a newsletter signup popup that appears after 30 seconds on the homepage:
+- Headline: "Get Weekly Exclusive Deals"
+- Subtext: "Join 5,000+ Canadian travelers getting the best deals, reviews, and tips delivered weekly."
+- Email input + warm-orange "Subscribe" button
+- Dismissible with X button (stored in localStorage so it doesn't reshow for 7 days)
+- Stores email signups in a new `email_subscribers` database table
+
+### Database Table
+Create `email_subscribers` table:
+- `id` (uuid, primary key)
+- `email` (text, unique, not null)
+- `subscribed_at` (timestamptz, default now())
+- `source` (text, default 'popup') -- tracks where the signup came from
+
+RLS: Allow anonymous inserts (public signup), no select/update/delete for anon users.
+
+**Files Created:**
+- `src/components/EmailCapturePopup.tsx` -- the popup component
+
+**Files Modified:**
+- `src/pages/Index.tsx` -- add EmailCapturePopup
 
 ---
 
 ## Technical Summary
 
+### Database Changes
+- New table: `email_subscribers` with RLS allowing anonymous inserts only
+
 ### Files Created
-- `src/components/TrustBadges.tsx` -- trust signal bar
-- `src/components/AffiliateDisclosureBanner.tsx` -- dismissible affiliate notice
+- `src/components/EmailCapturePopup.tsx` -- email capture popup with localStorage dismissal
 
 ### Files Modified
-- `src/components/HeroSection.tsx` -- full rewrite with rotating images, search bar, CTA
-- `src/components/RecentReviewsHomepage.tsx` -- remove search (moved to hero), upgrade CTA buttons
-- `src/components/TravelDealsSection.tsx` -- urgency text, orange CTA buttons
-- `src/components/GearPreviewSection.tsx` -- orange button styling
-- `src/components/IntelPreviewSection.tsx` -- orange button styling
-- `src/components/BlogPreviewSection.tsx` -- upgrade deal links to buttons
-- `src/pages/Index.tsx` -- add new components, wire search state from hero to reviews
+- `src/pages/Destinations.tsx` -- brand styling, disclosure banner
+- `src/components/destinations/DestinationCard.tsx` -- add Expedia CTA
+- `src/pages/DestinationReview.tsx` -- disclosure banner, Tom's Take section
+- `src/pages/Gear.tsx` -- brand styling, disclosure banner
+- `src/pages/TravelIntel.tsx` -- warm-orange buttons, disclosure banner
+- `src/pages/Compass.tsx` -- brand styling, disclosure banner
+- `src/pages/Compare.tsx` -- warm-orange buttons, disclosure banner
+- `src/pages/About.tsx` -- hero section, disclosure banner
+- `src/pages/Contact.tsx` -- disclosure banner
+- `src/components/InlineAffiliateCTA.tsx` -- warm-orange CTA
+- `src/components/AffiliateLinks.tsx` -- primary Expedia CTA button
+- `src/pages/Index.tsx` -- add EmailCapturePopup
 
 ### Files NOT Touched
 - All files under `src/components/dashboard/`
 - All admin pages (GearAdmin, BookingReport, ClientFile, etc.)
-- All edge functions and database tables
-- `src/components/AffiliateLinks.tsx` (affiliate logic unchanged)
+- All edge functions
 - `src/index.css`, `tailwind.config.ts` (Phase 1 styling stays)
 - `src/components/Header.tsx`, `src/components/Footer.tsx` (Phase 1 work stays)
+- `src/components/HeroSection.tsx`, `src/components/TrustBadges.tsx` (Phase 2 work stays)
+
+---
+
+## What Comes Next (Phase 4)
+- Exit-intent popup with hot deals
+- Cross-linking between sections (gear recommendations on review pages)
+- Additional conversion optimizations
+- Social sharing buttons on review pages
 
