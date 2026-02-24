@@ -59,7 +59,7 @@ const PublicQuote = () => {
 
   return (
     <div className="min-h-screen bg-background py-12 px-4">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <Card>
           <CardContent className="p-8 space-y-6">
             {/* Resort Hero Image */}
