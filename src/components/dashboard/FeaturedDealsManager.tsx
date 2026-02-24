@@ -174,20 +174,21 @@ const FeaturedDealsManager = () => {
       <h1 className="font-display text-2xl font-bold text-foreground flex items-center gap-2">
         <Star className="h-6 w-6" /> Featured Deals Manager
       </h1>
-      <p className="text-sm text-muted-foreground">Click Edit on any card to change it. Custom overrides are marked with a badge.</p>
+      <p className="text-sm text-muted-foreground">Click Edit on any card to change it.</p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {slots.map((slot, idx) => {
           const isEditing = editingSlot === idx;
-          const pct = Math.round((1 - slot.salePrice / slot.originalPrice) * 100);
+          const hasNightly = slot.originalPrice > 0 && slot.salePrice > 0;
+          const hasWeekly = (slot.originalPriceWeekly ?? 0) > 0 && (slot.salePriceWeekly ?? 0) > 0;
+          const original = hasNightly ? slot.originalPrice : hasWeekly ? slot.originalPriceWeekly! : 1;
+          const sale = hasNightly ? slot.salePrice : hasWeekly ? slot.salePriceWeekly! : 0;
+          const pct = Math.round((1 - sale / original) * 100);
 
           return (
             <Card key={idx} className="overflow-hidden flex flex-col">
               {/* Card preview */}
               <div className="relative">
-                {slot.isCustom && (
-                  <span className="absolute top-2 right-2 z-10 bg-primary text-primary-foreground text-[10px] font-bold px-2 py-0.5 rounded-full">CUSTOM</span>
-                )}
                 <span className="absolute top-2 left-2 z-10 bg-secondary text-secondary-foreground text-xs font-bold px-2 py-0.5 rounded-full">{pct}% OFF</span>
                 <img src={isEditing && imagePreview ? imagePreview : slot.imageUrl} alt={slot.name} className="w-full h-40 object-cover" />
               </div>
@@ -198,10 +199,12 @@ const FeaturedDealsManager = () => {
                     <p className="text-xs font-semibold text-muted-foreground mb-1">Slot {idx + 1}</p>
                     <p className="font-semibold text-foreground text-sm line-clamp-2 leading-tight">{slot.name}</p>
                     <p className="text-xs text-muted-foreground mt-1">{slot.location}</p>
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="text-xs text-muted-foreground line-through">${slot.originalPrice}</span>
-                      <span className="text-sm font-bold text-secondary">${slot.salePrice}/night</span>
-                    </div>
+                    {slot.originalPrice > 0 && slot.salePrice > 0 && (
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className="text-xs text-muted-foreground line-through">${slot.originalPrice}</span>
+                        <span className="text-sm font-bold text-secondary">${slot.salePrice}/night</span>
+                      </div>
+                    )}
                     {slot.originalPriceWeekly && slot.salePriceWeekly && (
                       <div className="flex items-center gap-2 mt-1">
                         <span className="text-xs text-muted-foreground line-through">${slot.originalPriceWeekly.toLocaleString()}</span>
