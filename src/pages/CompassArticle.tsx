@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ReadingProgress from "@/components/ReadingProgress";
 import { getArticleBySlug, getRelatedArticles, ContentBlock } from "@/data/compassArticles";
 import { ArrowLeft, ArrowRight, Clock, User } from "lucide-react";
 import CommentsSection from "@/components/comments/CommentsSection";
@@ -106,6 +107,7 @@ const CompassArticle = () => {
         ]}
       />
       <Header />
+      <ReadingProgress />
       <section className="relative h-[50vh] min-h-[400px]">
         <img
           src={article.image}

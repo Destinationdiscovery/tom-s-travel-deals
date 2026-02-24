@@ -145,10 +145,13 @@ const destinations: Destination[] = [
   },
 ];
 
+const regions = ["All", "Caribbean", "North America", "Europe", "Southeast Asia", "Indian Ocean", "Multiple"];
+
 const Destinations = () => {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedRegion, setSelectedRegion] = useState("All");
   const { suggestions } = useSearchSuggestions(query);
   const { review, isLoading, error, generateReview, clearReview } = useGenerateReview();
   const resultsRef = useRef<HTMLDivElement>(null);
@@ -256,11 +259,30 @@ const Destinations = () => {
             {/* Destinations Grid */}
             {!review && !isLoading && !error && (
               <>
+                {/* Region Filter Chips */}
+                <div className="flex flex-wrap gap-2 mb-8">
+                  {regions.map((region) => (
+                    <button
+                      key={region}
+                      onClick={() => setSelectedRegion(region)}
+                      className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                        selectedRegion === region
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground hover:bg-muted/80"
+                      }`}
+                    >
+                      {region}
+                    </button>
+                  ))}
+                </div>
+
                 <div className="flex items-center justify-between mb-8">
-                  <p className="text-muted-foreground">{destinations.length} destinations reviewed</p>
+                  <p className="text-muted-foreground">
+                    {(selectedRegion === "All" ? destinations : destinations.filter(d => d.region === selectedRegion)).length} destinations
+                  </p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {destinations.map((dest, index) => (
+                  {(selectedRegion === "All" ? destinations : destinations.filter(d => d.region === selectedRegion)).map((dest, index) => (
                     <DestinationCard key={dest.slug} destination={dest} index={index} />
                   ))}
                 </div>

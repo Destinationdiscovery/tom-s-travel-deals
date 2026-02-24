@@ -2,10 +2,12 @@ import { useState, useEffect, useCallback } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
+import ReadingProgress from "@/components/ReadingProgress";
 import { useParams, Link } from "react-router-dom";
-import { Star, ArrowLeft, Calendar, MapPin, Heart, Share2, Twitter, Facebook, Copy, Check, Package, Plug, Waves, ChevronUp, ArrowRight } from "lucide-react";
+import { Star, ArrowLeft, Calendar, MapPin, Heart, Share2, Twitter, Facebook, Copy, Check, Package, Plug, Waves, ChevronUp, ArrowRight, List } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import SEOHead from "@/components/SEOHead";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import {
   DropdownMenu,
@@ -451,6 +453,15 @@ const DestinationReview = () => {
     );
   }
 
+  const tocSections = [
+    { id: "summary", label: "Summary" },
+    { id: "experience", label: "My Experience" },
+    { id: "tips", label: "Tips" },
+    ...(review.gallery?.length ? [{ id: "gallery", label: "Gallery" }] : []),
+    { id: "related", label: "Related" },
+    { id: "comments", label: "Comments" },
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
@@ -461,6 +472,7 @@ const DestinationReview = () => {
         type="article"
       />
       <Header />
+      <ReadingProgress />
       <AffiliateDisclosureBanner />
       <main className="pt-24">
         <div className="relative h-[50vh] md:h-[60vh]">
@@ -521,8 +533,33 @@ const DestinationReview = () => {
           <div className="grid lg:grid-cols-3 gap-12">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-12">
+              {/* Table of Contents */}
+              <Collapsible defaultOpen={false}>
+                <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors w-full">
+                  <List className="h-4 w-4" />
+                  <span>Jump to section</span>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="mt-3">
+                  <nav className="flex flex-wrap gap-2">
+                    {tocSections.map((s) => (
+                      <a
+                        key={s.id}
+                        href={`#${s.id}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          document.getElementById(s.id)?.scrollIntoView({ behavior: "smooth" });
+                        }}
+                        className="px-3 py-1.5 rounded-full text-xs font-medium bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors"
+                      >
+                        {s.label}
+                      </a>
+                    ))}
+                  </nav>
+                </CollapsibleContent>
+              </Collapsible>
+
               {/* Summary */}
-              <div className="bg-card rounded-2xl p-8 shadow-soft">
+              <div id="summary" className="bg-card rounded-2xl p-8 shadow-soft">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="flex items-center gap-1">
                     {[...Array(5)].map((_, i) => (
@@ -577,7 +614,7 @@ const DestinationReview = () => {
               </div>
 
               {/* Full Review */}
-              <div className="space-y-6">
+              <div id="experience" className="space-y-6">
                 <h2 className="font-display text-2xl font-bold text-foreground">My Experience</h2>
                 {review.fullReview.map((paragraph, index) => (
                   <p key={index} className="text-muted-foreground leading-relaxed">
@@ -606,7 +643,7 @@ const DestinationReview = () => {
               )}
 
               {/* Tips */}
-              <div className="bg-secondary/10 rounded-2xl p-8">
+              <div id="tips" className="bg-secondary/10 rounded-2xl p-8">
                 <h2 className="font-display text-2xl font-bold text-foreground mb-6">Tom's Tips</h2>
                 <ul className="space-y-4">
                   {review.tips.map((tip, index) => (
@@ -625,7 +662,7 @@ const DestinationReview = () => {
 
               {/* Gallery */}
               {review.gallery && review.gallery.length > 0 && (
-                <div className="space-y-6">
+                <div id="gallery" className="space-y-6">
                   <h2 className="font-display text-2xl font-bold text-foreground">Photo Gallery</h2>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {review.gallery.map((image, index) => (
@@ -657,7 +694,7 @@ const DestinationReview = () => {
 
               {/* Related Reviews */}
               {relatedReviews.length > 0 && (
-                <div className="space-y-6">
+                <div id="related" className="space-y-6">
                   <h2 className="font-display text-2xl font-bold text-foreground">You Might Also Like</h2>
                   <div className="grid sm:grid-cols-3 gap-4">
                     {relatedReviews.map((r) => (
@@ -686,7 +723,9 @@ const DestinationReview = () => {
               {/* Engagement Widget */}
               {slug && <ReviewEngagement slug={slug} pageType="destination" />}
 
-              {slug && <CommentsSection pageType="destination" pageSlug={slug} />}
+              <div id="comments">
+                {slug && <CommentsSection pageType="destination" pageSlug={slug} />}
+              </div>
             </div>
 
             {/* Sidebar */}

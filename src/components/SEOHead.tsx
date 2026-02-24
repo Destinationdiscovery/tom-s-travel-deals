@@ -21,7 +21,7 @@ interface SEOHeadProps {
 }
 
 const SITE_NAME = "ReviewThenGo";
-const DEFAULT_IMAGE = "https://reviewthengo.lovable.app/favicon.png";
+const DEFAULT_IMAGE = "https://reviewthengo.lovable.app/og-image.jpg";
 const BASE_URL = "https://reviewthengo.lovable.app";
 
 const SEOHead = ({ title, description, image, url, type = "website", noindex, breadcrumbs, jsonLd }: SEOHeadProps) => {
@@ -46,7 +46,7 @@ const SEOHead = ({ title, description, image, url, type = "website", noindex, br
     <Helmet>
       <title>{fullTitle}</title>
       <meta name="description" content={description} />
-      <link rel="canonical" href={fullUrl} />
+      <link rel="canonical" href={fullUrl.split("?")[0]} />
       {noindex && <meta name="robots" content="noindex, nofollow" />}
 
       <meta property="og:title" content={fullTitle} />
