@@ -1,4 +1,5 @@
 import { Star, ArrowRight } from "lucide-react";
+import { trackAffiliateClick } from "@/lib/analytics";
 import { detectCountry, EXPEDIA_LINKS } from "@/components/AffiliateLinks";
 import dealBanner from "@/assets/deal-expedia-vacation-sale-banner.png";
 import hotelsBanner from "@/assets/deal-hotels-spring-sale-banner.png";
@@ -103,6 +104,7 @@ const TravelDealsSection = () => {
                 href={deal.affiliateUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => trackAffiliateClick("Expedia", "homepage", `deals_grid_${deal.name}`)}
                 className="group block rounded-2xl overflow-hidden bg-card shadow-sm hover:shadow-elevated transition-all duration-300 hover:-translate-y-1 border border-border/50"
               >
                 <div className="relative">

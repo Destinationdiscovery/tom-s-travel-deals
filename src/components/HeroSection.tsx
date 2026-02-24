@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { detectCountry, EXPEDIA_LINKS } from "@/components/AffiliateLinks";
+import { trackAffiliateClick } from "@/lib/analytics";
 import expediaLogo from "@/assets/expedia-logo.png";
 
 import heroBeach from "@/assets/hero-beach.jpg";
@@ -42,6 +43,7 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
           key={i}
           src={src}
           alt=""
+          loading={i === 0 ? "eager" : "lazy"}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
             i === currentSlide ? "opacity-100" : "opacity-0"
           }`}
@@ -88,6 +90,7 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
           target="_blank"
           rel="noopener noreferrer"
           className="inline-block mb-4"
+          onClick={() => trackAffiliateClick("Expedia", "homepage", "hero_cta")}
         >
           <Button variant="default" size="lg" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-bold text-base shadow-lg">
             Find Your Next Trip

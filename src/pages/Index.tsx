@@ -14,6 +14,7 @@ import ComparisonFloatingBadge from "@/components/ComparisonFloatingBadge";
 import Footer from "@/components/Footer";
 import EmailCapturePopup from "@/components/EmailCapturePopup";
 import AIReviewResult from "@/components/AIReviewResult";
+import SEOHead from "@/components/SEOHead";
 import { useGenerateReview } from "@/hooks/useGenerateReview";
 
 const SectionConnector = ({ text, linkText, to }: { text: string; linkText: string; to: string }) => (
@@ -51,6 +52,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Honest Travel Reviews, Deals & Insights for Canadians"
+        description="Real destination reviews, tested travel gear, and expert insights from an Ontario travel consultant. Plan your perfect trip."
+        url="/"
+      />
       <Header />
       <AffiliateDisclosureBanner />
       <main>

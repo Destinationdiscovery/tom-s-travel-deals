@@ -6,19 +6,14 @@ import { getArticleBySlug, getRelatedArticles, ContentBlock } from "@/data/compa
 import { ArrowLeft, ArrowRight, Clock, User } from "lucide-react";
 import CommentsSection from "@/components/comments/CommentsSection";
 import InlineAffiliateCTA from "@/components/InlineAffiliateCTA";
+import SEOHead from "@/components/SEOHead";
+import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 
 const CompassArticle = () => {
   const { slug } = useParams<{ slug: string }>();
   const article = slug ? getArticleBySlug(slug) : undefined;
   const relatedArticles = slug ? getRelatedArticles(slug, 3) : [];
-
-  useEffect(() => {
-    if (article) {
-      document.title = `${article.title} - ReviewThenGo`;
-    }
-    return () => { document.title = "ReviewThenGo.com | Honest Reviews, Tested Gear & Travel Insights"; };
-  }, [article]);
 
   // JSON-LD structured data for SEO
   useEffect(() => {
@@ -77,7 +72,7 @@ const CompassArticle = () => {
             <img
               src={block.value}
               alt={block.caption || "Article image"}
-              className="w-full rounded-xl shadow-soft"
+              loading="lazy"
             />
             {block.caption && (
               <figcaption className="text-sm text-muted-foreground mt-3 text-center italic">
@@ -98,9 +93,14 @@ const CompassArticle = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title={article.title}
+        description={article.excerpt || article.content?.[0] || ""}
+        image={article.image}
+        url={`/compass/${slug}`}
+        type="article"
+      />
       <Header />
-      
-      {/* Hero Image */}
       <section className="relative h-[50vh] min-h-[400px]">
         <img
           src={article.image}
@@ -122,6 +122,25 @@ const CompassArticle = () => {
           </div>
         </div>
       </section>
+
+      {/* Breadcrumbs */}
+      <div className="container mx-auto px-4 pt-6">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild><Link to="/">Home</Link></BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild><Link to="/compass">Blog</Link></BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{article.title}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
 
       {/* Article Content */}
       <section className="relative -mt-32 pb-16">

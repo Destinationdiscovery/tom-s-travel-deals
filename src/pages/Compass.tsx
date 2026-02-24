@@ -1,31 +1,30 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import { compassArticles } from "@/data/compassArticles";
 import { ArrowRight, Clock } from "lucide-react";
+import SEOHead from "@/components/SEOHead";
 import heroImg from "@/assets/japan-cherry-blossoms.webp";
 
 const categories = ["All", "Packing", "Guides", "Budget", "Insurance", "Timing"];
 
 const Compass = () => {
   const [activeCategory, setActiveCategory] = useState("All");
-
-  useEffect(() => {
-    document.title = "Travel Blog - ReviewThenGo";
-    return () => { document.title = "ReviewThenGo.com | Honest Reviews, Tested Gear & Travel Insights"; };
-  }, []);
   const filteredArticles = activeCategory === "All" 
     ? compassArticles 
     : compassArticles.filter(article => article.category === activeCategory);
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Travel Blog"
+        description="Insider tips and travel wisdom from over a decade of experience. Practical advice to help you travel smarter."
+        url="/compass"
+      />
       <Header />
       <AffiliateDisclosureBanner />
-      
-      {/* Hero Section */}
       <section className="relative h-[40vh] min-h-[320px] flex items-center justify-center pt-20">
         <img src={heroImg} alt="Cherry blossoms in Japan" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60" />
@@ -81,6 +80,7 @@ const Compass = () => {
                     <img
                       src={article.image}
                       alt={article.title}
+                      loading="lazy"
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />

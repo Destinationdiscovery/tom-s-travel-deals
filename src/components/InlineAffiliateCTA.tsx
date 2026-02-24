@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { ExternalLink } from "lucide-react";
 import { buildDeepLinks, detectCountry } from "@/components/AffiliateLinks";
+import { trackAffiliateClick } from "@/lib/analytics";
 
 interface InlineAffiliateCTAProps {
   propertyName?: string;
@@ -24,6 +25,7 @@ const InlineAffiliateCTA = ({ propertyName, variant = "compact" }: InlineAffilia
           href={link}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => trackAffiliateClick("Expedia", window.location.pathname, "inline_banner")}
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-secondary text-secondary-foreground font-semibold text-sm hover:opacity-90 transition-opacity whitespace-nowrap"
         >
           Search Deals on Expedia
@@ -38,6 +40,7 @@ const InlineAffiliateCTA = ({ propertyName, variant = "compact" }: InlineAffilia
       href={link}
       target="_blank"
       rel="noopener noreferrer"
+      onClick={() => trackAffiliateClick("Expedia", window.location.pathname, "inline_compact")}
       className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
     >
       Book on Expedia

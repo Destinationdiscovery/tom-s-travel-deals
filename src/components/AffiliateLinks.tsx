@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { ExternalLink } from "lucide-react";
+import { trackAffiliateClick } from "@/lib/analytics";
 
 type CountryCode = "CA" | "US" | "GB";
 
@@ -103,6 +104,7 @@ const AffiliateLinks = ({ propertyName }: AffiliateLinksProps) => {
         href={affiliates[0].url}
         target="_blank"
         rel="noopener noreferrer"
+        onClick={() => trackAffiliateClick("Expedia", window.location.pathname, "sidebar_cta")}
         className="flex items-center justify-center gap-2 w-full rounded-xl bg-secondary text-secondary-foreground font-bold text-sm py-3 mb-4 hover:opacity-90 transition-opacity"
       >
         Book on Expedia
@@ -115,6 +117,7 @@ const AffiliateLinks = ({ propertyName }: AffiliateLinksProps) => {
             href={affiliate.url}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => trackAffiliateClick(affiliate.name, window.location.pathname, "sidebar_card")}
             className={`flex items-center justify-between gap-3 rounded-xl border-2 ${affiliate.color} bg-background p-4 transition-all duration-200 hover:shadow-sm group`}
           >
             <div>

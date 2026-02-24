@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { trackAffiliateClick, trackEmailSignup } from "@/lib/analytics";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -23,6 +24,7 @@ const Footer = () => {
         body: { email: trimmed, source_slug: "footer" },
       });
       if (error) throw error;
+      trackEmailSignup("footer");
       toast({ title: "You're in! 🎉", description: "Check your inbox for weekly deals." });
       setEmail("");
     } catch {
@@ -108,10 +110,10 @@ const Footer = () => {
 
             {/* Social */}
             <div className="flex items-center gap-4 mb-6">
-              <a href="#" aria-label="Twitter" className="text-primary-foreground/60 hover:text-secondary transition-colors">
+              <a href="https://x.com/TomLaracyTravel" target="_blank" rel="noopener noreferrer" aria-label="Twitter" className="text-primary-foreground/60 hover:text-secondary transition-colors">
                 <Twitter className="h-5 w-5" />
               </a>
-              <a href="#" aria-label="Instagram" className="text-primary-foreground/60 hover:text-secondary transition-colors">
+              <a href="https://www.instagram.com/reviewthengo/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-primary-foreground/60 hover:text-secondary transition-colors">
                 <Instagram className="h-5 w-5" />
               </a>
             </div>
@@ -121,6 +123,7 @@ const Footer = () => {
               href="https://www.expedia.ca/?affcid=CA.DIRECT.PHG.0000.HOTEL.kwrd%3D.0000&ref_id=1101l5c5bMbAX&my_ad=ABA-14217255"
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => trackAffiliateClick("Expedia", "footer", "footer_badge")}
               className="inline-flex items-center gap-2 bg-primary-foreground/10 rounded-lg px-3 py-2 hover:bg-primary-foreground/20 transition-colors"
             >
               <img src={expediaLogo} alt="Expedia" className="h-5 object-contain" />

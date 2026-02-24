@@ -5,6 +5,8 @@ import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import { useParams, Link } from "react-router-dom";
 import { Star, ArrowLeft, Calendar, MapPin, Heart, Share2, Twitter, Facebook, Copy, Check, Package, Plug, Waves, ChevronUp, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import SEOHead from "@/components/SEOHead";
+import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -449,10 +451,16 @@ const DestinationReview = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title={`${review.destination} Review`}
+        description={review.summary}
+        image={review.image}
+        url={`/review/${slug}`}
+        type="article"
+      />
       <Header />
       <AffiliateDisclosureBanner />
       <main className="pt-24">
-        {/* Hero Image */}
         <div className="relative h-[50vh] md:h-[60vh]">
           <img
             src={review.image}
@@ -485,6 +493,25 @@ const DestinationReview = () => {
               </p>
             </div>
           </div>
+        </div>
+
+        {/* Breadcrumbs */}
+        <div className="container mx-auto px-4 pt-6">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild><Link to="/">Home</Link></BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild><Link to="/destinations">Destinations</Link></BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{review.destination}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
         </div>
 
         {/* Content */}
@@ -611,6 +638,7 @@ const DestinationReview = () => {
                         <img 
                           src={image} 
                           alt={`${review.destination} gallery image ${index + 1}`}
+                          loading="lazy"
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                         />
                       </button>
