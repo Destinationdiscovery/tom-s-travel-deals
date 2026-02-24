@@ -388,6 +388,36 @@ export type Database = {
         }
         Relationships: []
       }
+      comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_hidden: boolean
+          page_slug: string
+          page_type: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_hidden?: boolean
+          page_slug: string
+          page_type: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_hidden?: boolean
+          page_slug?: string
+          page_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       email_log: {
         Row: {
           booking_id: string | null
