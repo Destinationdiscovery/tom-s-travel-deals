@@ -73,9 +73,9 @@ const BlogPreviewSection = () => {
                       href={expediaLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                      className="inline-flex items-center gap-1.5 text-xs font-bold bg-secondary text-secondary-foreground px-4 py-2 rounded-full hover:bg-secondary/90 transition-colors"
                     >
-                      Find deals
+                      Find Deals
                       <ExternalLink className="h-3 w-3" />
                     </a>
                   </div>
