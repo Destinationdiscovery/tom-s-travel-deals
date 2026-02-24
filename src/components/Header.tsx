@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { useLocation } from "react-router-dom";
 import { Shield, Search, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -12,13 +13,21 @@ const navLinks = [
   { to: "/gear", label: "Gear" },
   { to: "/travel-intel", label: "Intel" },
   { to: "/compass", label: "Blog" },
-  { to: "/#deals", label: "Deals" },
+  { to: "/#travel-deals", label: "Deals" },
 ];
 
 const Header = () => {
   const { isAdmin } = useAuth();
+  const location = useLocation();
   const [widgetOpen, setWidgetOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const handleDealsClick = useCallback((e: React.MouseEvent) => {
+    if (location.pathname === "/") {
+      e.preventDefault();
+      document.getElementById("travel-deals")?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [location.pathname]);
 
   return (
     <>
@@ -41,6 +50,7 @@ const Header = () => {
               <Link
                 key={link.to}
                 to={link.to}
+                onClick={link.label === "Deals" ? handleDealsClick : undefined}
                 className="text-sm font-medium text-primary-foreground/80 hover:text-primary-foreground transition-colors"
               >
                 {link.label}
@@ -82,7 +92,10 @@ const Header = () => {
                     <Link
                       key={link.to}
                       to={link.to}
-                      onClick={() => setMobileOpen(false)}
+                      onClick={(e) => {
+                        if (link.label === "Deals") handleDealsClick(e);
+                        setMobileOpen(false);
+                      }}
                       className="text-lg font-medium text-primary-foreground/80 hover:text-primary-foreground transition-colors py-2"
                     >
                       {link.label}

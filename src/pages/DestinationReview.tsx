@@ -1,9 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import { useParams, Link } from "react-router-dom";
-import { Star, ArrowLeft, Calendar, MapPin, Heart, Share2 } from "lucide-react";
+import { Star, ArrowLeft, Calendar, MapPin, Heart, Share2, Twitter, Facebook, Copy, Check, Package, Plug, Waves, ChevronUp, ArrowRight } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import CommentsSection from "@/components/comments/CommentsSection";
 import AffiliateLinks from "@/components/AffiliateLinks";
@@ -316,11 +323,74 @@ const reviews: Record<string, ReviewData> = {
   },
 };
 
+const SAVED_KEY = "rtg-saved-destinations";
+
+const gearRecommendations = [
+  { icon: Package, label: "Packing Cubes", desc: "Stay organized on the go" },
+  { icon: Plug, label: "Universal Adapter", desc: "Power up anywhere" },
+  { icon: Waves, label: "Water Hammock", desc: "Ultimate pool lounging" },
+];
+
 const DestinationReview = () => {
   const { slug } = useParams<{ slug: string }>();
   const review = slug ? reviews[slug] : null;
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [isSaved, setIsSaved] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const { toast } = useToast();
+
+  // Saved state from localStorage
+  useEffect(() => {
+    if (!slug) return;
+    const saved: string[] = JSON.parse(localStorage.getItem(SAVED_KEY) || "[]");
+    setIsSaved(saved.includes(slug));
+  }, [slug]);
+
+  const toggleSave = useCallback(() => {
+    if (!slug) return;
+    const saved: string[] = JSON.parse(localStorage.getItem(SAVED_KEY) || "[]");
+    if (saved.includes(slug)) {
+      localStorage.setItem(SAVED_KEY, JSON.stringify(saved.filter((s) => s !== slug)));
+      setIsSaved(false);
+      toast({ title: "Removed from saved" });
+    } else {
+      localStorage.setItem(SAVED_KEY, JSON.stringify([...saved, slug]));
+      setIsSaved(true);
+      toast({ title: "Saved!" });
+    }
+  }, [slug, toast]);
+
+  // Share helpers
+  const shareUrl = typeof window !== "undefined" ? window.location.href : "";
+  const shareTitle = review ? `${review.destination} — ReviewThenGo` : "";
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try { await navigator.share({ title: shareTitle, url: shareUrl }); } catch {}
+      return;
+    }
+  };
+
+  const copyLink = () => {
+    navigator.clipboard.writeText(shareUrl);
+    setLinkCopied(true);
+    toast({ title: "Link copied!" });
+    setTimeout(() => setLinkCopied(false), 2000);
+  };
+
+  // Scroll-to-top
+  useEffect(() => {
+    const onScroll = () => setShowScrollTop(window.scrollY > 600);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Related reviews
+  const relatedReviews = slug
+    ? Object.values(reviews).filter((r) => r.slug !== slug).slice(0, 3)
+    : [];
 
   useEffect(() => {
     if (review) {
@@ -435,14 +505,41 @@ const DestinationReview = () => {
                     <span className="text-lg font-bold text-foreground ml-2">{review.rating}</span>
                   </div>
                   <div className="flex gap-2 ml-auto">
-                    <Button variant="outline" size="sm" className="gap-2">
-                      <Heart className="h-4 w-4" />
-                      Save
+                    <Button variant={isSaved ? "default" : "outline"} size="sm" className="gap-2" onClick={toggleSave}>
+                      <Heart className={`h-4 w-4 ${isSaved ? "fill-current" : ""}`} />
+                      {isSaved ? "Saved" : "Save"}
                     </Button>
-                    <Button variant="outline" size="sm" className="gap-2">
-                      <Share2 className="h-4 w-4" />
-                      Share
-                    </Button>
+                    {navigator.share ? (
+                      <Button variant="outline" size="sm" className="gap-2" onClick={handleShare}>
+                        <Share2 className="h-4 w-4" />
+                        Share
+                      </Button>
+                    ) : (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="sm" className="gap-2">
+                            <Share2 className="h-4 w-4" />
+                            Share
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem asChild>
+                            <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareTitle)}&url=${encodeURIComponent(shareUrl)}`} target="_blank" rel="noopener noreferrer" className="gap-2">
+                              <Twitter className="h-4 w-4" /> Twitter / X
+                            </a>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`} target="_blank" rel="noopener noreferrer" className="gap-2">
+                              <Facebook className="h-4 w-4" /> Facebook
+                            </a>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={copyLink} className="gap-2">
+                            {linkCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                            {linkCopied ? "Copied!" : "Copy Link"}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
                   </div>
                 </div>
                 <p className="text-lg text-foreground leading-relaxed">
@@ -528,6 +625,34 @@ const DestinationReview = () => {
                 </div>
               )}
 
+              {/* Related Reviews */}
+              {relatedReviews.length > 0 && (
+                <div className="space-y-6">
+                  <h2 className="font-display text-2xl font-bold text-foreground">You Might Also Like</h2>
+                  <div className="grid sm:grid-cols-3 gap-4">
+                    {relatedReviews.map((r) => (
+                      <Link key={r.slug} to={`/review/${r.slug}`} className="group bg-card rounded-xl overflow-hidden shadow-soft hover:shadow-md transition-shadow">
+                        <div className="aspect-[4/3] overflow-hidden">
+                          <img src={r.image} alt={r.destination} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        </div>
+                        <div className="p-4">
+                          <h3 className="font-semibold text-foreground text-sm mb-1">{r.destination}</h3>
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Star className="h-3 w-3 text-accent fill-accent" />
+                            <span>{r.rating}/5</span>
+                            <span className="mx-1">·</span>
+                            <span>{r.country}</span>
+                          </div>
+                          <span className="text-xs text-secondary font-medium mt-2 inline-flex items-center gap-1">
+                            Read Review <ArrowRight className="h-3 w-3" />
+                          </span>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {slug && <CommentsSection pageType="destination" pageSlug={slug} />}
             </div>
 
@@ -568,11 +693,42 @@ const DestinationReview = () => {
                 </div>
 
                 <AffiliateLinks />
+
+                {/* Recommended Gear */}
+                <div className="mt-8 bg-secondary/10 rounded-xl p-5">
+                  <h4 className="font-display font-semibold text-foreground mb-3">Recommended Gear</h4>
+                  <div className="space-y-3">
+                    {gearRecommendations.map((g) => (
+                      <Link key={g.label} to="/gear" className="flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors group">
+                        <g.icon className="h-4 w-4 text-secondary" />
+                        <div>
+                          <span className="font-medium text-foreground group-hover:text-secondary transition-colors">{g.label}</span>
+                          <span className="block text-xs">{g.desc}</span>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                  <Link to="/gear" className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-secondary hover:text-secondary/80 transition-colors">
+                    Browse all gear <ArrowRight className="h-3 w-3" />
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </main>
+
+      {/* Scroll to top */}
+      {showScrollTop && (
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          className="fixed bottom-6 right-6 z-40 p-3 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors"
+          aria-label="Scroll to top"
+        >
+          <ChevronUp className="h-5 w-5" />
+        </button>
+      )}
+
       <Footer />
     </div>
   );

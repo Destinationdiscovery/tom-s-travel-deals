@@ -1,9 +1,36 @@
-import { Heart, ExternalLink, Twitter, Instagram } from "lucide-react";
+import { useState } from "react";
+import { Heart, ExternalLink, Twitter, Instagram, Send } from "lucide-react";
 import { Link } from "react-router-dom";
 import expediaLogo from "@/assets/expedia-logo.png";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const [email, setEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const { toast } = useToast();
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = email.trim();
+    if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return;
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.functions.invoke("subscribe", {
+        body: { email: trimmed, source_slug: "footer" },
+      });
+      if (error) throw error;
+      toast({ title: "You're in! 🎉", description: "Check your inbox for weekly deals." });
+      setEmail("");
+    } catch {
+      toast({ title: "Something went wrong", description: "Please try again.", variant: "destructive" });
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <footer className="bg-primary text-primary-foreground py-16">
@@ -27,9 +54,23 @@ const Footer = () => {
             >
               Visit my Travelonly profile <ExternalLink className="h-3 w-3" />
             </a>
-          </div>
 
-          {/* Quick Links */}
+            {/* Inline email capture */}
+            <form onSubmit={handleSubscribe} className="mt-4 flex gap-2 max-w-xs">
+              <Input
+                type="email"
+                placeholder="Your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="flex-1 bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/40 h-9 text-sm"
+              />
+              <Button type="submit" disabled={submitting} size="sm" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 h-9 px-3">
+                <Send className="h-3.5 w-3.5" />
+              </Button>
+            </form>
+            <p className="text-xs text-primary-foreground/40 mt-1">Get weekly deals — no spam.</p>
+          </div>
           <div>
             <h4 className="font-display font-semibold text-lg mb-4">Explore</h4>
             <nav className="flex flex-col gap-2">
