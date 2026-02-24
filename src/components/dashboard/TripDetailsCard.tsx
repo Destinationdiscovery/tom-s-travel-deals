@@ -195,7 +195,18 @@ const TripDetailsCard = ({
                   key={i}
                   onClick={async () => {
                     const { data } = await supabase.storage.from("booking-documents").createSignedUrl(url, 3600);
-                    if (data?.signedUrl) window.open(data.signedUrl, "_blank");
+                    if (data?.signedUrl) {
+                      const res = await fetch(data.signedUrl);
+                      const blob = await res.blob();
+                      const blobUrl = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = blobUrl;
+                      a.download = url.split("/").pop() || "document";
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                      URL.revokeObjectURL(blobUrl);
+                    }
                   }}
                   className="inline-flex items-center gap-1.5 text-primary hover:underline"
                 >
