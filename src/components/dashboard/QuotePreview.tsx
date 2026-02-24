@@ -48,64 +48,54 @@ const QuotePreview = ({ quote, totalPrice, onBack, onSave, saving, editingId }: 
   };
 
   const emailSubject = `Your Vacation Quote — ${quote.resortName}`;
-  const emailBody =
-    `Hi ${quote.clientName},\n\nPlease find your vacation quote details below:\n\n` +
-    `Resort: ${quote.resortName}\n` +
-    `Destination: ${quote.destination}\n` +
-    (quote.checkIn ? `Dates: ${quote.checkIn} to ${quote.checkOut}\n` : "") +
-    `Travellers: ${quote.numTravellers}\n\n` +
-    `Total Price: ${quote.currency} $${totalPrice.toLocaleString()}\n\n` +
-    (shareUrl ? `View your full quote online: ${shareUrl}\n\n` : "") +
-    `Let me know if you have any questions!\n\nBest regards,\n${AGENT_INFO.name}\n${AGENT_INFO.agency}`;
+  const emailBody = shareUrl
+    ? `Hi ${quote.clientName},\n\nYour vacation quote for ${quote.resortName} in ${quote.destination} is ready!\n\nView Your Quote: ${shareUrl}\n\nLet me know if you have any questions!\n\nBest regards,\n${AGENT_INFO.name} - ${AGENT_INFO.agency}`
+    : "";
+
+  const requireSaved = () => {
+    if (!shareUrl) {
+      toast({ title: "Save first", description: "Please save the quote to generate a shareable link before sending.", variant: "destructive" });
+      return true;
+    }
+    return false;
+  };
 
   const openOutlook = () => {
+    if (requireSaved()) return;
     window.open(`mailto:${quote.clientEmail}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`);
   };
 
   const openGmail = () => {
+    if (requireSaved()) return;
     window.open(`https://mail.google.com/mail/?view=cm&to=${encodeURIComponent(quote.clientEmail || "")}&su=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`);
   };
 
   const openYahoo = () => {
+    if (requireSaved()) return;
     window.open(`https://compose.mail.yahoo.com/?to=${encodeURIComponent(quote.clientEmail || "")}&subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`);
   };
 
   const buildHtmlEmail = () => {
+    if (!shareUrl) return "";
     const nights = getNights(quote.checkIn, quote.checkOut);
-    const cs = currencySymbol;
-    const lineItemsHtml = quote.lineItems.filter(li => li.description).map(li =>
-      `<tr><td style="padding:6px 0;color:#666;border-bottom:1px solid #eee;">${li.category ? `<strong>${li.category}:</strong> ` : ""}${li.description}</td><td style="padding:6px 0;text-align:right;border-bottom:1px solid #eee;">${cs}${li.amount.toLocaleString()}</td></tr>`
-    ).join("");
-    const inclusionsHtml = quote.inclusions.length > 0
-      ? `<p style="margin-top:16px;"><strong>Inclusions:</strong> ${quote.inclusions.map(i => `<span style="display:inline-block;background:#e8f4fd;color:#0369a1;padding:2px 10px;border-radius:12px;font-size:12px;margin:2px 3px;">${i}</span>`).join("")}</p>` : "";
-    const viewLink = shareUrl ? `<p style="text-align:center;margin:24px 0;"><a href="${shareUrl}" style="display:inline-block;background:#0284c7;color:#fff;text-decoration:none;padding:12px 32px;border-radius:8px;font-weight:600;font-size:15px;">View Full Quote Online</a></p>` : "";
+    const datesLine = quote.checkIn && quote.checkOut
+      ? `<p style="margin:8px 0 0;color:#64748b;font-size:14px;">${quote.checkIn} — ${quote.checkOut}${nights ? ` (${nights} night${nights > 1 ? "s" : ""})` : ""}</p>`
+      : "";
 
     return `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;background:#f7f7f7;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f7f7;padding:24px;">
 <tr><td align="center">
 <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
   <tr><td style="background:linear-gradient(135deg,#0284c7,#06b6d4);padding:28px 32px;text-align:center;">
-    <h1 style="margin:0;color:#fff;font-size:22px;font-weight:700;">Vacation Quote</h1>
+    <h1 style="margin:0;color:#fff;font-size:22px;font-weight:700;">Your Vacation Quote</h1>
     <p style="margin:6px 0 0;color:rgba(255,255,255,0.85);font-size:13px;">Prepared for ${quote.clientName}</p>
   </td></tr>
-  <tr><td style="padding:32px;">
+  <tr><td style="padding:32px;text-align:center;">
     <h2 style="margin:0 0 4px;font-size:20px;color:#1e293b;">${quote.resortName}</h2>
-    <p style="margin:0 0 20px;color:#64748b;font-size:14px;">${quote.destination}</p>
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;font-size:13px;color:#334155;">
-      <tr>
-        ${quote.checkIn ? `<td style="padding:8px 0;"><strong>Check-In</strong><br/>${quote.checkIn}</td>` : ""}
-        ${quote.checkOut ? `<td style="padding:8px 0;"><strong>Check-Out</strong><br/>${quote.checkOut}</td>` : ""}
-        ${nights ? `<td style="padding:8px 0;"><strong>Duration</strong><br/>${nights} night${nights > 1 ? "s" : ""}</td>` : ""}
-        <td style="padding:8px 0;"><strong>Travellers</strong><br/>${quote.numTravellers}</td>
-      </tr>
-    </table>
-    <table width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;">
-      ${lineItemsHtml}
-      <tr><td style="padding:12px 0 0;font-size:16px;font-weight:700;color:#1e293b;">Total</td><td style="padding:12px 0 0;text-align:right;font-size:16px;font-weight:700;color:#1e293b;">${quote.currency} ${cs}${totalPrice.toLocaleString()}</td></tr>
-    </table>
-    ${inclusionsHtml}
-    ${quote.notes ? `<p style="margin-top:16px;padding:12px;background:#f8fafc;border-radius:8px;font-size:13px;color:#475569;"><strong>Notes:</strong> ${quote.notes}</p>` : ""}
-    ${viewLink}
+    <p style="margin:0;color:#64748b;font-size:14px;">${quote.destination}</p>
+    ${datesLine}
+    <p style="margin:28px 0;"><a href="${shareUrl}" style="display:inline-block;background:#0284c7;color:#fff;text-decoration:none;padding:14px 36px;border-radius:8px;font-weight:600;font-size:16px;">View Your Quote</a></p>
+    <p style="margin:0;color:#64748b;font-size:13px;">Let me know if you have any questions!</p>
   </td></tr>
   <tr><td style="padding:20px 32px;background:#f8fafc;text-align:center;border-top:1px solid #e2e8f0;">
     <p style="margin:0;font-size:13px;font-weight:600;color:#1e293b;">${AGENT_INFO.name}</p>
@@ -116,6 +106,7 @@ const QuotePreview = ({ quote, totalPrice, onBack, onSave, saving, editingId }: 
   };
 
   const sendDirect = async () => {
+    if (requireSaved()) return;
     if (!quote.clientEmail) {
       toast({ title: "No email", description: "Client email is required to send directly.", variant: "destructive" });
       return;
