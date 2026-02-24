@@ -1,7 +1,9 @@
 import { useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import { Globe, Heart, MapPin, Camera } from "lucide-react";
+import heroImg from "@/assets/snowbird-caribbean-aerial.jpg";
 
 const features = [
   {
@@ -39,7 +41,20 @@ const About = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      <AffiliateDisclosureBanner />
       <main className="pt-20">
+        {/* Hero Section */}
+        <section className="relative h-[40vh] min-h-[320px] flex items-center justify-center">
+          <img src={heroImg} alt="Aerial view of Caribbean" className="absolute inset-0 w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60" />
+          <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
+            <h1 className="font-display text-4xl md:text-6xl font-bold text-white mb-3">
+              About <span className="text-primary">Tom</span>
+            </h1>
+            <p className="text-white/80 text-lg">Toronto-based travel consultant sharing honest insights from real trips.</p>
+          </div>
+        </section>
+
         <section className="py-24 bg-background">
           <div className="container mx-auto px-4">
             <div className="grid lg:grid-cols-2 gap-16 items-center">

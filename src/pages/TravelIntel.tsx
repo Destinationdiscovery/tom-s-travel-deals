@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,12 +55,13 @@ const TravelIntel = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      <AffiliateDisclosureBanner />
       <section className="relative h-[40vh] min-h-[320px] flex items-center justify-center">
         <img src={heroImg} alt="Travel destination sunset" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60" />
         <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <Globe className="h-8 w-8 text-sky-300" />
+            <Globe className="h-8 w-8 text-primary" />
           </div>
           <h1 className="font-display text-4xl md:text-5xl font-bold text-white mb-3">Know Before You Go</h1>
           <p className="text-white/80 text-lg max-w-lg mx-auto">Visa requirements, safety advisories, and destination news — powered by real-time data.</p>
@@ -78,7 +80,7 @@ const TravelIntel = () => {
             <div className="flex flex-col sm:flex-row gap-3">
               <Input placeholder="Your citizenship (e.g., Canada)" value={reqCitizenship} onChange={(e) => setReqCitizenship(e.target.value)} />
               <Input placeholder="Destination (e.g., Cuba)" value={reqDestination} onChange={(e) => setReqDestination(e.target.value)} />
-              <Button onClick={() => handleSubmit("requirements")} disabled={loading || reqCitizenship.trim().length < 2 || reqDestination.trim().length < 2} className="whitespace-nowrap">
+              <Button onClick={() => handleSubmit("requirements")} disabled={loading || reqCitizenship.trim().length < 2 || reqDestination.trim().length < 2} className="whitespace-nowrap bg-secondary text-secondary-foreground hover:bg-secondary/90">
                 {loading && activeTab === "requirements" ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                 Check
               </Button>
@@ -90,7 +92,7 @@ const TravelIntel = () => {
           <TabsContent value="advisories">
             <div className="flex flex-col sm:flex-row gap-3">
               <Input placeholder="Destination (e.g., Cuba)" value={advDestination} onChange={(e) => setAdvDestination(e.target.value)} className="flex-1" />
-              <Button onClick={() => handleSubmit("advisories")} disabled={loading || advDestination.trim().length < 2} className="whitespace-nowrap">
+              <Button onClick={() => handleSubmit("advisories")} disabled={loading || advDestination.trim().length < 2} className="whitespace-nowrap bg-secondary text-secondary-foreground hover:bg-secondary/90">
                 {loading && activeTab === "advisories" ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                 Check
               </Button>
@@ -102,7 +104,7 @@ const TravelIntel = () => {
           <TabsContent value="news">
             <div className="flex flex-col sm:flex-row gap-3">
               <Input placeholder="Destination (e.g., Cuba)" value={newsDestination} onChange={(e) => setNewsDestination(e.target.value)} className="flex-1" />
-              <Button onClick={() => handleSubmit("news")} disabled={loading || newsDestination.trim().length < 2} className="whitespace-nowrap">
+              <Button onClick={() => handleSubmit("news")} disabled={loading || newsDestination.trim().length < 2} className="whitespace-nowrap bg-secondary text-secondary-foreground hover:bg-secondary/90">
                 {loading && activeTab === "news" ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                 Get News
               </Button>
