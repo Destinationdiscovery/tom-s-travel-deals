@@ -20,6 +20,8 @@ interface SlotData {
   affiliateUrl: string;
   originalPrice: number;
   salePrice: number;
+  originalPriceWeekly: number | null;
+  salePriceWeekly: number | null;
   rating: number;
   imageUrl: string;
   expiresAt: string | null;
@@ -28,12 +30,12 @@ interface SlotData {
 }
 
 const DEFAULTS: Omit<SlotData, "isCustom" | "dbId">[] = [
-  { name: "Temptation Cancun Resort All Inclusive — Adults Only", location: "Cancun, Mexico", affiliateUrl: "https://expedia.com/affiliate/sCSkKSm", originalPrice: 389, salePrice: 249, rating: 4.3, imageUrl: dealTemptation, expiresAt: "2026-04-30" },
-  { name: "Hotel Riu Plaza Toronto", location: "Toronto, Canada", affiliateUrl: "https://expedia.com/affiliate/4XUFIIR", originalPrice: 279, salePrice: 179, rating: 4.1, imageUrl: dealRiu, expiresAt: "2026-03-31" },
-  { name: "OUTRIGGER Honua Kai Resort & Spa", location: "Lahaina, Hawaii", affiliateUrl: "https://expedia.com/affiliate/N2Bmgth", originalPrice: 499, salePrice: 329, rating: 4.6, imageUrl: dealOutrigger, expiresAt: "2026-05-15" },
-  { name: "Save on Eligible Flights to Top Destinations", location: "Multiple Destinations", affiliateUrl: "https://expedia.com/affiliate/bPJ1N3S", originalPrice: 650, salePrice: 399, rating: 4.0, imageUrl: dealFlights, expiresAt: "2026-04-15" },
-  { name: "Garza Blanca Resort & Spa Cancun", location: "Punta Sam, Mexico", affiliateUrl: "https://www.hotels.com/affiliate/gUxIS8k", originalPrice: 459, salePrice: 299, rating: 4.5, imageUrl: dealGarza, expiresAt: "2026-05-01" },
-  { name: "Phuket Moonlit Bay Seaview Resort & Spa", location: "Ratsada, Thailand", affiliateUrl: "https://expedia.com/affiliate/av1oUFB", originalPrice: 199, salePrice: 119, rating: 4.2, imageUrl: dealPhuket, expiresAt: "2026-04-20" },
+  { name: "Temptation Cancun Resort All Inclusive — Adults Only", location: "Cancun, Mexico", affiliateUrl: "https://expedia.com/affiliate/sCSkKSm", originalPrice: 389, salePrice: 249, originalPriceWeekly: null, salePriceWeekly: null, rating: 4.3, imageUrl: dealTemptation, expiresAt: "2026-04-30" },
+  { name: "Hotel Riu Plaza Toronto", location: "Toronto, Canada", affiliateUrl: "https://expedia.com/affiliate/4XUFIIR", originalPrice: 279, salePrice: 179, originalPriceWeekly: null, salePriceWeekly: null, rating: 4.1, imageUrl: dealRiu, expiresAt: "2026-03-31" },
+  { name: "OUTRIGGER Honua Kai Resort & Spa", location: "Lahaina, Hawaii", affiliateUrl: "https://expedia.com/affiliate/N2Bmgth", originalPrice: 499, salePrice: 329, originalPriceWeekly: null, salePriceWeekly: null, rating: 4.6, imageUrl: dealOutrigger, expiresAt: "2026-05-15" },
+  { name: "Save on Eligible Flights to Top Destinations", location: "Multiple Destinations", affiliateUrl: "https://expedia.com/affiliate/bPJ1N3S", originalPrice: 650, salePrice: 399, originalPriceWeekly: null, salePriceWeekly: null, rating: 4.0, imageUrl: dealFlights, expiresAt: "2026-04-15" },
+  { name: "Garza Blanca Resort & Spa Cancun", location: "Punta Sam, Mexico", affiliateUrl: "https://www.hotels.com/affiliate/gUxIS8k", originalPrice: 459, salePrice: 299, originalPriceWeekly: null, salePriceWeekly: null, rating: 4.5, imageUrl: dealGarza, expiresAt: "2026-05-01" },
+  { name: "Phuket Moonlit Bay Seaview Resort & Spa", location: "Ratsada, Thailand", affiliateUrl: "https://expedia.com/affiliate/av1oUFB", originalPrice: 199, salePrice: 119, originalPriceWeekly: null, salePriceWeekly: null, rating: 4.2, imageUrl: dealPhuket, expiresAt: "2026-04-20" },
 ];
 
 const FeaturedDealsManager = () => {
@@ -43,7 +45,7 @@ const FeaturedDealsManager = () => {
   const [saving, setSaving] = useState(false);
 
   // Edit form state
-  const [form, setForm] = useState({ name: "", location: "", affiliateUrl: "", originalPrice: "", salePrice: "", rating: "", expiresAt: "" });
+  const [form, setForm] = useState({ name: "", location: "", affiliateUrl: "", originalPrice: "", salePrice: "", originalPriceWeekly: "", salePriceWeekly: "", rating: "", expiresAt: "" });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState("");
 
@@ -63,6 +65,8 @@ const FeaturedDealsManager = () => {
             affiliateUrl: row.affiliate_url,
             originalPrice: Number(row.original_price),
             salePrice: Number(row.sale_price),
+            originalPriceWeekly: row.original_price_weekly ? Number(row.original_price_weekly) : null,
+            salePriceWeekly: row.sale_price_weekly ? Number(row.sale_price_weekly) : null,
             rating: Number(row.rating),
             imageUrl: row.image_url,
             expiresAt: row.expires_at ? row.expires_at.split("T")[0] : null,
@@ -81,6 +85,8 @@ const FeaturedDealsManager = () => {
     setForm({
       name: s.name, location: s.location, affiliateUrl: s.affiliateUrl,
       originalPrice: String(s.originalPrice), salePrice: String(s.salePrice),
+      originalPriceWeekly: s.originalPriceWeekly ? String(s.originalPriceWeekly) : "",
+      salePriceWeekly: s.salePriceWeekly ? String(s.salePriceWeekly) : "",
       rating: String(s.rating), expiresAt: s.expiresAt || "",
     });
     setImageFile(null);
@@ -117,6 +123,9 @@ const FeaturedDealsManager = () => {
       const sp = Number(form.salePrice);
       const slotNumber = slotIdx + 1;
 
+      const opw = form.originalPriceWeekly ? Number(form.originalPriceWeekly) : null;
+      const spw = form.salePriceWeekly ? Number(form.salePriceWeekly) : null;
+
       const payload = {
         slot_number: slotNumber,
         name: form.name.trim(),
@@ -126,6 +135,10 @@ const FeaturedDealsManager = () => {
         sale_price: sp,
         original_label: `$${op}/night`,
         sale_label: `$${sp}/night`,
+        original_price_weekly: opw,
+        sale_price_weekly: spw,
+        original_label_weekly: opw ? `$${opw.toLocaleString()}/week` : null,
+        sale_label_weekly: spw ? `$${spw.toLocaleString()}/week` : null,
         rating: Number(form.rating),
         image_url: imageUrl,
         image_position: "center",
@@ -193,6 +206,12 @@ const FeaturedDealsManager = () => {
                       <span className="text-xs text-muted-foreground line-through">${slot.originalPrice}</span>
                       <span className="text-sm font-bold text-secondary">${slot.salePrice}/night</span>
                     </div>
+                    {slot.originalPriceWeekly && slot.salePriceWeekly && (
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs text-muted-foreground line-through">${slot.originalPriceWeekly.toLocaleString()}</span>
+                        <span className="text-sm font-bold text-secondary">${slot.salePriceWeekly.toLocaleString()}/week</span>
+                      </div>
+                    )}
                     <div className="flex gap-2 mt-auto pt-3">
                       <Button variant="outline" size="sm" className="gap-1.5" onClick={() => startEdit(idx)}>
                         <Pencil className="h-3 w-3" /> Edit
@@ -228,6 +247,16 @@ const FeaturedDealsManager = () => {
                       <div>
                         <Label className="text-xs">Sale $/night</Label>
                         <Input type="number" value={form.salePrice} onChange={e => setForm(f => ({ ...f, salePrice: e.target.value }))} className="h-8 text-xs" />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <Label className="text-xs">Original $/week</Label>
+                        <Input type="number" value={form.originalPriceWeekly} onChange={e => setForm(f => ({ ...f, originalPriceWeekly: e.target.value }))} className="h-8 text-xs" placeholder="Optional" />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Sale $/week</Label>
+                        <Input type="number" value={form.salePriceWeekly} onChange={e => setForm(f => ({ ...f, salePriceWeekly: e.target.value }))} className="h-8 text-xs" placeholder="Optional" />
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2">

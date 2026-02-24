@@ -20,9 +20,11 @@ interface FeaturedDeal {
   salePrice: number;
   originalLabel: string;
   saleLabel: string;
+  originalLabelWeekly?: string;
+  saleLabelWeekly?: string;
   rating: number;
   imagePosition?: string;
-  expiresAt?: string; // ISO date string
+  expiresAt?: string;
 }
 
 const featuredDeals: FeaturedDeal[] = [
@@ -107,6 +109,8 @@ const TravelDealsSection = () => {
               salePrice: Number(dbDeal.sale_price),
               originalLabel: dbDeal.original_label,
               saleLabel: dbDeal.sale_label,
+              originalLabelWeekly: dbDeal.original_label_weekly || undefined,
+              saleLabelWeekly: dbDeal.sale_label_weekly || undefined,
               rating: Number(dbDeal.rating),
               imagePosition: dbDeal.image_position || "center",
               expiresAt: dbDeal.expires_at || undefined,
@@ -181,9 +185,17 @@ const TravelDealsSection = () => {
                   <p className="text-sm text-muted-foreground mt-1">{deal.location}</p>
                   <MiniStars rating={deal.rating} />
                   <div className="flex items-center justify-between mt-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground line-through">{deal.originalLabel}</span>
-                      <span className="font-bold text-emerald-400 text-lg">{deal.saleLabel}</span>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground line-through">{deal.originalLabel}</span>
+                        <span className="font-bold text-emerald-400 text-lg">{deal.saleLabel}</span>
+                      </div>
+                      {deal.originalLabelWeekly && deal.saleLabelWeekly && (
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-xs text-muted-foreground line-through">{deal.originalLabelWeekly}</span>
+                          <span className="font-semibold text-emerald-400 text-sm">{deal.saleLabelWeekly}</span>
+                        </div>
+                      )}
                     </div>
                     <span className="text-xs font-bold bg-secondary text-secondary-foreground px-3 py-1.5 rounded-full group-hover:bg-secondary/90 transition-colors">
                       Grab This Deal →
