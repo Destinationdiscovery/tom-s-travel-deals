@@ -7,16 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useGearIntel } from "@/hooks/useGearIntel";
 import { GearLoading, PackingResultCard, ProductReviewPanel, GearCitations } from "@/components/gear/GearResults";
+import SEOHead from "@/components/SEOHead";
 import heroImg from "@/assets/gear-water-hammock-main.jpg";
 
 const Gear = () => {
   const { loading, error, packingData, reviewData, reviewLoading, fetchPackingList, fetchProductReview, clearReview } = useGearIntel();
   const [searchQuery, setSearchQuery] = useState("");
-
-  useEffect(() => {
-    document.title = "Travel Gear - ReviewThenGo";
-    return () => { document.title = "ReviewThenGo.com | Honest Reviews, Tested Gear & Travel Insights"; };
-  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -43,6 +39,11 @@ const Gear = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Travel Gear"
+        description="Tell us where you're going, we'll tell you what to pack. AI-powered packing lists and product reviews."
+        url="/gear"
+      />
       <Header />
       <AffiliateDisclosureBanner />
       <main className="pt-20">

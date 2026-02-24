@@ -7,17 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTravelIntel, type IntelType } from "@/hooks/useTravelIntel";
 import { Shield, FileText, Newspaper, Loader2, Globe } from "lucide-react";
+import SEOHead from "@/components/SEOHead";
 import heroImg from "@/assets/snowbird-beach-sunset.jpg";
 import { IntelLoading, RequirementsResult, AdvisoriesResult, NewsResult } from "@/components/intel/IntelResults";
 
 const TravelIntel = () => {
   const { loading, error, requirementsData, advisoriesData, newsData, fetchIntel } = useTravelIntel();
   const [activeTab, setActiveTab] = useState<IntelType>("requirements");
-
-  useEffect(() => {
-    document.title = "Know Before You Go - ReviewThenGo";
-    return () => { document.title = "ReviewThenGo.com | Honest Reviews, Tested Gear & Travel Insights"; };
-  }, []);
 
   const [reqCitizenship, setReqCitizenship] = useState("");
   const [reqDestination, setReqDestination] = useState("");
@@ -54,6 +50,11 @@ const TravelIntel = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Know Before You Go"
+        description="Visa requirements, safety advisories, and destination news — powered by real-time data."
+        url="/travel-intel"
+      />
       <Header />
       <AffiliateDisclosureBanner />
       <section className="relative h-[40vh] min-h-[320px] flex items-center justify-center">

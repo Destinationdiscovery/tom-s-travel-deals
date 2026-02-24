@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { trackEmailSignup } from "@/lib/analytics";
 
 const STORAGE_KEY = "rtg-email-popup-dismissed";
 const DISMISS_DAYS = 7;
@@ -20,8 +21,23 @@ const EmailCapturePopup = () => {
       const dismissedAt = parseInt(dismissed, 10);
       if (Date.now() - dismissedAt < DISMISS_DAYS * 86400000) return;
     }
+
+    // Exit-intent on desktop
+    const handleMouseLeave = (e: MouseEvent) => {
+      if (e.clientY <= 0) {
+        setVisible(true);
+        document.documentElement.removeEventListener("mouseleave", handleMouseLeave);
+      }
+    };
+    document.documentElement.addEventListener("mouseleave", handleMouseLeave);
+
+    // Fallback timer (mobile + desktop)
     const timer = setTimeout(() => setVisible(true), 30000);
-    return () => clearTimeout(timer);
+
+    return () => {
+      clearTimeout(timer);
+      document.documentElement.removeEventListener("mouseleave", handleMouseLeave);
+    };
   }, []);
 
   const dismiss = () => {
@@ -40,6 +56,7 @@ const EmailCapturePopup = () => {
         body: { email: trimmed, source_slug: "popup" },
       });
       if (error) throw error;
+      trackEmailSignup("popup");
       toast({ title: "You're in! 🎉", description: "Check your inbox for weekly deals." });
       dismiss();
     } catch {

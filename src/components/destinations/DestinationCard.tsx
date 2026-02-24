@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import type { Destination } from "@/pages/Destinations";
 import { useMemo } from "react";
 import { buildDeepLinks, detectCountry } from "@/components/AffiliateLinks";
+import { trackAffiliateClick } from "@/lib/analytics";
 
 interface DestinationCardProps {
   destination: Destination;
@@ -74,7 +75,7 @@ const DestinationCard = ({ destination: dest, index }: DestinationCardProps) => 
             href={expediaLink}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => { e.stopPropagation(); trackAffiliateClick("Expedia", "/destinations", "destination_card"); }}
             className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-secondary text-secondary-foreground text-xs font-semibold hover:opacity-90 transition-opacity"
           >
             Book on Expedia

@@ -1,8 +1,8 @@
-import { useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import { Globe, Heart, MapPin, Camera } from "lucide-react";
+import SEOHead from "@/components/SEOHead";
 import heroImg from "@/assets/snowbird-caribbean-aerial.jpg";
 
 const features = [
@@ -33,13 +33,14 @@ const travelPhilosophy = [
 ];
 
 const About = () => {
-  useEffect(() => {
-    document.title = "About - ReviewThenGo";
-    return () => { document.title = "ReviewThenGo.com | Honest Reviews, Tested Gear & Travel Insights"; };
-  }, []);
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="About Tom"
+        description="Toronto-based travel consultant sharing honest insights from real trips across 20+ countries."
+        url="/about"
+      />
       <Header />
       <AffiliateDisclosureBanner />
       <main className="pt-20">

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
@@ -8,6 +8,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useGenerateReview } from "@/hooks/useGenerateReview";
 import { useSearchSuggestions } from "@/hooks/useSearchSuggestions";
 import AIReviewResult from "@/components/AIReviewResult";
+import SEOHead from "@/components/SEOHead";
 import heroImg from "@/assets/snowbird-caribbean-aerial.jpg";
 import cubaImg from "@/assets/deal-cuba.jpg";
 import curacaoImg from "@/assets/curacao-hero.avif";
@@ -152,11 +153,6 @@ const Destinations = () => {
   const { review, isLoading, error, generateReview, clearReview } = useGenerateReview();
   const resultsRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    document.title = "Real Destination Reviews - ReviewThenGo";
-    return () => { document.title = "ReviewThenGo.com | Real Reviews, Tested Gear & Travel Insights"; };
-  }, []);
-
   const handleSearch = () => {
     const trimmed = query.trim();
     if (trimmed.length < 2) return;
@@ -174,6 +170,11 @@ const Destinations = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Real Destination Reviews"
+        description="Explore curated reviews from real traveler experiences. Search any hotel, resort, or destination."
+        url="/destinations"
+      />
       <Header />
       <AffiliateDisclosureBanner />
       <main className="pt-24">

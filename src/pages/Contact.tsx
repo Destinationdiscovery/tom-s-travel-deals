@@ -1,20 +1,20 @@
-import { useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import { Phone, Mail, Globe, MessageSquare, Award, MapPin, Heart, Star } from "lucide-react";
+import SEOHead from "@/components/SEOHead";
 import heroBeach from "@/assets/hero-beach.jpg";
 
 const Contact = () => {
-  useEffect(() => {
-    document.title = "Contact - ReviewThenGo";
-    return () => { document.title = "ReviewThenGo.com | Honest Reviews, Tested Gear & Travel Insights"; };
-  }, []);
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Contact"
+        description="Get in touch with Tom, a Toronto-based travel consultant with over a decade of experience."
+        url="/contact"
+      />
       <Header />
-      <AffiliateDisclosureBanner />
       <main className="pt-20">
         <section className="py-24 bg-muted">
           <div className="container mx-auto px-4">
