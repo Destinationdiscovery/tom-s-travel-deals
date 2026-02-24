@@ -44,6 +44,54 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_posts: {
+        Row: {
+          author: string
+          category: string
+          category_color: string
+          created_at: string
+          date_published: string
+          excerpt: string | null
+          hero_image_url: string | null
+          id: string
+          read_time: string
+          rich_content: Json
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author?: string
+          category?: string
+          category_color?: string
+          created_at?: string
+          date_published?: string
+          excerpt?: string | null
+          hero_image_url?: string | null
+          id?: string
+          read_time?: string
+          rich_content?: Json
+          slug: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author?: string
+          category?: string
+          category_color?: string
+          created_at?: string
+          date_published?: string
+          excerpt?: string | null
+          hero_image_url?: string | null
+          id?: string
+          read_time?: string
+          rich_content?: Json
+          slug?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       booking_details: {
         Row: {
           agency: string | null
@@ -384,6 +432,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      featured_deals: {
+        Row: {
+          affiliate_url: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          image_position: string | null
+          image_url: string
+          location: string
+          name: string
+          original_label: string
+          original_price: number
+          rating: number
+          sale_label: string
+          sale_price: number
+          slot_number: number
+          updated_at: string
+        }
+        Insert: {
+          affiliate_url: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          image_position?: string | null
+          image_url: string
+          location: string
+          name: string
+          original_label: string
+          original_price: number
+          rating?: number
+          sale_label: string
+          sale_price: number
+          slot_number: number
+          updated_at?: string
+        }
+        Update: {
+          affiliate_url?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          image_position?: string | null
+          image_url?: string
+          location?: string
+          name?: string
+          original_label?: string
+          original_price?: number
+          rating?: number
+          sale_label?: string
+          sale_price?: number
+          slot_number?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       gear_intel_cache: {
         Row: {

@@ -1,0 +1,322 @@
+import { useState, useEffect } from "react";
+import { Plus, Trash2, ArrowUp, ArrowDown, Upload, Loader2, BookOpen, Eye } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
+
+interface ContentBlock {
+  type: "text" | "heading" | "image";
+  value: string;
+  caption?: string;
+}
+
+interface BlogPost {
+  id: string;
+  slug: string;
+  title: string;
+  category: string;
+  category_color: string;
+  hero_image_url: string | null;
+  excerpt: string | null;
+  author: string;
+  date_published: string;
+  read_time: string;
+  rich_content: ContentBlock[];
+  created_at: string;
+}
+
+const CATEGORIES = [
+  { label: "Guides", color: "bg-teal-500" },
+  { label: "Packing", color: "bg-purple-500" },
+  { label: "Budget", color: "bg-emerald-500" },
+  { label: "Insurance", color: "bg-red-500" },
+  { label: "Timing", color: "bg-amber-500" },
+  { label: "Travel Tips", color: "bg-blue-500" },
+];
+
+const BlogPostCreator = () => {
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [publishing, setPublishing] = useState(false);
+  const [heroFile, setHeroFile] = useState<File | null>(null);
+  const [heroPreview, setHeroPreview] = useState("");
+
+  // Form fields
+  const [title, setTitle] = useState("");
+  const [slug, setSlug] = useState("");
+  const [category, setCategory] = useState("Guides");
+  const [author, setAuthor] = useState("Tom");
+  const [excerpt, setExcerpt] = useState("");
+  const [readTime, setReadTime] = useState("5 min read");
+  const [blocks, setBlocks] = useState<ContentBlock[]>([{ type: "text", value: "" }]);
+
+  // Editing
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  useEffect(() => { fetchPosts(); }, []);
+
+  const fetchPosts = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("blog_posts")
+      .select("*")
+      .order("created_at", { ascending: false }) as any;
+    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+    else setPosts(data || []);
+    setLoading(false);
+  };
+
+  const generateSlug = (t: string) => {
+    return t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 80);
+  };
+
+  const handleTitleChange = (val: string) => {
+    setTitle(val);
+    if (!editingId) setSlug(generateSlug(val));
+  };
+
+  const handleHeroFile = (file: File | null) => {
+    setHeroFile(file);
+    if (file) setHeroPreview(URL.createObjectURL(file));
+    else setHeroPreview("");
+  };
+
+  const addBlock = (type: "text" | "heading" | "image") => {
+    setBlocks([...blocks, { type, value: "", caption: type === "image" ? "" : undefined }]);
+  };
+
+  const updateBlock = (index: number, updates: Partial<ContentBlock>) => {
+    setBlocks(blocks.map((b, i) => i === index ? { ...b, ...updates } : b));
+  };
+
+  const removeBlock = (index: number) => {
+    setBlocks(blocks.filter((_, i) => i !== index));
+  };
+
+  const moveBlock = (index: number, direction: -1 | 1) => {
+    const newI = index + direction;
+    if (newI < 0 || newI >= blocks.length) return;
+    const arr = [...blocks];
+    [arr[index], arr[newI]] = [arr[newI], arr[index]];
+    setBlocks(arr);
+  };
+
+  const uploadImageBlock = async (index: number, file: File) => {
+    const ext = file.name.split(".").pop() || "jpg";
+    const fileName = `inline-${Date.now()}-${Math.random().toString(36).slice(2, 6)}.${ext}`;
+    const { error } = await supabase.storage.from("blog-images").upload(fileName, file, { contentType: file.type });
+    if (error) { toast({ title: "Upload failed", description: error.message, variant: "destructive" }); return; }
+    const { data: pub } = supabase.storage.from("blog-images").getPublicUrl(fileName);
+    updateBlock(index, { value: pub.publicUrl });
+  };
+
+  const resetForm = () => {
+    setTitle(""); setSlug(""); setCategory("Guides"); setAuthor("Tom");
+    setExcerpt(""); setReadTime("5 min read");
+    setBlocks([{ type: "text", value: "" }]);
+    setHeroFile(null); setHeroPreview(""); setEditingId(null);
+  };
+
+  const handlePublish = async () => {
+    if (!title.trim() || !slug.trim()) {
+      toast({ title: "Missing fields", description: "Title and slug are required.", variant: "destructive" });
+      return;
+    }
+    setPublishing(true);
+    try {
+      let heroUrl = heroPreview;
+      if (heroFile) {
+        const ext = heroFile.name.split(".").pop() || "jpg";
+        const fileName = `hero-${slug}-${Date.now()}.${ext}`;
+        const { error } = await supabase.storage.from("blog-images").upload(fileName, heroFile, { contentType: heroFile.type });
+        if (error) throw error;
+        const { data: pub } = supabase.storage.from("blog-images").getPublicUrl(fileName);
+        heroUrl = pub.publicUrl;
+      }
+
+      const categoryColor = CATEGORIES.find(c => c.label === category)?.color || "bg-blue-500";
+      const payload = {
+        title: title.trim(),
+        slug: slug.trim(),
+        category,
+        category_color: categoryColor,
+        hero_image_url: heroUrl || null,
+        excerpt: excerpt.trim() || null,
+        author: author.trim(),
+        read_time: readTime.trim(),
+        rich_content: blocks.filter(b => b.value.trim()),
+        date_published: new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
+      };
+
+      if (editingId) {
+        const { error } = await supabase.from("blog_posts").update(payload as any).eq("id", editingId);
+        if (error) throw error;
+        toast({ title: "Updated!", description: `"${title}" has been updated.` });
+      } else {
+        const { error } = await supabase.from("blog_posts").insert(payload as any);
+        if (error) throw error;
+        toast({ title: "Published!", description: `"${title}" is now live on the blog.` });
+      }
+      resetForm();
+      fetchPosts();
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message || "Unknown error", variant: "destructive" });
+    }
+    setPublishing(false);
+  };
+
+  const handleEdit = (post: BlogPost) => {
+    setEditingId(post.id);
+    setTitle(post.title);
+    setSlug(post.slug);
+    setCategory(post.category);
+    setAuthor(post.author);
+    setExcerpt(post.excerpt || "");
+    setReadTime(post.read_time);
+    setBlocks(post.rich_content?.length ? post.rich_content : [{ type: "text", value: "" }]);
+    setHeroPreview(post.hero_image_url || "");
+    setHeroFile(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase.from("blog_posts").delete().eq("id", id) as any;
+    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+    else { toast({ title: "Deleted" }); fetchPosts(); }
+  };
+
+  return (
+    <div className="space-y-6">
+      <h1 className="font-display text-2xl font-bold text-foreground flex items-center gap-2">
+        <BookOpen className="h-6 w-6" /> Blog Post Creator
+      </h1>
+
+      {/* Form */}
+      <Card>
+        <CardContent className="p-6 space-y-4">
+          <h2 className="font-semibold text-foreground">{editingId ? "Edit Post" : "New Blog Post"}</h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label>Title</Label>
+              <Input value={title} onChange={e => handleTitleChange(e.target.value)} placeholder="Article title" />
+            </div>
+            <div>
+              <Label>Slug</Label>
+              <Input value={slug} onChange={e => setSlug(e.target.value)} placeholder="url-slug" />
+            </div>
+            <div>
+              <Label>Category</Label>
+              <select value={category} onChange={e => setCategory(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                {CATEGORIES.map(c => <option key={c.label} value={c.label}>{c.label}</option>)}
+              </select>
+            </div>
+            <div>
+              <Label>Author</Label>
+              <Input value={author} onChange={e => setAuthor(e.target.value)} />
+            </div>
+            <div>
+              <Label>Read Time</Label>
+              <Input value={readTime} onChange={e => setReadTime(e.target.value)} placeholder="5 min read" />
+            </div>
+            <div>
+              <Label>Hero Image</Label>
+              <input type="file" accept="image/*" onChange={e => handleHeroFile(e.target.files?.[0] || null)} className="text-sm text-muted-foreground file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-primary-foreground file:font-medium file:cursor-pointer" />
+            </div>
+          </div>
+
+          {heroPreview && (
+            <img src={heroPreview} alt="Hero preview" className="w-full h-48 object-cover rounded-lg" />
+          )}
+
+          <div>
+            <Label>Excerpt</Label>
+            <Textarea value={excerpt} onChange={e => setExcerpt(e.target.value)} placeholder="Short summary for the card..." className="min-h-[60px]" />
+          </div>
+
+          {/* Block Editor */}
+          <div>
+            <Label className="mb-2 block">Article Content</Label>
+            <div className="space-y-3">
+              {blocks.map((block, i) => (
+                <div key={i} className="flex gap-2 items-start bg-muted/30 rounded-lg p-3">
+                  <div className="flex flex-col gap-1 shrink-0">
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => moveBlock(i, -1)} disabled={i === 0}><ArrowUp className="h-3 w-3" /></Button>
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => moveBlock(i, 1)} disabled={i === blocks.length - 1}><ArrowDown className="h-3 w-3" /></Button>
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <span className="text-xs font-medium text-muted-foreground uppercase">{block.type}</span>
+                    {block.type === "text" && (
+                      <Textarea value={block.value} onChange={e => updateBlock(i, { value: e.target.value })} placeholder="Paragraph text..." className="min-h-[80px]" />
+                    )}
+                    {block.type === "heading" && (
+                      <Input value={block.value} onChange={e => updateBlock(i, { value: e.target.value })} placeholder="Section heading..." />
+                    )}
+                    {block.type === "image" && (
+                      <>
+                        {block.value ? (
+                          <img src={block.value} alt="Block" className="w-full h-32 object-cover rounded-lg" />
+                        ) : (
+                          <input type="file" accept="image/*" onChange={e => { const f = e.target.files?.[0]; if (f) uploadImageBlock(i, f); }} className="text-sm text-muted-foreground" />
+                        )}
+                        <Input value={block.caption || ""} onChange={e => updateBlock(i, { caption: e.target.value })} placeholder="Image caption (optional)" />
+                      </>
+                    )}
+                  </div>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-destructive" onClick={() => removeBlock(i)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2 mt-3">
+              <Button variant="outline" size="sm" onClick={() => addBlock("text")}><Plus className="h-3 w-3 mr-1" /> Text</Button>
+              <Button variant="outline" size="sm" onClick={() => addBlock("heading")}><Plus className="h-3 w-3 mr-1" /> Heading</Button>
+              <Button variant="outline" size="sm" onClick={() => addBlock("image")}><Plus className="h-3 w-3 mr-1" /> Image</Button>
+            </div>
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            <Button onClick={handlePublish} disabled={publishing} className="gap-2">
+              {publishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+              {editingId ? "Update Post" : "Publish"}
+            </Button>
+            {editingId && <Button variant="outline" onClick={resetForm}>Cancel Edit</Button>}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Existing Posts */}
+      <h2 className="font-display text-lg font-semibold text-foreground">Published Posts ({posts.length})</h2>
+      {loading ? (
+        <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+      ) : posts.length === 0 ? (
+        <p className="text-muted-foreground text-center py-8">No blog posts yet. Create your first one above!</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {posts.map(post => (
+            <Card key={post.id} className="overflow-hidden">
+              {post.hero_image_url && <img src={post.hero_image_url} alt={post.title} className="w-full h-32 object-cover" />}
+              <CardContent className="p-4">
+                <h3 className="font-semibold text-foreground line-clamp-1">{post.title}</h3>
+                <p className="text-xs text-muted-foreground mt-1">{post.category} · {post.date_published} · {post.read_time}</p>
+                <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{post.excerpt}</p>
+                <div className="flex gap-2 mt-3">
+                  <Button variant="outline" size="sm" onClick={() => handleEdit(post)}>Edit</Button>
+                  <Button variant="outline" size="sm" onClick={() => window.open(`/compass/${post.slug}`, "_blank")} className="gap-1"><Eye className="h-3 w-3" /> View</Button>
+                  <Button variant="destructive" size="sm" onClick={() => handleDelete(post.id)}>Delete</Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default BlogPostCreator;

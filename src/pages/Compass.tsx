@@ -1,20 +1,50 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
-import { compassArticles } from "@/data/compassArticles";
+import { compassArticles, type CompassArticle } from "@/data/compassArticles";
 import { ArrowRight, Clock } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
 import heroImg from "@/assets/japan-cherry-blossoms.webp";
+import { supabase } from "@/integrations/supabase/client";
 
 const categories = ["All", "Packing", "Guides", "Budget", "Insurance", "Timing"];
 
 const Compass = () => {
   const [activeCategory, setActiveCategory] = useState("All");
+  const [allArticles, setAllArticles] = useState<CompassArticle[]>(compassArticles);
+
+  useEffect(() => {
+    const fetchDbPosts = async () => {
+      const { data } = await supabase.from("blog_posts").select("*").order("created_at", { ascending: false }) as any;
+      if (data && data.length > 0) {
+        const dbArticles: CompassArticle[] = data.map((p: any, i: number) => ({
+          id: 1000 + i,
+          slug: p.slug,
+          title: p.title,
+          category: p.category,
+          categoryColor: p.category_color,
+          image: p.hero_image_url || "",
+          excerpt: p.excerpt || "",
+          author: p.author,
+          datePublished: p.date_published,
+          readTime: p.read_time,
+          content: [],
+          richContent: p.rich_content || [],
+        }));
+        // DB posts first, then static (deduped by slug)
+        const staticSlugs = new Set(dbArticles.map((a: CompassArticle) => a.slug));
+        const merged = [...dbArticles, ...compassArticles.filter(a => !staticSlugs.has(a.slug))];
+        setAllArticles(merged);
+      }
+    };
+    fetchDbPosts();
+  }, []);
+
   const filteredArticles = activeCategory === "All" 
-    ? compassArticles 
-    : compassArticles.filter(article => article.category === activeCategory);
+    ? allArticles 
+    : allArticles.filter(article => article.category === activeCategory);
 
   return (
     <div className="min-h-screen bg-background">
