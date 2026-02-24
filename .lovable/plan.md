@@ -1,29 +1,37 @@
 
-# Redesign Featured Deals Manager: Inline Card Editing
+
+# Add Per-Week Pricing to Featured Deals Manager
 
 ## Overview
-Replace the current "separate form + slot picker" layout with a visual grid of all 6 deal cards. Each card shows its current state (from the database or the hardcoded default) and has an inline Edit button that expands an edit form right on that card.
+Add weekly pricing fields alongside the existing per-night fields in the deal edit form. This gives you the flexibility to display either nightly or weekly pricing for each deal.
 
-## How It Works
+## Changes
 
-1. **Always show all 6 cards** -- merge the hardcoded defaults from `TravelDealsSection.tsx` with any database overrides, so you always see the full grid regardless of how many slots have been customized.
+### 1. Database Migration
+Add four new columns to the `featured_deals` table:
+- `original_price_weekly` (numeric, nullable) -- original weekly price
+- `sale_price_weekly` (numeric, nullable) -- sale weekly price
+- `original_label_weekly` (text, nullable) -- e.g. "$2,730/week"
+- `sale_label_weekly` (text, nullable) -- e.g. "$1,743/week"
 
-2. **Click "Edit" on any card** -- the card expands to reveal inline form fields (name, location, affiliate URL, prices, rating, expiry date, and image upload). No more slot number dropdown.
+### 2. Edit Form Update
+**File:** `src/components/dashboard/FeaturedDealsManager.tsx`
 
-3. **"Image Only" quick swap** -- if you just want to change the photo, upload a new image and hit Save without touching other fields.
+- Add two new fields to the form state: `originalPriceWeekly` and `salePriceWeekly`
+- Add a new row in the inline edit form below the per-night prices labeled "Original $/week" and "Sale $/week"
+- On save, compute the weekly labels (e.g. `$1,743/week`) and include them in the database payload
+- In the card preview (non-editing view), show the weekly price below the nightly price when set
 
-4. **"Revert to Default"** -- deletes the database row for that slot, reverting it back to the hardcoded deal.
+### 3. Homepage Display Update
+**File:** `src/components/TravelDealsSection.tsx`
 
-5. **Save** -- upserts the deal to the `featured_deals` table for that slot number.
+- Read the new weekly fields from database overrides
+- When weekly prices exist, display them as a second line below the nightly pricing (e.g. showing both "$249/night" and "$1,743/week")
 
 ## Technical Details
 
-**File:** `src/components/dashboard/FeaturedDealsManager.tsx` (full rewrite)
+- Weekly fields are optional/nullable so existing deals continue working unchanged
+- The weekly discount badge percentage will be calculated the same way as nightly
+- Labels are auto-generated from the numeric values on save (formatted with commas for readability)
+- The `DEFAULTS` array in `FeaturedDealsManager` will include `originalPriceWeekly: null` and `salePriceWeekly: null` defaults
 
-- Import the same hardcoded `featuredDeals` defaults used on the homepage (extract them to a shared constant, or duplicate the 6-item array inline for simplicity).
-- On load, fetch all DB deals and merge them into a 6-slot array (DB overrides hardcoded defaults by `slot_number`).
-- Render a 3-column grid of cards. Each card shows the image, name, location, prices, and two buttons: **Edit** and **Revert** (if customized).
-- Clicking Edit sets `editingSlot` state to that slot number, which renders the form fields below the card image.
-- The form pre-fills with the current card data (whether default or DB).
-- On Save, upsert to the `featured_deals` table. On Revert, delete the DB row.
-- No changes needed to the database schema or `TravelDealsSection.tsx`.
