@@ -22,6 +22,8 @@ interface FeaturedDeal {
   saleLabel: string;
   originalLabelWeekly?: string;
   saleLabelWeekly?: string;
+  originalPriceWeekly?: number;
+  salePriceWeekly?: number;
   rating: number;
   imagePosition?: string;
   expiresAt?: string;
@@ -56,8 +58,13 @@ function useCountdown(expiresAt?: string) {
 }
 
 
-const DiscountBadge = ({ original, sale, expiresAt }: { original: number; sale: number; expiresAt?: string }) => {
-  const pct = Math.round((1 - sale / original) * 100);
+const DiscountBadge = ({ original, sale, originalWeekly, saleWeekly, expiresAt }: { original: number; sale: number; originalWeekly?: number; saleWeekly?: number; expiresAt?: string }) => {
+  const hasNightly = original > 0 && sale > 0;
+  const hasWeekly = (originalWeekly ?? 0) > 0 && (saleWeekly ?? 0) > 0;
+  const calcOriginal = hasNightly ? original : hasWeekly ? originalWeekly! : 0;
+  const calcSale = hasNightly ? sale : hasWeekly ? saleWeekly! : 0;
+  if (calcOriginal <= 0) return null;
+  const pct = Math.round((1 - calcSale / calcOriginal) * 100);
   const { label, expired } = useCountdown(expiresAt);
   if (expired) return null;
   return (
@@ -111,6 +118,8 @@ const TravelDealsSection = () => {
               saleLabel: dbDeal.sale_label,
               originalLabelWeekly: dbDeal.original_label_weekly || undefined,
               saleLabelWeekly: dbDeal.sale_label_weekly || undefined,
+              originalPriceWeekly: dbDeal.original_price_weekly ? Number(dbDeal.original_price_weekly) : undefined,
+              salePriceWeekly: dbDeal.sale_price_weekly ? Number(dbDeal.sale_price_weekly) : undefined,
               rating: Number(dbDeal.rating),
               imagePosition: dbDeal.image_position || "center",
               expiresAt: dbDeal.expires_at || undefined,
@@ -169,7 +178,7 @@ const TravelDealsSection = () => {
                 className="group block rounded-2xl overflow-hidden bg-card shadow-sm hover:shadow-elevated transition-all duration-300 hover:-translate-y-1 border border-border/50 min-w-[280px] md:min-w-0 snap-start"
               >
                 <div className="relative">
-                  <DiscountBadge original={deal.originalPrice} sale={deal.salePrice} expiresAt={deal.expiresAt} />
+                  <DiscountBadge original={deal.originalPrice} sale={deal.salePrice} originalWeekly={deal.originalPriceWeekly} saleWeekly={deal.salePriceWeekly} expiresAt={deal.expiresAt} />
                   <img
                     src={deal.image}
                     alt={deal.name}
@@ -186,10 +195,12 @@ const TravelDealsSection = () => {
                   <MiniStars rating={deal.rating} />
                   <div className="flex items-center justify-between mt-3">
                     <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground line-through">{deal.originalLabel}</span>
-                        <span className="font-bold text-emerald-400 text-lg">{deal.saleLabel}</span>
-                      </div>
+                      {deal.originalPrice > 0 && deal.salePrice > 0 && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-muted-foreground line-through">{deal.originalLabel}</span>
+                          <span className="font-bold text-emerald-400 text-lg">{deal.saleLabel}</span>
+                        </div>
+                      )}
                       {deal.originalLabelWeekly && deal.saleLabelWeekly && (
                         <div className="flex items-center gap-2 mt-0.5">
                           <span className="text-xs text-muted-foreground line-through">{deal.originalLabelWeekly}</span>
