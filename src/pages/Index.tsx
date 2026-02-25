@@ -53,7 +53,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="Real Travel Reviews, Deals & Insights for Canadians"
+        title="Real Travel Reviews, Deals & Insights for Travellers"
         description="Real destination reviews, tested travel gear, and expert insights from an Ontario travel consultant. Plan your perfect trip."
         url="/"
         jsonLd={[
