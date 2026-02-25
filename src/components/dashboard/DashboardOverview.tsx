@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { openExternal } from "@/lib/openExternal";
-import { FileText, Calendar, Mail, DollarSign, AlertTriangle, Plus, TrendingUp, Clock, ExternalLink } from "lucide-react";
+import { FileText, Calendar, Mail, DollarSign, AlertTriangle, Plus, TrendingUp, Clock, ExternalLink, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +18,9 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
   const [upcomingDeadlines, setUpcomingDeadlines] = useState<any[]>([]);
   const [todayEvents, setTodayEvents] = useState<any[]>([]);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [dismissedCards, setDismissedCards] = useState<Set<string>>(new Set());
+
+  const dismissCard = (id: string) => setDismissedCards(prev => new Set(prev).add(id));
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -130,13 +133,14 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
       </div>
 
       {/* Today's Events */}
-      {todayEvents.length > 0 && (
+      {!dismissedCards.has("today") && todayEvents.length > 0 && (
         <Card className="border-primary/30 bg-primary/5">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
               <Clock className="h-4 w-4 text-primary" />
               <span className="text-sm font-semibold text-foreground">Today</span>
               <Badge variant="secondary" className="text-xs">{todayEvents.length}</Badge>
+              <Button variant="ghost" size="icon" className="h-6 w-6 ml-auto" onClick={() => dismissCard("today")}><X className="h-3.5 w-3.5" /></Button>
             </div>
             <div className="space-y-1.5">
               {todayEvents.map((e) => (
@@ -208,7 +212,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
           const eventDate = new Date(d.event_date);
           return isBefore(eventDate, addDays(new Date(), 3));
         });
-        if (urgentDeadlines.length === 0) return null;
+        if (urgentDeadlines.length === 0 || dismissedCards.has("urgent")) return null;
         return (
           <Card className="border-rose-500/30 bg-rose-500/5">
             <CardContent className="p-4">
@@ -221,6 +225,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
                 <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => { window.location.href = "ms-outlook://"; }}>
                   <Mail className="h-3 w-3" /> Open Outlook App
                 </Button>
+                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => dismissCard("urgent")}><X className="h-3.5 w-3.5" /></Button>
               </div>
               <div className="space-y-1.5">
                 {urgentDeadlines.map((d) => (
