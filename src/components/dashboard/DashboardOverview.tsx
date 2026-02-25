@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { openExternal } from "@/lib/openExternal";
 import { FileText, Calendar, Mail, DollarSign, AlertTriangle, Plus, TrendingUp, Clock, ExternalLink } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -217,7 +218,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
                   <span className="text-sm font-semibold text-foreground">Urgent — Due Within 3 Days</span>
                   <Badge variant="destructive" className="text-xs">{urgentDeadlines.length}</Badge>
                 </div>
-                <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => window.open("https://outlook.live.com/mail/", "_blank")}>
+                <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => openExternal("https://outlook.live.com/mail/")}>
                   <Mail className="h-3 w-3" /> Open Outlook
                 </Button>
               </div>
@@ -253,13 +254,13 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
 
       {/* Quick Links */}
       <div className="flex gap-3 flex-wrap">
-        <Button variant="outline" size="sm" className="gap-2" onClick={() => window.open("https://outlook.live.com/mail/", "_blank")}>
+        <Button variant="outline" size="sm" className="gap-2" onClick={() => openExternal("https://outlook.live.com/mail/")}>
           <ExternalLink className="h-3.5 w-3.5" /> Outlook Email
         </Button>
-        <Button variant="outline" size="sm" className="gap-2" onClick={() => window.open("https://tob.sax.softvoyage.com/", "_blank")}>
+        <Button variant="outline" size="sm" className="gap-2" onClick={() => openExternal("https://tob.sax.softvoyage.com/")}>
           <ExternalLink className="h-3.5 w-3.5" /> Sirev Booking
         </Button>
-        <Button variant="outline" size="sm" className="gap-2" onClick={() => window.open("https://www.expediataap.ca/", "_blank")}>
+        <Button variant="outline" size="sm" className="gap-2" onClick={() => openExternal("https://www.expediataap.ca/")}>
           <ExternalLink className="h-3.5 w-3.5" /> Expedia TAAP
         </Button>
       </div>

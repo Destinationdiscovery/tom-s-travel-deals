@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { openExternal } from "@/lib/openExternal";
 import { Mail, ExternalLink, Link2, Send, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -188,13 +189,13 @@ const EmailComposer = () => {
           <Card>
             <CardHeader className="pb-3"><CardTitle className="text-sm">Quick Links</CardTitle></CardHeader>
             <CardContent className="space-y-2">
-              <Button variant="outline" size="sm" className="w-full justify-start gap-2" onClick={() => window.open("https://outlook.live.com/mail/", "_blank")}>
+              <Button variant="outline" size="sm" className="w-full justify-start gap-2" onClick={() => openExternal("https://outlook.live.com/mail/")}>
                 <ExternalLink className="h-3.5 w-3.5" /> Outlook Email
               </Button>
-              <Button variant="outline" size="sm" className="w-full justify-start gap-2" onClick={() => window.open("https://tob.sax.softvoyage.com/", "_blank")}>
+              <Button variant="outline" size="sm" className="w-full justify-start gap-2" onClick={() => openExternal("https://tob.sax.softvoyage.com/")}>
                 <ExternalLink className="h-3.5 w-3.5" /> Sirev Booking
               </Button>
-              <Button variant="outline" size="sm" className="w-full justify-start gap-2" onClick={() => window.open("https://www.expediataap.ca/", "_blank")}>
+              <Button variant="outline" size="sm" className="w-full justify-start gap-2" onClick={() => openExternal("https://www.expediataap.ca/")}>
                 <ExternalLink className="h-3.5 w-3.5" /> Expedia TAAP
               </Button>
             </CardContent>
