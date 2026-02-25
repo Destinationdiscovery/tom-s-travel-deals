@@ -188,7 +188,7 @@ const EmailComposer = () => {
           <Card>
             <CardHeader className="pb-3"><CardTitle className="text-sm">Quick Links</CardTitle></CardHeader>
             <CardContent className="space-y-2">
-              <Button variant="outline" size="sm" className="w-full justify-start gap-2" onClick={() => window.open("https://outlook.cloud.microsoft/mail/", "_blank")}>
+              <Button variant="outline" size="sm" className="w-full justify-start gap-2" onClick={() => window.open("https://www.outlook.com/mail/", "_blank")}>
                 <ExternalLink className="h-3.5 w-3.5" /> Outlook Email
               </Button>
               <Button variant="outline" size="sm" className="w-full justify-start gap-2" onClick={() => window.open("https://tob.sax.softvoyage.com/", "_blank")}>

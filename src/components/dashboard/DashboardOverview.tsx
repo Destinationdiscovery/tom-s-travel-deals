@@ -217,7 +217,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
                   <span className="text-sm font-semibold text-foreground">Urgent — Due Within 3 Days</span>
                   <Badge variant="destructive" className="text-xs">{urgentDeadlines.length}</Badge>
                 </div>
-                <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => window.open("https://outlook.cloud.microsoft/mail/", "_blank")}>
+                <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => window.open("https://www.outlook.com/mail/", "_blank")}>
                   <Mail className="h-3 w-3" /> Open Outlook
                 </Button>
               </div>
@@ -253,7 +253,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
 
       {/* Quick Links */}
       <div className="flex gap-3 flex-wrap">
-        <Button variant="outline" size="sm" className="gap-2" onClick={() => window.open("https://outlook.cloud.microsoft/mail/", "_blank")}>
+        <Button variant="outline" size="sm" className="gap-2" onClick={() => window.open("https://www.outlook.com/mail/", "_blank")}>
           <ExternalLink className="h-3.5 w-3.5" /> Outlook Email
         </Button>
         <Button variant="outline" size="sm" className="gap-2" onClick={() => window.open("https://tob.sax.softvoyage.com/", "_blank")}>
