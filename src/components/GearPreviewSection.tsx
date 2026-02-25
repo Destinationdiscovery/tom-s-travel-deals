@@ -159,7 +159,7 @@ const GearPreviewSection = () => {
                   className="group rounded-2xl overflow-hidden bg-card shadow-sm hover:shadow-elevated transition-all duration-300 hover:-translate-y-1 border border-border/50 text-left block"
                 >
                   <div className="aspect-[16/10] overflow-hidden relative">
-                    <img src={card.image} alt={card.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <img src={card.image} alt={card.title} className="w-full h-full object-contain bg-muted group-hover:scale-105 transition-transform duration-500" />
                     {card.price && (
                       <span className="absolute top-2 right-2 bg-secondary text-secondary-foreground text-xs font-bold px-2 py-0.5 rounded-full">{card.price}</span>
                     )}
