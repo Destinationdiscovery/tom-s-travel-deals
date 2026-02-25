@@ -1,58 +1,25 @@
 
 
-# Plan: Change "Honest" to "Real" + Reorganize Footer Layout
+# Plan: Improve Blog Image Block Experience
 
-## 1. Text Changes: "Honest" → "Real"
+## Current State
+The blog post creator **already supports** inline image blocks -- you can click "+ Image" to add an image block, upload a file, and add a caption. Images upload to the `blog-images` storage bucket and render in published articles.
 
-All instances across the site:
+## Problem
+Once an image is uploaded to a block, there's no way to **replace** it -- the file input disappears and only the preview shows. This makes editing awkward if you picked the wrong image or want to swap one out.
 
-| File | Line | Current | New |
-|------|------|---------|-----|
-| `index.html` | 17 | "Honest Reviews, Tested Gear..." | "Real Reviews, Tested Gear..." |
-| `index.html` | 18 | "Honest destination reviews..." | "Real destination reviews..." |
-| `index.html` | 26 | "Honest Reviews, Tested Gear..." | "Real Reviews, Tested Gear..." |
-| `index.html` | 27 | "Honest destination reviews..." | "Real destination reviews..." |
-| `src/components/HeroSection.tsx` | 66 | "Honest Travel Reviews, Deals..." | "Real Travel Reviews, Deals..." |
-| `src/components/TrustBadges.tsx` | 4 | "100% Honest Reviews" | "100% Real Reviews" |
-| `src/components/Footer.tsx` | 49 | "Honest destination reviews..." | "Real destination reviews..." |
-| `src/pages/Index.tsx` | 57 | SEO title "Honest Travel Reviews..." | "Real Travel Reviews..." |
-| `src/pages/Contact.tsx` | 29 | "Looking for Honest Reviews..." | "Looking for Real Reviews..." |
-| `src/pages/Contact.tsx` | 118 | "Honest reviews with no hidden agendas" | "Real reviews with no hidden agendas" |
-| `src/pages/AffiliateDisclosure.tsx` | 18 | "providing honest, in-depth reviews" | "providing real, in-depth reviews" |
-| `src/pages/AffiliateDisclosure.tsx` | 33 | "Our Commitment to Honesty" | "Our Commitment to Transparency" |
-| `src/pages/BookingReport.tsx` | 464 | "Honest Reviews, Tested Gear..." | "Real Reviews, Tested Gear..." |
-| `src/pages/DestinationReview.tsx` | 405 | "Honest Reviews, Tested Gear..." | "Real Reviews, Tested Gear..." |
-| `src/pages/AIReview.tsx` | 60 | "Honest Reviews, Tested Gear..." | "Real Reviews, Tested Gear..." |
+## Changes
 
-## 2. Footer Layout Reorganization
+### File: `src/components/dashboard/BlogPostCreator.tsx`
 
-The current 3-column layout has too much vertical sprawl in the left column (brand + description + Travelonly link + email form + helper text). The Legal column looks sparse with just 2 links, social icons, and the Expedia badge floating underneath.
+**1. Allow replacing uploaded images in blocks (lines 276-284)**
+When an image block already has a value, show the preview AND a "Replace" button that clears the value so the file input reappears. This lets you swap images freely.
 
-**New layout -- 4 columns on desktop:**
+**2. Improve image block preview styling**
+Make the image preview in the editor taller (`h-48` instead of `h-32`) and add rounded corners + object-cover to better match how it'll look when published.
 
-```text
-┌──────────────┬────────────┬──────────────┬──────────────────┐
-│ Brand Logo   │  Explore   │  Legal       │  Stay Connected  │
-│ Tagline      │  Home      │  Privacy     │  Email form      │
-│ Travelonly   │  Dest...   │  Affiliate   │  "No spam" note  │
-│              │  Gear      │              │  Social icons    │
-│              │  Intel     │              │  Expedia badge   │
-│              │  Blog      │              │                  │
-│              │  About     │              │                  │
-│              │  Contact   │              │                  │
-└──────────────┴────────────┴──────────────┴──────────────────┘
-```
+**3. Add a "clear image" option**
+Add a small button overlay or below the image to reset the block value, re-enabling the file picker.
 
-- Column 1 (Brand): Logo, tagline, Travelonly link -- clean and compact
-- Column 2 (Explore): Navigation links (unchanged)
-- Column 3 (Legal): Privacy + Affiliate links only
-- Column 4 (Stay Connected): Email capture form, social icons, Expedia badge -- groups all engagement/interaction elements together
-
-Grid changes from `md:grid-cols-3` to `md:grid-cols-2 lg:grid-cols-4` for better spacing. On mobile it stays single-column.
-
-### File: `src/components/Footer.tsx`
-- Move email form + social icons + Expedia badge into a new 4th column titled "Stay Connected"
-- Keep Brand column lean (logo + tagline + Travelonly link only)
-- Keep Legal column with just the two links
-- Update tagline text from "Honest" to "Real"
+The published article rendering in `CompassArticle.tsx` already matches the hardcoded articles (full-width, rounded-xl, object-cover, captions) so no changes needed there.
 
