@@ -45,3 +45,6 @@ verify_jwt = false
 [functions.generate-sitemap]
 verify_jwt = false
 
+[functions.format-blog-post]
+verify_jwt = false
+
