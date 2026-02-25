@@ -6,6 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTravelIntel, type IntelType } from "@/hooks/useTravelIntel";
 import { IntelLoading, RequirementsResult, AdvisoriesResult, NewsResult } from "@/components/intel/IntelResults";
+import heroBeach from "@/assets/hero-beach.jpg";
+import aerialView from "@/assets/snowbird-caribbean-aerial.jpg";
+import timesSquare from "@/assets/snowbird-times-square.jpg";
 
 const intelCards = [
   {
@@ -13,21 +16,21 @@ const intelCards = [
     description: "Visa policies, documents, and health requirements for your destination",
     icon: Shield,
     type: "requirements" as IntelType,
-    color: "bg-emerald-500/10 text-emerald-600",
+    image: heroBeach,
   },
   {
     title: "Safety Advisories",
     description: "Current travel advisories, health alerts, and safety tips",
     icon: AlertTriangle,
     type: "advisories" as IntelType,
-    color: "bg-amber-500/10 text-amber-600",
+    image: aerialView,
   },
   {
     title: "Travel News",
     description: "Latest travel news, policy changes, and trending destinations",
     icon: Newspaper,
     type: "news" as IntelType,
-    color: "bg-sky-500/10 text-sky-600",
+    image: timesSquare,
   },
 ];
 
@@ -151,15 +154,19 @@ const IntelPreviewSection = () => {
                 <button
                   key={card.title}
                   onClick={() => handleCardClick(card)}
-                  className="group rounded-2xl bg-card shadow-sm hover:shadow-elevated transition-all duration-300 hover:-translate-y-1 border border-border/50 p-6 text-left"
+                  className="group relative overflow-hidden rounded-2xl shadow-sm hover:shadow-elevated transition-all duration-300 hover:-translate-y-1 border border-border/50 p-6 text-left min-h-[200px] flex flex-col justify-end"
                 >
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${card.color}`}>
-                    <Icon className="h-6 w-6" />
+                  <img src={card.image} alt="" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30" />
+                  <div className="relative z-10">
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3 bg-white/15 backdrop-blur-sm">
+                      <Icon className="h-5 w-5 text-white" />
+                    </div>
+                    <h3 className="font-display font-bold text-white group-hover:text-primary transition-colors mb-1">
+                      {card.title}
+                    </h3>
+                    <p className="text-sm text-white/75">{card.description}</p>
                   </div>
-                  <h3 className="font-display font-bold text-foreground group-hover:text-primary transition-colors mb-2">
-                    {card.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">{card.description}</p>
                 </button>
               );
             })}
