@@ -39,16 +39,33 @@ Deno.serve(async (req) => {
 
     if (error) throw error;
 
-    // Welcome email temporarily disabled until domain is verified with Resend
-    // const funcUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-welcome-email`;
-    // fetch(funcUrl, {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //     Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
-    //   },
-    //   body: JSON.stringify({ email: normalizedEmail }),
-    // }).catch(() => {});
+    // Notify admin of new subscriber (fire-and-forget)
+    const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+    if (RESEND_API_KEY) {
+      const interestsList = interests && Array.isArray(interests) && interests.length
+        ? interests.join(", ")
+        : "None selected";
+      fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${RESEND_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: "onboarding@resend.dev",
+          to: ["tlaracy@travelonly.com"],
+          subject: `📬 New Subscriber: ${normalizedEmail}`,
+          html: `
+            <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:500px;margin:0 auto;padding:30px 20px;">
+              <h2 style="color:#1a1a2e;margin-bottom:16px;">New Newsletter Signup 🎉</h2>
+              <p><strong>Email:</strong> ${normalizedEmail}</p>
+              <p><strong>Interests:</strong> ${interestsList}</p>
+              <p><strong>Source:</strong> ${source_slug || "Homepage"}</p>
+              <p style="color:#aaa;font-size:12px;margin-top:20px;">Sent by ReviewThenGo</p>
+            </div>`,
+        }),
+      }).catch(() => {});
+    }
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
