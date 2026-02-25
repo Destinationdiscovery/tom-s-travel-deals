@@ -1,45 +1,29 @@
 
 
-# Plan: Implement the about:blank Detachment Approach
+# Plan: Open Outlook Desktop App Instead of Web
 
-## Status
-The previously approved plan (using `window.open('about:blank')` + `w.opener = null`) was never implemented. The `openExternal.ts` file still contains the anchor-click approach that doesn't work.
-
-## Why the Current Approach Fails
-The anchor-click with `rel="noopener noreferrer"` doesn't fully sever the cross-origin opener relationship when running inside the Lovable preview sandbox. Microsoft's `Cross-Origin-Opener-Policy: same-origin` header still detects the iframe context and blocks the response.
+## Problem
+Every attempt to open Outlook's web interface gets blocked by Microsoft's `Cross-Origin-Opener-Policy` headers. The `about:blank` intermediate step also fails — the navigation never completes.
 
 ## Solution
-Update `src/lib/openExternal.ts` to use the two-step window.open approach:
+Stop trying to open Outlook's web interface entirely. Instead, use the `ms-outlook:` protocol URL, which prompts the OS to open the Outlook desktop/native app directly. This is the same mechanism websites use to open Slack, Zoom, Teams, etc.
 
-1. Open `about:blank` first (no cross-origin restrictions)
-2. Set `opener = null` to sever the relationship
-3. Navigate to the destination URL
-4. Fall back to anchor-click if popup is blocked
+If the user doesn't have the Outlook app installed, the browser will show its standard "no app found" prompt — no blocked pages, no blank tabs.
 
-## File to Update
+## Implementation
 
-| File | Change |
-|------|--------|
-| `src/lib/openExternal.ts` | Replace anchor-click implementation with `window.open('about:blank')` + `opener = null` + navigation approach, with anchor-click fallback |
+**File: `src/components/dashboard/DashboardOverview.tsx`** (2 locations)
+- Replace `openExternal("https://outlook.live.com/mail/")` with `window.location.href = "ms-outlook://"`
 
-```typescript
-export const openExternal = (url: string) => {
-  const w = window.open('about:blank', '_blank');
-  if (w) {
-    w.opener = null;
-    w.location.href = url;
-  } else {
-    // Fallback if popup blocked
-    const a = document.createElement('a');
-    a.href = url;
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  }
-};
-```
+**File: `src/components/dashboard/EmailComposer.tsx`** (1 location)
+- Same replacement
 
-Only one file changes. All three Outlook buttons (and Sirev/Expedia) already use `openExternal`, so they'll all benefit automatically.
+The button labels will change from "Open Outlook" / "Outlook Email" to "Open Outlook App" to set the right expectation.
+
+We can also add `https://outlook.live.com/mail/` as a secondary fallback link (plain `<a>` tag) labeled "Open Outlook Web" for cases where the desktop app isn't installed.
+
+## Technical Details
+- `ms-outlook://` is the registered protocol handler for Microsoft Outlook on macOS/Windows
+- Protocol URLs bypass all COOP/iframe restrictions because they're handled by the OS, not the browser
+- No changes needed to `openExternal.ts` — these links won't use it
 
