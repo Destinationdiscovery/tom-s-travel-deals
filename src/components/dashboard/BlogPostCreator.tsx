@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Trash2, ArrowUp, ArrowDown, Upload, Loader2, BookOpen, Eye } from "lucide-react";
+import { Plus, Trash2, ArrowUp, ArrowDown, Upload, Loader2, BookOpen, Eye, Sparkles, X, ImagePlus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,6 +58,12 @@ const BlogPostCreator = () => {
   const [customCategory, setCustomCategory] = useState("");
   const [blocks, setBlocks] = useState<ContentBlock[]>([{ type: "text", value: "" }]);
 
+  // Auto-format state
+  const [rawText, setRawText] = useState("");
+  const [imagePool, setImagePool] = useState<File[]>([]);
+  const [imagePoolPreviews, setImagePoolPreviews] = useState<string[]>([]);
+  const [formatting, setFormatting] = useState(false);
+
   // Editing
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -87,6 +93,79 @@ const BlogPostCreator = () => {
     setHeroFile(file);
     if (file) setHeroPreview(URL.createObjectURL(file));
     else setHeroPreview("");
+  };
+
+  // Image pool handlers
+  const handleImagePoolAdd = (files: FileList | null) => {
+    if (!files) return;
+    const newFiles = Array.from(files);
+    const newPreviews = newFiles.map(f => URL.createObjectURL(f));
+    setImagePool(prev => [...prev, ...newFiles]);
+    setImagePoolPreviews(prev => [...prev, ...newPreviews]);
+  };
+
+  const removeFromImagePool = (index: number) => {
+    URL.revokeObjectURL(imagePoolPreviews[index]);
+    setImagePool(prev => prev.filter((_, i) => i !== index));
+    setImagePoolPreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Auto-format handler
+  const handleAutoFormat = async () => {
+    if (!rawText.trim()) {
+      toast({ title: "No text", description: "Paste your article text first.", variant: "destructive" });
+      return;
+    }
+    setFormatting(true);
+    try {
+      // 1. Upload all pool images to storage
+      const uploadedUrls: string[] = [];
+      for (const file of imagePool) {
+        const ext = file.name.split(".").pop() || "jpg";
+        const fileName = `inline-${Date.now()}-${Math.random().toString(36).slice(2, 6)}.${ext}`;
+        const { error } = await supabase.storage.from("blog-images").upload(fileName, file, { contentType: file.type });
+        if (error) throw new Error(`Image upload failed: ${error.message}`);
+        const { data: pub } = supabase.storage.from("blog-images").getPublicUrl(fileName);
+        uploadedUrls.push(pub.publicUrl);
+      }
+
+      // 2. Call the AI edge function
+      const { data, error } = await supabase.functions.invoke("format-blog-post", {
+        body: { rawText: rawText.trim(), imageCount: uploadedUrls.length },
+      });
+
+      if (error) throw new Error(error.message || "AI formatting failed");
+      if (data?.error) throw new Error(data.error);
+
+      // 3. Map IMAGE_X placeholders to actual URLs
+      const formattedBlocks: ContentBlock[] = (data.blocks || []).map((block: ContentBlock) => {
+        if (block.type === "image") {
+          const match = block.value.match(/IMAGE_(\d+)/);
+          if (match) {
+            const idx = parseInt(match[1], 10);
+            return { ...block, value: uploadedUrls[idx] || "" };
+          }
+        }
+        return block;
+      });
+
+      // 4. Populate the editor
+      setBlocks(formattedBlocks);
+      if (data.excerpt) setExcerpt(data.excerpt);
+      if (data.read_time) setReadTime(data.read_time);
+
+      // Clear the raw input area
+      setRawText("");
+      setImagePool([]);
+      imagePoolPreviews.forEach(u => URL.revokeObjectURL(u));
+      setImagePoolPreviews([]);
+
+      toast({ title: "✨ Article formatted!", description: "Review the blocks below and publish when ready." });
+    } catch (e: any) {
+      console.error("Auto-format error:", e);
+      toast({ title: "Format failed", description: e.message || "Unknown error", variant: "destructive" });
+    }
+    setFormatting(false);
   };
 
   const addBlock = (type: "text" | "heading" | "image") => {
@@ -123,6 +202,10 @@ const BlogPostCreator = () => {
     setExcerpt(""); setReadTime("5 min read"); setTags(""); setCustomCategory("");
     setBlocks([{ type: "text", value: "" }]);
     setHeroFile(null); setHeroPreview(""); setEditingId(null);
+    setRawText("");
+    setImagePool([]);
+    imagePoolPreviews.forEach(u => URL.revokeObjectURL(u));
+    setImagePoolPreviews([]);
   };
 
   const handlePublish = async () => {
@@ -202,6 +285,68 @@ const BlogPostCreator = () => {
       <h1 className="font-display text-2xl font-bold text-foreground flex items-center gap-2">
         <BookOpen className="h-6 w-6" /> Blog Post Creator
       </h1>
+
+      {/* Auto-Format Section */}
+      <Card className="border-primary/30 bg-primary/5">
+        <CardContent className="p-6 space-y-4">
+          <h2 className="font-semibold text-foreground flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-primary" /> AI Auto-Format
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Paste your full article text and upload images. AI will structure it into a professional blog with headings, paragraphs, and images placed logically throughout.
+          </p>
+
+          <div>
+            <Label>Article Text</Label>
+            <Textarea
+              value={rawText}
+              onChange={e => setRawText(e.target.value)}
+              placeholder="Paste your entire article text here..."
+              className="min-h-[200px] font-mono text-sm"
+            />
+          </div>
+
+          <div>
+            <Label className="flex items-center gap-2"><ImagePlus className="h-4 w-4" /> Upload Images</Label>
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={e => handleImagePoolAdd(e.target.files)}
+              className="text-sm text-muted-foreground file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-primary-foreground file:font-medium file:cursor-pointer mt-1"
+            />
+            {imagePoolPreviews.length > 0 && (
+              <div className="flex flex-wrap gap-3 mt-3">
+                {imagePoolPreviews.map((url, i) => (
+                  <div key={i} className="relative group">
+                    <img src={url} alt={`Pool ${i + 1}`} className="w-24 h-24 object-cover rounded-lg border border-border" />
+                    <button
+                      onClick={() => removeFromImagePool(i)}
+                      className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                    <span className="absolute bottom-1 left-1 text-[10px] bg-background/80 text-foreground rounded px-1">{i + 1}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <Button
+            onClick={handleAutoFormat}
+            disabled={formatting || !rawText.trim()}
+            className="gap-2"
+          >
+            {formatting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+            {formatting ? "Formatting..." : "✨ Auto-Format Article"}
+          </Button>
+
+          <p className="text-xs text-muted-foreground border-t border-border pt-3">
+            Or manually build your article using the block editor below.
+          </p>
+        </CardContent>
+      </Card>
 
       {/* Form */}
       <Card>
