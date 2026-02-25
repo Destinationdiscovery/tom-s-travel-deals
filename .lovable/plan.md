@@ -1,12 +1,21 @@
 
 
-# Plan: Add Test Booking Entry and Trigger Payment Reminder
+# Plan: Test Newsletter Signup Notification
+
+## What We'll Do
+
+Trigger the `subscribe` Edge Function with a fake test email to verify the admin notification arrives at tlaracy@travelonly.com.
 
 ## Steps
 
-1. **Insert a test booking** into the `bookings` table with `event_type = 'deposit_due'`, `event_date = today (2026-02-25)`, and `is_completed = false` using made-up client data.
+1. **Call the `subscribe` function** via HTTP POST with test data:
+   - Email: `test-user-123@example.com`
+   - Source: `manual-test`
+   - Interests: `["destinations", "deals"]`
 
-2. **Trigger the `payment-reminders` Edge Function** via HTTP POST to verify the email arrives at tlaracy@travelonly.com.
+2. **Expected result**: The function will:
+   - Insert (or upsert) the test subscriber into the `subscribers` table
+   - Fire off an admin notification email to tlaracy@travelonly.com with the subscriber details
 
-No file changes needed -- this is purely database insert + function invocation.
+No file changes needed -- just a function invocation.
 
