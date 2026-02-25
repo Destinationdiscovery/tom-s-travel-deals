@@ -1,39 +1,45 @@
 
 
-# Plan: Fix Outlook Links Being Blocked
+# Plan: Implement the about:blank Detachment Approach
 
-## Root Cause
+## Status
+The previously approved plan (using `window.open('about:blank')` + `w.opener = null`) was never implemented. The `openExternal.ts` file still contains the anchor-click approach that doesn't work.
 
-Microsoft's Outlook servers return a `Cross-Origin-Opener-Policy: same-origin` header. When `window.open(url, "_blank")` is called from the Lovable preview iframe, the new tab retains an "opener" relationship back to the cross-origin iframe. Microsoft detects this and blocks the connection with `ERR_BLOCKED_BY_RESPONSE`.
-
-Gmail does not set these same restrictive COOP headers, which is why it loads fine.
+## Why the Current Approach Fails
+The anchor-click with `rel="noopener noreferrer"` doesn't fully sever the cross-origin opener relationship when running inside the Lovable preview sandbox. Microsoft's `Cross-Origin-Opener-Policy: same-origin` header still detects the iframe context and blocks the response.
 
 ## Solution
+Update `src/lib/openExternal.ts` to use the two-step window.open approach:
 
-Replace all `window.open(url, "_blank")` calls for Outlook with a method that severs the opener relationship:
+1. Open `about:blank` first (no cross-origin restrictions)
+2. Set `opener = null` to sever the relationship
+3. Navigate to the destination URL
+4. Fall back to anchor-click if popup is blocked
+
+## File to Update
+
+| File | Change |
+|------|--------|
+| `src/lib/openExternal.ts` | Replace anchor-click implementation with `window.open('about:blank')` + `opener = null` + navigation approach, with anchor-click fallback |
 
 ```typescript
-// Instead of:
-window.open("https://outlook.live.com/mail/", "_blank")
-
-// Use:
-const a = document.createElement('a');
-a.href = "https://outlook.live.com/mail/";
-a.target = '_blank';
-a.rel = 'noopener noreferrer';
-document.body.appendChild(a);
-a.click();
-document.body.removeChild(a);
+export const openExternal = (url: string) => {
+  const w = window.open('about:blank', '_blank');
+  if (w) {
+    w.opener = null;
+    w.location.href = url;
+  } else {
+    // Fallback if popup blocked
+    const a = document.createElement('a');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+};
 ```
 
-The `noopener` attribute breaks the cross-origin opener relationship so Microsoft's security headers won't block the page.
-
-## Files to Update
-
-| File | Locations |
-|------|-----------|
-| `src/components/dashboard/DashboardOverview.tsx` | 2 Outlook `window.open` calls (lines 220, 256) |
-| `src/components/dashboard/EmailComposer.tsx` | 1 Outlook `window.open` call (line 191) |
-
-I will create a small helper function (e.g., `openExternal(url)`) to avoid duplicating the anchor-click logic, and use it for all three Outlook links. Other external links (Sirev, Expedia TAAP) can optionally use the same helper for consistency.
+Only one file changes. All three Outlook buttons (and Sirev/Expedia) already use `openExternal`, so they'll all benefit automatically.
 
