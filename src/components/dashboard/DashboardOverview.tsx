@@ -218,8 +218,8 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
                   <span className="text-sm font-semibold text-foreground">Urgent — Due Within 3 Days</span>
                   <Badge variant="destructive" className="text-xs">{urgentDeadlines.length}</Badge>
                 </div>
-                <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => openExternal("https://outlook.live.com/mail/")}>
-                  <Mail className="h-3 w-3" /> Open Outlook
+                <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => { window.location.href = "ms-outlook://"; }}>
+                  <Mail className="h-3 w-3" /> Open Outlook App
                 </Button>
               </div>
               <div className="space-y-1.5">
@@ -254,8 +254,8 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
 
       {/* Quick Links */}
       <div className="flex gap-3 flex-wrap">
-        <Button variant="outline" size="sm" className="gap-2" onClick={() => openExternal("https://outlook.live.com/mail/")}>
-          <ExternalLink className="h-3.5 w-3.5" /> Outlook Email
+        <Button variant="outline" size="sm" className="gap-2" onClick={() => { window.location.href = "ms-outlook://"; }}>
+          <ExternalLink className="h-3.5 w-3.5" /> Open Outlook App
         </Button>
         <Button variant="outline" size="sm" className="gap-2" onClick={() => openExternal("https://tob.sax.softvoyage.com/")}>
           <ExternalLink className="h-3.5 w-3.5" /> Sirev Booking
