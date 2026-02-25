@@ -15,7 +15,7 @@ const tabs = [
   { id: "deals" as const, label: "Deal Maker", icon: Megaphone },
   { id: "featured-deals" as const, label: "Featured Deals", icon: Star },
   { id: "blog" as const, label: "Blog", icon: BookOpen },
-  { id: "gear" as const, label: "Gear Images", icon: ImageIcon },
+  { id: "gear" as const, label: "Featured Gear", icon: ImageIcon },
   { id: "revenue" as const, label: "Revenue", icon: TrendingUp },
 ];
 

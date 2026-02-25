@@ -532,6 +532,42 @@ export type Database = {
         }
         Relationships: []
       }
+      featured_gear_cards: {
+        Row: {
+          affiliate_url: string
+          created_at: string
+          description: string
+          id: string
+          image_url: string
+          price: string
+          slot_number: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          affiliate_url?: string
+          created_at?: string
+          description?: string
+          id?: string
+          image_url?: string
+          price?: string
+          slot_number: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          affiliate_url?: string
+          created_at?: string
+          description?: string
+          id?: string
+          image_url?: string
+          price?: string
+          slot_number?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       gear_intel_cache: {
         Row: {
           cache_key: string

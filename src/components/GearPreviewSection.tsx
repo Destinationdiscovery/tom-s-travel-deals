@@ -1,26 +1,59 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Search, Luggage } from "lucide-react";
+import { ArrowRight, ArrowLeft, Search, Luggage, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGearIntel } from "@/hooks/useGearIntel";
 import { GearLoading, PackingResultCard, ProductReviewPanel, GearCitations } from "@/components/gear/GearResults";
+import { supabase } from "@/integrations/supabase/client";
 
 import gearPackingCubes from "@/assets/gear-packing-cubes-main.jpg";
 import gearPhoneHolder from "@/assets/gear-phone-holder-main.jpg";
 import gearWaterHammock from "@/assets/gear-water-hammock-main.jpg";
 import gearThermacell from "@/assets/gear-thermacell-main.jpg";
 
-const categories = [
-  { title: "Beach Essentials", description: "Sunscreen, beach towels, waterproof gear", image: gearWaterHammock, query: "beach vacation packing list" },
-  { title: "Tech & Gadgets", description: "Adapters, chargers, travel tech", image: gearPhoneHolder, query: "travel tech gadgets" },
-  { title: "Packing & Organization", description: "Cubes, bags, and compression sacks", image: gearPackingCubes, query: "packing cubes travel organization" },
-  { title: "Outdoor & Adventure", description: "Bug protection, hiking, and comfort gear", image: gearThermacell, query: "outdoor adventure travel gear" },
+interface GearCard {
+  title: string;
+  description: string;
+  price: string;
+  affiliateUrl: string;
+  image: string;
+}
+
+const DEFAULT_CARDS: GearCard[] = [
+  { title: "Beach Essentials", description: "Sunscreen, beach towels, waterproof gear", price: "$15 - $40", affiliateUrl: "", image: gearWaterHammock },
+  { title: "Tech & Gadgets", description: "Adapters, chargers, travel tech", price: "$10 - $35", affiliateUrl: "", image: gearPhoneHolder },
+  { title: "Packing & Organization", description: "Cubes, bags, and compression sacks", price: "$20 - $45", affiliateUrl: "", image: gearPackingCubes },
+  { title: "Outdoor & Adventure", description: "Bug protection, hiking, and comfort gear", price: "$15 - $50", affiliateUrl: "", image: gearThermacell },
 ];
 
 const GearPreviewSection = () => {
   const [query, setQuery] = useState("");
+  const [cards, setCards] = useState<GearCard[]>(DEFAULT_CARDS);
   const gear = useGearIntel();
   const resultsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const fetchCards = async () => {
+      const { data } = await supabase.from("featured_gear_cards").select("*").order("slot_number") as any;
+      if (data && data.length > 0) {
+        const merged = [...DEFAULT_CARDS];
+        data.forEach((row: any) => {
+          const idx = row.slot_number - 1;
+          if (idx >= 0 && idx < 4) {
+            merged[idx] = {
+              title: row.title || DEFAULT_CARDS[idx].title,
+              description: row.description || DEFAULT_CARDS[idx].description,
+              price: row.price || DEFAULT_CARDS[idx].price,
+              affiliateUrl: row.affiliate_url || "",
+              image: row.image_url || DEFAULT_CARDS[idx].image,
+            };
+          }
+        });
+        setCards(merged);
+      }
+    };
+    fetchCards();
+  }, []);
 
   const handleSearch = () => {
     const trimmed = query.trim();
@@ -30,19 +63,17 @@ const GearPreviewSection = () => {
     setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
   };
 
-  const handleCategoryClick = (q: string) => {
-    setQuery(q);
-    gear.clearAll();
-    gear.fetchPackingList(q);
-    setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
-  };
-
   const handleGearReview = (productName: string) => {
     gear.fetchProductReview(productName);
     setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
   };
 
-  const hasResults = gear.packingData || gear.reviewData;
+  const handleBackToCards = () => {
+    gear.clearAll();
+    setQuery("");
+  };
+
+  const hasResults = gear.packingData || gear.reviewData || gear.loading || gear.reviewLoading;
 
   return (
     <section className="py-12 bg-muted/30">
@@ -52,10 +83,7 @@ const GearPreviewSection = () => {
             <Luggage className="h-6 w-6 text-primary" />
             Travel Gear
           </h2>
-          <Link
-            to="/gear"
-            className="text-sm font-medium text-primary hover:underline flex items-center gap-1"
-          >
+          <Link to="/gear" className="text-sm font-medium text-primary hover:underline flex items-center gap-1">
             View All Gear <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
@@ -82,20 +110,21 @@ const GearPreviewSection = () => {
 
         {/* Inline results */}
         <div ref={resultsRef}>
-          {gear.loading && !gear.packingData && (
-            <div className="mb-8">
-              <GearLoading label="Building your packing list..." />
+          {hasResults && (
+            <div className="mb-4">
+              <Button variant="ghost" size="sm" className="gap-1.5 text-primary" onClick={handleBackToCards}>
+                <ArrowLeft className="h-4 w-4" /> Back to Featured Gear
+              </Button>
             </div>
+          )}
+          {gear.loading && !gear.packingData && (
+            <div className="mb-8"><GearLoading label="Building your packing list..." /></div>
           )}
           {gear.reviewLoading && (
-            <div className="mb-8">
-              <GearLoading label="Researching product reviews..." />
-            </div>
+            <div className="mb-8"><GearLoading label="Researching product reviews..." /></div>
           )}
           {gear.reviewData && !gear.reviewLoading && (
-            <div className="mb-8">
-              <ProductReviewPanel review={gear.reviewData} onBack={gear.clearReview} />
-            </div>
+            <div className="mb-8"><ProductReviewPanel review={gear.reviewData} onBack={gear.clearReview} /></div>
           )}
           {gear.packingData && !gear.reviewData && !gear.reviewLoading && (
             <div className="mb-8 space-y-6 animate-fade-in">
@@ -113,36 +142,40 @@ const GearPreviewSection = () => {
             </div>
           )}
           {gear.error && (
-            <div className="mb-8 p-4 rounded-xl bg-destructive/10 text-destructive text-sm max-w-2xl">
-              {gear.error}
-            </div>
+            <div className="mb-8 p-4 rounded-xl bg-destructive/10 text-destructive text-sm max-w-2xl">{gear.error}</div>
           )}
         </div>
 
-        {/* Category cards */}
-        {!hasResults && !gear.loading && !gear.reviewLoading && (
+        {/* Featured gear cards */}
+        {!hasResults && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {categories.map((cat) => (
-              <button
-                key={cat.title}
-                onClick={() => handleCategoryClick(cat.query)}
-                className="group rounded-2xl overflow-hidden bg-card shadow-sm hover:shadow-elevated transition-all duration-300 hover:-translate-y-1 border border-border/50 text-left"
-              >
-                <div className="aspect-[16/10] overflow-hidden">
-                  <img
-                    src={cat.image}
-                    alt={cat.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                </div>
-                <div className="p-4">
-                  <h3 className="font-display font-bold text-foreground group-hover:text-primary transition-colors">
-                    {cat.title}
-                  </h3>
-                  <p className="text-xs text-muted-foreground mt-1">{cat.description}</p>
-                </div>
-              </button>
-            ))}
+            {cards.map((card) => {
+              const Wrapper = card.affiliateUrl
+                ? (props: any) => <a href={card.affiliateUrl} target="_blank" rel="noopener noreferrer" {...props} />
+                : (props: any) => <div {...props} />;
+              return (
+                <Wrapper
+                  key={card.title}
+                  className="group rounded-2xl overflow-hidden bg-card shadow-sm hover:shadow-elevated transition-all duration-300 hover:-translate-y-1 border border-border/50 text-left block"
+                >
+                  <div className="aspect-[16/10] overflow-hidden relative">
+                    <img src={card.image} alt={card.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    {card.price && (
+                      <span className="absolute top-2 right-2 bg-secondary text-secondary-foreground text-xs font-bold px-2 py-0.5 rounded-full">{card.price}</span>
+                    )}
+                    {card.affiliateUrl && (
+                      <span className="absolute top-2 left-2 bg-black/60 text-white text-xs px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <ExternalLink className="h-3 w-3" /> Shop
+                      </span>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-display font-bold text-foreground group-hover:text-primary transition-colors">{card.title}</h3>
+                    <p className="text-xs text-muted-foreground mt-1">{card.description}</p>
+                  </div>
+                </Wrapper>
+              );
+            })}
           </div>
         )}
       </div>
