@@ -1,21 +1,18 @@
 
 
-# Plan: Test Newsletter Signup Notification
+# Plan: Update Outlook Links to https://www.outlook.com/mail/
 
-## What We'll Do
+## Changes
 
-Trigger the `subscribe` Edge Function with a fake test email to verify the admin notification arrives at tlaracy@travelonly.com.
+Three files contain hardcoded Outlook URLs (`https://outlook.cloud.microsoft/mail/`) that need updating to `https://www.outlook.com/mail/`:
 
-## Steps
+| File | Lines | Change |
+|------|-------|--------|
+| `src/components/dashboard/EmailComposer.tsx` | Line 191 | Update Quick Links Outlook URL |
+| `src/components/dashboard/DashboardOverview.tsx` | Line 220 | Update "Open Outlook" button URL |
+| `src/components/dashboard/DashboardOverview.tsx` | Line 256 | Update Quick Links Outlook URL |
 
-1. **Call the `subscribe` function** via HTTP POST with test data:
-   - Email: `test-user-123@example.com`
-   - Source: `manual-test`
-   - Interests: `["destinations", "deals"]`
+All three are simple string replacements: `https://outlook.cloud.microsoft/mail/` → `https://www.outlook.com/mail/`
 
-2. **Expected result**: The function will:
-   - Insert (or upsert) the test subscriber into the `subscribers` table
-   - Fire off an admin notification email to tlaracy@travelonly.com with the subscriber details
-
-No file changes needed -- just a function invocation.
+No other files or logic affected.
 
