@@ -143,7 +143,7 @@ const FeaturedGearManager = () => {
           return (
             <Card key={idx} className="overflow-hidden flex flex-col">
               <div className="relative">
-                <img src={isEditing && imagePreview ? imagePreview : slot.imageUrl} alt={slot.title} className="w-full aspect-[16/10] object-contain bg-muted" />
+                <img src={isEditing && imagePreview ? imagePreview : slot.imageUrl} alt={slot.title} className="w-full aspect-[16/10] object-cover" />
                 {slot.price && (
                   <span className="absolute top-2 right-2 bg-secondary text-secondary-foreground text-xs font-bold px-2 py-0.5 rounded-full">{slot.price}</span>
                 )}
