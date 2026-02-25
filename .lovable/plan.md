@@ -1,20 +1,21 @@
 
 
-# Fix: Gear Card Images Zoomed In
+# Fix: Gear Card Images to Match Featured Deals Style
 
-The gear card images appear overly zoomed/cropped because the image containers use fixed heights (`h-40`) or aspect ratios that don't match the source images well, combined with `object-cover` which crops to fill. The fix is to use `object-contain` or adjust the aspect ratio to show more of the image.
+## Problem
+The gear cards use `object-contain` which leaves empty space around images. The featured deals cards use `object-cover` which fills the image area edge-to-edge — that's the look we want.
 
-## Files to Change
+## Changes
 
-### 1. `src/components/dashboard/GearImageManager.tsx`
-- Change the image tag from `h-40 object-cover` to `aspect-[16/10] object-contain bg-muted` so the full image is visible within the card without aggressive cropping.
+### 1. `src/components/GearPreviewSection.tsx` (line ~162)
+Change `object-contain bg-muted` back to `object-cover` on the gear card images.
 
-### 2. `src/components/GearPreviewSection.tsx`
-- The cards already use `aspect-[16/10] overflow-hidden` with `object-cover`. Change to `object-contain bg-muted` so images fit without cropping.
+### 2. `src/pages/Gear.tsx` (line ~183)
+Same change — `object-contain bg-muted` → `object-cover`.
 
-### 3. `src/pages/Gear.tsx`
-- Same fix for the gear cards on the /gear page if they also use `object-cover`.
+### 3. `src/components/dashboard/GearImageManager.tsx` (line ~146)
+Same change for the admin preview cards — `object-contain bg-muted` → `object-cover`.
 
-## Approach
-Replace `object-cover` with `object-contain` on all gear card images. Add a `bg-muted` background so any letterboxing blends with the card. This ensures the full product image is visible rather than being cropped/zoomed.
+## Why This Works
+The featured deals cards use `object-cover` which crops images to fill the container while maintaining aspect ratio. This is what makes them look polished. The previous `object-contain` fix was overcorrecting — `object-cover` is the standard approach for card imagery.
 
