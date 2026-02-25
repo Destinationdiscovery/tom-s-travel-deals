@@ -1,37 +1,44 @@
 
 
-# Plan: Add Background Images to Travel Intel Cards
+# Plan: Email Notifications for Calendar Reminders & Newsletter Signups
 
 ## Overview
-Add contextually appropriate background images to the three Travel Intel category cards (Entry Requirements, Safety Advisories, Travel News) to make them visually richer.
+Two notification features, both sending to your email (tlaracy@travelonly.com):
+1. **Payment reminders** -- daily check for deposit_due/final_payment events 4 days away or due today
+2. **Newsletter signup alerts** -- instant notification when someone subscribes
 
-## Approach
-Use stock-style images already in the project assets or source appropriate ones. Each card will have a background image with a dark gradient overlay so the text remains readable.
+Since your domain isn't verified yet, both will use `onboarding@resend.dev` as the sender (Resend sandbox allows sending to your own account email).
 
-### Image Choices
-- **Entry Requirements**: Use `src/assets/hero-beach.jpg` — evokes travel/destinations (passport + travel vibes)
-- **Safety Advisories**: Use `src/assets/snowbird-caribbean-aerial.jpg` — aerial travel view suggesting awareness/overview
-- **Travel News**: Use `src/assets/snowbird-times-square.jpg` — busy cityscape suggesting news/activity
+## Changes
 
-### File: `src/components/IntelPreviewSection.tsx`
+### 1. New Edge Function: `supabase/functions/payment-reminders/index.ts`
 
-**Changes to the `intelCards` array (lines 8-31):**
-- Add an `image` property to each card object with the appropriate import
+- Runs daily via `pg_cron` at 8 AM EST (13:00 UTC)
+- Queries `bookings` table for `deposit_due` and `final_payment` events where `event_date` is today or 4 days from now, and `is_completed = false`
+- For each match, sends a styled HTML email to tlaracy@travelonly.com with client name, booking number, supplier, event type, due date, and days remaining
+- Groups multiple reminders into a single digest email rather than spamming individual emails
 
-**Changes to card rendering (lines 148-166):**
-- Add `relative overflow-hidden` to the card button
-- Add an `<img>` element as background with `absolute inset-0 w-full h-full object-cover`
-- Add a dark gradient overlay div (`absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30`)
-- Make card content `relative z-10` so it sits above the overlay
-- Change text colors to white variants since they'll be on a dark background (`text-white`, `text-white/80`)
-- Increase card height with `min-h-[200px]` and use `flex flex-col justify-end` to push content to the bottom for a modern card look
+### 2. Update: `supabase/functions/subscribe/index.ts`
 
-**Imports to add:**
-```typescript
-import heroBeach from "@/assets/hero-beach.jpg";
-import aerialView from "@/assets/snowbird-caribbean-aerial.jpg";
-import timesSquare from "@/assets/snowbird-times-square.jpg";
-```
+- After successfully saving the subscriber, fire-and-forget a notification email to tlaracy@travelonly.com
+- Email includes the new subscriber's email, interests they selected, and the page they signed up from (source_slug)
+- Uses the existing `send-email` function internally
 
-The result will be cards with full-bleed background images, a dark gradient overlay for readability, and the icon + text positioned at the bottom of each card.
+### 3. Cron Job Setup (SQL insert)
+
+- Enable `pg_cron` and `pg_net` extensions
+- Schedule daily HTTP POST to the `payment-reminders` function at 13:00 UTC
+
+### 4. Config: `supabase/config.toml`
+
+- Add `[functions.payment-reminders]` with `verify_jwt = false`
+
+## File Summary
+
+| File | Action |
+|------|--------|
+| `supabase/functions/payment-reminders/index.ts` | **Create** -- daily payment reminder digest |
+| `supabase/functions/subscribe/index.ts` | **Edit** -- add signup notification to your email |
+| `supabase/config.toml` | **Edit** -- register new function |
+| SQL (pg_cron) | **Insert** -- schedule daily reminder job |
 
