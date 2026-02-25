@@ -1,18 +1,20 @@
 
 
-# Plan: Update Outlook Links to https://www.outlook.com/mail/
+# Plan: Fix Outlook URL Across Dashboard
 
-## Changes
+## Problem
+`https://www.outlook.com/mail/` redirects to `outlook.live.com` which is getting blocked (ERR_BLOCKED_BY_RESPONSE). This is because Outlook sets `X-Frame-Options` headers that block iframe embedding, but more importantly the redirect chain lands on a blocked domain.
 
-Three files contain hardcoded Outlook URLs (`https://outlook.cloud.microsoft/mail/`) that need updating to `https://www.outlook.com/mail/`:
+## Solution
+Replace all instances with `https://outlook.office.com/mail/` — this is the direct Outlook Web App URL used by Microsoft 365 / Office 365 accounts and does not redirect through `outlook.live.com`.
 
-| File | Lines | Change |
-|------|-------|--------|
-| `src/components/dashboard/EmailComposer.tsx` | Line 191 | Update Quick Links Outlook URL |
-| `src/components/dashboard/DashboardOverview.tsx` | Line 220 | Update "Open Outlook" button URL |
-| `src/components/dashboard/DashboardOverview.tsx` | Line 256 | Update Quick Links Outlook URL |
+## Files to Update
 
-All three are simple string replacements: `https://outlook.cloud.microsoft/mail/` → `https://www.outlook.com/mail/`
+| File | Line | Current URL | New URL |
+|------|------|-------------|---------|
+| `DashboardOverview.tsx` | 220 | `https://www.outlook.com/mail/` | `https://outlook.office.com/mail/` |
+| `DashboardOverview.tsx` | 256 | `https://www.outlook.com/mail/` | `https://outlook.office.com/mail/` |
+| `EmailComposer.tsx` | 191 | `https://www.outlook.com/mail/` | `https://outlook.office.com/mail/` |
 
-No other files or logic affected.
+Three simple string replacements. The `mailto:` links in QuotePreview and DealMaker are fine — those use the OS mail client, not a web URL.
 
