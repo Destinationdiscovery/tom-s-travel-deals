@@ -276,7 +276,17 @@ const BlogPostCreator = () => {
                     {block.type === "image" && (
                       <>
                         {block.value ? (
-                          <img src={block.value} alt="Block" className="w-full h-32 object-cover rounded-lg" />
+                          <div className="relative">
+                            <img src={block.value} alt="Block" className="w-full h-48 object-cover rounded-xl" />
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              className="absolute top-2 right-2 opacity-80 hover:opacity-100"
+                              onClick={() => updateBlock(i, { value: "" })}
+                            >
+                              Replace
+                            </Button>
+                          </div>
                         ) : (
                           <input type="file" accept="image/*" onChange={e => { const f = e.target.files?.[0]; if (f) uploadImageBlock(i, f); }} className="text-sm text-muted-foreground" />
                         )}
