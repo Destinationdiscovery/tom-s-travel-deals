@@ -63,7 +63,7 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
 
       <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
         <h1 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold mb-3 leading-tight text-white">
-          Real Travel Reviews, Deals &amp; Insights for Canadians
+          Real Travel Reviews, Deals &amp; Insights for Travellers
         </h1>
         <p className="text-white/80 text-base md:text-lg font-light mb-6">
           Real reviews from a Toronto-based travel consultant. Find your perfect trip.
