@@ -1,7 +1,7 @@
 import { Shield, MapPin, Award, Users } from "lucide-react";
 
 const badges = [
-  { icon: Shield, label: "100% Honest Reviews" },
+  { icon: Shield, label: "100% Real Reviews" },
   { icon: MapPin, label: "Canadian Traveler Focused" },
   { icon: Award, label: "Expedia Partner" },
   { icon: Users, label: "10,000+ Travelers Helped" },

@@ -57,7 +57,7 @@ const AIReview = () => {
     if (review) {
       document.title = `${review.property_name}${review.location ? `, ${review.location}` : ""} - ReviewThenGo`;
     }
-    return () => { document.title = "ReviewThenGo.com | Honest Reviews, Tested Gear & Travel Insights"; };
+    return () => { document.title = "ReviewThenGo.com | Real Reviews, Tested Gear & Travel Insights"; };
   }, [review]);
   const handleNewReview = () => {
     navigate("/");

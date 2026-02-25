@@ -26,7 +26,7 @@ const Contact = () => {
                     Get in Touch
                   </span>
                   <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-6">
-                    Looking for Honest Reviews Before You Book?
+                    Looking for Real Reviews Before You Book?
                   </h2>
                   <p className="text-muted-foreground text-lg">
                     As a travel consultant with over a decade of experience, I share real insights 
@@ -115,7 +115,7 @@ const Contact = () => {
                     </li>
                     <li className="flex items-center gap-3">
                       <Heart className="h-5 w-5 text-primary flex-shrink-0" />
-                      <span>Honest reviews with no hidden agendas</span>
+                      <span>Real reviews with no hidden agendas</span>
                     </li>
                     <li className="flex items-center gap-3">
                       <Star className="h-5 w-5 text-primary flex-shrink-0" />

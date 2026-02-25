@@ -53,7 +53,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="Honest Travel Reviews, Deals & Insights for Canadians"
+        title="Real Travel Reviews, Deals & Insights for Canadians"
         description="Real destination reviews, tested travel gear, and expert insights from an Ontario travel consultant. Plan your perfect trip."
         url="/"
         jsonLd={[
@@ -98,7 +98,7 @@ const Index = () => {
         <RecentReviewsHomepage />
         <SectionConnector text="Need gear for your trip?" linkText="Check our Travel Gear picks" to="/gear" />
         <TravelDealsSection />
-        <SectionConnector text="Read honest reviews before you book →" linkText="Browse Destinations" to="/destinations" />
+        <SectionConnector text="Read real reviews before you book →" linkText="Browse Destinations" to="/destinations" />
         <GearPreviewSection />
         <IntelPreviewSection />
         <BlogPreviewSection />

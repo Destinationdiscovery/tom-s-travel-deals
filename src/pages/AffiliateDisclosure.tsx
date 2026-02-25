@@ -15,7 +15,7 @@ const AffiliateDisclosure = () => {
 
           <section>
             <h2 className="font-display text-2xl font-semibold text-foreground mt-8 mb-3">How It Works</h2>
-            <p>When you click on certain links on our website and make a purchase or booking, we may receive a small commission at <strong>no extra cost to you</strong>. This helps us keep the site running, fund our travel research, and continue providing honest, in-depth reviews.</p>
+            <p>When you click on certain links on our website and make a purchase or booking, we may receive a small commission at <strong>no extra cost to you</strong>. This helps us keep the site running, fund our travel research, and continue providing real, in-depth reviews.</p>
           </section>
 
           <section>
@@ -30,7 +30,7 @@ const AffiliateDisclosure = () => {
           </section>
 
           <section>
-            <h2 className="font-display text-2xl font-semibold text-foreground mt-8 mb-3">Our Commitment to Honesty</h2>
+            <h2 className="font-display text-2xl font-semibold text-foreground mt-8 mb-3">Our Commitment to Transparency</h2>
             <p>Our reviews and recommendations are based on real personal travel experiences and thorough research. Affiliate partnerships <strong>never influence</strong> our ratings, reviews, or recommendations. We only recommend products and services we genuinely believe will benefit our readers.</p>
             <p>If we feature a product or destination, it's because we think it's worth your time and money — not because of a commission.</p>
           </section>

@@ -402,7 +402,7 @@ const DestinationReview = () => {
     if (review) {
       document.title = `${review.destination}, ${review.country} - ReviewThenGo`;
     }
-    return () => { document.title = "ReviewThenGo.com | Honest Reviews, Tested Gear & Travel Insights"; };
+    return () => { document.title = "ReviewThenGo.com | Real Reviews, Tested Gear & Travel Insights"; };
   }, [review]);
 
   // JSON-LD structured data for SEO

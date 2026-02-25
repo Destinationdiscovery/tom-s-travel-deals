@@ -37,7 +37,7 @@ const Footer = () => {
   return (
     <footer className="bg-primary text-primary-foreground py-16">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
           {/* Brand */}
           <div>
             <h3 className="font-display text-3xl font-bold mb-2">
@@ -46,7 +46,7 @@ const Footer = () => {
               <span className="text-emerald-400">Go</span>
             </h3>
             <p className="text-primary-foreground/70 text-base mb-4">
-              Honest destination reviews, tested travel gear, and real-world insights to help you travel with confidence.
+              Real destination reviews, tested travel gear, and real-world insights to help you travel with confidence.
             </p>
             <a
               href="https://tom.travelonly.com"
@@ -56,23 +56,9 @@ const Footer = () => {
             >
               Visit my Travelonly profile <ExternalLink className="h-3 w-3" />
             </a>
-
-            {/* Inline email capture */}
-            <form onSubmit={handleSubscribe} className="mt-4 flex gap-2 max-w-xs">
-              <Input
-                type="email"
-                placeholder="Your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="flex-1 bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/40 h-9 text-sm"
-              />
-              <Button type="submit" disabled={submitting} size="sm" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 h-9 px-3">
-                <Send className="h-3.5 w-3.5" />
-              </Button>
-            </form>
-            <p className="text-xs text-primary-foreground/40 mt-1">Get weekly deals — no spam.</p>
           </div>
+
+          {/* Explore */}
           <div>
             <h4 className="font-display font-semibold text-lg mb-4">Explore</h4>
             <nav className="flex flex-col gap-2">
@@ -99,7 +85,7 @@ const Footer = () => {
           {/* Legal */}
           <div>
             <h4 className="font-display font-semibold text-lg mb-4">Legal</h4>
-            <nav className="flex flex-col gap-2 mb-6">
+            <nav className="flex flex-col gap-2">
               <Link to="/privacy-policy" className="text-primary-foreground/70 hover:text-secondary transition-colors text-base">
                 Privacy Policy
               </Link>
@@ -107,9 +93,27 @@ const Footer = () => {
                 Affiliate Disclosure
               </Link>
             </nav>
+          </div>
 
-            {/* Social */}
-            <div className="flex items-center gap-4 mb-6">
+          {/* Stay Connected */}
+          <div>
+            <h4 className="font-display font-semibold text-lg mb-4">Stay Connected</h4>
+            <form onSubmit={handleSubscribe} className="flex gap-2 max-w-xs">
+              <Input
+                type="email"
+                placeholder="Your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="flex-1 bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/40 h-9 text-sm"
+              />
+              <Button type="submit" disabled={submitting} size="sm" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 h-9 px-3">
+                <Send className="h-3.5 w-3.5" />
+              </Button>
+            </form>
+            <p className="text-xs text-primary-foreground/40 mt-1 mb-4">Get weekly deals — no spam.</p>
+
+            <div className="flex items-center gap-4 mb-4">
               <a href="https://x.com/TomLaracyTravel" target="_blank" rel="noopener noreferrer" aria-label="Twitter" className="text-primary-foreground/60 hover:text-secondary transition-colors">
                 <Twitter className="h-5 w-5" />
               </a>
@@ -118,7 +122,6 @@ const Footer = () => {
               </a>
             </div>
 
-            {/* Expedia badge */}
             <a
               href="https://www.expedia.ca/?affcid=CA.DIRECT.PHG.0000.HOTEL.kwrd%3D.0000&ref_id=1101l5c5bMbAX&my_ad=ABA-14217255"
               target="_blank"
