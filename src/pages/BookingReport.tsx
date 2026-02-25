@@ -461,7 +461,7 @@ const BookingReport = () => {
     if (resortName) {
       document.title = `${resortName} — Trip Report`;
     }
-    return () => { document.title = "ReviewThenGo.com | Honest Reviews, Tested Gear & Travel Insights"; };
+    return () => { document.title = "ReviewThenGo.com | Real Reviews, Tested Gear & Travel Insights"; };
   }, [resortName]);
 
   // Auto-migrate: if rooms is empty but passengers exist, build Room 1
