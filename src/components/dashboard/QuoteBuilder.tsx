@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Search, ChevronRight, ChevronLeft, Plus, Trash2, Save, Loader2, Users, FileText, Star, MapPin, CalendarIcon, Copy, Upload, X, Paperclip, ArrowUp, ArrowDown, BookmarkPlus, BookOpen, CheckCircle2 } from "lucide-react";
+import { Search, ChevronRight, ChevronLeft, Plus, Trash2, Save, Loader2, Users, FileText, Star, MapPin, CalendarIcon, Copy, Upload, X, Paperclip, ArrowUp, ArrowDown, BookmarkPlus, BookOpen, CheckCircle2, Sparkles, Wand2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -218,6 +218,13 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
   const [templates, setTemplates] = useState<any[]>([]);
   const [templateName, setTemplateName] = useState("");
   const [showTemplateSave, setShowTemplateSave] = useState(false);
+  const [aiMode, setAiMode] = useState<"generate" | "manual">("generate");
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiAttachments, setAiAttachments] = useState<string[]>([]);
+  const [aiAttachmentNames, setAiAttachmentNames] = useState<string[]>([]);
+  const [aiUploading, setAiUploading] = useState(false);
+  const aiFileInputRef = useRef<HTMLInputElement>(null);
 
   const [quote, setQuote] = useState<QuoteData>({
     clientName: "", clientEmail: "", resortName: "", resortReviewSlug: "", destination: "",
@@ -238,6 +245,78 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
   const fetchTemplates = async () => {
     const { data } = await supabase.from("quote_templates" as any).select("*").order("created_at", { ascending: false });
     setTemplates(data || []);
+  };
+
+  const handleAiFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAiUploading(true);
+    const path = `quotes/ai-${Date.now()}-${file.name}`;
+    const { data, error } = await supabase.storage.from("booking-documents").upload(path, file, { upsert: true });
+    if (error) {
+      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
+    } else {
+      setAiAttachments((prev) => [...prev, data.path]);
+      setAiAttachmentNames((prev) => [...prev, file.name]);
+      toast({ title: "File attached" });
+    }
+    setAiUploading(false);
+    if (aiFileInputRef.current) aiFileInputRef.current.value = "";
+  };
+
+  const handleAiGenerate = async () => {
+    if (!aiPrompt.trim()) {
+      toast({ title: "No prompt", description: "Describe the trip details first.", variant: "destructive" });
+      return;
+    }
+    setAiGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-quote", {
+        body: { prompt: aiPrompt.trim(), attachmentPaths: aiAttachments.length > 0 ? aiAttachments : undefined },
+      });
+
+      if (error) throw new Error(error.message || "Generation failed");
+      if (data?.error) throw new Error(data.error);
+
+      // Auto-fill quote state
+      setQuote((prev) => ({
+        ...prev,
+        clientName: data.client_name || prev.clientName,
+        clientEmail: data.client_email || prev.clientEmail,
+        resortName: data.resort_name || prev.resortName,
+        destination: data.destination || prev.destination,
+        checkIn: data.check_in || prev.checkIn,
+        checkOut: data.check_out || prev.checkOut,
+        numTravellers: data.num_travellers || prev.numTravellers,
+        roomType: data.room_type || prev.roomType,
+        inclusions: data.inclusions || prev.inclusions,
+        lineItems: data.line_items?.length ? data.line_items : prev.lineItems,
+        flights: data.flights?.length ? data.flights : prev.flights,
+        notes: data.notes || prev.notes,
+        currency: data.currency || prev.currency,
+        validUntil: data.valid_until || prev.validUntil,
+      }));
+
+      // Also copy AI attachments to the quote attachments
+      if (aiAttachments.length > 0) {
+        setAttachmentUrls((prev) => [...prev, ...aiAttachments]);
+      }
+
+      // Trigger resort review lookup
+      if (data.resort_name) {
+        generateReview(data.resort_name);
+      }
+
+      setAiPrompt("");
+      setAiAttachments([]);
+      setAiAttachmentNames([]);
+      setStep(4); // Jump to preview
+      toast({ title: "✨ Quote generated!", description: "Review everything and save when ready." });
+    } catch (e: any) {
+      console.error("AI quote error:", e);
+      toast({ title: "Generation failed", description: e.message || "Unknown error", variant: "destructive" });
+    }
+    setAiGenerating(false);
   };
 
   useEffect(() => {
@@ -579,8 +658,95 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
         </Card>
       )}
 
-      {/* Step indicators */}
+      {/* AI Quote Assistant */}
       {step !== 4 && (
+        <Card className="border-primary/30 bg-primary/5">
+          <CardContent className="p-6 space-y-4">
+            <h2 className="font-semibold text-foreground flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" /> AI Quote Assistant
+            </h2>
+
+            {/* Mode Toggle */}
+            <div className="flex gap-1 bg-muted rounded-lg p-1">
+              <button
+                onClick={() => setAiMode("generate")}
+                className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${aiMode === "generate" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                <Wand2 className="h-4 w-4" /> Generate from Prompt
+              </button>
+              <button
+                onClick={() => setAiMode("manual")}
+                className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${aiMode === "manual" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                <FileText className="h-4 w-4" /> Manual Builder
+              </button>
+            </div>
+
+            {aiMode === "generate" && (
+              <>
+                <p className="text-sm text-muted-foreground">
+                  Describe the trip and AI will research the resort, build pricing, and fill everything. Just review and save.
+                </p>
+                <div>
+                  <Label>Prompt</Label>
+                  <Textarea
+                    value={aiPrompt}
+                    onChange={(e) => setAiPrompt(e.target.value)}
+                    placeholder="e.g. Create a quote for Pat and Holly, 1 week Barcelo Maya Riviera adults only, $1295 per person, all inclusive, flights from Toronto..."
+                    className="min-h-[120px] text-sm"
+                  />
+                </div>
+
+                {/* Attachment upload */}
+                <div>
+                  <input
+                    ref={aiFileInputRef}
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png,.webp"
+                    className="hidden"
+                    onChange={handleAiFileUpload}
+                  />
+                  {aiAttachmentNames.length > 0 && (
+                    <div className="space-y-1.5 mb-2">
+                      {aiAttachmentNames.map((name, i) => (
+                        <div key={i} className="flex items-center gap-2 text-sm">
+                          <Paperclip className="h-3.5 w-3.5 text-muted-foreground" />
+                          <span className="text-foreground truncate max-w-[300px]">{name}</span>
+                          <button onClick={() => { setAiAttachments(p => p.filter((_, j) => j !== i)); setAiAttachmentNames(p => p.filter((_, j) => j !== i)); }} className="text-muted-foreground hover:text-destructive">
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <Button variant="outline" size="sm" onClick={() => aiFileInputRef.current?.click()} disabled={aiUploading} className="gap-2">
+                    {aiUploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Paperclip className="h-3.5 w-3.5" />}
+                    {aiUploading ? "Uploading..." : "Attach Document"}
+                  </Button>
+                  <span className="text-xs text-muted-foreground ml-2">PDF, JPG, PNG, WEBP — invoices, confirmations, etc.</span>
+                </div>
+
+                <Button
+                  onClick={handleAiGenerate}
+                  disabled={aiGenerating || !aiPrompt.trim()}
+                  className="gap-2"
+                >
+                  {aiGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+                  {aiGenerating ? "Researching & Building Quote..." : "🔍 Generate Quote"}
+                </Button>
+                {aiGenerating && (
+                  <p className="text-xs text-muted-foreground animate-pulse">
+                    Researching the resort, extracting details, and building your quote. This may take 15-30 seconds...
+                  </p>
+                )}
+              </>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Step indicators */}
+      {step !== 4 && aiMode === "manual" && (
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           {["Resort", "Details", "Pricing", "Preview"].map((s, i) => (
             <button key={s} onClick={() => setStep(i + 1)} className={`px-3 py-1.5 rounded-full transition-colors ${step === i + 1 ? "bg-primary text-primary-foreground" : "bg-muted hover:bg-muted/80"}`}>
@@ -591,7 +757,7 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
       )}
 
       {/* Step 1: Select Resort */}
-      {step === 1 && (
+      {step === 1 && aiMode === "manual" && (
         <Card>
           <CardContent className="p-6 space-y-4">
             <h3 className="font-semibold text-foreground">Search or Select a Resort</h3>
