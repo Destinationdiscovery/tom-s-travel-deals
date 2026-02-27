@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Trash2, ArrowUp, ArrowDown, Upload, Loader2, BookOpen, Eye, Sparkles, X, ImagePlus } from "lucide-react";
+import { Plus, Trash2, ArrowUp, ArrowDown, Upload, Loader2, BookOpen, Eye, Sparkles, X, ImagePlus, Wand2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -64,6 +64,11 @@ const BlogPostCreator = () => {
   const [imagePoolPreviews, setImagePoolPreviews] = useState<string[]>([]);
   const [formatting, setFormatting] = useState(false);
 
+  // Generate from topic state
+  const [aiMode, setAiMode] = useState<"generate" | "format">("generate");
+  const [topicPrompt, setTopicPrompt] = useState("");
+  const [generating, setGenerating] = useState(false);
+
   // Editing
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -108,6 +113,39 @@ const BlogPostCreator = () => {
     URL.revokeObjectURL(imagePoolPreviews[index]);
     setImagePool(prev => prev.filter((_, i) => i !== index));
     setImagePoolPreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Generate from topic handler
+  const handleGenerateFromTopic = async () => {
+    if (!topicPrompt.trim()) {
+      toast({ title: "No topic", description: "Enter a topic or prompt first.", variant: "destructive" });
+      return;
+    }
+    setGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-blog-post", {
+        body: { prompt: topicPrompt.trim() },
+      });
+
+      if (error) throw new Error(error.message || "Generation failed");
+      if (data?.error) throw new Error(data.error);
+
+      // Auto-fill all form fields
+      if (data.title) { setTitle(data.title); setSlug(generateSlug(data.title)); }
+      if (data.slug) setSlug(data.slug);
+      if (data.category) setCategory(CATEGORIES.find(c => c.label === data.category) ? data.category : "Other");
+      if (data.excerpt) setExcerpt(data.excerpt);
+      if (data.read_time) setReadTime(data.read_time);
+      if (data.tags) setTags(data.tags.join(", "));
+      if (data.blocks) setBlocks(data.blocks);
+
+      setTopicPrompt("");
+      toast({ title: "✨ Article generated!", description: "Review everything below, add images, and publish when ready." });
+    } catch (e: any) {
+      console.error("Generate error:", e);
+      toast({ title: "Generation failed", description: e.message || "Unknown error", variant: "destructive" });
+    }
+    setGenerating(false);
   };
 
   // Auto-format handler
@@ -202,7 +240,7 @@ const BlogPostCreator = () => {
     setExcerpt(""); setReadTime("5 min read"); setTags(""); setCustomCategory("");
     setBlocks([{ type: "text", value: "" }]);
     setHeroFile(null); setHeroPreview(""); setEditingId(null);
-    setRawText("");
+    setRawText(""); setTopicPrompt("");
     setImagePool([]);
     imagePoolPreviews.forEach(u => URL.revokeObjectURL(u));
     setImagePoolPreviews([]);
@@ -290,57 +328,106 @@ const BlogPostCreator = () => {
       <Card className="border-primary/30 bg-primary/5">
         <CardContent className="p-6 space-y-4">
           <h2 className="font-semibold text-foreground flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" /> AI Auto-Format
+            <Sparkles className="h-5 w-5 text-primary" /> AI Article Assistant
           </h2>
-          <p className="text-sm text-muted-foreground">
-            Paste your full article text and upload images. AI will structure it into a professional blog with headings, paragraphs, and images placed logically throughout.
-          </p>
 
-          <div>
-            <Label>Article Text</Label>
-            <Textarea
-              value={rawText}
-              onChange={e => setRawText(e.target.value)}
-              placeholder="Paste your entire article text here..."
-              className="min-h-[200px] font-mono text-sm"
-            />
+          {/* Mode Toggle */}
+          <div className="flex gap-1 bg-muted rounded-lg p-1">
+            <button
+              onClick={() => setAiMode("generate")}
+              className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${aiMode === "generate" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              <Wand2 className="h-4 w-4" /> Generate from Topic
+            </button>
+            <button
+              onClick={() => setAiMode("format")}
+              className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${aiMode === "format" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              <Sparkles className="h-4 w-4" /> Format Existing Text
+            </button>
           </div>
 
-          <div>
-            <Label className="flex items-center gap-2"><ImagePlus className="h-4 w-4" /> Upload Images</Label>
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={e => handleImagePoolAdd(e.target.files)}
-              className="text-sm text-muted-foreground file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-primary-foreground file:font-medium file:cursor-pointer mt-1"
-            />
-            {imagePoolPreviews.length > 0 && (
-              <div className="flex flex-wrap gap-3 mt-3">
-                {imagePoolPreviews.map((url, i) => (
-                  <div key={i} className="relative group">
-                    <img src={url} alt={`Pool ${i + 1}`} className="w-24 h-24 object-cover rounded-lg border border-border" />
-                    <button
-                      onClick={() => removeFromImagePool(i)}
-                      className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                    <span className="absolute bottom-1 left-1 text-[10px] bg-background/80 text-foreground rounded px-1">{i + 1}</span>
-                  </div>
-                ))}
+          {aiMode === "generate" ? (
+            <>
+              <p className="text-sm text-muted-foreground">
+                Describe a topic and AI will research it, write a full article in your voice, and auto-fill every field below. Just review and publish.
+              </p>
+              <div>
+                <Label>Topic / Prompt</Label>
+                <Textarea
+                  value={topicPrompt}
+                  onChange={e => setTopicPrompt(e.target.value)}
+                  placeholder="e.g. Write me a blog article on the current situation in Mexico and the impact it has on Canadian travellers..."
+                  className="min-h-[120px] text-sm"
+                />
               </div>
-            )}
-          </div>
+              <Button
+                onClick={handleGenerateFromTopic}
+                disabled={generating || !topicPrompt.trim()}
+                className="gap-2"
+              >
+                {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+                {generating ? "Researching & Writing..." : "🔍 Generate Article"}
+              </Button>
+              {generating && (
+                <p className="text-xs text-muted-foreground animate-pulse">
+                  Searching the web for current info, then writing your article. This may take 15-30 seconds...
+                </p>
+              )}
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground">
+                Paste your full article text and upload images. AI will structure it into a professional blog with headings, paragraphs, and images placed logically throughout.
+              </p>
 
-          <Button
-            onClick={handleAutoFormat}
-            disabled={formatting || !rawText.trim()}
-            className="gap-2"
-          >
-            {formatting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-            {formatting ? "Formatting..." : "✨ Auto-Format Article"}
-          </Button>
+              <div>
+                <Label>Article Text</Label>
+                <Textarea
+                  value={rawText}
+                  onChange={e => setRawText(e.target.value)}
+                  placeholder="Paste your entire article text here..."
+                  className="min-h-[200px] font-mono text-sm"
+                />
+              </div>
+
+              <div>
+                <Label className="flex items-center gap-2"><ImagePlus className="h-4 w-4" /> Upload Images</Label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={e => handleImagePoolAdd(e.target.files)}
+                  className="text-sm text-muted-foreground file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-primary-foreground file:font-medium file:cursor-pointer mt-1"
+                />
+                {imagePoolPreviews.length > 0 && (
+                  <div className="flex flex-wrap gap-3 mt-3">
+                    {imagePoolPreviews.map((url, i) => (
+                      <div key={i} className="relative group">
+                        <img src={url} alt={`Pool ${i + 1}`} className="w-24 h-24 object-cover rounded-lg border border-border" />
+                        <button
+                          onClick={() => removeFromImagePool(i)}
+                          className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                        <span className="absolute bottom-1 left-1 text-[10px] bg-background/80 text-foreground rounded px-1">{i + 1}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <Button
+                onClick={handleAutoFormat}
+                disabled={formatting || !rawText.trim()}
+                className="gap-2"
+              >
+                {formatting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                {formatting ? "Formatting..." : "✨ Auto-Format Article"}
+              </Button>
+            </>
+          )}
 
           <p className="text-xs text-muted-foreground border-t border-border pt-3">
             Or manually build your article using the block editor below.
