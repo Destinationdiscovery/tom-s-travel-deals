@@ -138,9 +138,10 @@ const BlogPostCreator = () => {
       if (data.read_time) setReadTime(data.read_time);
       if (data.tags) setTags(data.tags.join(", "));
       if (data.blocks) setBlocks(data.blocks);
+      if (data.hero_image_url) setHeroPreview(data.hero_image_url);
 
       setTopicPrompt("");
-      toast({ title: "✨ Article generated!", description: "Review everything below, add images, and publish when ready." });
+      toast({ title: "✨ Article generated!", description: "Review everything below and publish when ready." });
     } catch (e: any) {
       console.error("Generate error:", e);
       toast({ title: "Generation failed", description: e.message || "Unknown error", variant: "destructive" });
@@ -321,7 +322,7 @@ const BlogPostCreator = () => {
   return (
     <div className="space-y-6">
       <h1 className="font-display text-2xl font-bold text-foreground flex items-center gap-2">
-        <BookOpen className="h-6 w-6" /> Blog Post Creator
+        <BookOpen className="h-6 w-6" /> Blog Creator
       </h1>
 
       {/* Auto-Format Section */}
@@ -367,11 +368,11 @@ const BlogPostCreator = () => {
                 className="gap-2"
               >
                 {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
-                {generating ? "Researching & Writing..." : "🔍 Generate Article"}
+                {generating ? "Researching, Writing & Generating Images..." : "🔍 Generate Article"}
               </Button>
               {generating && (
                 <p className="text-xs text-muted-foreground animate-pulse">
-                  Searching the web for current info, then writing your article. This may take 15-30 seconds...
+                  Searching the web, writing your article, and generating images. This may take 30-60 seconds...
                 </p>
               )}
             </>

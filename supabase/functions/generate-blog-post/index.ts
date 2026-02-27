@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -6,6 +7,65 @@ const corsHeaders = {
 };
 
 const CATEGORIES = ["Guides", "Packing", "Budget", "Insurance", "Timing", "Travel Tips", "News", "Other"];
+
+function base64ToUint8Array(base64: string): Uint8Array {
+  const raw = atob(base64);
+  const arr = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+  return arr;
+}
+
+async function generateImage(prompt: string, apiKey: string): Promise<string | null> {
+  try {
+    console.log("Generating image:", prompt.slice(0, 60));
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash-image",
+        messages: [{ role: "user", content: prompt }],
+        modalities: ["image", "text"],
+      }),
+    });
+    if (!res.ok) {
+      console.error("Image gen failed:", res.status);
+      return null;
+    }
+    const data = await res.json();
+    const imageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+    if (!imageUrl?.startsWith("data:image/")) return null;
+    return imageUrl;
+  } catch (e) {
+    console.error("Image gen error:", e);
+    return null;
+  }
+}
+
+async function uploadBase64Image(
+  supabaseClient: any,
+  dataUrl: string,
+  fileName: string
+): Promise<string | null> {
+  try {
+    const match = dataUrl.match(/^data:image\/([\w+]+);base64,(.+)$/);
+    if (!match) return null;
+    const ext = match[1] === "jpeg" ? "jpg" : match[1];
+    const bytes = base64ToUint8Array(match[2]);
+    const fullName = `${fileName}.${ext}`;
+    const { error } = await supabaseClient.storage
+      .from("blog-images")
+      .upload(fullName, bytes, { contentType: `image/${match[1]}`, upsert: true });
+    if (error) { console.error("Upload error:", error.message); return null; }
+    const { data } = supabaseClient.storage.from("blog-images").getPublicUrl(fullName);
+    return data.publicUrl;
+  } catch (e) {
+    console.error("Upload error:", e);
+    return null;
+  }
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -19,6 +79,11 @@ serve(async (req) => {
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
 
     // Step 1: Research with Perplexity
     console.log("Researching topic with Perplexity...");
@@ -180,6 +245,71 @@ Generate the full article with all metadata. Pick the most appropriate category 
     }));
 
     console.log("Article generated:", article.title);
+
+    // Step 3: Generate images
+    console.log("Generating images...");
+    const slugForFiles = article.slug || "article";
+
+    // Hero image
+    const heroPrompt = `Professional, high-quality travel blog hero photograph: ${article.title}. Photorealistic, vibrant colors, wide landscape format, editorial quality, no text overlay.`;
+    const heroDataUrl = await generateImage(heroPrompt, LOVABLE_API_KEY);
+    let heroImageUrl: string | null = null;
+    if (heroDataUrl) {
+      heroImageUrl = await uploadBase64Image(supabaseClient, heroDataUrl, `hero-${slugForFiles}-${Date.now()}`);
+      console.log("Hero image uploaded:", !!heroImageUrl);
+    }
+
+    // Inline images: pick 2-3 headings
+    const headings = article.blocks
+      .filter((b: any) => b.type === "heading")
+      .map((b: any) => b.value)
+      .slice(0, 3);
+
+    const inlineImageUrls: string[] = [];
+    for (let i = 0; i < headings.length; i++) {
+      const imgPrompt = `Professional travel blog photograph illustrating: ${headings[i]}. Photorealistic, vibrant, editorial quality, no text.`;
+      const dataUrl = await generateImage(imgPrompt, LOVABLE_API_KEY);
+      if (dataUrl) {
+        const url = await uploadBase64Image(supabaseClient, dataUrl, `inline-${slugForFiles}-${Date.now()}-${i}`);
+        if (url) inlineImageUrls.push(url);
+      }
+    }
+    console.log("Inline images generated:", inlineImageUrls.length);
+
+    // Inject image blocks after matching headings
+    if (inlineImageUrls.length > 0) {
+      const newBlocks: any[] = [];
+      let imgIdx = 0;
+      for (const block of article.blocks) {
+        newBlocks.push(block);
+        if (block.type === "heading" && imgIdx < inlineImageUrls.length) {
+          // Find the next text block after this heading, then insert image after it
+          const nextBlockIndex = article.blocks.indexOf(block) + 1;
+          if (nextBlockIndex < article.blocks.length && article.blocks[nextBlockIndex].type === "text") {
+            // We'll add the image after pushing the text block in the next iteration
+          }
+        }
+      }
+
+      // Simpler approach: insert image blocks after the first text block following each target heading
+      const finalBlocks: any[] = [];
+      let headingsSeen = 0;
+      let insertAfterNextText = false;
+      for (const block of article.blocks) {
+        finalBlocks.push(block);
+        if (block.type === "heading" && headingsSeen < inlineImageUrls.length && headings.includes(block.value)) {
+          insertAfterNextText = true;
+        } else if (insertAfterNextText && block.type === "text") {
+          finalBlocks.push({ type: "image", value: inlineImageUrls[headingsSeen], caption: "" });
+          headingsSeen++;
+          insertAfterNextText = false;
+        }
+      }
+      article.blocks = finalBlocks;
+    }
+
+    // Add hero_image_url to response
+    article.hero_image_url = heroImageUrl;
 
     return new Response(JSON.stringify(article), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
