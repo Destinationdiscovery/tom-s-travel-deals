@@ -1,70 +1,91 @@
 
 
-# Plan: AI-Powered Quote Builder
+# Plan: Featured Reviews Manager + Homepage Redesign
 
 ## Overview
-Add a "Generate from Prompt" mode to the Quote Builder, mirroring the Blog Creator's AI Article Assistant pattern. You type a natural language prompt like "Create a quote for Pat and Holly, 1 week Barcelo Maya Riviera adults only, $1295 per person" and optionally attach documents (invoices, confirmations). AI researches the resort via Perplexity, extracts details from attachments, and auto-fills every field. You review and save.
+Add a "Featured Reviews" admin tab to manage the 4 review cards on the homepage. Remove "View All" link. Add the review search bar below the cards on the homepage. Cards get resort images, custom affiliate links, and optional sale badges.
+
+## Database
+
+### New table: `featured_reviews` (4 slots, same pattern as `featured_deals`)
+```sql
+CREATE TABLE public.featured_reviews (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  slot_number integer NOT NULL CHECK (slot_number >= 1 AND slot_number <= 4),
+  property_name text NOT NULL,
+  location text,
+  slug text NOT NULL,
+  rating numeric DEFAULT 4.0,
+  summary text,
+  image_url text,
+  affiliate_url text,           -- exact affiliate link (replaces generic)
+  sale_label text,              -- e.g. "50% OFF" or "$500 OFF" (null = no badge)
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now(),
+  UNIQUE(slot_number)
+);
+ALTER TABLE public.featured_reviews ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Admins manage featured_reviews" ON public.featured_reviews FOR ALL TO authenticated USING (public.has_role(auth.uid(), 'admin'));
+CREATE POLICY "Public read featured_reviews" ON public.featured_reviews FOR SELECT TO anon USING (true);
+```
 
 ## File Changes
 
-### 1. New Edge Function: `supabase/functions/generate-quote/index.ts`
-- Accepts `{ prompt: string, attachmentContents?: string[] }`
-- Calls Perplexity `sonar` to research the resort (amenities, location, room types, highlights)
-- Passes research + prompt + any attachment text to Gemini via tool calling
-- Returns structured output: `client_name`, `client_email`, `resort_name`, `destination`, `check_in`, `check_out`, `num_travellers`, `room_type`, `inclusions[]`, `line_items[]`, `flights[]`, `notes`, `currency`, `valid_until`
-- Extracts pricing, dates, flight info, and passenger names from attachments when provided
+### 1. New: `src/components/dashboard/FeaturedReviewsManager.tsx`
+- Mirrors `FeaturedDealsManager` pattern: 4 editable card slots
+- Each card shows: image preview, property name, location, rating, summary, affiliate URL, sale label
+- Inline edit form with image upload (to `blog-images` bucket)
+- Includes a review search bar at the top so admin can search/preview new properties
+- "Add to Slot" button to populate a slot from a searched review
 
-### 2. Update: `src/components/dashboard/QuoteBuilder.tsx`
-- Add an AI Quote Assistant card at the top (before the step indicators), styled identically to the Blog Creator's AI card
-- Two-mode toggle: **"Generate from Prompt"** | **"Manual Builder"** (current flow)
-- "Generate from Prompt" mode shows:
-  - A prompt textarea (same styling as Blog Creator)
-  - An attachment upload area (accepts PDF, JPG, PNG, WEBP) that uploads to `booking-documents` bucket and extracts text via AI
-  - A "Generate Quote" button
-- On success, auto-fills the entire `quote` state and jumps to step 2 (or step 4 preview)
-- The existing manual 4-step flow remains fully intact as the "Manual Builder" mode
-- Also auto-triggers the resort review lookup so the review data is populated
+### 2. Update: `src/components/dashboard/DashboardSidebar.tsx`
+- Add `"reviews"` to `DashboardTab` type
+- Add sidebar entry: `{ id: "reviews", label: "Featured Reviews", icon: MapPin }`
 
-### 3. Attachment Processing
-- When attachments are uploaded in the AI prompt mode, the edge function receives their storage paths
-- The function downloads each file, and for PDFs/images uses Gemini's vision capability to extract text content
-- Extracted content is included in the prompt to Gemini so it can pull dates, pricing, flight details, passenger names, etc.
+### 3. Update: `src/pages/GearAdmin.tsx`
+- Import and render `FeaturedReviewsManager` for `activeTab === "reviews"`
 
-## Technical Details
+### 4. Update: `src/components/RecentReviewsHomepage.tsx`
+- Fetch from `featured_reviews` table instead of latest `cached_reviews`
+- Fall back to `cached_reviews` if no featured reviews exist
+- Remove "View All" link
+- Add resort image at top of each card (from `image_url`)
+- Show sale badge if `sale_label` is set
+- Use `affiliate_url` from the record (exact link) instead of generic deep link
+- Add the review search bar below the 4 cards
 
-| Aspect | Detail |
-|--------|--------|
-| Research model | Perplexity `sonar` for resort info |
-| Writing model | `google/gemini-2.5-flash` with tool calling for structured output |
-| Attachment parsing | Gemini vision (multimodal) for PDFs/images sent as base64 |
-| Review integration | After AI fills the resort name, triggers `generateReview()` to attach review data |
-| Persona | Professional travel agent tone, CAD default, Canadian perspective |
-| Error handling | 429/402 rate limit handling, attachment parse failures graceful |
+### 5. Update: `src/pages/Index.tsx`
+- Remove the `SectionConnector` that links to "Browse Destinations" (line 101)
 
-## UI Flow
+### 6. Remove: `src/pages/Destinations.tsx` route
+- Remove the `/destinations` route from `App.tsx`
+- Keep the file but it's no longer linked from homepage
 
+## Card Design (homepage)
 ```text
-┌─────────────────────────────────────────────┐
-│ ✨ AI Quote Assistant                       │
-│ ┌─────────────────┬───────────────────────┐ │
-│ │ Generate from   │ Manual Builder        │ │
-│ │ Prompt (active) │                       │ │
-│ └─────────────────┴───────────────────────┘ │
-│                                             │
-│ Describe the trip and AI will research the  │
-│ resort, build pricing, and fill everything. │
-│                                             │
-│ Prompt:                                     │
-│ ┌─────────────────────────────────────────┐ │
-│ │ Create a quote for Pat and Holly, 1     │ │
-│ │ week Barcelo Maya Riviera adults only...│ │
-│ └─────────────────────────────────────────┘ │
-│                                             │
-│ 📎 Attachments: [invoice.pdf] [+ Add]       │
-│                                             │
-│ [🔍 Generate Quote]                         │
-└─────────────────────────────────────────────┘
+┌──────────────────────────┐
+│  [Resort Photo]          │
+│  ┌─ 50% OFF ─┐ (if set) │
+├──────────────────────────┤
+│  Property Name           │
+│  Location                │
+│  ★★★★☆ 4.5              │
+│  Summary text...         │
+│  Read Review →           │
+│  [Book on Expedia ↗]     │
+└──────────────────────────┘
 ```
 
-After generation, all fields auto-populate and you land on the preview step to review, adjust, and save.
+## Admin Card Design
+```text
+┌──────────────────────────┐
+│  Slot 1                  │
+│  [Resort Photo]          │
+│  Property Name           │
+│  Location | ★ 4.5        │
+│  Affiliate URL           │
+│  Sale: 50% OFF           │
+│  [Edit] [Revert]         │
+└──────────────────────────┘
+```
 
