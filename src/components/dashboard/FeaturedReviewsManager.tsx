@@ -96,6 +96,12 @@ const FeaturedReviewsManager = () => {
       toast({ title: "Missing fields", description: "Property name and slug are required.", variant: "destructive" });
       return;
     }
+    // Validate slug exists in cached_reviews
+    const { data: match } = await supabase.from("cached_reviews").select("id").eq("slug", form.slug.trim()).maybeSingle();
+    if (!match) {
+      toast({ title: "Slug not found", description: "This slug doesn't match any cached review. The 'Read Review' link won't work.", variant: "destructive" });
+      return;
+    }
     setSaving(true);
     try {
       let imageUrl = slots[slotIdx]?.image_url || "";
@@ -155,13 +161,13 @@ const FeaturedReviewsManager = () => {
 
   const addReviewToSlot = useCallback((slotIdx: number) => {
     if (!review) return;
-    const rd = review as any;
+    const rd = review.review_data as any;
     setForm({
-      property_name: rd.propertyName || rd.property_name || "",
-      location: rd.location || "",
-      slug: rd.slug || "",
-      rating: String(rd.overallRating || rd.overall_rating || 4.0),
-      summary: rd.summary || "",
+      property_name: review.property_name || "",
+      location: review.location || "",
+      slug: review.slug || "",
+      rating: String(rd?.overallRating || 4.0),
+      summary: rd?.summary || "",
       affiliate_url: "",
       sale_label: "",
     });
@@ -306,8 +312,8 @@ const FeaturedReviewsManager = () => {
                         <Input value={form.location} onChange={e => setForm(f => ({ ...f, location: e.target.value }))} className="h-8 text-xs" />
                       </div>
                       <div>
-                        <Label className="text-xs">Slug *</Label>
-                        <Input value={form.slug} onChange={e => setForm(f => ({ ...f, slug: e.target.value }))} className="h-8 text-xs" />
+                        <Label className="text-xs">Slug * <span className="font-normal text-muted-foreground">(must match cached review)</span></Label>
+                        <Input value={form.slug} onChange={e => setForm(f => ({ ...f, slug: e.target.value }))} className="h-8 text-xs" placeholder="e.g. hotel-riu-palace-costa-rica" />
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
