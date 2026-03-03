@@ -1,91 +1,34 @@
 
 
-# Plan: Featured Reviews Manager + Homepage Redesign
+# Plan: Fix Featured Review Slugs Not Matching Cached Reviews
 
-## Overview
-Add a "Featured Reviews" admin tab to manage the 4 review cards on the homepage. Remove "View All" link. Add the review search bar below the cards on the homepage. Cards get resort images, custom affiliate links, and optional sale badges.
+## Problem
+The featured_reviews table has slugs like `riu palace costa rica` and `Riviera Maya 2 Nights Free` which don't match the actual cached_reviews slugs (`hotel-riu-palace-costa-rica`, etc.). When a user clicks "Read Review", the AIReview page queries `cached_reviews` by slug and gets no match.
 
-## Database
+## Solution
 
-### New table: `featured_reviews` (4 slots, same pattern as `featured_deals`)
-```sql
-CREATE TABLE public.featured_reviews (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  slot_number integer NOT NULL CHECK (slot_number >= 1 AND slot_number <= 4),
-  property_name text NOT NULL,
-  location text,
-  slug text NOT NULL,
-  rating numeric DEFAULT 4.0,
-  summary text,
-  image_url text,
-  affiliate_url text,           -- exact affiliate link (replaces generic)
-  sale_label text,              -- e.g. "50% OFF" or "$500 OFF" (null = no badge)
-  created_at timestamptz DEFAULT now(),
-  updated_at timestamptz DEFAULT now(),
-  UNIQUE(slot_number)
-);
-ALTER TABLE public.featured_reviews ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Admins manage featured_reviews" ON public.featured_reviews FOR ALL TO authenticated USING (public.has_role(auth.uid(), 'admin'));
-CREATE POLICY "Public read featured_reviews" ON public.featured_reviews FOR SELECT TO anon USING (true);
-```
+Two changes:
 
-## File Changes
+### 1. Update `FeaturedReviewsManager.tsx` — Auto-populate slug from cached_reviews
+When the admin uses "Add to Slot" from a searched review, the slug should come from the `CachedReview` object (which has the correct slug from `cached_reviews`). Currently the `addReviewToSlot` function reads from the wrong fields. Fix it to use `review.slug` (the cached review's actual slug) and `review.property_name`.
 
-### 1. New: `src/components/dashboard/FeaturedReviewsManager.tsx`
-- Mirrors `FeaturedDealsManager` pattern: 4 editable card slots
-- Each card shows: image preview, property name, location, rating, summary, affiliate URL, sale label
-- Inline edit form with image upload (to `blog-images` bucket)
-- Includes a review search bar at the top so admin can search/preview new properties
-- "Add to Slot" button to populate a slot from a searched review
+Also, when manually editing a slot, add a note/helper text reminding the admin that the slug must match an existing cached review.
 
-### 2. Update: `src/components/dashboard/DashboardSidebar.tsx`
-- Add `"reviews"` to `DashboardTab` type
-- Add sidebar entry: `{ id: "reviews", label: "Featured Reviews", icon: MapPin }`
+### 2. Update `AIReview.tsx` — Fallback: generate review if slug not found
+When the slug doesn't exist in `cached_reviews`, instead of showing "Review not found", trigger the review generation for the property name. This way even if the slug is slightly off, the user gets a review generated and cached.
 
-### 3. Update: `src/pages/GearAdmin.tsx`
-- Import and render `FeaturedReviewsManager` for `activeTab === "reviews"`
+**However**, the simpler and more correct fix is: update the 4 existing featured_reviews rows to use the correct cached_reviews slugs via a data fix, and ensure the admin tool auto-fills the correct slug going forward.
 
-### 4. Update: `src/components/RecentReviewsHomepage.tsx`
-- Fetch from `featured_reviews` table instead of latest `cached_reviews`
-- Fall back to `cached_reviews` if no featured reviews exist
-- Remove "View All" link
-- Add resort image at top of each card (from `image_url`)
-- Show sale badge if `sale_label` is set
-- Use `affiliate_url` from the record (exact link) instead of generic deep link
-- Add the review search bar below the 4 cards
+### Implementation
 
-### 5. Update: `src/pages/Index.tsx`
-- Remove the `SectionConnector` that links to "Browse Destinations" (line 101)
+**A. Fix `addReviewToSlot` in `FeaturedReviewsManager.tsx`** (lines 156-171):
+The `review` object from `useGenerateReview` is a `CachedReview` with fields `property_name`, `slug`, `location`, `review_data`. Currently the code reads `rd.propertyName` and `rd.slug` which may not exist. Fix to read from the correct CachedReview fields and nested review_data.
 
-### 6. Remove: `src/pages/Destinations.tsx` route
-- Remove the `/destinations` route from `App.tsx`
-- Keep the file but it's no longer linked from homepage
+**B. Fix the 4 existing DB rows** — Run a migration/update to correct the slugs:
+- `riu palace costa rica` → `hotel-riu-palace-costa-rica`  
+- `Riviera Maya 2 Nights Free` → look up Ocean Maya Royale slug in cached_reviews
+- `curacao 2 nights free` → `sunscape-curacao-resort-spa-casino-all-inclusive`
+- `Save on Toronto stay` → look up Town Inn slug
 
-## Card Design (homepage)
-```text
-┌──────────────────────────┐
-│  [Resort Photo]          │
-│  ┌─ 50% OFF ─┐ (if set) │
-├──────────────────────────┤
-│  Property Name           │
-│  Location                │
-│  ★★★★☆ 4.5              │
-│  Summary text...         │
-│  Read Review →           │
-│  [Book on Expedia ↗]     │
-└──────────────────────────┘
-```
-
-## Admin Card Design
-```text
-┌──────────────────────────┐
-│  Slot 1                  │
-│  [Resort Photo]          │
-│  Property Name           │
-│  Location | ★ 4.5        │
-│  Affiliate URL           │
-│  Sale: 50% OFF           │
-│  [Edit] [Revert]         │
-└──────────────────────────┘
-```
+**C. Add slug validation** in `FeaturedReviewsManager` save handler — check that the slug exists in `cached_reviews` before saving, and warn if not.
 
