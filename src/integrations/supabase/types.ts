@@ -568,6 +568,51 @@ export type Database = {
         }
         Relationships: []
       }
+      featured_reviews: {
+        Row: {
+          affiliate_url: string | null
+          created_at: string | null
+          id: string
+          image_url: string | null
+          location: string | null
+          property_name: string
+          rating: number | null
+          sale_label: string | null
+          slot_number: number
+          slug: string
+          summary: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          affiliate_url?: string | null
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          property_name: string
+          rating?: number | null
+          sale_label?: string | null
+          slot_number: number
+          slug: string
+          summary?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          affiliate_url?: string | null
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          property_name?: string
+          rating?: number | null
+          sale_label?: string | null
+          slot_number?: number
+          slug?: string
+          summary?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       gear_intel_cache: {
         Row: {
           cache_key: string

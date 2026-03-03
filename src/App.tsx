@@ -56,7 +56,7 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/review/:slug" element={<AIReview />} />
-                <Route path="/destinations" element={<Destinations />} />
+                {/* /destinations route removed — reviews are now managed via Featured Reviews */}
                 <Route path="/destinations/:slug" element={<DestinationReview />} />
                 <Route path="/compass" element={<Compass />} />
                 <Route path="/compass/:slug" element={<CompassArticle />} />

@@ -13,6 +13,7 @@ import ClientList from "@/components/dashboard/ClientList";
 import DealMaker from "@/components/dashboard/DealMaker";
 import BlogPostCreator from "@/components/dashboard/BlogPostCreator";
 import FeaturedDealsManager from "@/components/dashboard/FeaturedDealsManager";
+import FeaturedReviewsManager from "@/components/dashboard/FeaturedReviewsManager";
 
 const GearAdmin = () => {
   const { user, isAdmin } = useAuth();
@@ -55,6 +56,7 @@ const GearAdmin = () => {
           {activeTab === "emails" && <EmailComposer />}
           {activeTab === "deals" && <DealMaker />}
           {activeTab === "featured-deals" && <FeaturedDealsManager />}
+          {activeTab === "reviews" && <FeaturedReviewsManager />}
           {activeTab === "blog" && <BlogPostCreator />}
           {activeTab === "gear" && <GearImageManager />}
         </main>

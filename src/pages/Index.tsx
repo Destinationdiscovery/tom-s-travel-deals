@@ -98,7 +98,7 @@ const Index = () => {
         <RecentReviewsHomepage />
         <SectionConnector text="Need gear for your trip?" linkText="Check our Travel Gear picks" to="/gear" />
         <TravelDealsSection />
-        <SectionConnector text="Read real reviews before you book →" linkText="Browse Destinations" to="/destinations" />
+        
         <GearPreviewSection />
         <IntelPreviewSection />
         <BlogPreviewSection />
