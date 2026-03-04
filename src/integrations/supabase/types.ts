@@ -44,6 +44,39 @@ export type Database = {
         }
         Relationships: []
       }
+      banner_deals: {
+        Row: {
+          affiliate_url: string
+          alt_text: string | null
+          created_at: string
+          id: string
+          image_url: string
+          sale_label: string | null
+          slot_number: number
+          updated_at: string
+        }
+        Insert: {
+          affiliate_url: string
+          alt_text?: string | null
+          created_at?: string
+          id?: string
+          image_url: string
+          sale_label?: string | null
+          slot_number: number
+          updated_at?: string
+        }
+        Update: {
+          affiliate_url?: string
+          alt_text?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string
+          sale_label?: string | null
+          slot_number?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       blog_posts: {
         Row: {
           author: string

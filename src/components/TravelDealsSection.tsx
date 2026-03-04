@@ -96,8 +96,21 @@ const MiniStars = ({ rating }: { rating: number }) => {
   );
 };
 
+interface BannerData {
+  image: string;
+  affiliateUrl: string;
+  saleLabel: string;
+  alt: string;
+}
+
+const defaultBanners: BannerData[] = [
+  { image: dealBanner, affiliateUrl: "https://expedia.com/affiliate/7ymxnWK", saleLabel: "", alt: "Expedia's Annual Vacation Sale" },
+  { image: hotelsBanner, affiliateUrl: "https://www.hotels.com/affiliate/FvZz7Rm", saleLabel: "", alt: "Hotels.com Big Spring Sale" },
+];
+
 const TravelDealsSection = () => {
   const [mergedDeals, setMergedDeals] = useState<FeaturedDeal[]>(featuredDeals);
+  const [banners, setBanners] = useState<BannerData[]>(defaultBanners);
 
   useEffect(() => {
     const fetchDbDeals = async () => {
@@ -129,7 +142,26 @@ const TravelDealsSection = () => {
         setMergedDeals(merged);
       }
     };
+    const fetchBanners = async () => {
+      const { data } = await supabase.from("banner_deals").select("*").order("slot_number") as any;
+      if (data && data.length > 0) {
+        const merged = [...defaultBanners];
+        data.forEach((row: any) => {
+          const idx = row.slot_number - 1;
+          if (idx >= 0 && idx < 2) {
+            merged[idx] = {
+              image: row.image_url,
+              affiliateUrl: row.affiliate_url,
+              saleLabel: row.sale_label || "",
+              alt: row.alt_text || defaultBanners[idx].alt,
+            };
+          }
+        });
+        setBanners(merged);
+      }
+    };
     fetchDbDeals();
+    fetchBanners();
   }, []);
 
   return (
@@ -144,12 +176,16 @@ const TravelDealsSection = () => {
 
         {/* Banners — compact */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <a href="https://expedia.com/affiliate/7ymxnWK" target="_blank" rel="noopener noreferrer" className="block rounded-xl overflow-hidden group">
-            <img src={dealBanner} alt="Expedia's Annual Vacation Sale" className="w-full h-[100px] md:h-[130px] object-cover transition-transform duration-500 group-hover:scale-[1.02]" />
-          </a>
-          <a href="https://www.hotels.com/affiliate/FvZz7Rm" target="_blank" rel="noopener noreferrer" className="block rounded-xl overflow-hidden group">
-            <img src={hotelsBanner} alt="Hotels.com Big Spring Sale" className="w-full h-[100px] md:h-[130px] object-cover object-right transition-transform duration-500 group-hover:scale-[1.02]" />
-          </a>
+          {banners.map((b, i) => (
+            <a key={i} href={b.affiliateUrl} target="_blank" rel="noopener noreferrer" className="block rounded-xl overflow-hidden group relative">
+              <img src={b.image} alt={b.alt} className={`w-full h-[100px] md:h-[130px] object-cover transition-transform duration-500 group-hover:scale-[1.02] ${i === 1 ? "object-right" : ""}`} />
+              {b.saleLabel && (
+                <span className="absolute top-3 left-3 bg-secondary text-secondary-foreground text-xs font-bold px-2.5 py-1 rounded-full shadow-lg">
+                  {b.saleLabel}
+                </span>
+              )}
+            </a>
+          ))}
         </div>
 
         {/* Featured Deals Grid */}
