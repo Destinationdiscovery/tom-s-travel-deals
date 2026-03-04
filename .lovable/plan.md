@@ -1,37 +1,43 @@
 
 
-# Plan: Custom Affiliate Links for Featured Reviews
+# Plan: Banner Deals Manager
 
 ## Problem
-When a user clicks a featured review card and opens the full review, they see generic affiliate links (Expedia/Hotels.com/VRBO sidebar + "Planning a trip?" banner). The admin-curated affiliate URL from the card should carry through instead.
+The two promotional banners at the top of the Travel Deals section (Expedia vacation sale + Hotels.com spring sale) are hardcoded. The admin needs to swap images, update affiliate links, and add sale labels — just like the other managed sections.
 
 ## Approach
 
-### 1. `AIReview.tsx` — Look up affiliate URL from `featured_reviews`
-After fetching the cached review, also query `featured_reviews` by slug. If a match exists with an `affiliate_url`, pass it down to `AIReviewResult`.
+### 1. Database — Create `banner_deals` table
+Create a table with 2 slots (1 = left banner, 2 = right banner), each storing:
+- `slot_number` (1-2)
+- `image_url` (uploaded to `blog-images` bucket)
+- `affiliate_url`
+- `sale_label` (e.g. "3 nights free!", "Save 40%")
+- `alt_text` (for accessibility)
 
-### 2. `AIReviewResult.tsx` — Accept optional `affiliateUrl` prop
-When `affiliateUrl` is provided (featured review):
-- **Remove** the `AffiliateLinks` sidebar card ("Ready to Book?" with Expedia/Hotels.com/VRBO)
-- **Replace** the `InlineAffiliateCTA` banner ("Planning a trip?") with a "Book This Trip on Expedia" button using the exact affiliate URL
-- Keep ratings, map, save button, everything else the same
+RLS: public read, admin manage.
 
-When `affiliateUrl` is NOT provided (regular user-generated review):
-- Everything stays exactly as it is today
+### 2. Admin Component — `BannerDealsManager.tsx`
+A simple 2-slot editor (similar pattern to FeaturedReviewsManager) with:
+- Image upload (to `blog-images` bucket)
+- Current image preview
+- Affiliate URL input
+- Sale label input (displayed as a badge overlay on the banner)
+- Save / Reset to default buttons
 
-### 3. Changes summary
+### 3. Sidebar + GearAdmin — New "Banner Deals" tab
+Add `"banner-deals"` to `DashboardTab` union and wire it up.
 
-**`src/pages/AIReview.tsx`** (~5 lines):
-- After fetching cached_review, query `featured_reviews` for matching slug
-- Store `affiliateUrl` in state
-- Pass `affiliateUrl` prop to `AIReviewResult`
+### 4. TravelDealsSection — Fetch from `banner_deals`
+Query `banner_deals` on mount. If rows exist, use their `image_url`, `affiliate_url`, and `sale_label` instead of the hardcoded imports. Fall back to hardcoded defaults if no DB rows.
 
-**`src/components/AIReviewResult.tsx`** (~20 lines):
-- Add optional `affiliateUrl?: string` to props
-- When set: hide `AffiliateLinks` component (sidebar + mobile), replace `InlineAffiliateCTA` banner with a custom CTA block using the affiliate URL
-- CTA text: "Book This Trip on Expedia" with ExternalLink icon, styled like the card button
+### Changes Summary
 
-The affiliate link will appear in exactly 2 places for featured reviews:
-1. On the homepage card ("Book on Expedia — Save Now")
-2. Inside the full review at the end (replacing the generic "Planning a trip?" banner)
+| File | Change |
+|------|--------|
+| Migration SQL | Create `banner_deals` table (2 slots) with RLS |
+| `src/components/dashboard/BannerDealsManager.tsx` | New component: 2-slot inline editor with image upload, affiliate URL, sale label |
+| `src/components/dashboard/DashboardSidebar.tsx` | Add `"banner-deals"` tab |
+| `src/pages/GearAdmin.tsx` | Import + render `BannerDealsManager` |
+| `src/components/TravelDealsSection.tsx` | Fetch `banner_deals`, merge with defaults, render sale label badge |
 
