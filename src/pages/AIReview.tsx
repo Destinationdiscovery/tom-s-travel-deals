@@ -16,6 +16,7 @@ const AIReview = () => {
   const [review, setReview] = useState<CachedReview | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [affiliateUrl, setAffiliateUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (!slug) return;
@@ -43,6 +44,15 @@ const AIReview = () => {
           review_data: data.review_data as unknown as CachedReview["review_data"],
           created_at: data.created_at,
         });
+        // Look up featured_reviews for affiliate URL
+        const { data: featured } = await supabase
+          .from("featured_reviews")
+          .select("affiliate_url")
+          .eq("slug", data.slug)
+          .maybeSingle();
+        if (featured?.affiliate_url) {
+          setAffiliateUrl(featured.affiliate_url);
+        }
       }
       setLoading(false);
     };
@@ -90,6 +100,7 @@ const AIReview = () => {
               isLoading={false}
               error={error}
               onNewReview={handleNewReview}
+              affiliateUrl={affiliateUrl ?? undefined}
             />
             {slug && (
               <div className="container mx-auto px-4 py-8 max-w-6xl">

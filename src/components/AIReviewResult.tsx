@@ -1,5 +1,5 @@
 import { useEffect, useRef, useMemo } from "react";
-import { Star, MapPin, Sparkles, Search, Camera } from "lucide-react";
+import { Star, MapPin, Sparkles, Search, Camera, ExternalLink } from "lucide-react";
 import ReviewLoadingStages from "@/components/ReviewLoadingStages";
 import { Button } from "@/components/ui/button";
 import AffiliateLinks from "@/components/AffiliateLinks";
@@ -16,6 +16,7 @@ interface AIReviewResultProps {
   error: string | null;
   onNewReview?: () => void;
   onReviewReady?: (slug: string) => void;
+  affiliateUrl?: string;
 }
 
 const RatingBar = ({ label, value }: { label: string; value: number }) => (
@@ -34,7 +35,7 @@ const RatingBar = ({ label, value }: { label: string; value: number }) => (
 );
 
 
-const AIReviewResult = ({ review, isLoading, error, onNewReview, onReviewReady }: AIReviewResultProps) => {
+const AIReviewResult = ({ review, isLoading, error, onNewReview, onReviewReady, affiliateUrl }: AIReviewResultProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const functionUrl = useMemo(() => {
@@ -195,9 +196,27 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview, onReviewReady }
                 </div>
               )}
 
-              {/* Inline affiliate after tips */}
+              {/* Inline affiliate / custom CTA */}
               <div className="order-7">
-                <InlineAffiliateCTA propertyName={data.propertyName} variant="banner" />
+                {affiliateUrl ? (
+                  <div className="rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div>
+                      <p className="font-display font-bold text-foreground text-lg">Ready to book?</p>
+                      <p className="text-sm text-muted-foreground">Exclusive deal — book directly through our partner link.</p>
+                    </div>
+                    <a
+                      href={affiliateUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-secondary text-secondary-foreground font-semibold text-sm hover:opacity-90 transition-opacity whitespace-nowrap"
+                    >
+                      Book This Trip on Expedia
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
+                  </div>
+                ) : (
+                  <InlineAffiliateCTA propertyName={data.propertyName} variant="banner" />
+                )}
               </div>
 
 
@@ -207,10 +226,12 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview, onReviewReady }
                 <LocationMap data={data} />
               </div>
 
-              {/* 9. Affiliate Links (mobile only) */}
-              <div className="lg:hidden order-9">
-                <AffiliateLinks propertyName={data.propertyName} />
-              </div>
+              {/* Affiliate Links (mobile only, hide for featured) */}
+              {!affiliateUrl && (
+                <div className="lg:hidden order-9">
+                  <AffiliateLinks propertyName={data.propertyName} />
+                </div>
+              )}
 
               {/* 10. Save & New Review Buttons (mobile only) */}
               <div className="lg:hidden flex flex-col gap-3 order-10">
@@ -227,8 +248,8 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview, onReviewReady }
               {/* Location Map */}
               <LocationMap data={data} />
 
-              {/* Affiliate Links */}
-              <AffiliateLinks propertyName={data.propertyName} />
+              {/* Affiliate Links (hide for featured) */}
+              {!affiliateUrl && <AffiliateLinks propertyName={data.propertyName} />}
 
               {/* Save to Compare */}
               <SaveReviewButton review={review} />
