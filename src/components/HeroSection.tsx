@@ -70,7 +70,7 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
         </p>
 
         {/* Integrated search bar */}
-        <div className="max-w-xl mx-auto mb-6">
+        <div className="max-w-xl mx-auto mb-4">
           <div className="flex gap-2 relative">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -81,7 +81,7 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
                 onFocus={() => query.trim().length >= 2 && setShowSuggestions(true)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                 placeholder="Search a hotel, resort, or destination..."
-                className="w-full h-12 pl-10 pr-4 rounded-lg border-0 bg-white text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-2 focus:ring-secondary/50 shadow-lg"
+                className="w-full h-12 pl-10 pr-4 rounded-lg border-0 bg-white text-gray-900 placeholder:text-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-secondary/50 shadow-lg"
               />
               {showSuggestions && suggestions.length > 0 && (
                 <div className="absolute top-full left-0 right-0 mt-1 bg-card rounded-lg shadow-lg border border-border overflow-hidden z-20">
@@ -108,20 +108,11 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
               {isSearching ? "Searching..." : "Search"}
             </Button>
           </div>
+          <p className="text-white/70 text-xs mt-2">
+            Search any hotel, resort, or destination worldwide — get honest, AI-powered reviews instantly.
+          </p>
         </div>
 
-        {/* CTA + Expedia badge */}
-        <a
-          href={EXPEDIA_LINKS[detectCountry()]}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-block mb-4"
-          onClick={() => trackAffiliateClick("Expedia", "homepage", "hero_cta")}
-        >
-          <Button variant="default" size="lg" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-bold text-base shadow-lg">
-            Find Your Next Trip
-          </Button>
-        </a>
         <div className="flex items-center justify-center gap-2">
           <span className="text-white/60 text-sm font-light">Powered by:</span>
           <a

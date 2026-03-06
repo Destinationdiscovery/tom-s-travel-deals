@@ -1,22 +1,43 @@
 
 
-# Plan: Hero Section Cleanup
+# Plan: Banner Deals Manager
 
-## Changes to `src/components/HeroSection.tsx`
+## Problem
+The two promotional banners at the top of the Travel Deals section (Expedia vacation sale + Hotels.com spring sale) are hardcoded. The admin needs to swap images, update affiliate links, and add sale labels — just like the other managed sections.
 
-### 1. Remove "Find Your Next Trip" button
-Delete the entire CTA block (lines 113-124) — the `<a>` wrapping the "Find Your Next Trip" button. Keep the Expedia logo/badge below.
+## Approach
 
-### 2. Fix search input text color
-The input uses `text-foreground` which resolves to a CSS variable that may be white in dark themes or on this dark overlay. Change to an explicit dark color: `text-gray-900` so typed text is always visible on the white background.
+### 1. Database — Create `banner_deals` table
+Create a table with 2 slots (1 = left banner, 2 = right banner), each storing:
+- `slot_number` (1-2)
+- `image_url` (uploaded to `blog-images` bucket)
+- `affiliate_url`
+- `sale_label` (e.g. "3 nights free!", "Save 40%")
+- `alt_text` (for accessibility)
 
-### 3. Add helper text below search bar
-After the search bar `div` (line 111), add a small subtitle:
-```
-<p className="text-white/70 text-xs mt-2">
-  Search any hotel, resort, or destination worldwide — get honest, AI-powered reviews instantly.
-</p>
-```
+RLS: public read, admin manage.
 
-Three simple edits, all in one file.
+### 2. Admin Component — `BannerDealsManager.tsx`
+A simple 2-slot editor (similar pattern to FeaturedReviewsManager) with:
+- Image upload (to `blog-images` bucket)
+- Current image preview
+- Affiliate URL input
+- Sale label input (displayed as a badge overlay on the banner)
+- Save / Reset to default buttons
+
+### 3. Sidebar + GearAdmin — New "Banner Deals" tab
+Add `"banner-deals"` to `DashboardTab` union and wire it up.
+
+### 4. TravelDealsSection — Fetch from `banner_deals`
+Query `banner_deals` on mount. If rows exist, use their `image_url`, `affiliate_url`, and `sale_label` instead of the hardcoded imports. Fall back to hardcoded defaults if no DB rows.
+
+### Changes Summary
+
+| File | Change |
+|------|--------|
+| Migration SQL | Create `banner_deals` table (2 slots) with RLS |
+| `src/components/dashboard/BannerDealsManager.tsx` | New component: 2-slot inline editor with image upload, affiliate URL, sale label |
+| `src/components/dashboard/DashboardSidebar.tsx` | Add `"banner-deals"` tab |
+| `src/pages/GearAdmin.tsx` | Import + render `BannerDealsManager` |
+| `src/components/TravelDealsSection.tsx` | Fetch `banner_deals`, merge with defaults, render sale label badge |
 
