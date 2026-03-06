@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -8,61 +7,42 @@ const corsHeaders = {
 
 const CATEGORIES = ["Guides", "Packing", "Budget", "Insurance", "Timing", "Travel Tips", "News", "Other"];
 
-function base64ToUint8Array(base64: string): Uint8Array {
-  const raw = atob(base64);
-  const arr = new Uint8Array(raw.length);
-  for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
-  return arr;
+interface PexelsPhoto {
+  url: string;
+  photographer: string;
+  photographer_url: string;
+  src: { large2x: string; large: string };
 }
 
-async function generateImage(prompt: string, apiKey: string): Promise<string | null> {
+async function searchStockPhoto(
+  query: string,
+  apiKey: string,
+  size: "large2x" | "large" = "large"
+): Promise<{ url: string; photographer: string; photographerUrl: string } | null> {
   try {
-    console.log("Generating image:", prompt.slice(0, 60));
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash-image",
-        messages: [{ role: "user", content: prompt }],
-        modalities: ["image", "text"],
-      }),
+    console.log("Searching Pexels for:", query.slice(0, 60));
+    const params = new URLSearchParams({
+      query,
+      per_page: "3",
+      orientation: "landscape",
+    });
+    const res = await fetch(`https://api.pexels.com/v1/search?${params}`, {
+      headers: { Authorization: apiKey },
     });
     if (!res.ok) {
-      console.error("Image gen failed:", res.status);
+      console.error("Pexels search failed:", res.status);
       return null;
     }
     const data = await res.json();
-    const imageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-    if (!imageUrl?.startsWith("data:image/")) return null;
-    return imageUrl;
+    const photo: PexelsPhoto | undefined = data.photos?.[0];
+    if (!photo) return null;
+    return {
+      url: photo.src[size],
+      photographer: photo.photographer,
+      photographerUrl: photo.photographer_url,
+    };
   } catch (e) {
-    console.error("Image gen error:", e);
-    return null;
-  }
-}
-
-async function uploadBase64Image(
-  supabaseClient: any,
-  dataUrl: string,
-  fileName: string
-): Promise<string | null> {
-  try {
-    const match = dataUrl.match(/^data:image\/([\w+]+);base64,(.+)$/);
-    if (!match) return null;
-    const ext = match[1] === "jpeg" ? "jpg" : match[1];
-    const bytes = base64ToUint8Array(match[2]);
-    const fullName = `${fileName}.${ext}`;
-    const { error } = await supabaseClient.storage
-      .from("blog-images")
-      .upload(fullName, bytes, { contentType: `image/${match[1]}`, upsert: true });
-    if (error) { console.error("Upload error:", error.message); return null; }
-    const { data } = supabaseClient.storage.from("blog-images").getPublicUrl(fullName);
-    return data.publicUrl;
-  } catch (e) {
-    console.error("Upload error:", e);
+    console.error("Pexels error:", e);
     return null;
   }
 }
@@ -80,10 +60,8 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
+    const PEXELS_API_KEY = Deno.env.get("PEXELS_API_KEY");
+    if (!PEXELS_API_KEY) throw new Error("PEXELS_API_KEY is not configured");
 
     // Step 1: Research with Perplexity
     console.log("Researching topic with Perplexity...");
@@ -155,7 +133,9 @@ ${research}
 
 ${citations.length > 0 ? `\nSOURCES:\n${citations.map((c: string, i: number) => `[${i + 1}] ${c}`).join("\n")}` : ""}
 
-Generate the full article with all metadata. Pick the most appropriate category from: ${CATEGORIES.join(", ")}`,
+Generate the full article with all metadata. Pick the most appropriate category from: ${CATEGORIES.join(", ")}
+
+IMPORTANT: For the image_search_queries field, provide short, descriptive search terms that would find great stock photos on Pexels. For example "tropical beach resort", "packing suitcase travel", "airport departure lounge". Provide one for the hero and one per section heading.`,
           },
         ],
         tools: [
@@ -177,6 +157,10 @@ Generate the full article with all metadata. Pick the most appropriate category 
                     items: { type: "string" },
                     description: "5-8 SEO keywords/tags",
                   },
+                  hero_image_query: {
+                    type: "string",
+                    description: "Short search query for finding a hero stock photo, e.g. 'tropical beach sunset resort'",
+                  },
                   blocks: {
                     type: "array",
                     items: {
@@ -184,14 +168,15 @@ Generate the full article with all metadata. Pick the most appropriate category 
                       properties: {
                         type: { type: "string", enum: ["heading", "text"] },
                         value: { type: "string" },
+                        image_query: { type: "string", description: "Optional: stock photo search query for this section" },
                       },
                       required: ["type", "value"],
                       additionalProperties: false,
                     },
-                    description: "Article content as blocks. Use 'heading' for section titles and 'text' for paragraphs. Each text block should be 1-3 paragraphs.",
+                    description: "Article content as blocks. Use 'heading' for section titles and 'text' for paragraphs. Add image_query on heading blocks where a photo would enhance the section.",
                   },
                 },
-                required: ["title", "slug", "category", "excerpt", "read_time", "tags", "blocks"],
+                required: ["title", "slug", "category", "excerpt", "read_time", "tags", "hero_image_query", "blocks"],
                 additionalProperties: false,
               },
             },
@@ -246,70 +231,75 @@ Generate the full article with all metadata. Pick the most appropriate category 
 
     console.log("Article generated:", article.title);
 
-    // Step 3: Generate images
-    console.log("Generating images...");
-    const slugForFiles = article.slug || "article";
+    // Step 3: Fetch stock photos from Pexels
+    console.log("Fetching stock photos from Pexels...");
 
     // Hero image
-    const heroPrompt = `Professional, high-quality travel blog hero photograph: ${article.title}. Photorealistic, vibrant colors, wide landscape format, editorial quality, no text overlay.`;
-    const heroDataUrl = await generateImage(heroPrompt, LOVABLE_API_KEY);
-    let heroImageUrl: string | null = null;
-    if (heroDataUrl) {
-      heroImageUrl = await uploadBase64Image(supabaseClient, heroDataUrl, `hero-${slugForFiles}-${Date.now()}`);
-      console.log("Hero image uploaded:", !!heroImageUrl);
-    }
+    const heroPhoto = await searchStockPhoto(
+      article.hero_image_query || article.title,
+      PEXELS_API_KEY,
+      "large2x"
+    );
+    article.hero_image_url = heroPhoto?.url || null;
+    article.hero_image_photographer = heroPhoto?.photographer || null;
+    article.hero_image_photographer_url = heroPhoto?.photographerUrl || null;
+    console.log("Hero image found:", !!heroPhoto);
 
-    // Inline images: pick 2-3 headings
-    const headings = article.blocks
-      .filter((b: any) => b.type === "heading")
-      .map((b: any) => b.value)
+    // Inline images: find headings with image_query
+    const headingsWithQueries = article.blocks
+      .filter((b: any) => b.type === "heading" && b.image_query)
       .slice(0, 3);
 
-    const inlineImageUrls: string[] = [];
-    for (let i = 0; i < headings.length; i++) {
-      const imgPrompt = `Professional travel blog photograph illustrating: ${headings[i]}. Photorealistic, vibrant, editorial quality, no text.`;
-      const dataUrl = await generateImage(imgPrompt, LOVABLE_API_KEY);
-      if (dataUrl) {
-        const url = await uploadBase64Image(supabaseClient, dataUrl, `inline-${slugForFiles}-${Date.now()}-${i}`);
-        if (url) inlineImageUrls.push(url);
-      }
+    const inlinePhotos: Array<{ url: string; photographer: string; photographerUrl: string }> = [];
+    const usedQueries = new Set<string>();
+
+    for (const heading of headingsWithQueries) {
+      // Vary the query slightly to avoid duplicate photos
+      let query = heading.image_query;
+      if (usedQueries.has(query)) query += " travel";
+      usedQueries.add(query);
+
+      const photo = await searchStockPhoto(query, PEXELS_API_KEY, "large");
+      if (photo) inlinePhotos.push(photo);
     }
-    console.log("Inline images generated:", inlineImageUrls.length);
+    console.log("Inline photos found:", inlinePhotos.length);
 
     // Inject image blocks after matching headings
-    if (inlineImageUrls.length > 0) {
-      const newBlocks: any[] = [];
-      let imgIdx = 0;
-      for (const block of article.blocks) {
-        newBlocks.push(block);
-        if (block.type === "heading" && imgIdx < inlineImageUrls.length) {
-          // Find the next text block after this heading, then insert image after it
-          const nextBlockIndex = article.blocks.indexOf(block) + 1;
-          if (nextBlockIndex < article.blocks.length && article.blocks[nextBlockIndex].type === "text") {
-            // We'll add the image after pushing the text block in the next iteration
-          }
-        }
-      }
-
-      // Simpler approach: insert image blocks after the first text block following each target heading
+    if (inlinePhotos.length > 0) {
       const finalBlocks: any[] = [];
-      let headingsSeen = 0;
+      let photoIdx = 0;
       let insertAfterNextText = false;
+
       for (const block of article.blocks) {
         finalBlocks.push(block);
-        if (block.type === "heading" && headingsSeen < inlineImageUrls.length && headings.includes(block.value)) {
+        if (
+          block.type === "heading" &&
+          block.image_query &&
+          photoIdx < inlinePhotos.length
+        ) {
           insertAfterNextText = true;
         } else if (insertAfterNextText && block.type === "text") {
-          finalBlocks.push({ type: "image", value: inlineImageUrls[headingsSeen], caption: "" });
-          headingsSeen++;
+          const photo = inlinePhotos[photoIdx];
+          finalBlocks.push({
+            type: "image",
+            value: photo.url,
+            caption: "",
+            photographer: photo.photographer,
+            photographerUrl: photo.photographerUrl,
+          });
+          photoIdx++;
           insertAfterNextText = false;
         }
       }
       article.blocks = finalBlocks;
     }
 
-    // Add hero_image_url to response
-    article.hero_image_url = heroImageUrl;
+    // Clean up image_query fields from blocks before returning
+    article.blocks = article.blocks.map((b: any) => {
+      const { image_query, ...rest } = b;
+      return rest;
+    });
+    delete article.hero_image_query;
 
     return new Response(JSON.stringify(article), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
