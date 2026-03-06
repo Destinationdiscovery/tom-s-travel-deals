@@ -1,47 +1,43 @@
 
 
-# Plan: Use Pexels/Pixabay Stock Photos in Blog Generator
+# Plan: Banner Deals Manager
 
-## Feasibility
-
-Yes, both Pexels and Pixabay offer free APIs that return high-quality, royalty-free photos perfect for travel blog posts. Pexels is the better choice here: simpler API, higher quality results, and their free tier allows 200 requests/hour which is more than enough.
+## Problem
+The two promotional banners at the top of the Travel Deals section (Expedia vacation sale + Hotels.com spring sale) are hardcoded. The admin needs to swap images, update affiliate links, and add sale labels — just like the other managed sections.
 
 ## Approach
 
-### 1. Add Pexels API Key as a secret
-- Get a free API key from [pexels.com/api](https://www.pexels.com/api/) (instant, no payment required)
-- Store it as `PEXELS_API_KEY` secret
+### 1. Database — Create `banner_deals` table
+Create a table with 2 slots (1 = left banner, 2 = right banner), each storing:
+- `slot_number` (1-2)
+- `image_url` (uploaded to `blog-images` bucket)
+- `affiliate_url`
+- `sale_label` (e.g. "3 nights free!", "Save 40%")
+- `alt_text` (for accessibility)
 
-### 2. Update `generate-blog-post/index.ts`
-Replace the `generateImage()` function with a `searchStockPhoto()` function that:
-- Calls `https://api.pexels.com/v1/search?query=...&per_page=1&orientation=landscape`
-- Extracts the photo URL directly (no base64 conversion or upload needed — Pexels URLs are permanent and hotlink-friendly per their terms)
-- Falls back to AI-generated images if no Pexels results found
+RLS: public read, admin manage.
 
-### 3. Changes to image flow
-**Current flow:** AI generates base64 image → upload to storage → use public URL
-**New flow:** Search Pexels with keyword → use Pexels URL directly (with photographer attribution)
+### 2. Admin Component — `BannerDealsManager.tsx`
+A simple 2-slot editor (similar pattern to FeaturedReviewsManager) with:
+- Image upload (to `blog-images` bucket)
+- Current image preview
+- Affiliate URL input
+- Sale label input (displayed as a badge overlay on the banner)
+- Save / Reset to default buttons
 
-The article's tool call schema already has image blocks. We'll use Pexels `src.large2x` (1280px wide) for hero and `src.large` for inline images.
+### 3. Sidebar + GearAdmin — New "Banner Deals" tab
+Add `"banner-deals"` to `DashboardTab` union and wire it up.
 
-### 4. Attribution
-Pexels requires attribution. We'll store photographer name + Pexels URL alongside the image URL and render a small credit line under each image.
+### 4. TravelDealsSection — Fetch from `banner_deals`
+Query `banner_deals` on mount. If rows exist, use their `image_url`, `affiliate_url`, and `sale_label` instead of the hardcoded imports. Fall back to hardcoded defaults if no DB rows.
 
 ### Changes Summary
 
 | File | Change |
 |------|--------|
-| Secret | Add `PEXELS_API_KEY` |
-| `supabase/functions/generate-blog-post/index.ts` | Replace `generateImage()` + `uploadBase64Image()` with `searchStockPhoto()` using Pexels API. Remove base64/upload logic. Add photographer attribution to image blocks. |
-
-### Image block format change
-```typescript
-// Before
-{ type: "image", value: "https://storage.../uploaded.jpg", caption: "" }
-
-// After  
-{ type: "image", value: "https://images.pexels.com/...", caption: "", photographer: "John Doe", photographerUrl: "https://pexels.com/@john" }
-```
-
-The rendering component (`BlogPreviewSection` or wherever blog blocks render) would show a small "Photo by X on Pexels" credit — this is lightweight and keeps you compliant with Pexels terms.
+| Migration SQL | Create `banner_deals` table (2 slots) with RLS |
+| `src/components/dashboard/BannerDealsManager.tsx` | New component: 2-slot inline editor with image upload, affiliate URL, sale label |
+| `src/components/dashboard/DashboardSidebar.tsx` | Add `"banner-deals"` tab |
+| `src/pages/GearAdmin.tsx` | Import + render `BannerDealsManager` |
+| `src/components/TravelDealsSection.tsx` | Fetch `banner_deals`, merge with defaults, render sale label badge |
 
