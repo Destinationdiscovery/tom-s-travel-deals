@@ -476,6 +476,7 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
       room_type: quote.roomType || null,
       inclusions: quote.inclusions.length > 0 ? quote.inclusions : [],
       valid_until: quote.validUntil || null,
+      summary: quote.summary || null,
     };
 
     let result;
@@ -510,6 +511,7 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
       reviewData: q.review_data || null,
       attachmentUrls: q.attachment_urls || [],
       validUntil: q.valid_until || format(addDays(new Date(q.created_at), 14), "yyyy-MM-dd"),
+      summary: q.summary || "",
     });
     setAttachmentUrls(q.attachment_urls || []);
     setIncludeReview(q.include_review || false);
