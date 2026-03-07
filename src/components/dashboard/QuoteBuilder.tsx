@@ -531,6 +531,7 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
       notes: "", currency: "CAD", status: "draft", reviewSummary: "",
       includeReview: false, reviewData: null, attachmentUrls: [],
       validUntil: format(addDays(new Date(), 14), "yyyy-MM-dd"),
+      summary: "",
     });
     setStep(1);
   };
