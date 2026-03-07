@@ -62,6 +62,7 @@ export interface QuoteData {
   attachmentUrls?: string[];
   validUntil: string;
   summary?: string;
+  quoteMarkdown?: string;
 }
 
 const INCLUSION_PRESETS = [
