@@ -1,0 +1,1 @@
+ALTER TABLE public.client_quotes ADD COLUMN quote_markdown text;
