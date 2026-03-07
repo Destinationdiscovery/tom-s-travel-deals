@@ -294,34 +294,54 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
       if (error) throw new Error(error.message || "Generation failed");
       if (data?.error) throw new Error(data.error);
 
-      // Auto-fill quote state
-      setQuote((prev) => ({
-        ...prev,
-        clientName: data.client_name || prev.clientName,
-        clientEmail: data.client_email || prev.clientEmail,
-        resortName: data.resort_name || prev.resortName,
-        destination: data.destination || prev.destination,
-        checkIn: data.check_in || prev.checkIn,
-        checkOut: data.check_out || prev.checkOut,
-        numTravellers: data.num_travellers || prev.numTravellers,
-        roomType: data.room_type || prev.roomType,
-        inclusions: data.inclusions || prev.inclusions,
-        lineItems: data.line_items?.length ? data.line_items : prev.lineItems,
-        flights: data.flights?.length ? data.flights : prev.flights,
-        notes: data.notes || prev.notes,
-        currency: data.currency || prev.currency,
-        validUntil: data.valid_until || prev.validUntil,
-        summary: data.summary || prev.summary,
-      }));
+      // New blog-style response: { markdown, metadata }
+      if (data.markdown && data.metadata) {
+        const meta = data.metadata;
+        setQuote((prev) => ({
+          ...prev,
+          clientName: meta.client_name || aiClientName.trim(),
+          clientEmail: meta.client_email || aiClientEmail.trim(),
+          resortName: meta.resort_name || prev.resortName,
+          destination: meta.destination || prev.destination,
+          checkIn: meta.check_in || prev.checkIn,
+          checkOut: meta.check_out || prev.checkOut,
+          numTravellers: meta.num_travellers || prev.numTravellers,
+          currency: meta.currency || prev.currency,
+          validUntil: meta.valid_until || prev.validUntil,
+          quoteMarkdown: data.markdown,
+          lineItems: meta.total_price ? [{ description: "Total Package", amount: meta.total_price, category: "Other" }] : prev.lineItems,
+        }));
+      } else {
+        // Legacy structured response fallback
+        setQuote((prev) => ({
+          ...prev,
+          clientName: data.client_name || prev.clientName,
+          clientEmail: data.client_email || prev.clientEmail,
+          resortName: data.resort_name || prev.resortName,
+          destination: data.destination || prev.destination,
+          checkIn: data.check_in || prev.checkIn,
+          checkOut: data.check_out || prev.checkOut,
+          numTravellers: data.num_travellers || prev.numTravellers,
+          roomType: data.room_type || prev.roomType,
+          inclusions: data.inclusions || prev.inclusions,
+          lineItems: data.line_items?.length ? data.line_items : prev.lineItems,
+          flights: data.flights?.length ? data.flights : prev.flights,
+          notes: data.notes || prev.notes,
+          currency: data.currency || prev.currency,
+          validUntil: data.valid_until || prev.validUntil,
+          summary: data.summary || prev.summary,
+        }));
+      }
 
-      // Also copy AI attachments to the quote attachments
+      // Copy AI attachments to the quote attachments
       if (aiAttachments.length > 0) {
         setAttachmentUrls((prev) => [...prev, ...aiAttachments]);
       }
 
       // Trigger resort review lookup
-      if (data.resort_name) {
-        generateReview(data.resort_name);
+      const resortName = data.metadata?.resort_name || data.resort_name;
+      if (resortName) {
+        generateReview(resortName);
       }
 
       setAiPrompt("");
