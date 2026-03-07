@@ -1,5 +1,14 @@
-import { format } from "date-fns";
+import { format, isValid } from "date-fns";
 import { Plane, Users, Calendar, BedDouble, Paperclip, ExternalLink } from "lucide-react";
+
+const safeFormat = (dateStr: string, fmt: string): string | null => {
+  try {
+    const d = new Date(dateStr);
+    return isValid(d) ? format(d, fmt) : null;
+  } catch {
+    return null;
+  }
+};
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 
