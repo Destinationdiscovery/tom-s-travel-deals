@@ -402,6 +402,7 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
         inclusions: quote.inclusions.length > 0 ? quote.inclusions : [],
         valid_until: quote.validUntil || null,
         summary: quote.summary || null,
+        quote_markdown: quote.quoteMarkdown || null,
       };
       await supabase.from("client_quotes").update(payload as any).eq("id", editingId);
       setAutoSaved(true);
@@ -499,6 +500,7 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
       inclusions: quote.inclusions.length > 0 ? quote.inclusions : [],
       valid_until: quote.validUntil || null,
       summary: quote.summary || null,
+      quote_markdown: quote.quoteMarkdown || null,
     };
 
     let result;
