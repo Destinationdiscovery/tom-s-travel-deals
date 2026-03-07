@@ -1,5 +1,14 @@
-import { format } from "date-fns";
+import { format, isValid } from "date-fns";
 import { Plane, Users, Calendar, BedDouble, Paperclip, ExternalLink } from "lucide-react";
+
+const safeFormat = (dateStr: string, fmt: string): string | null => {
+  try {
+    const d = new Date(dateStr);
+    return isValid(d) ? format(d, fmt) : null;
+  } catch {
+    return null;
+  }
+};
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -82,15 +91,15 @@ const TripDetailsCard = ({
             {checkIn && (
               <div className="p-3 text-center border-r border-border">
                 <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Check-in</p>
-                <p className="text-sm font-bold text-foreground mt-1">{format(new Date(checkIn), "MMM d, yyyy")}</p>
-                <p className="text-xs text-muted-foreground">{format(new Date(checkIn), "EEEE")}</p>
+                <p className="text-sm font-bold text-foreground mt-1">{safeFormat(checkIn, "MMM d, yyyy") || checkIn}</p>
+                <p className="text-xs text-muted-foreground">{safeFormat(checkIn, "EEEE") || ""}</p>
               </div>
             )}
             {checkOut && (
               <div className="p-3 text-center border-r border-border">
                 <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Check-out</p>
-                <p className="text-sm font-bold text-foreground mt-1">{format(new Date(checkOut), "MMM d, yyyy")}</p>
-                <p className="text-xs text-muted-foreground">{format(new Date(checkOut), "EEEE")}</p>
+                <p className="text-sm font-bold text-foreground mt-1">{safeFormat(checkOut, "MMM d, yyyy") || checkOut}</p>
+                <p className="text-xs text-muted-foreground">{safeFormat(checkOut, "EEEE") || ""}</p>
               </div>
             )}
             <div className="p-3 text-center flex flex-col items-center justify-center">
@@ -126,10 +135,10 @@ const TripDetailsCard = ({
                     <p className="font-medium text-foreground">{f.airline} {f.flightNumber}</p>
                   </div>
                   <p className="text-muted-foreground mt-0.5">{f.departureAirport} → {f.arrivalAirport}</p>
-                  {f.departureTime && (
+                  {f.departureTime && safeFormat(f.departureTime, "MMM d, yyyy h:mm a") && (
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      {format(new Date(f.departureTime), "MMM d, yyyy h:mm a")}
-                      {f.arrivalTime ? ` → ${format(new Date(f.arrivalTime), "h:mm a")}` : ""}
+                      {safeFormat(f.departureTime, "MMM d, yyyy h:mm a")}
+                      {f.arrivalTime && safeFormat(f.arrivalTime, "h:mm a") ? ` → ${safeFormat(f.arrivalTime, "h:mm a")}` : ""}
                     </p>
                   )}
                 </div>
