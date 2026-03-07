@@ -6,12 +6,20 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const AGENT_BRANDING = {
+  name: "Tom Laracy",
+  email: "tlaracy@travelonly.com",
+  agency: "TravelOnly",
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { prompt, attachmentPaths } = await req.json();
-    if (!prompt?.trim()) throw new Error("Prompt is required");
+    const { prompt, attachmentPaths, clientName, clientEmail } = await req.json();
+
+    const hasAttachments = attachmentPaths?.length > 0;
+    if (!prompt?.trim() && !hasAttachments) throw new Error("Provide a prompt or attach documents");
 
     const PERPLEXITY_API_KEY = Deno.env.get("PERPLEXITY_API_KEY");
     if (!PERPLEXITY_API_KEY) throw new Error("PERPLEXITY_API_KEY is not configured");
@@ -26,7 +34,7 @@ serve(async (req) => {
 
     // Step 1: Download attachments and convert to base64 for vision
     const attachmentContents: { mimeType: string; base64: string; fileName: string }[] = [];
-    if (attachmentPaths?.length) {
+    if (hasAttachments) {
       for (const path of attachmentPaths) {
         try {
           const { data, error } = await supabaseClient.storage
@@ -49,6 +57,9 @@ serve(async (req) => {
       }
     }
 
+    // Build effective prompt
+    const effectivePrompt = prompt?.trim() || `Build a vacation quote for ${clientName || "the client"} using the attached documents. Extract all pricing, dates, flight details, resort info, and traveller information.`;
+
     // Step 2: Research resort with Perplexity
     console.log("Researching resort with Perplexity...");
     const perplexityRes = await fetch("https://api.perplexity.ai/chat/completions", {
@@ -66,7 +77,7 @@ serve(async (req) => {
           },
           {
             role: "user",
-            content: `Research this resort/hotel for a client quote: ${prompt}. Include details about amenities, room categories, what's included, location highlights, and any current pricing or package information.`,
+            content: `Research this resort/hotel for a client quote: ${effectivePrompt}. Include details about amenities, room categories, what's included, location highlights, and any current pricing or package information.`,
           },
         ],
       }),
@@ -82,13 +93,16 @@ serve(async (req) => {
     }
 
     // Step 3: Build Gemini messages with attachments as vision content
-    const userContent: any[] = [];
+    const clientNameStr = clientName ? `\nCLIENT NAME: ${clientName}` : "";
+    const clientEmailStr = clientEmail ? `\nCLIENT EMAIL: ${clientEmail}` : "";
 
+    const userContent: any[] = [];
     userContent.push({
       type: "text",
       text: `Generate a professional travel quote based on this request and research.
+${clientNameStr}${clientEmailStr}
 
-CLIENT REQUEST: ${prompt}
+CLIENT REQUEST: ${effectivePrompt}
 
 RESORT RESEARCH:
 ${research || "No research available, use details from the prompt and attachments."}
@@ -101,7 +115,10 @@ IMPORTANT RULES:
 - Extract as many details as possible from the prompt and any attachments
 - For line items, categorize each as: Hotel, Transfer, Excursion, Insurance, Flights, Car Rental, Spa, or Other
 - If per-person pricing is given, calculate total based on number of travellers
-- Include relevant resort amenities and features in the inclusions array`,
+- Include relevant resort amenities and features in the inclusions array
+- The client_name MUST be "${clientName || "the client"}"
+- Write a professional 2-3 sentence summary paragraph addressed to the client, thanking them and highlighting the trip (like a cover letter for the quote)
+- Do NOT use em-dashes or en-dashes in any output, use regular hyphens instead`,
     });
 
     // Add attachment images for vision
@@ -128,7 +145,7 @@ IMPORTANT RULES:
         messages: [
           {
             role: "system",
-            content: `You are a professional Canadian travel agent building client quotes. Extract every detail from the prompt and any attached documents to fill out a complete quote. Be thorough and accurate with pricing, dates, and traveller details.`,
+            content: `You are ${AGENT_BRANDING.name}, a professional Canadian travel agent at ${AGENT_BRANDING.agency} (${AGENT_BRANDING.email}). Build client quotes by extracting every detail from the prompt and attached documents. Be thorough and accurate with pricing, dates, and traveller details. Never use em-dashes or en-dashes.`,
           },
           { role: "user", content: userContent },
         ],
@@ -143,6 +160,7 @@ IMPORTANT RULES:
                 properties: {
                   client_name: { type: "string", description: "Client's full name" },
                   client_email: { type: "string", description: "Client email if found" },
+                  summary: { type: "string", description: "A professional 2-3 sentence introduction paragraph addressed to the client, thanking them for choosing the agency and highlighting the trip destination and key features. Written in first person as the agent." },
                   resort_name: { type: "string", description: "Full resort/hotel name" },
                   destination: { type: "string", description: "Destination city/region/country" },
                   check_in: { type: "string", description: "Check-in date YYYY-MM-DD" },
@@ -188,7 +206,7 @@ IMPORTANT RULES:
                   currency: { type: "string", enum: ["CAD", "USD", "EUR", "GBP"], description: "Currency code" },
                   valid_until: { type: "string", description: "Quote valid until date YYYY-MM-DD" },
                 },
-                required: ["client_name", "resort_name", "line_items"],
+                required: ["client_name", "resort_name", "line_items", "summary"],
                 additionalProperties: false,
               },
             },

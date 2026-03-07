@@ -61,6 +61,7 @@ export interface QuoteData {
   reviewData: any | null;
   attachmentUrls?: string[];
   validUntil: string;
+  summary?: string;
 }
 
 const INCLUSION_PRESETS = [
@@ -247,32 +248,46 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
     setTemplates(data || []);
   };
 
+  const [aiClientName, setAiClientName] = useState("");
+  const [aiClientEmail, setAiClientEmail] = useState("");
+
   const handleAiFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
     setAiUploading(true);
-    const path = `quotes/ai-${Date.now()}-${file.name}`;
-    const { data, error } = await supabase.storage.from("booking-documents").upload(path, file, { upsert: true });
-    if (error) {
-      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
-    } else {
-      setAiAttachments((prev) => [...prev, data.path]);
-      setAiAttachmentNames((prev) => [...prev, file.name]);
-      toast({ title: "File attached" });
+    for (const file of Array.from(files)) {
+      const path = `quotes/ai-${Date.now()}-${file.name}`;
+      const { data, error } = await supabase.storage.from("booking-documents").upload(path, file, { upsert: true });
+      if (error) {
+        toast({ title: "Upload failed", description: error.message, variant: "destructive" });
+      } else {
+        setAiAttachments((prev) => [...prev, data.path]);
+        setAiAttachmentNames((prev) => [...prev, file.name]);
+      }
     }
+    toast({ title: `${files.length} file(s) attached` });
     setAiUploading(false);
     if (aiFileInputRef.current) aiFileInputRef.current.value = "";
   };
 
   const handleAiGenerate = async () => {
-    if (!aiPrompt.trim()) {
-      toast({ title: "No prompt", description: "Describe the trip details first.", variant: "destructive" });
+    if (!aiClientName.trim()) {
+      toast({ title: "Client name required", description: "Enter the client's name before generating.", variant: "destructive" });
+      return;
+    }
+    if (!aiPrompt.trim() && aiAttachments.length === 0) {
+      toast({ title: "No info provided", description: "Add a prompt or attach documents.", variant: "destructive" });
       return;
     }
     setAiGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-quote", {
-        body: { prompt: aiPrompt.trim(), attachmentPaths: aiAttachments.length > 0 ? aiAttachments : undefined },
+        body: {
+          prompt: aiPrompt.trim() || undefined,
+          attachmentPaths: aiAttachments.length > 0 ? aiAttachments : undefined,
+          clientName: aiClientName.trim(),
+          clientEmail: aiClientEmail.trim() || undefined,
+        },
       });
 
       if (error) throw new Error(error.message || "Generation failed");
@@ -295,6 +310,7 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
         notes: data.notes || prev.notes,
         currency: data.currency || prev.currency,
         validUntil: data.valid_until || prev.validUntil,
+        summary: data.summary || prev.summary,
       }));
 
       // Also copy AI attachments to the quote attachments
@@ -310,6 +326,8 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
       setAiPrompt("");
       setAiAttachments([]);
       setAiAttachmentNames([]);
+      setAiClientName("");
+      setAiClientEmail("");
       setStep(4); // Jump to preview
       toast({ title: "✨ Quote generated!", description: "Review everything and save when ready." });
     } catch (e: any) {
@@ -362,6 +380,7 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
         room_type: quote.roomType || null,
         inclusions: quote.inclusions.length > 0 ? quote.inclusions : [],
         valid_until: quote.validUntil || null,
+        summary: quote.summary || null,
       };
       await supabase.from("client_quotes").update(payload as any).eq("id", editingId);
       setAutoSaved(true);
@@ -458,6 +477,7 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
       room_type: quote.roomType || null,
       inclusions: quote.inclusions.length > 0 ? quote.inclusions : [],
       valid_until: quote.validUntil || null,
+      summary: quote.summary || null,
     };
 
     let result;
@@ -492,6 +512,7 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
       reviewData: q.review_data || null,
       attachmentUrls: q.attachment_urls || [],
       validUntil: q.valid_until || format(addDays(new Date(q.created_at), 14), "yyyy-MM-dd"),
+      summary: q.summary || "",
     });
     setAttachmentUrls(q.attachment_urls || []);
     setIncludeReview(q.include_review || false);
@@ -510,6 +531,7 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
       notes: "", currency: "CAD", status: "draft", reviewSummary: "",
       includeReview: false, reviewData: null, attachmentUrls: [],
       validUntil: format(addDays(new Date(), 14), "yyyy-MM-dd"),
+      summary: "",
     });
     setStep(1);
   };
@@ -685,24 +707,38 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
             {aiMode === "generate" && (
               <>
                 <p className="text-sm text-muted-foreground">
-                  Describe the trip and AI will research the resort, build pricing, and fill everything. Just review and save.
+                  Attach screenshots of pricing, flights, resort info, and enter the client's name. AI will build the full quote.
                 </p>
-                <div>
-                  <Label>Prompt</Label>
-                  <Textarea
-                    value={aiPrompt}
-                    onChange={(e) => setAiPrompt(e.target.value)}
-                    placeholder="e.g. Create a quote for Pat and Holly, 1 week Barcelo Maya Riviera adults only, $1295 per person, all inclusive, flights from Toronto..."
-                    className="min-h-[120px] text-sm"
-                  />
+
+                {/* Client Name & Email */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label>Client Name *</Label>
+                    <Input
+                      value={aiClientName}
+                      onChange={(e) => setAiClientName(e.target.value)}
+                      placeholder="e.g. Loretta Smith"
+                    />
+                  </div>
+                  <div>
+                    <Label>Client Email</Label>
+                    <Input
+                      type="email"
+                      value={aiClientEmail}
+                      onChange={(e) => setAiClientEmail(e.target.value)}
+                      placeholder="Optional"
+                    />
+                  </div>
                 </div>
 
-                {/* Attachment upload */}
+                {/* Attachment upload - multiple files */}
                 <div>
+                  <Label className="mb-1.5 block">Attach Screenshots / Documents</Label>
                   <input
                     ref={aiFileInputRef}
                     type="file"
                     accept=".pdf,.jpg,.jpeg,.png,.webp"
+                    multiple
                     className="hidden"
                     onChange={handleAiFileUpload}
                   />
@@ -721,22 +757,33 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
                   )}
                   <Button variant="outline" size="sm" onClick={() => aiFileInputRef.current?.click()} disabled={aiUploading} className="gap-2">
                     {aiUploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Paperclip className="h-3.5 w-3.5" />}
-                    {aiUploading ? "Uploading..." : "Attach Document"}
+                    {aiUploading ? "Uploading..." : "Attach Files"}
                   </Button>
-                  <span className="text-xs text-muted-foreground ml-2">PDF, JPG, PNG, WEBP — invoices, confirmations, etc.</span>
+                  <span className="text-xs text-muted-foreground ml-2">PDF, JPG, PNG, WEBP - pricing screenshots, confirmations, etc.</span>
+                </div>
+
+                {/* Optional prompt */}
+                <div>
+                  <Label>Extra Context <span className="text-muted-foreground font-normal">(optional)</span></Label>
+                  <Textarea
+                    value={aiPrompt}
+                    onChange={(e) => setAiPrompt(e.target.value)}
+                    placeholder="Optional: add any extra context (e.g. 'couple trip, wants ocean view, budget $3000')..."
+                    className="min-h-[80px] text-sm"
+                  />
                 </div>
 
                 <Button
                   onClick={handleAiGenerate}
-                  disabled={aiGenerating || !aiPrompt.trim()}
+                  disabled={aiGenerating || !aiClientName.trim() || (!aiPrompt.trim() && aiAttachments.length === 0)}
                   className="gap-2"
                 >
                   {aiGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
-                  {aiGenerating ? "Researching & Building Quote..." : "🔍 Generate Quote"}
+                  {aiGenerating ? "Researching & Building Quote..." : "Generate Quote"}
                 </Button>
                 {aiGenerating && (
                   <p className="text-xs text-muted-foreground animate-pulse">
-                    Researching the resort, extracting details, and building your quote. This may take 15-30 seconds...
+                    Researching the resort, extracting details from your screenshots, and building the quote. This may take 15-30 seconds...
                   </p>
                 )}
               </>

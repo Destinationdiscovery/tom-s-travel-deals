@@ -363,6 +363,7 @@ export type Database = {
           room_type: string | null
           share_token: string | null
           status: Database["public"]["Enums"]["quote_status"] | null
+          summary: string | null
           total_price: number | null
           updated_at: string
           valid_until: string | null
@@ -389,6 +390,7 @@ export type Database = {
           room_type?: string | null
           share_token?: string | null
           status?: Database["public"]["Enums"]["quote_status"] | null
+          summary?: string | null
           total_price?: number | null
           updated_at?: string
           valid_until?: string | null
@@ -415,6 +417,7 @@ export type Database = {
           room_type?: string | null
           share_token?: string | null
           status?: Database["public"]["Enums"]["quote_status"] | null
+          summary?: string | null
           total_price?: number | null
           updated_at?: string
           valid_until?: string | null
