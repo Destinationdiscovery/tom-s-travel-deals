@@ -536,6 +536,7 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
       attachmentUrls: q.attachment_urls || [],
       validUntil: q.valid_until || format(addDays(new Date(q.created_at), 14), "yyyy-MM-dd"),
       summary: q.summary || "",
+      quoteMarkdown: q.quote_markdown || "",
     });
     setAttachmentUrls(q.attachment_urls || []);
     setIncludeReview(q.include_review || false);
