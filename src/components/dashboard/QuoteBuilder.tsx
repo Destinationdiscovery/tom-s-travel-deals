@@ -310,6 +310,7 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
         notes: data.notes || prev.notes,
         currency: data.currency || prev.currency,
         validUntil: data.valid_until || prev.validUntil,
+        summary: data.summary || prev.summary,
       }));
 
       // Also copy AI attachments to the quote attachments
@@ -325,6 +326,8 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
       setAiPrompt("");
       setAiAttachments([]);
       setAiAttachmentNames([]);
+      setAiClientName("");
+      setAiClientEmail("");
       setStep(4); // Jump to preview
       toast({ title: "✨ Quote generated!", description: "Review everything and save when ready." });
     } catch (e: any) {
