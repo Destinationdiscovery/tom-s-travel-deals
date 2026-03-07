@@ -57,7 +57,6 @@ serve(async (req) => {
       }
     }
 
-    // Build effective prompt
     const effectivePrompt = prompt?.trim() || `Build a vacation quote for ${clientName || "the client"} using the attached documents. Extract all pricing, dates, flight details, resort info, and traveller information.`;
 
     // Step 2: Research resort with Perplexity
@@ -73,11 +72,11 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: "You are a travel research assistant. Provide detailed resort/hotel information including amenities, room types, location details, highlights, and what's included. Focus on practical booking details.",
+            content: "You are a travel research assistant. Provide detailed resort/hotel information including amenities, room types, location details, highlights, dining options, nearby attractions, and what's included. Focus on practical details that would help sell the trip to a client.",
           },
           {
             role: "user",
-            content: `Research this resort/hotel for a client quote: ${effectivePrompt}. Include details about amenities, room categories, what's included, location highlights, and any current pricing or package information.`,
+            content: `Research this resort/hotel for a client vacation quote: ${effectivePrompt}. Include: amenities, room categories, what's included, location highlights, dining, nearby activities, and any current pricing or package info.`,
           },
         ],
       }),
@@ -92,33 +91,69 @@ serve(async (req) => {
       console.error("Perplexity error:", perplexityRes.status);
     }
 
-    // Step 3: Build Gemini messages with attachments as vision content
-    const clientNameStr = clientName ? `\nCLIENT NAME: ${clientName}` : "";
-    const clientEmailStr = clientEmail ? `\nCLIENT EMAIL: ${clientEmail}` : "";
+    // Step 3: Build vision content for Gemini
+    const clientNameStr = clientName || "the client";
+    const today = new Date().toISOString().split("T")[0];
+    const validUntilDate = new Date(Date.now() + 14 * 86400000).toISOString().split("T")[0];
 
     const userContent: any[] = [];
     userContent.push({
       type: "text",
-      text: `Generate a professional travel quote based on this request and research.
-${clientNameStr}${clientEmailStr}
+      text: `You are ${AGENT_BRANDING.name}, a professional Canadian travel agent at ${AGENT_BRANDING.agency} (${AGENT_BRANDING.email}).
+
+Write a professional, blog-style vacation quote document for your client "${clientNameStr}"${clientEmail ? ` (${clientEmail})` : ""}.
 
 CLIENT REQUEST: ${effectivePrompt}
 
 RESORT RESEARCH:
-${research || "No research available, use details from the prompt and attachments."}
+${research || "No research available - use details from the prompt and attachments."}
 
 ${attachmentContents.length > 0 ? `\nATTACHED DOCUMENTS: ${attachmentContents.length} file(s) attached below. Extract ALL relevant details: pricing, dates, flight info, passenger names, booking numbers, room types, inclusions, etc.` : ""}
 
+INSTRUCTIONS:
+Write the quote as a flowing, narrative blog-style document in MARKDOWN format. Think of it like writing a travel article that also serves as a quote. You have FULL creative freedom over the layout - use headings, bold text, bullet points, tables, blockquotes, whatever makes the document beautiful and informative.
+
+The document should feel personal and professional, like a travel consultant wrote it specifically for the client. Include:
+- A warm, personal greeting addressing the client by name
+- An engaging overview of the destination and resort (use the research to paint a picture)
+- Accommodation details and room description
+- What's included (all-inclusive features, amenities, etc.)
+- Travel dates, duration, and check-in/check-out details
+- Flight information if available (airline, flight numbers, times)
+- A clear cost breakdown section with itemized pricing
+- Total cost prominently displayed
+- Any special notes, tips, or recommendations
+- Next steps for booking
+- A professional sign-off from ${AGENT_BRANDING.name}, ${AGENT_BRANDING.agency}
+
 IMPORTANT RULES:
 - Default currency is CAD unless specified otherwise
-- valid_until should be 14 days from today (${new Date().toISOString().split("T")[0]})
-- Extract as many details as possible from the prompt and any attachments
-- For line items, categorize each as: Hotel, Transfer, Excursion, Insurance, Flights, Car Rental, Spa, or Other
-- If per-person pricing is given, calculate total based on number of travellers
-- Include relevant resort amenities and features in the inclusions array
-- The client_name MUST be "${clientName || "the client"}"
-- Write a professional 2-3 sentence summary paragraph addressed to the client, thanking them and highlighting the trip (like a cover letter for the quote)
-- Do NOT use em-dashes or en-dashes in any output, use regular hyphens instead`,
+- Do NOT use em-dashes or en-dashes anywhere, use regular hyphens instead
+- Make the document feel like a premium travel consultation, not a boring form
+- Include the agent's email (${AGENT_BRANDING.email}) in the sign-off
+- Be thorough with pricing - if per-person pricing is given, show both per-person and total
+- Today's date is ${today}, quote valid until ${validUntilDate}
+
+After writing the markdown, also return a small metadata object for database storage.
+
+Return your response as a JSON object with exactly two fields:
+{
+  "markdown": "the full markdown document...",
+  "metadata": {
+    "client_name": "...",
+    "client_email": "..." or null,
+    "resort_name": "...",
+    "destination": "...",
+    "total_price": number or null,
+    "currency": "CAD",
+    "valid_until": "${validUntilDate}",
+    "check_in": "YYYY-MM-DD" or null,
+    "check_out": "YYYY-MM-DD" or null,
+    "num_travellers": number or null
+  }
+}
+
+Return ONLY valid JSON. No markdown fencing around the JSON itself.`,
     });
 
     // Add attachment images for vision
@@ -133,7 +168,7 @@ IMPORTANT RULES:
       }
     }
 
-    console.log("Generating quote with Gemini...");
+    console.log("Generating blog-style quote with Gemini...");
     const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -145,74 +180,10 @@ IMPORTANT RULES:
         messages: [
           {
             role: "system",
-            content: `You are ${AGENT_BRANDING.name}, a professional Canadian travel agent at ${AGENT_BRANDING.agency} (${AGENT_BRANDING.email}). Build client quotes by extracting every detail from the prompt and attached documents. Be thorough and accurate with pricing, dates, and traveller details. Never use em-dashes or en-dashes.`,
+            content: `You are ${AGENT_BRANDING.name}, a professional Canadian travel consultant at ${AGENT_BRANDING.agency}. You write beautiful, engaging vacation quotes that read like premium travel blog articles. Your tone is warm, knowledgeable, and personal. Never use em-dashes or en-dashes. Always return valid JSON.`,
           },
           { role: "user", content: userContent },
         ],
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: "build_quote",
-              description: "Build a complete client vacation quote with all details",
-              parameters: {
-                type: "object",
-                properties: {
-                  client_name: { type: "string", description: "Client's full name" },
-                  client_email: { type: "string", description: "Client email if found" },
-                  summary: { type: "string", description: "A professional 2-3 sentence introduction paragraph addressed to the client, thanking them for choosing the agency and highlighting the trip destination and key features. Written in first person as the agent." },
-                  resort_name: { type: "string", description: "Full resort/hotel name" },
-                  destination: { type: "string", description: "Destination city/region/country" },
-                  check_in: { type: "string", description: "Check-in date YYYY-MM-DD" },
-                  check_out: { type: "string", description: "Check-out date YYYY-MM-DD" },
-                  num_travellers: { type: "number", description: "Number of travellers" },
-                  room_type: { type: "string", description: "Room or suite type" },
-                  inclusions: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "What's included: All-Inclusive, Airport Transfers, Travel Insurance, etc.",
-                  },
-                  line_items: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        category: { type: "string", enum: ["Hotel", "Transfer", "Excursion", "Insurance", "Flights", "Car Rental", "Spa", "Other"] },
-                        description: { type: "string" },
-                        amount: { type: "number" },
-                      },
-                      required: ["description", "amount"],
-                      additionalProperties: false,
-                    },
-                    description: "Itemized pricing breakdown",
-                  },
-                  flights: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        airline: { type: "string" },
-                        flightNumber: { type: "string" },
-                        departureAirport: { type: "string" },
-                        arrivalAirport: { type: "string" },
-                        departureTime: { type: "string" },
-                        arrivalTime: { type: "string" },
-                      },
-                      additionalProperties: false,
-                    },
-                    description: "Flight details if available",
-                  },
-                  notes: { type: "string", description: "Additional notes, highlights, or special requests" },
-                  currency: { type: "string", enum: ["CAD", "USD", "EUR", "GBP"], description: "Currency code" },
-                  valid_until: { type: "string", description: "Quote valid until date YYYY-MM-DD" },
-                },
-                required: ["client_name", "resort_name", "line_items", "summary"],
-                additionalProperties: false,
-              },
-            },
-          },
-        ],
-        tool_choice: { type: "function", function: { name: "build_quote" } },
       }),
     });
 
@@ -234,15 +205,24 @@ IMPORTANT RULES:
     }
 
     const aiData = await aiRes.json();
-    const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
-    if (!toolCall?.function?.arguments) {
-      throw new Error("AI did not return structured output");
+    const rawContent = aiData.choices?.[0]?.message?.content;
+    if (!rawContent) throw new Error("AI did not return content");
+
+    // Parse JSON - handle potential markdown fencing
+    let cleaned = rawContent.trim();
+    if (cleaned.startsWith("```json")) cleaned = cleaned.slice(7);
+    else if (cleaned.startsWith("```")) cleaned = cleaned.slice(3);
+    if (cleaned.endsWith("```")) cleaned = cleaned.slice(0, -3);
+    cleaned = cleaned.trim();
+
+    const result = JSON.parse(cleaned);
+    if (!result.markdown || !result.metadata) {
+      throw new Error("AI response missing markdown or metadata");
     }
 
-    const quoteData = JSON.parse(toolCall.function.arguments);
-    console.log("Quote generated for:", quoteData.resort_name);
+    console.log("Blog-style quote generated for:", result.metadata.resort_name);
 
-    return new Response(JSON.stringify(quoteData), {
+    return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e: any) {
