@@ -357,6 +357,7 @@ export type Database = {
           line_items: Json | null
           notes: string | null
           num_travellers: number | null
+          quote_markdown: string | null
           resort_name: string
           resort_review_slug: string | null
           review_data: Json | null
@@ -384,6 +385,7 @@ export type Database = {
           line_items?: Json | null
           notes?: string | null
           num_travellers?: number | null
+          quote_markdown?: string | null
           resort_name: string
           resort_review_slug?: string | null
           review_data?: Json | null
@@ -411,6 +413,7 @@ export type Database = {
           line_items?: Json | null
           notes?: string | null
           num_travellers?: number | null
+          quote_markdown?: string | null
           resort_name?: string
           resort_review_slug?: string | null
           review_data?: Json | null

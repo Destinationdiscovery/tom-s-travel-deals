@@ -4,6 +4,8 @@ import { Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import QuoteReviewSection from "@/components/dashboard/QuoteReviewSection";
 import TripDetailsCard from "@/components/dashboard/TripDetailsCard";
 
@@ -11,12 +13,6 @@ const AGENT_INFO = {
   name: "Tom Laracy",
   email: "tlaracy@travelonly.com",
   agency: "TravelOnly",
-};
-
-const getNights = (checkIn: string, checkOut: string) => {
-  if (!checkIn || !checkOut) return null;
-  const diff = Math.round((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / 86400000);
-  return diff > 0 ? diff : null;
 };
 
 const PublicQuote = () => {
@@ -51,101 +47,116 @@ const PublicQuote = () => {
     </div>
   );
 
-  const lineItems = (quote.line_items as any[]) || [];
-  const flights = (quote.flight_details as any[]) || [];
-  const inclusions = (quote.inclusions as string[]) || [];
-  const attachments = (quote.attachment_urls as string[]) || [];
-  const heroImage = (quote.review_data as any)?.photos?.[0] || (quote.review_data as any)?.heroImage || null;
+  const hasMarkdown = !!quote.quote_markdown;
 
   return (
     <div className="min-h-screen bg-background py-12 px-4">
       <div className="max-w-5xl mx-auto">
         <Card>
-          <CardContent className="p-8 space-y-6">
-            {/* Resort Hero Image */}
-            {heroImage && (
-              <div className="rounded-lg overflow-hidden -mx-2 -mt-2 mb-4">
-                <img src={heroImage} alt={quote.resort_name} className="w-full h-48 object-cover" />
-              </div>
-            )}
-
-            <div className="flex items-start justify-between">
-              <div>
-                <h1 className="font-display text-2xl font-bold text-foreground">Vacation Quote</h1>
-                <p className="text-sm text-muted-foreground mt-1">Prepared for {quote.client_name}</p>
-              </div>
-              <div className="text-right">
-                <p className="font-display text-lg font-bold">
-                  <span className="text-sky-400">Review</span>
-                  <span className="text-amber-400">Then</span>
-                  <span className="text-emerald-400">Go</span>
-                </p>
-                <p className="text-xs text-muted-foreground">Travel Services</p>
-              </div>
-            </div>
-
-            <div className="border-t border-border pt-4">
-              <h2 className="font-display text-xl font-bold text-foreground">{quote.resort_name}</h2>
-              {quote.destination && <p className="text-sm text-muted-foreground">{quote.destination}</p>}
-            </div>
-
-            {/* Professional Summary */}
-            {quote.summary && (
-              <p className="text-sm text-muted-foreground leading-relaxed">{quote.summary}</p>
-            )}
-
-            {/* Embedded Review Section with Trip Details in sidebar */}
-            {quote.include_review && quote.review_data ? (
-              <QuoteReviewSection
-                reviewData={quote.review_data}
-                hideHeader
-                tripDetailsProps={{
-                  resortName: quote.resort_name,
-                  destination: quote.destination,
-                  roomType: quote.room_type,
-                  checkIn: quote.check_in,
-                  checkOut: quote.check_out,
-                  numTravellers: quote.num_travellers,
-                  flights,
-                  lineItems,
-                  totalPrice: quote.total_price,
-                  currency: quote.currency || "CAD",
-                  inclusions,
-                  notes: quote.notes,
-                  attachmentUrls: attachments,
-                }}
-              />
+          <CardContent className="p-8">
+            {hasMarkdown ? (
+              <article className="prose prose-sm sm:prose dark:prose-invert max-w-none prose-headings:font-display prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-p:leading-relaxed prose-li:leading-relaxed prose-table:text-sm prose-th:bg-muted prose-th:px-3 prose-th:py-2 prose-td:px-3 prose-td:py-2 prose-blockquote:border-primary prose-blockquote:bg-muted/50 prose-blockquote:py-1 prose-blockquote:px-4 prose-blockquote:rounded-r-lg">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {quote.quote_markdown}
+                </ReactMarkdown>
+              </article>
             ) : (
-              <TripDetailsCard
-                resortName={quote.resort_name}
-                destination={quote.destination}
-                roomType={quote.room_type}
-                checkIn={quote.check_in}
-                checkOut={quote.check_out}
-                numTravellers={quote.num_travellers}
-                flights={flights}
-                lineItems={lineItems}
-                totalPrice={quote.total_price}
-                currency={quote.currency || "CAD"}
-                inclusions={inclusions}
-                notes={quote.notes}
-                attachmentUrls={attachments}
-              />
-            )}
+              /* Legacy structured layout for old quotes */
+              <div className="space-y-6">
+                {(() => {
+                  const lineItems = (quote.line_items as any[]) || [];
+                  const flights = (quote.flight_details as any[]) || [];
+                  const inclusions = (quote.inclusions as string[]) || [];
+                  const attachments = (quote.attachment_urls as string[]) || [];
+                  const heroImage = (quote.review_data as any)?.photos?.[0] || (quote.review_data as any)?.heroImage || null;
 
-            {/* Footer: Valid Until + Agent Contact */}
-            <div className="border-t border-border pt-4 space-y-2">
-              {quote.valid_until && (
-                <p className="text-xs text-muted-foreground text-center">
-                  Quote valid until <span className="font-medium text-foreground">{format(new Date(quote.valid_until + "T00:00:00"), "MMM d, yyyy")}</span>
-                </p>
-              )}
-              <div className="text-center text-xs text-muted-foreground">
-                <p className="font-medium text-foreground">{AGENT_INFO.name}</p>
-                <p>{AGENT_INFO.agency} · {AGENT_INFO.email}</p>
+                  return (
+                    <>
+                      {heroImage && (
+                        <div className="rounded-lg overflow-hidden -mx-2 -mt-2 mb-4">
+                          <img src={heroImage} alt={quote.resort_name} className="w-full h-48 object-cover" />
+                        </div>
+                      )}
+
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h1 className="font-display text-2xl font-bold text-foreground">Vacation Quote</h1>
+                          <p className="text-sm text-muted-foreground mt-1">Prepared for {quote.client_name}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-display text-lg font-bold">
+                            <span className="text-sky-400">Review</span>
+                            <span className="text-amber-400">Then</span>
+                            <span className="text-emerald-400">Go</span>
+                          </p>
+                          <p className="text-xs text-muted-foreground">Travel Services</p>
+                        </div>
+                      </div>
+
+                      <div className="border-t border-border pt-4">
+                        <h2 className="font-display text-xl font-bold text-foreground">{quote.resort_name}</h2>
+                        {quote.destination && <p className="text-sm text-muted-foreground">{quote.destination}</p>}
+                      </div>
+
+                      {quote.summary && (
+                        <p className="text-sm text-muted-foreground leading-relaxed">{quote.summary}</p>
+                      )}
+
+                      {quote.include_review && quote.review_data ? (
+                        <QuoteReviewSection
+                          reviewData={quote.review_data}
+                          hideHeader
+                          tripDetailsProps={{
+                            resortName: quote.resort_name,
+                            destination: quote.destination,
+                            roomType: quote.room_type,
+                            checkIn: quote.check_in,
+                            checkOut: quote.check_out,
+                            numTravellers: quote.num_travellers,
+                            flights,
+                            lineItems,
+                            totalPrice: quote.total_price,
+                            currency: quote.currency || "CAD",
+                            inclusions,
+                            notes: quote.notes,
+                            attachmentUrls: attachments,
+                          }}
+                        />
+                      ) : (
+                        <TripDetailsCard
+                          resortName={quote.resort_name}
+                          destination={quote.destination}
+                          roomType={quote.room_type}
+                          checkIn={quote.check_in}
+                          checkOut={quote.check_out}
+                          numTravellers={quote.num_travellers}
+                          flights={flights}
+                          lineItems={lineItems}
+                          totalPrice={quote.total_price}
+                          currency={quote.currency || "CAD"} 
+                          inclusions={inclusions}
+                          notes={quote.notes}
+                          attachmentUrls={attachments}
+                        />
+                      )}
+
+                      <div className="border-t border-border pt-4 space-y-2">
+                        {quote.valid_until && (
+                          <p className="text-xs text-muted-foreground text-center">
+                            Quote valid until <span className="font-medium text-foreground">{format(new Date(quote.valid_until + "T00:00:00"), "MMM d, yyyy")}</span>
+                          </p>
+                        )}
+                        <div className="text-center text-xs text-muted-foreground">
+                          <p className="font-medium text-foreground">{AGENT_INFO.name}</p>
+                          <p>{AGENT_INFO.agency} · {AGENT_INFO.email}</p>
+                        </div>
+                        <p className="text-xs text-muted-foreground text-center">Generated on {format(new Date(quote.created_at), "MMM d, yyyy")}</p>
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
-              <p className="text-xs text-muted-foreground text-center">Generated on {format(new Date(quote.created_at), "MMM d, yyyy")}</p>
-            </div>
+            )}
           </CardContent>
         </Card>
       </div>
