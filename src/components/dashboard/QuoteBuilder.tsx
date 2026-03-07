@@ -61,6 +61,7 @@ export interface QuoteData {
   reviewData: any | null;
   attachmentUrls?: string[];
   validUntil: string;
+  summary?: string;
 }
 
 const INCLUSION_PRESETS = [
@@ -247,32 +248,46 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
     setTemplates(data || []);
   };
 
+  const [aiClientName, setAiClientName] = useState("");
+  const [aiClientEmail, setAiClientEmail] = useState("");
+
   const handleAiFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
     setAiUploading(true);
-    const path = `quotes/ai-${Date.now()}-${file.name}`;
-    const { data, error } = await supabase.storage.from("booking-documents").upload(path, file, { upsert: true });
-    if (error) {
-      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
-    } else {
-      setAiAttachments((prev) => [...prev, data.path]);
-      setAiAttachmentNames((prev) => [...prev, file.name]);
-      toast({ title: "File attached" });
+    for (const file of Array.from(files)) {
+      const path = `quotes/ai-${Date.now()}-${file.name}`;
+      const { data, error } = await supabase.storage.from("booking-documents").upload(path, file, { upsert: true });
+      if (error) {
+        toast({ title: "Upload failed", description: error.message, variant: "destructive" });
+      } else {
+        setAiAttachments((prev) => [...prev, data.path]);
+        setAiAttachmentNames((prev) => [...prev, file.name]);
+      }
     }
+    toast({ title: `${files.length} file(s) attached` });
     setAiUploading(false);
     if (aiFileInputRef.current) aiFileInputRef.current.value = "";
   };
 
   const handleAiGenerate = async () => {
-    if (!aiPrompt.trim()) {
-      toast({ title: "No prompt", description: "Describe the trip details first.", variant: "destructive" });
+    if (!aiClientName.trim()) {
+      toast({ title: "Client name required", description: "Enter the client's name before generating.", variant: "destructive" });
+      return;
+    }
+    if (!aiPrompt.trim() && aiAttachments.length === 0) {
+      toast({ title: "No info provided", description: "Add a prompt or attach documents.", variant: "destructive" });
       return;
     }
     setAiGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-quote", {
-        body: { prompt: aiPrompt.trim(), attachmentPaths: aiAttachments.length > 0 ? aiAttachments : undefined },
+        body: {
+          prompt: aiPrompt.trim() || undefined,
+          attachmentPaths: aiAttachments.length > 0 ? aiAttachments : undefined,
+          clientName: aiClientName.trim(),
+          clientEmail: aiClientEmail.trim() || undefined,
+        },
       });
 
       if (error) throw new Error(error.message || "Generation failed");
