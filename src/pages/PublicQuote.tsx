@@ -89,6 +89,11 @@ const PublicQuote = () => {
               {quote.destination && <p className="text-sm text-muted-foreground">{quote.destination}</p>}
             </div>
 
+            {/* Professional Summary */}
+            {quote.summary && (
+              <p className="text-sm text-muted-foreground leading-relaxed">{quote.summary}</p>
+            )}
+
             {/* Embedded Review Section with Trip Details in sidebar */}
             {quote.include_review && quote.review_data ? (
               <QuoteReviewSection

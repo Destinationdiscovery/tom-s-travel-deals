@@ -161,6 +161,11 @@ const QuotePreview = ({ quote, totalPrice, onBack, onSave, saving, editingId }: 
             <p className="text-sm text-muted-foreground">{quote.destination}</p>
           </div>
 
+          {/* Professional Summary */}
+          {quote.summary && (
+            <p className="text-sm text-muted-foreground leading-relaxed">{quote.summary}</p>
+          )}
+
           {/* Embedded Review Section with Trip Details in sidebar */}
           {quote.includeReview && quote.reviewData ? (
             <QuoteReviewSection

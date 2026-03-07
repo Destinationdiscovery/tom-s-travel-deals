@@ -707,24 +707,38 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
             {aiMode === "generate" && (
               <>
                 <p className="text-sm text-muted-foreground">
-                  Describe the trip and AI will research the resort, build pricing, and fill everything. Just review and save.
+                  Attach screenshots of pricing, flights, resort info, and enter the client's name. AI will build the full quote.
                 </p>
-                <div>
-                  <Label>Prompt</Label>
-                  <Textarea
-                    value={aiPrompt}
-                    onChange={(e) => setAiPrompt(e.target.value)}
-                    placeholder="e.g. Create a quote for Pat and Holly, 1 week Barcelo Maya Riviera adults only, $1295 per person, all inclusive, flights from Toronto..."
-                    className="min-h-[120px] text-sm"
-                  />
+
+                {/* Client Name & Email */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label>Client Name *</Label>
+                    <Input
+                      value={aiClientName}
+                      onChange={(e) => setAiClientName(e.target.value)}
+                      placeholder="e.g. Loretta Smith"
+                    />
+                  </div>
+                  <div>
+                    <Label>Client Email</Label>
+                    <Input
+                      type="email"
+                      value={aiClientEmail}
+                      onChange={(e) => setAiClientEmail(e.target.value)}
+                      placeholder="Optional"
+                    />
+                  </div>
                 </div>
 
-                {/* Attachment upload */}
+                {/* Attachment upload - multiple files */}
                 <div>
+                  <Label className="mb-1.5 block">Attach Screenshots / Documents</Label>
                   <input
                     ref={aiFileInputRef}
                     type="file"
                     accept=".pdf,.jpg,.jpeg,.png,.webp"
+                    multiple
                     className="hidden"
                     onChange={handleAiFileUpload}
                   />
@@ -743,22 +757,33 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
                   )}
                   <Button variant="outline" size="sm" onClick={() => aiFileInputRef.current?.click()} disabled={aiUploading} className="gap-2">
                     {aiUploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Paperclip className="h-3.5 w-3.5" />}
-                    {aiUploading ? "Uploading..." : "Attach Document"}
+                    {aiUploading ? "Uploading..." : "Attach Files"}
                   </Button>
-                  <span className="text-xs text-muted-foreground ml-2">PDF, JPG, PNG, WEBP — invoices, confirmations, etc.</span>
+                  <span className="text-xs text-muted-foreground ml-2">PDF, JPG, PNG, WEBP - pricing screenshots, confirmations, etc.</span>
+                </div>
+
+                {/* Optional prompt */}
+                <div>
+                  <Label>Extra Context <span className="text-muted-foreground font-normal">(optional)</span></Label>
+                  <Textarea
+                    value={aiPrompt}
+                    onChange={(e) => setAiPrompt(e.target.value)}
+                    placeholder="Optional: add any extra context (e.g. 'couple trip, wants ocean view, budget $3000')..."
+                    className="min-h-[80px] text-sm"
+                  />
                 </div>
 
                 <Button
                   onClick={handleAiGenerate}
-                  disabled={aiGenerating || !aiPrompt.trim()}
+                  disabled={aiGenerating || !aiClientName.trim() || (!aiPrompt.trim() && aiAttachments.length === 0)}
                   className="gap-2"
                 >
                   {aiGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
-                  {aiGenerating ? "Researching & Building Quote..." : "🔍 Generate Quote"}
+                  {aiGenerating ? "Researching & Building Quote..." : "Generate Quote"}
                 </Button>
                 {aiGenerating && (
                   <p className="text-xs text-muted-foreground animate-pulse">
-                    Researching the resort, extracting details, and building your quote. This may take 15-30 seconds...
+                    Researching the resort, extracting details from your screenshots, and building the quote. This may take 15-30 seconds...
                   </p>
                 )}
               </>
