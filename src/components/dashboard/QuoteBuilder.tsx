@@ -380,6 +380,7 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
         room_type: quote.roomType || null,
         inclusions: quote.inclusions.length > 0 ? quote.inclusions : [],
         valid_until: quote.validUntil || null,
+        summary: quote.summary || null,
       };
       await supabase.from("client_quotes").update(payload as any).eq("id", editingId);
       setAutoSaved(true);
