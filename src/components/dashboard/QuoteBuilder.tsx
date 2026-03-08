@@ -228,6 +228,7 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
   const [aiAttachmentNames, setAiAttachmentNames] = useState<string[]>([]);
   const [aiUploading, setAiUploading] = useState(false);
   const aiFileInputRef = useRef<HTMLInputElement>(null);
+  const [aiIncludeThingsToDo, setAiIncludeThingsToDo] = useState(true);
 
   const [quote, setQuote] = useState<QuoteData>({
     clientName: "", clientEmail: "", resortName: "", resortReviewSlug: "", destination: "",
