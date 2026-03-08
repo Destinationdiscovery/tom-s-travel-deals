@@ -9,6 +9,7 @@ interface MonthData {
   month: string;
   quoted: number;
   booked: number;
+  commission: number;
 }
 
 const RevenueChart = () => {
@@ -18,7 +19,7 @@ const RevenueChart = () => {
     const fetchData = async () => {
       const [quotesRes, bookingDetailsRes] = await Promise.all([
         supabase.from("client_quotes").select("total_price, status, created_at"),
-        supabase.from("booking_details").select("total_value, created_at"),
+        supabase.from("booking_details").select("total_value, commission, created_at"),
       ]);
 
       const quotes = quotesRes.data || [];
@@ -34,6 +35,7 @@ const RevenueChart = () => {
 
         let quoted = 0;
         let booked = 0;
+        let commission = 0;
 
         quotes.forEach((q) => {
           if (q.created_at?.startsWith(monthKey)) {
@@ -43,15 +45,15 @@ const RevenueChart = () => {
           }
         });
 
-        // Add booking total_value to booked
         (bookingDetails as any[]).forEach((b) => {
           if (b.created_at?.startsWith(monthKey)) {
             const val = Number(b.total_value) || 0;
             if (val > 0) booked += val;
+            commission += Number(b.commission) || 0;
           }
         });
 
-        months.push({ month: monthLabel, quoted, booked });
+        months.push({ month: monthLabel, quoted, booked, commission });
       }
 
       setData(months);
@@ -80,6 +82,7 @@ const RevenueChart = () => {
               <Legend wrapperStyle={{ fontSize: "12px" }} />
               <Bar dataKey="quoted" name="Quoted" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
               <Bar dataKey="booked" name="Booked" fill="#10b981" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="commission" name="Commission" fill="#f97316" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         ) : (
