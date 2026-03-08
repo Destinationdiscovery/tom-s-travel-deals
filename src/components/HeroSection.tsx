@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Search } from "lucide-react";
+import { Search, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { detectCountry, EXPEDIA_LINKS } from "@/components/AffiliateLinks";
 import { trackAffiliateClick } from "@/lib/analytics";
@@ -113,14 +113,23 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
           </p>
         </div>
 
-        <div className="flex items-center justify-center gap-2">
-          <span className="text-white/60 text-sm font-light">Powered by:</span>
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex items-center justify-center gap-2">
+            <span className="text-white/60 text-sm font-light">Powered by:</span>
+            <a
+              href={EXPEDIA_LINKS[detectCountry()]}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img src={expediaLogo} alt="Expedia" className="h-8 md:h-10" />
+            </a>
+          </div>
           <a
-            href={EXPEDIA_LINKS[detectCountry()]}
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/install"
+            className="md:hidden inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/15 backdrop-blur-sm text-white text-sm font-medium hover:bg-white/25 transition-colors"
           >
-            <img src={expediaLogo} alt="Expedia" className="h-8 md:h-10" />
+            <Download className="h-4 w-4" />
+            Install App
           </a>
         </div>
       </div>
