@@ -1,43 +1,38 @@
 
 
-# Plan: Banner Deals Manager
+# Plan: Add Travel Tips and Optional "Things to Do" to Quotes
 
-## Problem
-The two promotional banners at the top of the Travel Deals section (Expedia vacation sale + Hotels.com spring sale) are hardcoded. The admin needs to swap images, update affiliate links, and add sale labels — just like the other managed sections.
+## Changes
 
-## Approach
+### 1. Update `generate-quote` Edge Function Prompt
 
-### 1. Database — Create `banner_deals` table
-Create a table with 2 slots (1 = left banner, 2 = right banner), each storing:
-- `slot_number` (1-2)
-- `image_url` (uploaded to `blog-images` bucket)
-- `affiliate_url`
-- `sale_label` (e.g. "3 nights free!", "Save 40%")
-- `alt_text` (for accessibility)
+Modify the AI prompt in `supabase/functions/generate-quote/index.ts` to **always include a "Travel Tips" section** in the generated markdown (5 practical insider tips for the property/destination). Also instruct the AI to include a "Things to Do Nearby" section by default, which can be removed later if not wanted.
 
-RLS: public read, admin manage.
+Add a new parameter `includeThingsToDo` to the request body. When `false`, the prompt will explicitly say "Do NOT include a Things to Do section."
 
-### 2. Admin Component — `BannerDealsManager.tsx`
-A simple 2-slot editor (similar pattern to FeaturedReviewsManager) with:
-- Image upload (to `blog-images` bucket)
-- Current image preview
-- Affiliate URL input
-- Sale label input (displayed as a badge overlay on the banner)
-- Save / Reset to default buttons
+### 2. Add "Include Things to Do" Toggle in QuoteBuilder
 
-### 3. Sidebar + GearAdmin — New "Banner Deals" tab
-Add `"banner-deals"` to `DashboardTab` union and wire it up.
+In `src/components/dashboard/QuoteBuilder.tsx`, add a checkbox/switch below the "Extra Context" textarea in the AI generate section:
 
-### 4. TravelDealsSection — Fetch from `banner_deals`
-Query `banner_deals` on mount. If rows exist, use their `image_url`, `affiliate_url`, and `sale_label` instead of the hardcoded imports. Fall back to hardcoded defaults if no DB rows.
+- **"Include Things to Do Nearby"** - checked by default
+- Pass the value as `includeThingsToDo` to the `generate-quote` edge function call
+- Travel Tips will always be included (no toggle needed)
 
-### Changes Summary
+### 3. Edge Function Prompt Updates
+
+In the Gemini prompt (lines ~146-157 of `generate-quote/index.ts`):
+
+**Always include:**
+- "A 'Travel Tips' section with 5 numbered practical insider tips for the property/destination (booking tips, local tips, what to pack, etc.)"
+
+**Conditionally include:**
+- When `includeThingsToDo` is true (default): "A 'Things to Do Nearby' section with 3-5 top-rated activities, attractions, or experiences near the property"
+- When false: "Do NOT include a Things to Do or activities section"
+
+## Files Changed
 
 | File | Change |
 |------|--------|
-| Migration SQL | Create `banner_deals` table (2 slots) with RLS |
-| `src/components/dashboard/BannerDealsManager.tsx` | New component: 2-slot inline editor with image upload, affiliate URL, sale label |
-| `src/components/dashboard/DashboardSidebar.tsx` | Add `"banner-deals"` tab |
-| `src/pages/GearAdmin.tsx` | Import + render `BannerDealsManager` |
-| `src/components/TravelDealsSection.tsx` | Fetch `banner_deals`, merge with defaults, render sale label badge |
+| `supabase/functions/generate-quote/index.ts` | Accept `includeThingsToDo` param; update prompt to always add Travel Tips and conditionally add Things to Do |
+| `src/components/dashboard/QuoteBuilder.tsx` | Add "Include Things to Do" checkbox in AI generate mode; pass to edge function |
 
