@@ -18,7 +18,8 @@ export default defineConfig(({ mode }) => ({
       includeAssets: ["favicon.svg", "favicon.png", "apple-touch-icon.png"],
       workbox: {
         navigateFallbackDenylist: [/^\/~oauth/],
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+        globPatterns: ["**/*.{js,css,html,ico,svg,woff2}"],
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,

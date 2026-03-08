@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { useLocation } from "react-router-dom";
-import { Shield, Search, Menu, X, Download } from "lucide-react";
+import { Shield, Search, Menu, Download } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import AdminLoginDialog from "@/components/auth/AdminLoginDialog";
@@ -38,12 +38,16 @@ const Header = () => {
       >
         Skip to main content
       </a>
-      <header className="fixed top-0 left-0 right-0 z-50 bg-primary backdrop-blur-md border-b border-primary/20" style={{ paddingLeft: 'env(safe-area-inset-left)', paddingRight: 'env(safe-area-inset-right)' }}>
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+      <header
+        className="fixed top-0 left-0 right-0 z-50 bg-primary backdrop-blur-md border-b border-primary/20"
+        style={{ paddingLeft: 'env(safe-area-inset-left)', paddingRight: 'env(safe-area-inset-right)' }}
+      >
+        <div className="container mx-auto px-3 md:px-4 py-3 flex items-center justify-between min-w-0">
+          {/* Left: logo */}
+          <div className="flex items-center gap-1.5 md:gap-2 shrink-0">
             <AdminLoginDialog />
             <Link to="/">
-              <h1 className="font-display text-2xl md:text-3xl font-bold">
+              <h1 className="font-display text-xl md:text-3xl font-bold whitespace-nowrap">
                 <span className="text-sky-300">Review</span>
                 <span className="text-amber-400">Then</span>
                 <span className="text-emerald-400">Go</span>
@@ -65,7 +69,8 @@ const Header = () => {
             ))}
           </nav>
 
-          <div className="flex items-center gap-3">
+          {/* Right actions — compact on mobile */}
+          <div className="flex items-center gap-1 md:gap-3 shrink-0">
             <ThemeToggle />
             <button
               onClick={() => setWidgetOpen((v) => !v)}
@@ -74,10 +79,21 @@ const Header = () => {
             >
               <Search className="h-4 w-4" />
             </button>
+
+            {/* Install icon — always visible on mobile */}
+            <Link
+              to="/install"
+              className="md:hidden p-2 rounded-lg text-secondary hover:text-secondary/80 hover:bg-primary-foreground/10 transition-colors"
+              aria-label="Install app"
+            >
+              <Download className="h-4 w-4" />
+            </Link>
+
+            {/* Admin link — desktop only */}
             {isAdmin && (
               <Link
                 to="/gear-admin"
-                className="text-sm font-medium text-primary-foreground/70 hover:text-primary-foreground transition-colors flex items-center gap-1"
+                className="hidden md:flex text-sm font-medium text-primary-foreground/70 hover:text-primary-foreground transition-colors items-center gap-1"
               >
                 <Shield className="h-4 w-4" />
                 Dashboard
