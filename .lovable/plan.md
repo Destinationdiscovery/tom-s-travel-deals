@@ -1,43 +1,24 @@
 
 
-# Plan: Banner Deals Manager
-
-## Problem
-The two promotional banners at the top of the Travel Deals section (Expedia vacation sale + Hotels.com spring sale) are hardcoded. The admin needs to swap images, update affiliate links, and add sale labels — just like the other managed sections.
+# Plan: Add Real Resort Photos to Blog-Style Quotes
 
 ## Approach
 
-### 1. Database — Create `banner_deals` table
-Create a table with 2 slots (1 = left banner, 2 = right banner), each storing:
-- `slot_number` (1-2)
-- `image_url` (uploaded to `blog-images` bucket)
-- `affiliate_url`
-- `sale_label` (e.g. "3 nights free!", "Save 40%")
-- `alt_text` (for accessibility)
+Use the same Google Places API photo lookup already used in `generate-review` — the `fetchPlacePhotos()` function searches Google Places for the resort name and returns photo references. These get served via the existing `place-photos` edge function proxy.
 
-RLS: public read, admin manage.
+## Changes
 
-### 2. Admin Component — `BannerDealsManager.tsx`
-A simple 2-slot editor (similar pattern to FeaturedReviewsManager) with:
-- Image upload (to `blog-images` bucket)
-- Current image preview
-- Affiliate URL input
-- Sale label input (displayed as a badge overlay on the banner)
-- Save / Reset to default buttons
+### `supabase/functions/generate-quote/index.ts`
 
-### 3. Sidebar + GearAdmin — New "Banner Deals" tab
-Add `"banner-deals"` to `DashboardTab` union and wire it up.
+1. Copy the `fetchPlacePhotos()` helper from `generate-review/index.ts` (Google Places Text Search API, returns photo reference names)
+2. After parsing the AI response, extract `metadata.resort_name` and call `fetchPlacePhotos(resortName, 4)` to get 3-4 real resort photos
+3. Build image URLs using the existing `place-photos` proxy: `${SUPABASE_URL}/functions/v1/place-photos?name=${photoRef}`
+4. Inject the images into the markdown at natural breakpoints (after the intro paragraph, near accommodation details) as standard markdown `![Resort photo](url)`
+5. Return the enriched markdown in the response
 
-### 4. TravelDealsSection — Fetch from `banner_deals`
-Query `banner_deals` on mount. If rows exist, use their `image_url`, `affiliate_url`, and `sale_label` instead of the hardcoded imports. Fall back to hardcoded defaults if no DB rows.
-
-### Changes Summary
+No frontend changes needed — `react-markdown` already renders `<img>` tags from markdown image syntax.
 
 | File | Change |
 |------|--------|
-| Migration SQL | Create `banner_deals` table (2 slots) with RLS |
-| `src/components/dashboard/BannerDealsManager.tsx` | New component: 2-slot inline editor with image upload, affiliate URL, sale label |
-| `src/components/dashboard/DashboardSidebar.tsx` | Add `"banner-deals"` tab |
-| `src/pages/GearAdmin.tsx` | Import + render `BannerDealsManager` |
-| `src/components/TravelDealsSection.tsx` | Fetch `banner_deals`, merge with defaults, render sale label badge |
+| `supabase/functions/generate-quote/index.ts` | Add `fetchPlacePhotos()`, inject real Google Places photos into markdown |
 
