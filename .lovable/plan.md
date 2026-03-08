@@ -1,43 +1,46 @@
 
 
-# Plan: Banner Deals Manager
+# Plan: Client Dropdown, Auto-Save, Delete Quotes & Delete Clients
 
-## Problem
-The two promotional banners at the top of the Travel Deals section (Expedia vacation sale + Hotels.com spring sale) are hardcoded. The admin needs to swap images, update affiliate links, and add sale labels — just like the other managed sections.
+## Changes
 
-## Approach
+### 1. Client Name Dropdown with Autocomplete (AI Generate mode)
 
-### 1. Database — Create `banner_deals` table
-Create a table with 2 slots (1 = left banner, 2 = right banner), each storing:
-- `slot_number` (1-2)
-- `image_url` (uploaded to `blog-images` bucket)
-- `affiliate_url`
-- `sale_label` (e.g. "3 nights free!", "Save 40%")
-- `alt_text` (for accessibility)
+Replace the plain text `Input` for "Client Name" in the AI generate section (lines ~739-746) with a **combobox-style dropdown** that:
+- Shows existing clients from `uniqueClients` as selectable options
+- Allows typing a new name (free-text)
+- When an existing client is selected, auto-fills email and ties the quote to that client folder (case-insensitive name match)
+- Uses a simple popover + filtered list pattern (no new dependencies needed)
 
-RLS: public read, admin manage.
+### 2. Auto-Save on Preview (Remove Manual Save)
 
-### 2. Admin Component — `BannerDealsManager.tsx`
-A simple 2-slot editor (similar pattern to FeaturedReviewsManager) with:
-- Image upload (to `blog-images` bucket)
-- Current image preview
-- Affiliate URL input
-- Sale label input (displayed as a badge overlay on the banner)
-- Save / Reset to default buttons
+- When the quote reaches step 4 (preview), **automatically save** it to the database immediately
+- Remove the "Save" button from `QuotePreview.tsx` action bar
+- Keep the auto-save on edit (existing 30s debounce) for when users go back and modify fields
+- After AI generates a quote and jumps to preview, it auto-inserts/updates in `client_quotes` and sets `editingId`
+- Show a brief "Saved" confirmation toast on auto-save
 
-### 3. Sidebar + GearAdmin — New "Banner Deals" tab
-Add `"banner-deals"` to `DashboardTab` union and wire it up.
+### 3. Delete Quote
 
-### 4. TravelDealsSection — Fetch from `banner_deals`
-Query `banner_deals` on mount. If rows exist, use their `image_url`, `affiliate_url`, and `sale_label` instead of the hardcoded imports. Fall back to hardcoded defaults if no DB rows.
+- Add a **delete button** (trash icon) next to each quote in the "Recent Clients" accordion (lines ~679-696)
+- Add a delete button next to each quote in the `ClientList.tsx` expanded view (lines ~206-224)
+- Add a confirmation dialog before deletion
+- Calls `supabase.from("client_quotes").delete().eq("id", quoteId)`
+- Refreshes the quote list after deletion
 
-### Changes Summary
+### 4. Delete Client
+
+- Add a **"Delete Client"** button in the `ClientList.tsx` expanded client section
+- Confirmation dialog: "This will delete all quotes and bookings for [Name]. Are you sure?"
+- Deletes all `client_quotes` where `client_name` matches (case-insensitive)
+- Deletes all `bookings` where `client_name` matches (case-insensitive)
+- Refreshes the client list
+
+## Files Changed
 
 | File | Change |
 |------|--------|
-| Migration SQL | Create `banner_deals` table (2 slots) with RLS |
-| `src/components/dashboard/BannerDealsManager.tsx` | New component: 2-slot inline editor with image upload, affiliate URL, sale label |
-| `src/components/dashboard/DashboardSidebar.tsx` | Add `"banner-deals"` tab |
-| `src/pages/GearAdmin.tsx` | Import + render `BannerDealsManager` |
-| `src/components/TravelDealsSection.tsx` | Fetch `banner_deals`, merge with defaults, render sale label badge |
+| `src/components/dashboard/QuoteBuilder.tsx` | Client name combobox dropdown in AI mode; auto-save on step 4 entry; delete quote button in Recent Clients accordion |
+| `src/components/dashboard/QuotePreview.tsx` | Remove Save button (auto-saved); keep other actions |
+| `src/components/dashboard/ClientList.tsx` | Add delete quote button per quote row; add delete client button per client |
 
