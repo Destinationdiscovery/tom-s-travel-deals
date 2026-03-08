@@ -6,6 +6,36 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+async function fetchPlacePhotos(placeName: string, maxPhotos = 4): Promise<string[]> {
+  const apiKey = Deno.env.get("GOOGLE_PLACES_API_KEY");
+  if (!apiKey) {
+    console.log("No Google Places API key configured, skipping photos");
+    return [];
+  }
+  try {
+    const response = await fetch("https://places.googleapis.com/v1/places:searchText", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": apiKey,
+        "X-Goog-FieldMask": "places.photos",
+      },
+      body: JSON.stringify({ textQuery: placeName, maxResultCount: 1 }),
+    });
+    if (!response.ok) {
+      console.error("Google Places search error:", response.status);
+      return [];
+    }
+    const data = await response.json();
+    const place = data.places?.[0];
+    if (!place?.photos?.length) return [];
+    return place.photos.slice(0, maxPhotos).map((p: { name: string }) => p.name);
+  } catch (e) {
+    console.error("Failed to fetch place photos:", e);
+    return [];
+  }
+}
+
 const AGENT_BRANDING = {
   name: "Tom Laracy",
   email: "tlaracy@travelonly.com",
@@ -221,6 +251,59 @@ Return ONLY valid JSON. No markdown fencing around the JSON itself.`,
     }
 
     console.log("Blog-style quote generated for:", result.metadata.resort_name);
+
+    // Fetch real resort photos from Google Places
+    const resortName = result.metadata.resort_name || "";
+    if (resortName) {
+      console.log("Fetching resort photos for:", resortName);
+      const photoRefs = await fetchPlacePhotos(resortName, 4);
+      if (photoRefs.length > 0) {
+        const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+        const photoUrls = photoRefs.map(
+          (ref) => `${supabaseUrl}/functions/v1/place-photos?name=${encodeURIComponent(ref)}`
+        );
+
+        // Inject photos at natural breakpoints in the markdown
+        const lines = result.markdown.split("\n");
+        const insertPoints: number[] = [];
+        let h2Count = 0;
+        for (let i = 0; i < lines.length; i++) {
+          if (lines[i].startsWith("## ")) {
+            h2Count++;
+            // Insert after the first paragraph following the 1st, 2nd, and 3rd h2
+            if (h2Count <= 3) {
+              // Find the next blank line after this heading (end of first paragraph)
+              for (let j = i + 2; j < lines.length; j++) {
+                if (lines[j].trim() === "") {
+                  insertPoints.push(j);
+                  break;
+                }
+              }
+            }
+          }
+        }
+
+        // Also add one photo at the very top (after first blank line)
+        for (let i = 0; i < lines.length; i++) {
+          if (lines[i].trim() === "" && i > 0) {
+            insertPoints.unshift(i);
+            break;
+          }
+        }
+
+        // Dedupe and sort descending so inserts don't shift indices
+        const uniquePoints = [...new Set(insertPoints)].sort((a, b) => b - a);
+        const photosToInsert = photoUrls.slice(0, uniquePoints.length);
+
+        for (let idx = 0; idx < photosToInsert.length && idx < uniquePoints.length; idx++) {
+          const insertAt = uniquePoints[idx];
+          lines.splice(insertAt + 1, 0, "", `![${resortName}](${photosToInsert[idx]})`, "");
+        }
+
+        result.markdown = lines.join("\n");
+        console.log(`Injected ${Math.min(photosToInsert.length, uniquePoints.length)} resort photos`);
+      }
+    }
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
