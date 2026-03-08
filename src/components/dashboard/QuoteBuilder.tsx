@@ -228,6 +228,7 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
   const [aiAttachmentNames, setAiAttachmentNames] = useState<string[]>([]);
   const [aiUploading, setAiUploading] = useState(false);
   const aiFileInputRef = useRef<HTMLInputElement>(null);
+  const [aiIncludeThingsToDo, setAiIncludeThingsToDo] = useState(true);
 
   const [quote, setQuote] = useState<QuoteData>({
     clientName: "", clientEmail: "", resortName: "", resortReviewSlug: "", destination: "",
@@ -289,6 +290,7 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
           attachmentPaths: aiAttachments.length > 0 ? aiAttachments : undefined,
           clientName: aiClientName.trim(),
           clientEmail: aiClientEmail.trim() || undefined,
+          includeThingsToDo: aiIncludeThingsToDo,
         },
       });
 
@@ -871,6 +873,18 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
                     placeholder="Optional: add any extra context (e.g. 'couple trip, wants ocean view, budget $3000')..."
                     className="min-h-[80px] text-sm"
                   />
+                </div>
+
+                {/* Things to Do toggle */}
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="ai-things-to-do"
+                    checked={aiIncludeThingsToDo}
+                    onCheckedChange={(checked) => setAiIncludeThingsToDo(checked === true)}
+                  />
+                  <Label htmlFor="ai-things-to-do" className="text-sm font-normal cursor-pointer">
+                    Include "Things to Do Nearby" section
+                  </Label>
                 </div>
 
                 <Button
