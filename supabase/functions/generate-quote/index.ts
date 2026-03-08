@@ -252,6 +252,59 @@ Return ONLY valid JSON. No markdown fencing around the JSON itself.`,
 
     console.log("Blog-style quote generated for:", result.metadata.resort_name);
 
+    // Fetch real resort photos from Google Places
+    const resortName = result.metadata.resort_name || "";
+    if (resortName) {
+      console.log("Fetching resort photos for:", resortName);
+      const photoRefs = await fetchPlacePhotos(resortName, 4);
+      if (photoRefs.length > 0) {
+        const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+        const photoUrls = photoRefs.map(
+          (ref) => `${supabaseUrl}/functions/v1/place-photos?name=${encodeURIComponent(ref)}`
+        );
+
+        // Inject photos at natural breakpoints in the markdown
+        const lines = result.markdown.split("\n");
+        const insertPoints: number[] = [];
+        let h2Count = 0;
+        for (let i = 0; i < lines.length; i++) {
+          if (lines[i].startsWith("## ")) {
+            h2Count++;
+            // Insert after the first paragraph following the 1st, 2nd, and 3rd h2
+            if (h2Count <= 3) {
+              // Find the next blank line after this heading (end of first paragraph)
+              for (let j = i + 2; j < lines.length; j++) {
+                if (lines[j].trim() === "") {
+                  insertPoints.push(j);
+                  break;
+                }
+              }
+            }
+          }
+        }
+
+        // Also add one photo at the very top (after first blank line)
+        for (let i = 0; i < lines.length; i++) {
+          if (lines[i].trim() === "" && i > 0) {
+            insertPoints.unshift(i);
+            break;
+          }
+        }
+
+        // Dedupe and sort descending so inserts don't shift indices
+        const uniquePoints = [...new Set(insertPoints)].sort((a, b) => b - a);
+        const photosToInsert = photoUrls.slice(0, uniquePoints.length);
+
+        for (let idx = 0; idx < photosToInsert.length && idx < uniquePoints.length; idx++) {
+          const insertAt = uniquePoints[idx];
+          lines.splice(insertAt + 1, 0, "", `![${resortName}](${photosToInsert[idx]})`, "");
+        }
+
+        result.markdown = lines.join("\n");
+        console.log(`Injected ${Math.min(photosToInsert.length, uniquePoints.length)} resort photos`);
+      }
+    }
+
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
