@@ -16,6 +16,7 @@ import QuickLinksManager from "./QuickLinksManager";
 import AgentPinboard from "./AgentPinboard";
 import SiteActivityWidget from "./SiteActivityWidget";
 import ClientInsights from "./ClientInsights";
+import DashboardSearchChat from "./DashboardSearchChat";
 import { useTravelIntel, type IntelType } from "@/hooks/useTravelIntel";
 import { RequirementsResult, AdvisoriesResult, NewsResult, IntelLoading } from "@/components/intel/IntelResults";
 
@@ -271,6 +272,9 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
 
       {/* Quick Links (DB-backed) */}
       <QuickLinksManager />
+
+      {/* Travel Research Chat */}
+      <DashboardSearchChat />
 
       {/* Quick Intel Lookup */}
       <Card className="border-l-4 border-l-cyan-500">
