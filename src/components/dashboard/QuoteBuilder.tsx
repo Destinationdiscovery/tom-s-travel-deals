@@ -1156,7 +1156,7 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
 
       {/* Step 4: Preview */}
       {step === 4 && (
-        <QuotePreview quote={quote} totalPrice={totalPrice} onBack={() => setStep(3)} onSave={handleSave} saving={saving} editingId={editingId} />
+        <QuotePreview quote={quote} totalPrice={totalPrice} onBack={() => setStep(3)} onSave={handleSave} saving={saving} editingId={editingId} onNewQuote={resetQuote} onDashboardHome={() => { resetQuote(); onPreviewMode?.(false); }} />
       )}
 
       {/* Booking from Quote Dialog */}
