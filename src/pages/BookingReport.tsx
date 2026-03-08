@@ -129,6 +129,7 @@ const BookingReport = () => {
       const details = (detailsResult as any).data;
       setBookingDetails(details);
       setReportMarkdown(details.report_markdown || "");
+      setCommissionValue(String(details.commission || 0));
     }
 
     setLoading(false);
