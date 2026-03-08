@@ -1,24 +1,48 @@
-import { LayoutDashboard, FileText, Calendar, Mail, ImageIcon, Users, Megaphone, ClipboardList, Menu, TrendingUp, BookOpen, Star, MapPin, PanelTop } from "lucide-react";
+import { LayoutDashboard, FileText, Calendar, Mail, ImageIcon, Users, ClipboardList, Menu, BookOpen, Star, MapPin, PanelTop, Luggage } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
-export type DashboardTab = "overview" | "quotes" | "calendar" | "emails" | "gear" | "clients" | "deals" | "bookings" | "revenue" | "blog" | "featured-deals" | "reviews" | "banner-deals";
+export type DashboardTab = "overview" | "quotes" | "calendar" | "emails" | "gear" | "clients" | "bookings" | "blog" | "featured-deals" | "reviews" | "banner-deals";
 
-const tabs = [
-  { id: "overview" as const, label: "Dashboard", icon: LayoutDashboard },
-  { id: "quotes" as const, label: "Quote Builder", icon: FileText },
-  { id: "clients" as const, label: "Clients", icon: Users },
-  { id: "bookings" as const, label: "Bookings", icon: ClipboardList },
-  { id: "calendar" as const, label: "Calendar", icon: Calendar },
-  { id: "emails" as const, label: "Emails", icon: Mail },
-  { id: "deals" as const, label: "Deal Maker", icon: Megaphone },
-  { id: "featured-deals" as const, label: "Featured Deals", icon: Star },
-  { id: "banner-deals" as const, label: "Banner Deals", icon: PanelTop },
-  { id: "reviews" as const, label: "Featured Reviews", icon: MapPin },
-  { id: "blog" as const, label: "Blog", icon: BookOpen },
-  { id: "gear" as const, label: "Featured Gear", icon: ImageIcon },
-  { id: "revenue" as const, label: "Revenue", icon: TrendingUp },
+interface TabItem {
+  id: DashboardTab;
+  label: string;
+  icon: React.ElementType;
+}
+
+interface TabSection {
+  label: string;
+  tabs: TabItem[];
+}
+
+const sections: TabSection[] = [
+  {
+    label: "AGENT HQ",
+    tabs: [
+      { id: "overview", label: "Dashboard", icon: LayoutDashboard },
+    ],
+  },
+  {
+    label: "CRM",
+    tabs: [
+      { id: "quotes", label: "Quote Builder", icon: FileText },
+      { id: "clients", label: "Clients", icon: Users },
+      { id: "bookings", label: "Bookings", icon: ClipboardList },
+      { id: "calendar", label: "Calendar", icon: Calendar },
+      { id: "emails", label: "Emails", icon: Mail },
+    ],
+  },
+  {
+    label: "SITE MANAGEMENT",
+    tabs: [
+      { id: "blog", label: "Content Studio", icon: BookOpen },
+      { id: "featured-deals", label: "Featured Deals", icon: Star },
+      { id: "banner-deals", label: "Banner Deals", icon: PanelTop },
+      { id: "reviews", label: "Featured Reviews", icon: MapPin },
+      { id: "gear", label: "Featured Gear", icon: Luggage },
+    ],
+  },
 ];
 
 interface DashboardSidebarProps {
@@ -35,20 +59,25 @@ const SidebarContent = ({ activeTab, onTabChange, onSelect }: { activeTab: Dashb
       <p className="text-xs text-muted-foreground">Travel Agent Dashboard</p>
     </div>
     <nav className="px-2 space-y-1">
-      {tabs.map((tab) => (
-        <button
-          key={tab.id}
-          onClick={() => { onTabChange(tab.id); onSelect?.(); }}
-          className={cn(
-            "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left",
-            activeTab === tab.id
-              ? "bg-primary/10 text-primary"
-              : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-          )}
-        >
-          <tab.icon className="h-4 w-4 shrink-0" />
-          {tab.label}
-        </button>
+      {sections.map((section) => (
+        <div key={section.label}>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 px-3 pt-4 pb-1.5">{section.label}</p>
+          {section.tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => { onTabChange(tab.id); onSelect?.(); }}
+              className={cn(
+                "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left",
+                activeTab === tab.id
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              )}
+            >
+              <tab.icon className="h-4 w-4 shrink-0" />
+              {tab.label}
+            </button>
+          ))}
+        </div>
       ))}
     </nav>
   </>

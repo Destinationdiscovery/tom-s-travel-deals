@@ -10,7 +10,6 @@ import BookingManager from "@/components/dashboard/BookingManager";
 import EmailComposer from "@/components/dashboard/EmailComposer";
 import GearImageManager from "@/components/dashboard/GearImageManager";
 import ClientList from "@/components/dashboard/ClientList";
-import DealMaker from "@/components/dashboard/DealMaker";
 import BlogPostCreator from "@/components/dashboard/BlogPostCreator";
 import FeaturedDealsManager from "@/components/dashboard/FeaturedDealsManager";
 import FeaturedReviewsManager from "@/components/dashboard/FeaturedReviewsManager";
@@ -55,7 +54,6 @@ const GearAdmin = () => {
           {activeTab === "bookings" && <BookingManager />}
           {activeTab === "calendar" && <BookingCalendar />}
           {activeTab === "emails" && <EmailComposer />}
-          {activeTab === "deals" && <DealMaker />}
           {activeTab === "featured-deals" && <FeaturedDealsManager />}
           {activeTab === "banner-deals" && <BannerDealsManager />}
           {activeTab === "reviews" && <FeaturedReviewsManager />}
