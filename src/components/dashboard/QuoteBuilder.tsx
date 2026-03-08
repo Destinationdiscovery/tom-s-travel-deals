@@ -229,6 +229,8 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
   const [aiUploading, setAiUploading] = useState(false);
   const aiFileInputRef = useRef<HTMLInputElement>(null);
   const [aiIncludeThingsToDo, setAiIncludeThingsToDo] = useState(true);
+  const [aiAdvisoryEnabled, setAiAdvisoryEnabled] = useState(false);
+  const [aiAdvisoryText, setAiAdvisoryText] = useState("");
 
   const [quote, setQuote] = useState<QuoteData>({
     clientName: "", clientEmail: "", resortName: "", resortReviewSlug: "", destination: "",
@@ -291,6 +293,7 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
           clientName: aiClientName.trim(),
           clientEmail: aiClientEmail.trim() || undefined,
           includeThingsToDo: aiIncludeThingsToDo,
+          advisory: aiAdvisoryEnabled && aiAdvisoryText.trim() ? aiAdvisoryText.trim() : undefined,
         },
       });
 
@@ -885,6 +888,28 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
                   <Label htmlFor="ai-things-to-do" className="text-sm font-normal cursor-pointer">
                     Include "Things to Do Nearby" section
                   </Label>
+                </div>
+
+                {/* Travel Advisory toggle */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id="ai-advisory"
+                      checked={aiAdvisoryEnabled}
+                      onCheckedChange={(checked) => setAiAdvisoryEnabled(checked === true)}
+                    />
+                    <Label htmlFor="ai-advisory" className="text-sm font-normal cursor-pointer">
+                      Include Travel Advisory
+                    </Label>
+                  </div>
+                  {aiAdvisoryEnabled && (
+                    <Input
+                      placeholder="e.g. Hurricane season - travel insurance strongly recommended"
+                      value={aiAdvisoryText}
+                      onChange={(e) => setAiAdvisoryText(e.target.value)}
+                      className="text-sm"
+                    />
+                  )}
                 </div>
 
                 <Button
