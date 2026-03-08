@@ -1,4 +1,5 @@
 import { createRoot } from "react-dom/client";
+// @ts-ignore - virtual module provided by vite-plugin-pwa
 import { registerSW } from "virtual:pwa-register";
 import App from "./App.tsx";
 import "./index.css";

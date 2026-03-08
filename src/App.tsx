@@ -76,6 +76,7 @@ const App = () => (
                 <Route path="/booking/:bookingNumber" element={<BookingReport />} />
                 <Route path="/client/:clientSlug" element={<ClientFile />} />
                 <Route path="/quote/:token" element={<PublicQuote />} />
+                <Route path="/install" element={<Install />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

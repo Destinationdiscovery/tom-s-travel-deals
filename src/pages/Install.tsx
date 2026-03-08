@@ -3,7 +3,7 @@ import { Download, Share, MoreVertical, CheckCircle2, Smartphone } from "lucide-
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { SEOHead } from "@/components/SEOHead";
+import SEOHead from "@/components/SEOHead";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
