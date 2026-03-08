@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { Megaphone, Copy, Download, Mail, Loader2, ExternalLink } from "lucide-react";
+import { openWorkOutlook } from "@/lib/openWorkOutlook";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -69,8 +70,7 @@ const DealMaker = () => {
 
   const openInOutlook = (content: string) => {
     const subject = `🔥 Deal Alert: ${form.resortName} in ${form.destination}`;
-    const mailtoUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(content)}`;
-    window.open(mailtoUrl);
+    openWorkOutlook('', subject, content);
   };
 
   const downloadPoster = async () => {
