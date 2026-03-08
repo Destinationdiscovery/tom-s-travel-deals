@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Search } from "lucide-react";
+import { Search, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { detectCountry, EXPEDIA_LINKS } from "@/components/AffiliateLinks";
 import { trackAffiliateClick } from "@/lib/analytics";
