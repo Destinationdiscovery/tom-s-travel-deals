@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { openWorkOutlook } from "@/lib/openWorkOutlook";
 import { ChevronLeft, Download, Link2, Mail, Loader2, ChevronDown, Send, PlusCircle, Home } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -59,7 +60,6 @@ const QuotePreview = ({ quote, totalPrice, onBack, onSave, saving, editingId, on
 
   const openOutlook = () => {
     if (requireSaved()) return;
-    const { openWorkOutlook } = require("@/lib/openWorkOutlook");
     openWorkOutlook(quote.clientEmail || '', emailSubject, emailBody);
   };
 
