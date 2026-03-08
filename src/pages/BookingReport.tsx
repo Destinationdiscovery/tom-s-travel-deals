@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, CalendarIcon, MapPin, Ship, RefreshCw, Loader2, Trash2, Paperclip, Send, X, FileText, Download, Image as ImageIcon, Pencil, Sparkles } from "lucide-react";
+import { ArrowLeft, CalendarIcon, MapPin, Ship, RefreshCw, Loader2, Trash2, Paperclip, Send, X, FileText, Download, Image as ImageIcon, Pencil, Sparkles, DollarSign, Check } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -65,6 +65,11 @@ const BookingReport = () => {
   const [chatStatus, setChatStatus] = useState("");
   const chatFileRef = useRef<HTMLInputElement>(null);
 
+  // Commission
+  const [commissionEdit, setCommissionEdit] = useState(false);
+  const [commissionValue, setCommissionValue] = useState("");
+  const [savingCommission, setSavingCommission] = useState(false);
+
   // Lightbox
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -124,6 +129,7 @@ const BookingReport = () => {
       const details = (detailsResult as any).data;
       setBookingDetails(details);
       setReportMarkdown(details.report_markdown || "");
+      setCommissionValue(String(details.commission || 0));
     }
 
     setLoading(false);
@@ -202,6 +208,23 @@ const BookingReport = () => {
       toast({ title: "Error saving", description: err.message, variant: "destructive" });
     } finally {
       setSavingMarkdown(false);
+    }
+  };
+
+  // Save commission
+  const handleSaveCommission = async () => {
+    if (!bookingNumber) return;
+    setSavingCommission(true);
+    try {
+      const val = parseFloat(commissionValue) || 0;
+      await supabase.from("booking_details").update({ commission: val } as any).eq("booking_number", bookingNumber);
+      setBookingDetails((prev: any) => prev ? { ...prev, commission: val } : prev);
+      setCommissionEdit(false);
+      toast({ title: "Commission saved" });
+    } catch (err: any) {
+      toast({ title: "Error saving commission", description: err.message, variant: "destructive" });
+    } finally {
+      setSavingCommission(false);
     }
   };
 
@@ -418,6 +441,42 @@ const BookingReport = () => {
                 </Button>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Commission Field */}
+        <div className="container mx-auto px-4 max-w-4xl mb-6">
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-orange-500/5 border border-orange-500/20">
+            <div className="p-2 rounded-lg bg-orange-500/10">
+              <DollarSign className="h-4 w-4 text-orange-400" />
+            </div>
+            <span className="text-sm font-semibold text-foreground">Commission</span>
+            {commissionEdit ? (
+              <div className="flex items-center gap-2 ml-auto">
+                <span className="text-sm text-muted-foreground">$</span>
+                <Input
+                  type="number"
+                  value={commissionValue}
+                  onChange={(e) => setCommissionValue(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSaveCommission()}
+                  className="w-32 h-8 text-sm"
+                  autoFocus
+                />
+                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={handleSaveCommission} disabled={savingCommission}>
+                  {savingCommission ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5 text-emerald-400" />}
+                </Button>
+                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => { setCommissionEdit(false); setCommissionValue(String(bookingDetails?.commission || 0)); }}>
+                  <X className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 ml-auto">
+                <span className="text-lg font-bold text-foreground">${(parseFloat(commissionValue) || 0).toLocaleString()}</span>
+                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setCommissionEdit(true)}>
+                  <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+                </Button>
+              </div>
+            )}
           </div>
         </div>
 

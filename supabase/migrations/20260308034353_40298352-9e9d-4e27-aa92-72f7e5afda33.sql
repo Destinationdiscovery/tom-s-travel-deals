@@ -1,0 +1,1 @@
+ALTER TABLE public.booking_details ADD COLUMN commission numeric DEFAULT 0;
