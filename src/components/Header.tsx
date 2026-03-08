@@ -109,6 +109,14 @@ const Header = () => {
                       {link.label}
                     </Link>
                   ))}
+                  <Link
+                    to="/install"
+                    onClick={() => setMobileOpen(false)}
+                    className="text-lg font-medium text-secondary hover:text-secondary/80 transition-colors flex items-center gap-2 py-2"
+                  >
+                    <Download className="h-4 w-4" />
+                    Install App
+                  </Link>
                   {isAdmin && (
                     <Link
                       to="/gear-admin"
