@@ -51,3 +51,6 @@ verify_jwt = false
 [functions.generate-quote]
 verify_jwt = false
 
+[functions.generate-booking-report]
+verify_jwt = false
+
