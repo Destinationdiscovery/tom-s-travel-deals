@@ -77,12 +77,12 @@ export function useDashboardSearch() {
             const parsed = JSON.parse(jsonStr);
             if (parsed.citations) {
               citations = parsed.citations;
-              upsert();
-              continue;
             }
             const content = parsed.choices?.[0]?.delta?.content;
             if (content) {
               assistantSoFar += content;
+            }
+            if (parsed.citations || content) {
               upsert();
             }
           } catch {
