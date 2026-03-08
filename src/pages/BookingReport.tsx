@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, CalendarIcon, MapPin, Ship, RefreshCw, Loader2, Trash2, Paperclip, Send, X, FileText, Download, Image as ImageIcon, Pencil, Sparkles } from "lucide-react";
+import { ArrowLeft, CalendarIcon, MapPin, Ship, RefreshCw, Loader2, Trash2, Paperclip, Send, X, FileText, Download, Image as ImageIcon, Pencil, Sparkles, DollarSign, Check } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -64,6 +64,11 @@ const BookingReport = () => {
   const [chatProcessing, setChatProcessing] = useState(false);
   const [chatStatus, setChatStatus] = useState("");
   const chatFileRef = useRef<HTMLInputElement>(null);
+
+  // Commission
+  const [commissionEdit, setCommissionEdit] = useState(false);
+  const [commissionValue, setCommissionValue] = useState("");
+  const [savingCommission, setSavingCommission] = useState(false);
 
   // Lightbox
   const [lightboxOpen, setLightboxOpen] = useState(false);
