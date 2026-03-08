@@ -15,12 +15,14 @@ const RevenueChart = () => {
   const [data, setData] = useState<MonthData[]>([]);
 
   useEffect(() => {
-    const fetch = async () => {
-      const { data: quotes } = await supabase
-        .from("client_quotes")
-        .select("total_price, status, created_at");
+    const fetchData = async () => {
+      const [quotesRes, bookingDetailsRes] = await Promise.all([
+        supabase.from("client_quotes").select("total_price, status, created_at"),
+        supabase.from("booking_details").select("total_value, created_at"),
+      ]);
 
-      if (!quotes) return;
+      const quotes = quotesRes.data || [];
+      const bookingDetails = bookingDetailsRes.data || [];
 
       const now = new Date();
       const months: MonthData[] = [];
@@ -41,12 +43,20 @@ const RevenueChart = () => {
           }
         });
 
+        // Add booking total_value to booked
+        (bookingDetails as any[]).forEach((b) => {
+          if (b.created_at?.startsWith(monthKey)) {
+            const val = Number(b.total_value) || 0;
+            if (val > 0) booked += val;
+          }
+        });
+
         months.push({ month: monthLabel, quoted, booked });
       }
 
       setData(months);
     };
-    fetch();
+    fetchData();
   }, []);
 
   return (

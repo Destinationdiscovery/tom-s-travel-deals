@@ -59,13 +59,20 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
     };
 
     const fetchRevenue = async () => {
-      const { data } = await supabase.from("client_quotes").select("total_price, status");
-      if (!data) return;
+      const [quotesRes, bookingDetailsRes] = await Promise.all([
+        supabase.from("client_quotes").select("total_price, status"),
+        supabase.from("booking_details").select("total_value"),
+      ]);
       let totalQuoted = 0, totalBooked = 0;
-      data.forEach((q) => {
+      (quotesRes.data || []).forEach((q) => {
         const price = Number(q.total_price) || 0;
         totalQuoted += price;
         if (q.status === "booked") totalBooked += price;
+      });
+      // Add booking total_value to booked revenue
+      (bookingDetailsRes.data || []).forEach((b: any) => {
+        const val = Number(b.total_value) || 0;
+        if (val > 0) totalBooked += val;
       });
       setRevenue({ totalQuoted, totalBooked });
     };

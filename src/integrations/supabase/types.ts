@@ -206,11 +206,13 @@ export type Database = {
           payment_history: Json | null
           pricing: Json | null
           rate_code: string | null
+          report_markdown: string | null
           resort_name: string | null
           room_type: string | null
           rooms: Json | null
           ship_name: string | null
           supplier: string | null
+          total_value: number | null
           trip_group_id: string | null
           updated_at: string
         }
@@ -240,11 +242,13 @@ export type Database = {
           payment_history?: Json | null
           pricing?: Json | null
           rate_code?: string | null
+          report_markdown?: string | null
           resort_name?: string | null
           room_type?: string | null
           rooms?: Json | null
           ship_name?: string | null
           supplier?: string | null
+          total_value?: number | null
           trip_group_id?: string | null
           updated_at?: string
         }
@@ -274,11 +278,13 @@ export type Database = {
           payment_history?: Json | null
           pricing?: Json | null
           rate_code?: string | null
+          report_markdown?: string | null
           resort_name?: string | null
           room_type?: string | null
           rooms?: Json | null
           ship_name?: string | null
           supplier?: string | null
+          total_value?: number | null
           trip_group_id?: string | null
           updated_at?: string
         }
