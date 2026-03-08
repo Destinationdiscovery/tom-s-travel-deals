@@ -211,6 +211,23 @@ const BookingReport = () => {
     }
   };
 
+  // Save commission
+  const handleSaveCommission = async () => {
+    if (!bookingNumber) return;
+    setSavingCommission(true);
+    try {
+      const val = parseFloat(commissionValue) || 0;
+      await supabase.from("booking_details").update({ commission: val } as any).eq("booking_number", bookingNumber);
+      setBookingDetails((prev: any) => prev ? { ...prev, commission: val } : prev);
+      setCommissionEdit(false);
+      toast({ title: "Commission saved" });
+    } catch (err: any) {
+      toast({ title: "Error saving commission", description: err.message, variant: "destructive" });
+    } finally {
+      setSavingCommission(false);
+    }
+  };
+
   // Delete document
   const deleteDocument = async (fileName: string) => {
     try {
