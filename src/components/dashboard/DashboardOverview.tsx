@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { openExternal } from "@/lib/openExternal";
 import { openOutlookInbox } from "@/lib/openWorkOutlook";
-import { FileText, Calendar, Mail, DollarSign, AlertTriangle, Plus, TrendingUp, Clock, X } from "lucide-react";
+import { FileText, Calendar, Mail, DollarSign, AlertTriangle, Plus, TrendingUp, Clock, X, Search, Globe, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { format, isBefore, addDays } from "date-fns";
 import type { DashboardTab } from "./DashboardSidebar";
@@ -14,6 +16,8 @@ import QuickLinksManager from "./QuickLinksManager";
 import AgentPinboard from "./AgentPinboard";
 import SiteActivityWidget from "./SiteActivityWidget";
 import ClientInsights from "./ClientInsights";
+import { useTravelIntel, type IntelType } from "@/hooks/useTravelIntel";
+import { RequirementsResult, AdvisoriesResult, NewsResult, IntelLoading } from "@/components/intel/IntelResults";
 
 interface DashboardOverviewProps {
   onNavigate: (tab: DashboardTab) => void;
@@ -27,7 +31,18 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
   const [dismissedCards, setDismissedCards] = useState<Set<string>>(new Set());
 
+  // Travel Intel state
+  const [intelDest, setIntelDest] = useState("");
+  const [intelType, setIntelType] = useState<IntelType>("requirements");
+  const [intelCitizenship, setIntelCitizenship] = useState("Canada");
+  const { loading: intelLoading, error: intelError, requirementsData, advisoriesData, newsData, fetchIntel, clearAll: clearIntel } = useTravelIntel();
+
   const dismissCard = (id: string) => setDismissedCards(prev => new Set(prev).add(id));
+
+  const handleIntelSearch = () => {
+    if (!intelDest.trim()) return;
+    fetchIntel(intelType, intelDest.trim(), intelType === "requirements" ? intelCitizenship : undefined);
+  };
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -249,6 +264,57 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
       {/* Quick Links (DB-backed) */}
       <QuickLinksManager />
 
+      {/* Quick Intel Lookup */}
+      <Card className="border-l-4 border-l-cyan-500">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <div className="p-1.5 rounded-lg bg-cyan-500/10">
+              <Globe className="h-4 w-4 text-cyan-400" />
+            </div>
+            Quick Intel Lookup
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex gap-2 flex-wrap">
+            <Input
+              value={intelDest}
+              onChange={(e) => setIntelDest(e.target.value)}
+              placeholder="Enter destination (e.g. Cuba, Japan)..."
+              className="flex-1 min-w-[200px]"
+              onKeyDown={(e) => e.key === "Enter" && handleIntelSearch()}
+            />
+            <Select value={intelType} onValueChange={(v) => { setIntelType(v as IntelType); clearIntel(); }}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="requirements">Requirements</SelectItem>
+                <SelectItem value="advisories">Advisories</SelectItem>
+                <SelectItem value="news">News</SelectItem>
+              </SelectContent>
+            </Select>
+            {intelType === "requirements" && (
+              <Input
+                value={intelCitizenship}
+                onChange={(e) => setIntelCitizenship(e.target.value)}
+                placeholder="Citizenship"
+                className="w-[120px]"
+              />
+            )}
+            <Button onClick={handleIntelSearch} disabled={intelLoading || !intelDest.trim()} className="gap-2">
+              {intelLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+              Search
+            </Button>
+          </div>
+
+          {intelLoading && <IntelLoading type={intelType} />}
+          {intelError && <p className="text-sm text-destructive">{intelError}</p>}
+          {requirementsData && intelType === "requirements" && <RequirementsResult data={requirementsData} />}
+          {advisoriesData && intelType === "advisories" && <AdvisoriesResult data={advisoriesData} />}
+          {newsData && intelType === "news" && <NewsResult data={newsData} />}
+        </CardContent>
+      </Card>
+
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <RevenueChart />
@@ -266,10 +332,12 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
         <AgentPinboard />
 
         {/* Upcoming Deadlines */}
-        <Card>
+        <Card className="border-l-4 border-l-amber-500">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-amber-400" />
+              <div className="p-1.5 rounded-lg bg-amber-500/10">
+                <AlertTriangle className="h-4 w-4 text-amber-400" />
+              </div>
               Upcoming Deadlines
             </CardTitle>
           </CardHeader>
@@ -295,10 +363,12 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
         </Card>
 
         {/* Recent Activity */}
-        <Card>
+        <Card className="border-l-4 border-l-primary">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              <Clock className="h-4 w-4 text-primary" />
+              <div className="p-1.5 rounded-lg bg-primary/10">
+                <Clock className="h-4 w-4 text-primary" />
+              </div>
               Recent Activity
             </CardTitle>
           </CardHeader>

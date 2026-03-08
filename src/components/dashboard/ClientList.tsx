@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Search, FileText, Calendar, ChevronRight, Mail, UserPlus, Trash2 } from "lucide-react";
+import { Search, FileText, Calendar, ChevronRight, Mail, UserPlus, Trash2, StickyNote, Save, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +22,8 @@ interface ClientInfo {
   lastActivity: string;
   quotes: any[];
   bookings: any[];
+  notes: string;
+  notesQuoteId: string | null;
 }
 
 interface ClientListProps {
@@ -43,7 +45,7 @@ const buildClientMap = (quotes: any[], bookings: any[]) => {
   quotes.forEach((q) => {
     const key = q.client_name.toLowerCase().trim();
     if (!map.has(key)) {
-      map.set(key, { name: q.client_name, email: q.client_email || "", quoteCount: 0, bookedCount: 0, lastActivity: q.created_at, quotes: [], bookings: [] });
+      map.set(key, { name: q.client_name, email: q.client_email || "", quoteCount: 0, bookedCount: 0, lastActivity: q.created_at, quotes: [], bookings: [], notes: "", notesQuoteId: null });
     }
     const client = map.get(key)!;
     if (new Date(q.created_at) > new Date(client.lastActivity)) {
@@ -51,6 +53,15 @@ const buildClientMap = (quotes: any[], bookings: any[]) => {
       client.lastActivity = q.created_at;
     }
     if (q.client_email) client.email = q.client_email;
+    // Track notes from the first quote that has notes, or the General Inquiry placeholder
+    if (q.notes && !client.notes) {
+      client.notes = q.notes;
+      client.notesQuoteId = q.id;
+    }
+    if (q.resort_name === "General Inquiry" && !client.notesQuoteId) {
+      client.notesQuoteId = q.id;
+      if (q.notes) client.notes = q.notes;
+    }
     client.quoteCount++;
     if (q.status === "booked") client.bookedCount++;
     client.quotes.push(q);
@@ -58,7 +69,7 @@ const buildClientMap = (quotes: any[], bookings: any[]) => {
   bookings.forEach((b) => {
     const key = b.client_name.toLowerCase().trim();
     if (!map.has(key)) {
-      map.set(key, { name: b.client_name, email: b.client_email || "", quoteCount: 0, bookedCount: 0, lastActivity: b.created_at, quotes: [], bookings: [] });
+      map.set(key, { name: b.client_name, email: b.client_email || "", quoteCount: 0, bookedCount: 0, lastActivity: b.created_at, quotes: [], bookings: [], notes: "", notesQuoteId: null });
     }
     map.get(key)!.bookings.push(b);
   });
@@ -75,6 +86,11 @@ const ClientList = ({ onNavigate }: ClientListProps) => {
   const [newEmail, setNewEmail] = useState("");
   const [newNotes, setNewNotes] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // Inline notes editing
+  const [editingNotes, setEditingNotes] = useState<string | null>(null);
+  const [notesText, setNotesText] = useState("");
+  const [savingNotes, setSavingNotes] = useState(false);
 
   const fetchAll = async () => {
     const [quotesRes, bookingsRes] = await Promise.all([
@@ -114,13 +130,43 @@ const ClientList = ({ onNavigate }: ClientListProps) => {
     setClients(buildClientMap(quotes, bookings));
   };
 
+  const handleSaveNotes = async (clientName: string, quoteId: string | null) => {
+    if (!quoteId) {
+      // Create a General Inquiry quote to store notes
+      setSavingNotes(true);
+      const { error } = await supabase.from("client_quotes").insert({
+        client_name: clientName,
+        resort_name: "General Inquiry",
+        status: "draft" as any,
+        total_price: 0,
+        notes: notesText.trim() || null,
+      });
+      setSavingNotes(false);
+      if (error) {
+        toast({ title: "Error", description: "Failed to save notes.", variant: "destructive" });
+        return;
+      }
+    } else {
+      setSavingNotes(true);
+      const { error } = await supabase.from("client_quotes").update({ notes: notesText.trim() || null } as any).eq("id", quoteId);
+      setSavingNotes(false);
+      if (error) {
+        toast({ title: "Error", description: "Failed to save notes.", variant: "destructive" });
+        return;
+      }
+    }
+    toast({ title: "Notes saved" });
+    setEditingNotes(null);
+    const { quotes, bookings } = await fetchAll();
+    setClients(buildClientMap(quotes, bookings));
+  };
+
   const handleStatusChange = async (quoteId: string, newStatus: string) => {
     const { error } = await supabase.from("client_quotes").update({ status: newStatus } as any).eq("id", quoteId);
     if (error) {
       toast({ title: "Error", description: "Failed to update status.", variant: "destructive" });
       return;
     }
-    // Update local state
     setClients((prev) =>
       prev.map((c) => ({
         ...c,
@@ -143,7 +189,6 @@ const ClientList = ({ onNavigate }: ClientListProps) => {
   };
 
   const handleDeleteClient = async (clientName: string) => {
-    // Delete all quotes and bookings for this client (case-insensitive via ilike)
     const [qRes, bRes] = await Promise.all([
       supabase.from("client_quotes").delete().ilike("client_name", clientName),
       supabase.from("bookings").delete().ilike("client_name", clientName),
@@ -196,7 +241,7 @@ const ClientList = ({ onNavigate }: ClientListProps) => {
       ) : (
         <div className="space-y-3">
           {filtered.map((client) => (
-            <Card key={client.name} className="overflow-hidden">
+            <Card key={client.name} className="overflow-hidden border-l-4 border-l-primary/30">
               <button
                 onClick={() => setExpandedClient(expandedClient === client.name ? null : client.name)}
                 className="w-full text-left"
@@ -224,6 +269,39 @@ const ClientList = ({ onNavigate }: ClientListProps) => {
 
               {expandedClient === client.name && (
                 <div className="border-t border-border px-4 py-3 bg-muted/20 space-y-3">
+                  {/* Client Notes */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <StickyNote className="h-3.5 w-3.5 text-amber-400" />
+                      <p className="text-xs font-semibold text-muted-foreground uppercase">Notes</p>
+                      {editingNotes !== client.name && (
+                        <Button variant="ghost" size="sm" className="h-6 text-xs px-2" onClick={() => { setEditingNotes(client.name); setNotesText(client.notes); }}>
+                          Edit
+                        </Button>
+                      )}
+                    </div>
+                    {editingNotes === client.name ? (
+                      <div className="space-y-2">
+                        <Textarea
+                          value={notesText}
+                          onChange={(e) => setNotesText(e.target.value)}
+                          placeholder="Add notes about this client..."
+                          className="min-h-[80px] text-sm"
+                        />
+                        <div className="flex gap-2">
+                          <Button size="sm" className="gap-1 text-xs" disabled={savingNotes} onClick={() => handleSaveNotes(client.name, client.notesQuoteId)}>
+                            {savingNotes ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />} Save
+                          </Button>
+                          <Button variant="ghost" size="sm" className="text-xs" onClick={() => setEditingNotes(null)}>Cancel</Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground pl-5">
+                        {client.notes || <span className="italic">No notes yet. Click Edit to add.</span>}
+                      </p>
+                    )}
+                  </div>
+
                   {/* Quotes */}
                   {client.quotes.length > 0 && (
                     <div>
