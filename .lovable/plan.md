@@ -1,43 +1,41 @@
 
 
-# Plan: Banner Deals Manager
+# Plan: Fix Muted Text in PDF/Print Output
 
-## Problem
-The two promotional banners at the top of the Travel Deals section (Expedia vacation sale + Hotels.com spring sale) are hardcoded. The admin needs to swap images, update affiliate links, and add sale labels — just like the other managed sections.
+## Root Cause
 
-## Approach
+The quote preview uses Tailwind's `prose dark:prose-invert` classes and `text-muted-foreground` throughout. When you print/save as PDF:
 
-### 1. Database — Create `banner_deals` table
-Create a table with 2 slots (1 = left banner, 2 = right banner), each storing:
-- `slot_number` (1-2)
-- `image_url` (uploaded to `blog-images` bucket)
-- `affiliate_url`
-- `sale_label` (e.g. "3 nights free!", "Save 40%")
-- `alt_text` (for accessibility)
+1. **Dark mode issue**: `dark:prose-invert` makes text light gray — the print CSS sets `body { color: black }` but Tailwind's prose classes have higher specificity and override it
+2. **Muted foreground**: Elements using `text-muted-foreground` render in gray even in print, since `--muted-foreground` resolves to a washed-out color
 
-RLS: public read, admin manage.
+The screenshot confirms this — all body text appears in light gray instead of solid black.
 
-### 2. Admin Component — `BannerDealsManager.tsx`
-A simple 2-slot editor (similar pattern to FeaturedReviewsManager) with:
-- Image upload (to `blog-images` bucket)
-- Current image preview
-- Affiliate URL input
-- Sale label input (displayed as a badge overlay on the banner)
-- Save / Reset to default buttons
+## Fix
 
-### 3. Sidebar + GearAdmin — New "Banner Deals" tab
-Add `"banner-deals"` to `DashboardTab` union and wire it up.
+Add targeted print overrides in `src/index.css` to force all text inside `#quote-preview` to render in high-contrast black:
 
-### 4. TravelDealsSection — Fetch from `banner_deals`
-Query `banner_deals` on mount. If rows exist, use their `image_url`, `affiliate_url`, and `sale_label` instead of the hardcoded imports. Fall back to hardcoded defaults if no DB rows.
+```css
+@media print {
+  #quote-preview,
+  #quote-preview *,
+  .prose,
+  .prose * {
+    color: black !important;
+    -webkit-print-color-adjust: exact;
+  }
+  
+  #quote-preview h1, #quote-preview h2, #quote-preview h3,
+  #quote-preview h4, #quote-preview h5, #quote-preview h6 {
+    color: black !important;
+    font-weight: 700 !important;
+  }
+}
+```
 
-### Changes Summary
+This ensures all prose text, headings, and muted-foreground elements print as solid black regardless of dark/light mode.
 
 | File | Change |
 |------|--------|
-| Migration SQL | Create `banner_deals` table (2 slots) with RLS |
-| `src/components/dashboard/BannerDealsManager.tsx` | New component: 2-slot inline editor with image upload, affiliate URL, sale label |
-| `src/components/dashboard/DashboardSidebar.tsx` | Add `"banner-deals"` tab |
-| `src/pages/GearAdmin.tsx` | Import + render `BannerDealsManager` |
-| `src/components/TravelDealsSection.tsx` | Fetch `banner_deals`, merge with defaults, render sale label badge |
+| `src/index.css` | Add `color: black !important` overrides for `#quote-preview` and `.prose` elements inside `@media print` |
 
