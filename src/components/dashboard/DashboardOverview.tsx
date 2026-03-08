@@ -1,13 +1,19 @@
 import { useEffect, useState } from "react";
 import { openExternal } from "@/lib/openExternal";
 import { openOutlookInbox } from "@/lib/openWorkOutlook";
-import { FileText, Calendar, Mail, DollarSign, AlertTriangle, Plus, TrendingUp, Clock, ExternalLink, X } from "lucide-react";
+import { FileText, Calendar, Mail, DollarSign, AlertTriangle, Plus, TrendingUp, Clock, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { format, isBefore, addDays, isToday } from "date-fns";
+import { format, isBefore, addDays } from "date-fns";
 import type { DashboardTab } from "./DashboardSidebar";
+import DashboardFunnel from "./DashboardFunnel";
+import RevenueChart from "./RevenueChart";
+import QuickLinksManager from "./QuickLinksManager";
+import AgentPinboard from "./AgentPinboard";
+import SiteActivityWidget from "./SiteActivityWidget";
+import ClientInsights from "./ClientInsights";
 
 interface DashboardOverviewProps {
   onNavigate: (tab: DashboardTab) => void;
@@ -126,6 +132,14 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
     return `Email sent to ${item.client_name}: ${item.subject}`;
   };
 
+  const statCards = [
+    { label: "Total Quoted", value: `$${revenue.totalQuoted.toLocaleString()}`, icon: DollarSign, accent: "border-l-primary", iconBg: "bg-primary/10", iconColor: "text-primary", tab: "quotes" as DashboardTab },
+    { label: "Booked Revenue", value: `$${revenue.totalBooked.toLocaleString()}`, icon: TrendingUp, accent: "border-l-emerald-500", iconBg: "bg-emerald-500/10", iconColor: "text-emerald-400", tab: "quotes" as DashboardTab },
+    { label: "Quotes", value: stats.quotes, icon: FileText, accent: "border-l-sky-500", iconBg: "bg-sky-500/10", iconColor: "text-sky-400", tab: "quotes" as DashboardTab },
+    { label: "Bookings", value: stats.bookings, icon: Calendar, accent: "border-l-violet-500", iconBg: "bg-violet-500/10", iconColor: "text-violet-400", tab: "calendar" as DashboardTab },
+    { label: "Emails", value: stats.emails, icon: Mail, accent: "border-l-amber-500", iconBg: "bg-amber-500/10", iconColor: "text-amber-400", tab: "emails" as DashboardTab },
+  ];
+
   return (
     <div className="space-y-6">
       <div>
@@ -158,56 +172,28 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
         </Card>
       )}
 
-      {/* Revenue + Stats */}
+      {/* Stat Cards with accent borders */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-        <Card className="cursor-pointer hover:border-primary/30 transition-colors" onClick={() => onNavigate("quotes")}>
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10"><DollarSign className="h-4 w-4 text-primary" /></div>
-            <div>
-              <p className="text-lg font-bold text-foreground">${revenue.totalQuoted.toLocaleString()}</p>
-              <p className="text-[10px] text-muted-foreground">Total Quoted</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="cursor-pointer hover:border-emerald-500/30 transition-colors" onClick={() => onNavigate("quotes")}>
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-emerald-500/10"><TrendingUp className="h-4 w-4 text-emerald-400" /></div>
-            <div>
-              <p className="text-lg font-bold text-foreground">${revenue.totalBooked.toLocaleString()}</p>
-              <p className="text-[10px] text-muted-foreground">Booked Revenue</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="cursor-pointer hover:border-primary/30 transition-colors" onClick={() => onNavigate("quotes")}>
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10"><FileText className="h-4 w-4 text-primary" /></div>
-            <div>
-              <p className="text-lg font-bold text-foreground">{stats.quotes}</p>
-              <p className="text-[10px] text-muted-foreground">Quotes</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="cursor-pointer hover:border-primary/30 transition-colors" onClick={() => onNavigate("calendar")}>
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-emerald-500/10"><Calendar className="h-4 w-4 text-emerald-400" /></div>
-            <div>
-              <p className="text-lg font-bold text-foreground">{stats.bookings}</p>
-              <p className="text-[10px] text-muted-foreground">Bookings</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="cursor-pointer hover:border-primary/30 transition-colors" onClick={() => onNavigate("emails")}>
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-amber-500/10"><Mail className="h-4 w-4 text-amber-400" /></div>
-            <div>
-              <p className="text-lg font-bold text-foreground">{stats.emails}</p>
-              <p className="text-[10px] text-muted-foreground">Emails</p>
-            </div>
-          </CardContent>
-        </Card>
+        {statCards.map((card) => (
+          <Card
+            key={card.label}
+            className={`cursor-pointer hover:shadow-md transition-all border-l-4 ${card.accent}`}
+            onClick={() => onNavigate(card.tab)}
+          >
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className={`p-2.5 rounded-xl ${card.iconBg}`}>
+                <card.icon className={`h-5 w-5 ${card.iconColor}`} />
+              </div>
+              <div>
+                <p className="text-xl font-bold text-foreground tracking-tight">{card.value}</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{card.label}</p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      {/* Urgent Deadlines (next 3 days) */}
+      {/* Urgent Deadlines */}
       {(() => {
         const urgentDeadlines = upcomingDeadlines.filter((d) => {
           const eventDate = new Date(d.event_date);
@@ -215,18 +201,20 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
         });
         if (urgentDeadlines.length === 0 || dismissedCards.has("urgent")) return null;
         return (
-          <Card className="border-rose-500/30 bg-rose-500/5">
+          <Card className="border-rose-500/30 bg-rose-500/5 border-l-4 border-l-rose-500">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <AlertTriangle className="h-4 w-4 text-rose-400" />
-                  <span className="text-sm font-semibold text-foreground">Urgent — Due Within 3 Days</span>
+                  <span className="text-sm font-semibold text-foreground">Urgent - Due Within 3 Days</span>
                   <Badge variant="destructive" className="text-xs">{urgentDeadlines.length}</Badge>
                 </div>
-                <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={openOutlookInbox}>
-                  <Mail className="h-3 w-3" /> Open Outlook Web
-                </Button>
-                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => dismissCard("urgent")}><X className="h-3.5 w-3.5" /></Button>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={openOutlookInbox}>
+                    <Mail className="h-3 w-3" /> Open Outlook Web
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => dismissCard("urgent")}><X className="h-3.5 w-3.5" /></Button>
+                </div>
               </div>
               <div className="space-y-1.5">
                 {urgentDeadlines.map((d) => (
@@ -234,7 +222,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
                     <div className="flex items-center gap-2">
                       <span className={`text-xs font-medium uppercase ${eventColors[d.event_type] || "text-muted-foreground"}`}>{d.event_type.replace(/_/g, " ")}</span>
                       <span className="text-foreground">{d.title}</span>
-                      {d.client_name && <span className="text-xs text-muted-foreground">— {d.client_name}</span>}
+                      {d.client_name && <span className="text-xs text-muted-foreground">- {d.client_name}</span>}
                     </div>
                     <span className="text-muted-foreground">{format(new Date(d.event_date), "MMM d")}</span>
                   </div>
@@ -258,20 +246,25 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
         </Button>
       </div>
 
-      {/* Quick Links */}
-      <div className="flex gap-3 flex-wrap">
-        <Button variant="outline" size="sm" className="gap-2" onClick={openOutlookInbox}>
-          <ExternalLink className="h-3.5 w-3.5" /> Open Outlook Web
-        </Button>
-        <Button variant="outline" size="sm" className="gap-2" onClick={() => openExternal("https://tob.sax.softvoyage.com/")}>
-          <ExternalLink className="h-3.5 w-3.5" /> Sirev Booking
-        </Button>
-        <Button variant="outline" size="sm" className="gap-2" onClick={() => openExternal("https://www.expediataap.ca/")}>
-          <ExternalLink className="h-3.5 w-3.5" /> Expedia TAAP
-        </Button>
+      {/* Quick Links (DB-backed) */}
+      <QuickLinksManager />
+
+      {/* Charts Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <RevenueChart />
+        <DashboardFunnel />
       </div>
 
+      {/* Insights Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <ClientInsights />
+        <SiteActivityWidget />
+      </div>
+
+      {/* Intel Pinboard + Deadlines + Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <AgentPinboard />
+
         {/* Upcoming Deadlines */}
         <Card>
           <CardHeader className="pb-3">
@@ -314,7 +307,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
               <p className="text-sm text-muted-foreground">No recent activity.</p>
             ) : (
               <div className="space-y-3">
-                {recentActivity.map((item, i) => (
+                {recentActivity.map((item) => (
                   <div key={`${item._type}-${item.id}`} className="flex items-start gap-3 text-sm">
                     <div className="mt-0.5">{activityIcon(item._type)}</div>
                     <div className="flex-1 min-w-0">
