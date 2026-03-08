@@ -273,6 +273,9 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
       {/* Quick Links (DB-backed) */}
       <QuickLinksManager />
 
+      {/* Travel Research Chat */}
+      <DashboardSearchChat />
+
       {/* Quick Intel Lookup */}
       <Card className="border-l-4 border-l-cyan-500">
         <CardHeader className="pb-3">
