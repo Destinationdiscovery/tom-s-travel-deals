@@ -1,43 +1,32 @@
 
 
-# Plan: Banner Deals Manager
+# Plan: Add Navigation Buttons to Quote Preview + Investigate Missing Quotes
 
-## Problem
-The two promotional banners at the top of the Travel Deals section (Expedia vacation sale + Hotels.com spring sale) are hardcoded. The admin needs to swap images, update affiliate links, and add sale labels — just like the other managed sections.
+## Missing Quotes
 
-## Approach
+The database only contains **2 quotes** for Loretta (Fellskot Guesthouse and Bjork Guesthouse). The other 2 were never persisted — likely the Save button wasn't clicked after previewing, or saves failed silently. To prevent this in future, I'll add a more prominent save indicator.
 
-### 1. Database — Create `banner_deals` table
-Create a table with 2 slots (1 = left banner, 2 = right banner), each storing:
-- `slot_number` (1-2)
-- `image_url` (uploaded to `blog-images` bucket)
-- `affiliate_url`
-- `sale_label` (e.g. "3 nights free!", "Save 40%")
-- `alt_text` (for accessibility)
+## Changes
 
-RLS: public read, admin manage.
+### 1. Add "Generate New Quote" and "Return to Dashboard" buttons to `QuotePreview.tsx`
 
-### 2. Admin Component — `BannerDealsManager.tsx`
-A simple 2-slot editor (similar pattern to FeaturedReviewsManager) with:
-- Image upload (to `blog-images` bucket)
-- Current image preview
-- Affiliate URL input
-- Sale label input (displayed as a badge overlay on the banner)
-- Save / Reset to default buttons
+Add two new buttons to the action bar at the bottom of the preview:
+- **Generate New Quote** — calls a new `onNewQuote` callback that resets the form and goes back to step 1
+- **Return to Dashboard Home** — calls a new `onDashboardHome` callback that switches to the overview tab
 
-### 3. Sidebar + GearAdmin — New "Banner Deals" tab
-Add `"banner-deals"` to `DashboardTab` union and wire it up.
+### 2. Wire the callbacks in `QuoteBuilder.tsx`
 
-### 4. TravelDealsSection — Fetch from `banner_deals`
-Query `banner_deals` on mount. If rows exist, use their `image_url`, `affiliate_url`, and `sale_label` instead of the hardcoded imports. Fall back to hardcoded defaults if no DB rows.
+- Pass `onNewQuote={resetQuote}` and `onDashboardHome` (which calls `onPreviewMode(false)` and sets the parent tab to "overview") to `QuotePreview`
+- The `QuotePreview` component needs two new props: `onNewQuote` and `onDashboardHome`
 
-### Changes Summary
+### 3. Auto-save improvement
+
+Currently the user must manually click Save. I'll add a subtle unsaved indicator (yellow dot on the Save button) when the quote hasn't been saved yet, making it more obvious.
+
+## Files Changed
 
 | File | Change |
 |------|--------|
-| Migration SQL | Create `banner_deals` table (2 slots) with RLS |
-| `src/components/dashboard/BannerDealsManager.tsx` | New component: 2-slot inline editor with image upload, affiliate URL, sale label |
-| `src/components/dashboard/DashboardSidebar.tsx` | Add `"banner-deals"` tab |
-| `src/pages/GearAdmin.tsx` | Import + render `BannerDealsManager` |
-| `src/components/TravelDealsSection.tsx` | Fetch `banner_deals`, merge with defaults, render sale label badge |
+| `src/components/dashboard/QuotePreview.tsx` | Add "Generate New Quote" and "Return to Dashboard" buttons |
+| `src/components/dashboard/QuoteBuilder.tsx` | Pass new callbacks to QuotePreview |
 
