@@ -44,6 +44,57 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_notes: {
+        Row: {
+          color: string | null
+          content: string
+          created_at: string | null
+          id: string
+          is_pinned: boolean | null
+        }
+        Insert: {
+          color?: string | null
+          content: string
+          created_at?: string | null
+          id?: string
+          is_pinned?: boolean | null
+        }
+        Update: {
+          color?: string | null
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_pinned?: boolean | null
+        }
+        Relationships: []
+      }
+      agent_quick_links: {
+        Row: {
+          created_at: string | null
+          icon_name: string | null
+          id: string
+          label: string
+          sort_order: number | null
+          url: string
+        }
+        Insert: {
+          created_at?: string | null
+          icon_name?: string | null
+          id?: string
+          label: string
+          sort_order?: number | null
+          url: string
+        }
+        Update: {
+          created_at?: string | null
+          icon_name?: string | null
+          id?: string
+          label?: string
+          sort_order?: number | null
+          url?: string
+        }
+        Relationships: []
+      }
       banner_deals: {
         Row: {
           affiliate_url: string
