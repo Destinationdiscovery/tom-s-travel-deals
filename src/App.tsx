@@ -31,6 +31,7 @@ const AffiliateDisclosure = lazy(() => import("./pages/AffiliateDisclosure"));
 const BookingReport = lazy(() => import("./pages/BookingReport"));
 const ClientFile = lazy(() => import("./pages/ClientFile"));
 const PublicQuote = lazy(() => import("./pages/PublicQuote"));
+const Install = lazy(() => import("./pages/Install"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
