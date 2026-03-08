@@ -236,5 +236,20 @@
     @page {
       margin: 0.75in;
     }
+
+    /* Force high-contrast black text in quote PDFs */
+    #quote-preview,
+    #quote-preview *,
+    .prose,
+    .prose * {
+      color: black !important;
+      -webkit-print-color-adjust: exact;
+    }
+
+    #quote-preview h1, #quote-preview h2, #quote-preview h3,
+    #quote-preview h4, #quote-preview h5, #quote-preview h6 {
+      color: black !important;
+      font-weight: 700 !important;
+    }
   }
 }
