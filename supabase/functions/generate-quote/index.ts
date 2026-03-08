@@ -6,6 +6,36 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+async function fetchPlacePhotos(placeName: string, maxPhotos = 4): Promise<string[]> {
+  const apiKey = Deno.env.get("GOOGLE_PLACES_API_KEY");
+  if (!apiKey) {
+    console.log("No Google Places API key configured, skipping photos");
+    return [];
+  }
+  try {
+    const response = await fetch("https://places.googleapis.com/v1/places:searchText", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": apiKey,
+        "X-Goog-FieldMask": "places.photos",
+      },
+      body: JSON.stringify({ textQuery: placeName, maxResultCount: 1 }),
+    });
+    if (!response.ok) {
+      console.error("Google Places search error:", response.status);
+      return [];
+    }
+    const data = await response.json();
+    const place = data.places?.[0];
+    if (!place?.photos?.length) return [];
+    return place.photos.slice(0, maxPhotos).map((p: { name: string }) => p.name);
+  } catch (e) {
+    console.error("Failed to fetch place photos:", e);
+    return [];
+  }
+}
+
 const AGENT_BRANDING = {
   name: "Tom Laracy",
   email: "tlaracy@travelonly.com",
