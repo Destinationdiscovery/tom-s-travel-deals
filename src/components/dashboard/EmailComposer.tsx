@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { openExternal } from "@/lib/openExternal";
+import { openWorkOutlook, openOutlookInbox } from "@/lib/openWorkOutlook";
 import { Mail, ExternalLink, Link2, Send, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -105,8 +106,7 @@ const EmailComposer = () => {
       return;
     }
 
-    const mailtoUrl = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.open(mailtoUrl);
+    openWorkOutlook(to, subject, body);
 
     await supabase.from("email_log").insert({
       client_name: clientName || to,
@@ -189,8 +189,8 @@ const EmailComposer = () => {
           <Card>
             <CardHeader className="pb-3"><CardTitle className="text-sm">Quick Links</CardTitle></CardHeader>
             <CardContent className="space-y-2">
-              <Button variant="outline" size="sm" className="w-full justify-start gap-2" onClick={() => { window.location.href = "ms-outlook://"; }}>
-                <ExternalLink className="h-3.5 w-3.5" /> Open Outlook App
+              <Button variant="outline" size="sm" className="w-full justify-start gap-2" onClick={openOutlookInbox}>
+                <ExternalLink className="h-3.5 w-3.5" /> Open Outlook Web
               </Button>
               <Button variant="outline" size="sm" className="w-full justify-start gap-2" onClick={() => openExternal("https://tob.sax.softvoyage.com/")}>
                 <ExternalLink className="h-3.5 w-3.5" /> Sirev Booking

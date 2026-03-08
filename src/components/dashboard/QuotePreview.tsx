@@ -59,7 +59,8 @@ const QuotePreview = ({ quote, totalPrice, onBack, onSave, saving, editingId, on
 
   const openOutlook = () => {
     if (requireSaved()) return;
-    window.location.href = `mailto:${quote.clientEmail}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+    const { openWorkOutlook } = require("@/lib/openWorkOutlook");
+    openWorkOutlook(quote.clientEmail || '', emailSubject, emailBody);
   };
 
   const openGmail = () => {
