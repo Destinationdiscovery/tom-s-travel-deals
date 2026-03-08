@@ -132,16 +132,21 @@ const FeaturedGearManager = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="font-display text-2xl font-bold text-foreground flex items-center gap-2">
-        <Luggage className="h-6 w-6" /> Featured Gear Manager
-      </h1>
-      <p className="text-sm text-muted-foreground">Click Edit on any card to update it. Cards link to your Amazon affiliate URLs.</p>
+      <div>
+        <h1 className="font-display text-2xl font-bold text-foreground flex items-center gap-2">
+          <div className="p-1.5 rounded-lg bg-emerald-500/10">
+            <Luggage className="h-6 w-6 text-emerald-400" />
+          </div>
+          Featured Gear Manager
+        </h1>
+        <p className="text-sm text-muted-foreground mt-1">Click Edit on any card to update it. Cards link to your affiliate URLs.</p>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {slots.map((slot, idx) => {
           const isEditing = editingSlot === idx;
           return (
-            <Card key={idx} className="overflow-hidden flex flex-col">
+            <Card key={idx} className="overflow-hidden flex flex-col border-l-4 border-l-emerald-500/50">
               <div className="relative">
                 <img src={isEditing && imagePreview ? imagePreview : slot.imageUrl} alt={slot.title} className="w-full aspect-[16/10] object-cover" />
                 {slot.price && (

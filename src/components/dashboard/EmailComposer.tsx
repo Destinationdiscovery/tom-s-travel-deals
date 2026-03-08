@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { openExternal } from "@/lib/openExternal";
 import { openWorkOutlook, openOutlookInbox } from "@/lib/openWorkOutlook";
-import { Mail, ExternalLink, Link2, Send, Loader2 } from "lucide-react";
+import { Mail, ExternalLink, Link2, Send, Loader2, FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -121,12 +121,15 @@ const EmailComposer = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="font-display text-2xl font-bold text-foreground">Email System</h1>
+      <div>
+        <h1 className="font-display text-2xl font-bold text-foreground">Email System</h1>
+        <p className="text-sm text-muted-foreground mt-1">Compose and send emails to clients.</p>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Compose */}
         <div className="lg:col-span-2 space-y-4">
-          <Card>
+          <Card className="border-l-4 border-l-amber-500">
             <CardContent className="p-6 space-y-4">
               <div className="flex gap-4 items-end">
                 <div className="flex-1">
@@ -186,8 +189,8 @@ const EmailComposer = () => {
         {/* Sidebar */}
         <div className="space-y-4">
           {/* Quick Links */}
-          <Card>
-            <CardHeader className="pb-3"><CardTitle className="text-sm">Quick Links</CardTitle></CardHeader>
+          <Card className="border-l-4 border-l-sky-500">
+            <CardHeader className="pb-3"><CardTitle className="text-sm flex items-center gap-2"><Mail className="h-4 w-4 text-sky-400" /> Quick Links</CardTitle></CardHeader>
             <CardContent className="space-y-2">
               <Button variant="outline" size="sm" className="w-full justify-start gap-2" onClick={openOutlookInbox}>
                 <ExternalLink className="h-3.5 w-3.5" /> Open Outlook Web
@@ -202,8 +205,8 @@ const EmailComposer = () => {
           </Card>
 
           {/* Email Log */}
-          <Card>
-            <CardHeader className="pb-3"><CardTitle className="text-sm">Email Log</CardTitle></CardHeader>
+          <Card className="border-l-4 border-l-amber-500/50">
+            <CardHeader className="pb-3"><CardTitle className="text-sm flex items-center gap-2"><FileText className="h-4 w-4 text-amber-400" /> Email Log</CardTitle></CardHeader>
             <CardContent>
               {emailLog.length === 0 ? (
                 <p className="text-xs text-muted-foreground">No emails logged yet.</p>

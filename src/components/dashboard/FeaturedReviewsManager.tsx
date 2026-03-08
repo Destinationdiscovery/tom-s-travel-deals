@@ -180,13 +180,18 @@ const FeaturedReviewsManager = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="font-display text-2xl font-bold text-foreground flex items-center gap-2">
-        <MapPin className="h-6 w-6" /> Featured Reviews Manager
-      </h1>
-      <p className="text-sm text-muted-foreground">Manage the 4 review cards shown on the homepage. Search for a property to preview and add to a slot.</p>
+      <div>
+        <h1 className="font-display text-2xl font-bold text-foreground flex items-center gap-2">
+          <div className="p-1.5 rounded-lg bg-sky-500/10">
+            <MapPin className="h-6 w-6 text-sky-400" />
+          </div>
+          Featured Reviews Manager
+        </h1>
+        <p className="text-sm text-muted-foreground mt-1">Manage the 4 review cards shown on the homepage.</p>
+      </div>
 
       {/* Admin review search */}
-      <Card>
+      <Card className="border-l-4 border-l-sky-500">
         <CardContent className="p-4 space-y-3">
           <Label className="text-sm font-semibold">Search & Preview a Property</Label>
           <div className="flex gap-2 relative">
@@ -245,7 +250,7 @@ const FeaturedReviewsManager = () => {
           const isEmpty = !slot;
 
           return (
-            <Card key={idx} className="overflow-hidden flex flex-col">
+            <Card key={idx} className="overflow-hidden flex flex-col border-l-4 border-l-sky-500/30">
               {/* Image preview */}
               {(slot?.image_url || (isEditing && imagePreview)) && (
                 <div className="relative">
