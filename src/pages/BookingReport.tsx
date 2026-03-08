@@ -444,6 +444,42 @@ const BookingReport = () => {
           </div>
         </div>
 
+        {/* Commission Field */}
+        <div className="container mx-auto px-4 max-w-4xl mb-6">
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-orange-500/5 border border-orange-500/20">
+            <div className="p-2 rounded-lg bg-orange-500/10">
+              <DollarSign className="h-4 w-4 text-orange-400" />
+            </div>
+            <span className="text-sm font-semibold text-foreground">Commission</span>
+            {commissionEdit ? (
+              <div className="flex items-center gap-2 ml-auto">
+                <span className="text-sm text-muted-foreground">$</span>
+                <Input
+                  type="number"
+                  value={commissionValue}
+                  onChange={(e) => setCommissionValue(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSaveCommission()}
+                  className="w-32 h-8 text-sm"
+                  autoFocus
+                />
+                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={handleSaveCommission} disabled={savingCommission}>
+                  {savingCommission ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5 text-emerald-400" />}
+                </Button>
+                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => { setCommissionEdit(false); setCommissionValue(String(bookingDetails?.commission || 0)); }}>
+                  <X className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 ml-auto">
+                <span className="text-lg font-bold text-foreground">${(parseFloat(commissionValue) || 0).toLocaleString()}</span>
+                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setCommissionEdit(true)}>
+                  <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Report Content */}
         <div className="container mx-auto px-4 max-w-4xl space-y-6">
           {/* Markdown Report */}

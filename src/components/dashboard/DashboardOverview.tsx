@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { openExternal } from "@/lib/openExternal";
 import { openOutlookInbox } from "@/lib/openWorkOutlook";
-import { FileText, Calendar, Mail, DollarSign, AlertTriangle, Plus, TrendingUp, Clock, X, Search, Globe, Loader2 } from "lucide-react";
+import { FileText, Calendar, Mail, DollarSign, AlertTriangle, Plus, TrendingUp, Clock, X, Search, Globe, Loader2, Wallet } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +25,7 @@ interface DashboardOverviewProps {
 
 const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
   const [stats, setStats] = useState({ quotes: 0, bookings: 0, emails: 0 });
-  const [revenue, setRevenue] = useState({ totalQuoted: 0, totalBooked: 0 });
+  const [revenue, setRevenue] = useState({ totalQuoted: 0, totalBooked: 0, totalCommission: 0 });
   const [upcomingDeadlines, setUpcomingDeadlines] = useState<any[]>([]);
   const [todayEvents, setTodayEvents] = useState<any[]>([]);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
@@ -61,20 +61,20 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
     const fetchRevenue = async () => {
       const [quotesRes, bookingDetailsRes] = await Promise.all([
         supabase.from("client_quotes").select("total_price, status"),
-        supabase.from("booking_details").select("total_value"),
+        supabase.from("booking_details").select("total_value, commission"),
       ]);
-      let totalQuoted = 0, totalBooked = 0;
+      let totalQuoted = 0, totalBooked = 0, totalCommission = 0;
       (quotesRes.data || []).forEach((q) => {
         const price = Number(q.total_price) || 0;
         totalQuoted += price;
         if (q.status === "booked") totalBooked += price;
       });
-      // Add booking total_value to booked revenue
       (bookingDetailsRes.data || []).forEach((b: any) => {
         const val = Number(b.total_value) || 0;
         if (val > 0) totalBooked += val;
+        totalCommission += Number(b.commission) || 0;
       });
-      setRevenue({ totalQuoted, totalBooked });
+      setRevenue({ totalQuoted, totalBooked, totalCommission });
     };
 
     const fetchDeadlines = async () => {
@@ -157,6 +157,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
   const statCards = [
     { label: "Total Quoted", value: `$${revenue.totalQuoted.toLocaleString()}`, icon: DollarSign, accent: "border-l-primary", iconBg: "bg-primary/10", iconColor: "text-primary", tab: "quotes" as DashboardTab },
     { label: "Booked Revenue", value: `$${revenue.totalBooked.toLocaleString()}`, icon: TrendingUp, accent: "border-l-emerald-500", iconBg: "bg-emerald-500/10", iconColor: "text-emerald-400", tab: "quotes" as DashboardTab },
+    { label: "Commission", value: `$${revenue.totalCommission.toLocaleString()}`, icon: Wallet, accent: "border-l-orange-500", iconBg: "bg-orange-500/10", iconColor: "text-orange-400", tab: "calendar" as DashboardTab },
     { label: "Quotes", value: stats.quotes, icon: FileText, accent: "border-l-sky-500", iconBg: "bg-sky-500/10", iconColor: "text-sky-400", tab: "quotes" as DashboardTab },
     { label: "Bookings", value: stats.bookings, icon: Calendar, accent: "border-l-violet-500", iconBg: "bg-violet-500/10", iconColor: "text-violet-400", tab: "calendar" as DashboardTab },
     { label: "Emails", value: stats.emails, icon: Mail, accent: "border-l-amber-500", iconBg: "bg-amber-500/10", iconColor: "text-amber-400", tab: "emails" as DashboardTab },
