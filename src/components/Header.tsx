@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { useLocation } from "react-router-dom";
-import { Shield, Search, Menu, X } from "lucide-react";
+import { Shield, Search, Menu, X, Download } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import AdminLoginDialog from "@/components/auth/AdminLoginDialog";
