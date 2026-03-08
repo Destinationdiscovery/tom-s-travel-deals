@@ -46,7 +46,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { prompt, attachmentPaths, clientName, clientEmail, includeThingsToDo = true } = await req.json();
+    const { prompt, attachmentPaths, clientName, clientEmail, includeThingsToDo = true, advisory } = await req.json();
 
     const hasAttachments = attachmentPaths?.length > 0;
     if (!prompt?.trim() && !hasAttachments) throw new Error("Provide a prompt or attach documents");
@@ -154,6 +154,7 @@ The document should feel personal and professional, like a travel consultant wro
 - Total cost prominently displayed
 - A "Travel Tips" section with 5 numbered practical insider tips specific to this property/destination (booking tips, local customs, what to pack, best time to visit, money-saving tips, etc.)
 ${includeThingsToDo ? `- A "Things to Do Nearby" section with 3-5 top-rated activities, attractions, restaurants, or experiences near the property, each with a brief description` : "- Do NOT include a Things to Do or activities section"}
+${advisory ? `- A prominent "Travel Advisory" banner section with a warning icon, containing this advisory: "${advisory}". Style it as a highlighted callout block (use a blockquote with ⚠️ emoji). Place it near the top of the document, after the greeting.` : ""}
 - Next steps for booking
 - A professional sign-off from ${AGENT_BRANDING.name}, ${AGENT_BRANDING.agency}
 
