@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Search, FileText, Calendar, ChevronRight, Mail, UserPlus } from "lucide-react";
+import { Search, FileText, Calendar, ChevronRight, Mail, UserPlus, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -130,6 +131,32 @@ const ClientList = ({ onNavigate }: ClientListProps) => {
     toast({ title: "Status updated", description: `Quote status changed to ${newStatus}.` });
   };
 
+  const handleDeleteQuote = async (quoteId: string, resortName: string) => {
+    const { error } = await supabase.from("client_quotes").delete().eq("id", quoteId);
+    if (error) {
+      toast({ title: "Error", description: "Failed to delete quote.", variant: "destructive" });
+      return;
+    }
+    toast({ title: "Quote deleted", description: `${resortName} quote removed.` });
+    const { quotes, bookings } = await fetchAll();
+    setClients(buildClientMap(quotes, bookings));
+  };
+
+  const handleDeleteClient = async (clientName: string) => {
+    // Delete all quotes and bookings for this client (case-insensitive via ilike)
+    const [qRes, bRes] = await Promise.all([
+      supabase.from("client_quotes").delete().ilike("client_name", clientName),
+      supabase.from("bookings").delete().ilike("client_name", clientName),
+    ]);
+    if (qRes.error || bRes.error) {
+      toast({ title: "Error", description: "Failed to delete client.", variant: "destructive" });
+      return;
+    }
+    toast({ title: "Client deleted", description: `${clientName} and all associated records removed.` });
+    const { quotes, bookings } = await fetchAll();
+    setClients(buildClientMap(quotes, bookings));
+  };
+
   const filtered = search.trim()
     ? clients.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))
     : clients;
@@ -221,6 +248,23 @@ const ClientList = ({ onNavigate }: ClientListProps) => {
                               </Select>
                               {q.total_price > 0 && <span className="text-xs text-muted-foreground">${Number(q.total_price).toLocaleString()}</span>}
                               <span className="text-xs text-muted-foreground">{format(new Date(q.created_at), "MMM d")}</span>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive hover:text-destructive">
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Delete Quote</AlertDialogTitle>
+                                    <AlertDialogDescription>Delete the quote for "{q.resort_name}"? This cannot be undone.</AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleDeleteQuote(q.id, q.resort_name)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
                             </div>
                           </div>
                         ))}
@@ -256,6 +300,23 @@ const ClientList = ({ onNavigate }: ClientListProps) => {
                     <Button variant="outline" size="sm" onClick={() => onNavigate("calendar")} className="text-xs gap-1">
                       <Calendar className="h-3 w-3" /> Go to Calendar
                     </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="sm" className="text-xs gap-1 text-destructive hover:text-destructive">
+                          <Trash2 className="h-3 w-3" /> Delete Client
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Client</AlertDialogTitle>
+                          <AlertDialogDescription>This will permanently delete all quotes and bookings for "{client.name}". This cannot be undone.</AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleDeleteClient(client.name)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete Client</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </div>
               )}

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Search, ChevronRight, ChevronLeft, Plus, Trash2, Save, Loader2, Users, FileText, Star, MapPin, CalendarIcon, Copy, Upload, X, Paperclip, ArrowUp, ArrowDown, BookmarkPlus, BookOpen, CheckCircle2, Sparkles, Wand2 } from "lucide-react";
+import { Search, ChevronRight, ChevronLeft, Plus, Trash2, Save, Loader2, Users, FileText, Star, MapPin, CalendarIcon, Copy, Upload, X, Paperclip, ArrowUp, ArrowDown, BookmarkPlus, BookOpen, CheckCircle2, Sparkles, Wand2, ChevronsUpDown, Check } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -349,8 +350,8 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
       setAiAttachmentNames([]);
       setAiClientName("");
       setAiClientEmail("");
-      setStep(4); // Jump to preview
-      toast({ title: "✨ Quote generated!", description: "Review everything and save when ready." });
+      setStep(4); // Jump to preview — auto-save will trigger via useEffect
+      toast({ title: "✨ Quote generated!", description: "Auto-saving to client file..." });
     } catch (e: any) {
       console.error("AI quote error:", e);
       toast({ title: "Generation failed", description: e.message || "Unknown error", variant: "destructive" });
@@ -372,6 +373,18 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
   useEffect(() => {
     onPreviewMode?.(step === 4);
   }, [step, onPreviewMode]);
+
+  // Auto-save when entering preview (step 4) for new quotes
+  const autoSaveOnPreviewRef = useRef(false);
+  useEffect(() => {
+    if (step === 4 && !editingId && quote.clientName.trim() && quote.resortName.trim() && !autoSaveOnPreviewRef.current) {
+      autoSaveOnPreviewRef.current = true;
+      handleSave();
+    }
+    if (step !== 4) {
+      autoSaveOnPreviewRef.current = false;
+    }
+  }, [step, editingId]);
 
   // Auto-save debounce (30s) - only when editing an existing quote
   const autoSaveRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -595,6 +608,16 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
     toast({ title: "Quote duplicated", description: "Edit and save as a new quote." });
   };
 
+  const deleteQuote = async (quoteId: string, resortName: string) => {
+    const { error } = await supabase.from("client_quotes").delete().eq("id", quoteId);
+    if (error) {
+      toast({ title: "Error", description: "Failed to delete quote.", variant: "destructive" });
+    } else {
+      toast({ title: "Quote deleted", description: `${resortName} quote removed.` });
+      fetchQuotes();
+    }
+  };
+
   const moveLineItem = (index: number, direction: "up" | "down") => {
     const newItems = [...quote.lineItems];
     const swapIndex = direction === "up" ? index - 1 : index + 1;
@@ -692,6 +715,23 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
                                 <CalendarIcon className="h-3 w-3" /> Book
                               </Button>
                             )}
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-7 text-xs text-destructive hover:text-destructive">
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete Quote</AlertDialogTitle>
+                                  <AlertDialogDescription>Delete the quote for "{q.resort_name}"? This cannot be undone.</AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => deleteQuote(q.id, q.resort_name)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
                           </div>
                         </div>
                       ))}
@@ -736,13 +776,49 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
 
                 {/* Client Name & Email */}
                 <div className="grid grid-cols-2 gap-3">
-                  <div>
+                  <div className="relative">
                     <Label>Client Name *</Label>
-                    <Input
-                      value={aiClientName}
-                      onChange={(e) => setAiClientName(e.target.value)}
-                      placeholder="e.g. Loretta Smith"
-                    />
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" role="combobox" className="w-full justify-between font-normal">
+                          {aiClientName || <span className="text-muted-foreground">Select or type name...</span>}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[260px] p-0" align="start">
+                        <div className="p-2">
+                          <Input
+                            value={aiClientName}
+                            onChange={(e) => setAiClientName(e.target.value)}
+                            placeholder="Type new name..."
+                            className="h-8 text-sm"
+                            autoFocus
+                          />
+                        </div>
+                        {uniqueClients.length > 0 && (
+                          <div className="max-h-[200px] overflow-y-auto border-t border-border">
+                            {uniqueClients
+                              .filter((c) => !aiClientName || c.name.toLowerCase().includes(aiClientName.toLowerCase()))
+                              .map((c) => (
+                                <button
+                                  key={c.name}
+                                  onClick={() => {
+                                    setAiClientName(c.name);
+                                    if (c.email) setAiClientEmail(c.email);
+                                  }}
+                                  className="w-full text-left px-3 py-2 text-sm hover:bg-muted/50 flex items-center justify-between"
+                                >
+                                  <div>
+                                    <span className="text-foreground">{c.name}</span>
+                                    {c.email && <span className="text-xs text-muted-foreground ml-2">{c.email}</span>}
+                                  </div>
+                                  {aiClientName === c.name && <Check className="h-3.5 w-3.5 text-primary" />}
+                                </button>
+                              ))}
+                          </div>
+                        )}
+                      </PopoverContent>
+                    </Popover>
                   </div>
                   <div>
                     <Label>Client Email</Label>

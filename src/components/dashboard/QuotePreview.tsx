@@ -212,10 +212,12 @@ const QuotePreview = ({ quote, totalPrice, onBack, onSave, saving, editingId, on
       {/* Actions (hidden in print) */}
       <div className="flex flex-wrap gap-2 print:hidden">
         <Button variant="outline" onClick={onBack}><ChevronLeft className="h-4 w-4 mr-1" /> Back</Button>
-        <Button variant="outline" onClick={onSave} disabled={saving} className="gap-2 relative">
-          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Save
-          {!editingId && <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-amber-400 border-2 border-background animate-pulse" title="Unsaved quote" />}
-        </Button>
+        {saving && (
+          <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground"><Loader2 className="h-3.5 w-3.5 animate-spin" /> Saving...</span>
+        )}
+        {editingId && !saving && (
+          <span className="inline-flex items-center gap-1.5 text-sm text-emerald-400">✓ Saved</span>
+        )}
         <Button variant="outline" onClick={handlePrint} className="gap-2"><Download className="h-4 w-4" /> Print / PDF</Button>
         <Button variant="outline" onClick={copyShareLink} className="gap-2"><Link2 className="h-4 w-4" /> Copy Link</Button>
         <DropdownMenu>
