@@ -192,6 +192,7 @@ export type Database = {
           cabin_number: string | null
           client_email: string | null
           client_name: string | null
+          commission: number | null
           created_at: string
           cruise_line_booking_number: string | null
           deck: string | null
@@ -228,6 +229,7 @@ export type Database = {
           cabin_number?: string | null
           client_email?: string | null
           client_name?: string | null
+          commission?: number | null
           created_at?: string
           cruise_line_booking_number?: string | null
           deck?: string | null
@@ -264,6 +266,7 @@ export type Database = {
           cabin_number?: string | null
           client_email?: string | null
           client_name?: string | null
+          commission?: number | null
           created_at?: string
           cruise_line_booking_number?: string | null
           deck?: string | null
