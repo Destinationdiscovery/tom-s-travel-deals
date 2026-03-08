@@ -70,6 +70,7 @@ const Footer = () => {
                 { to: "/compass", label: "Blog" },
                 { to: "/about", label: "About" },
                 { to: "/contact", label: "Contact" },
+                { to: "/install", label: "Install App" },
               ].map((link) => (
                 <Link
                   key={link.to}

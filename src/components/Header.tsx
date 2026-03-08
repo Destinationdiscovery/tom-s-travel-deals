@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { useLocation } from "react-router-dom";
-import { Shield, Search, Menu, X } from "lucide-react";
+import { Shield, Search, Menu, X, Download } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import AdminLoginDialog from "@/components/auth/AdminLoginDialog";
@@ -38,7 +38,7 @@ const Header = () => {
       >
         Skip to main content
       </a>
-      <header className="fixed top-0 left-0 right-0 z-50 bg-primary backdrop-blur-md border-b border-primary/20">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-primary backdrop-blur-md border-b border-primary/20" style={{ paddingLeft: 'env(safe-area-inset-left)', paddingRight: 'env(safe-area-inset-right)' }}>
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <AdminLoginDialog />
@@ -109,6 +109,14 @@ const Header = () => {
                       {link.label}
                     </Link>
                   ))}
+                  <Link
+                    to="/install"
+                    onClick={() => setMobileOpen(false)}
+                    className="text-lg font-medium text-secondary hover:text-secondary/80 transition-colors flex items-center gap-2 py-2"
+                  >
+                    <Download className="h-4 w-4" />
+                    Install App
+                  </Link>
                   {isAdmin && (
                     <Link
                       to="/gear-admin"
