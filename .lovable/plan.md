@@ -1,43 +1,74 @@
 
 
-# Plan: Banner Deals Manager
+# Booking Report: AI-Generated Markdown Approach
 
-## Problem
-The two promotional banners at the top of the Travel Deals section (Expedia vacation sale + Hotels.com spring sale) are hardcoded. The admin needs to swap images, update affiliate links, and add sale labels — just like the other managed sections.
+## The Problem
 
-## Approach
+The current `BookingReport.tsx` is ~2,000 lines of rigid card/table components that try to shoehorn extracted data into predefined layouts. When data is missing or structured differently, it looks broken. The quote builder solved this exact problem by letting AI generate free-form markdown.
 
-### 1. Database — Create `banner_deals` table
-Create a table with 2 slots (1 = left banner, 2 = right banner), each storing:
-- `slot_number` (1-2)
-- `image_url` (uploaded to `blog-images` bucket)
-- `affiliate_url`
-- `sale_label` (e.g. "3 nights free!", "Save 40%")
-- `alt_text` (for accessibility)
+## The Solution
 
-RLS: public read, admin manage.
+Mirror the quote builder pattern exactly:
 
-### 2. Admin Component — `BannerDealsManager.tsx`
-A simple 2-slot editor (similar pattern to FeaturedReviewsManager) with:
-- Image upload (to `blog-images` bucket)
-- Current image preview
-- Affiliate URL input
-- Sale label input (displayed as a badge overlay on the banner)
-- Save / Reset to default buttons
+1. **New edge function `generate-booking-report`** — Takes the booking data from `booking_details` (rooms, passengers, itinerary, flights, pricing, payment history, extras) plus any newly uploaded document images, and produces a rich markdown report. The AI decides how to format it — prose summaries, markdown tables for itineraries, passenger lists, payment schedules, etc.
 
-### 3. Sidebar + GearAdmin — New "Banner Deals" tab
-Add `"banner-deals"` to `DashboardTab` union and wire it up.
+2. **New column `report_markdown`** on `booking_details` — Stores the generated markdown, just like `quote_markdown` on `client_quotes`.
 
-### 4. TravelDealsSection — Fetch from `banner_deals`
-Query `banner_deals` on mount. If rows exist, use their `image_url`, `affiliate_url`, and `sale_label` instead of the hardcoded imports. Fall back to hardcoded defaults if no DB rows.
+3. **New column `total_value`** on `booking_details` — Clean numeric field for revenue tracking (extracted from pricing by AI).
 
-### Changes Summary
+4. **Redesigned `BookingReport.tsx`** — Dramatically simplified:
+   - Hero header with trip name, destination, dates, status
+   - Full-width `ReactMarkdown` render of `report_markdown` (same prose styling as QuotePreview)
+   - "Generate Report" / "Re-generate" button that calls the edge function
+   - Inline markdown editor toggle (edit the markdown directly, save back)
+   - Document upload/gallery section (existing functionality preserved)
+   - AI chat kept for adding new documents and triggering re-generation
+   - Delete booking button preserved
 
-| File | Change |
+5. **Revenue fix in `DashboardOverview.tsx`** — Query `booking_details.total_value` and combine with `client_quotes` revenue.
+
+## Edge Function Design (`generate-booking-report`)
+
+Input: `{ bookingData, files[] }` — the full booking_details record plus any new document images (base64).
+
+The AI prompt instructs it to produce a comprehensive, beautifully formatted markdown report covering:
+- Trip overview (destination, dates, supplier, ship if cruise)
+- Flights (formatted as a clean table or visual layout)
+- Rooms/Cabins with passenger assignments
+- Cruise itinerary (if applicable) as a table
+- Pricing breakdown
+- Payment history/timeline
+- Extras and special requests
+- Any other details found in documents
+
+Also returns `{ markdown, metadata: { total_value } }` so we can populate the revenue field.
+
+## Key Differences from Current System
+
+| Current | New |
+|---------|-----|
+| 2000-line rigid component tree | ~400-line page: header + markdown + docs |
+| Card grid that breaks with missing data | AI adapts format to available data |
+| Flights/passengers hidden in sub-components | Everything in one flowing document |
+| Can't easily edit displayed info | Toggle to edit markdown directly |
+| No revenue tracking | `total_value` column + dashboard integration |
+
+## Files
+
+| File | Action |
 |------|--------|
-| Migration SQL | Create `banner_deals` table (2 slots) with RLS |
-| `src/components/dashboard/BannerDealsManager.tsx` | New component: 2-slot inline editor with image upload, affiliate URL, sale label |
-| `src/components/dashboard/DashboardSidebar.tsx` | Add `"banner-deals"` tab |
-| `src/pages/GearAdmin.tsx` | Import + render `BannerDealsManager` |
-| `src/components/TravelDealsSection.tsx` | Fetch `banner_deals`, merge with defaults, render sale label badge |
+| DB migration | Add `report_markdown text`, `total_value numeric DEFAULT 0` to `booking_details` |
+| `supabase/functions/generate-booking-report/index.ts` | New edge function |
+| `supabase/config.toml` | Add function config |
+| `src/pages/BookingReport.tsx` | Rewrite — markdown-first layout |
+| `src/components/dashboard/DashboardOverview.tsx` | Add booking revenue query |
+| `src/components/dashboard/BookingManager.tsx` | Show total_value per client |
+
+## Implementation Order
+
+1. DB migration (add columns)
+2. Edge function
+3. BookingReport rewrite
+4. Revenue fix
+5. BookingManager updates
 
