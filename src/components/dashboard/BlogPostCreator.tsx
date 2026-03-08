@@ -321,12 +321,18 @@ const BlogPostCreator = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="font-display text-2xl font-bold text-foreground flex items-center gap-2">
-        <BookOpen className="h-6 w-6" /> Blog Creator
-      </h1>
+      <div>
+        <h1 className="font-display text-2xl font-bold text-foreground flex items-center gap-2">
+          <div className="p-1.5 rounded-lg bg-primary/10">
+            <BookOpen className="h-6 w-6 text-primary" />
+          </div>
+          Content Studio
+        </h1>
+        <p className="text-sm text-muted-foreground mt-1">Create and manage blog articles.</p>
+      </div>
 
       {/* Auto-Format Section */}
-      <Card className="border-primary/30 bg-primary/5">
+      <Card className="border-primary/30 bg-primary/5 border-l-4 border-l-primary">
         <CardContent className="p-6 space-y-4">
           <h2 className="font-semibold text-foreground flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" /> AI Article Assistant

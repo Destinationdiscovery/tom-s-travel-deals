@@ -188,7 +188,10 @@ const BookingCalendar = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-bold text-foreground">Booking Calendar</h1>
+        <div>
+          <h1 className="font-display text-2xl font-bold text-foreground">Booking Calendar</h1>
+          <p className="text-sm text-muted-foreground mt-1">Track all travel dates and payment milestones.</p>
+        </div>
         <div className="flex gap-2">
           <div className="flex border border-border rounded-lg overflow-hidden">
             <button onClick={() => setViewMode("grid")} className={cn("px-2.5 py-1.5 text-xs font-medium transition-colors", viewMode === "grid" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted")}>
@@ -202,7 +205,7 @@ const BookingCalendar = () => {
         </div>
       </div>
 
-      <Card>
+      <Card className="border-l-4 border-l-violet-500">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <Button variant="ghost" size="icon" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}><ChevronLeft className="h-4 w-4" /></Button>

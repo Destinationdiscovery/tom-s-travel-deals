@@ -171,10 +171,15 @@ const FeaturedDealsManager = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="font-display text-2xl font-bold text-foreground flex items-center gap-2">
-        <Star className="h-6 w-6" /> Featured Deals Manager
-      </h1>
-      <p className="text-sm text-muted-foreground">Click Edit on any card to change it.</p>
+      <div>
+        <h1 className="font-display text-2xl font-bold text-foreground flex items-center gap-2">
+          <div className="p-1.5 rounded-lg bg-amber-500/10">
+            <Star className="h-6 w-6 text-amber-400" />
+          </div>
+          Featured Deals Manager
+        </h1>
+        <p className="text-sm text-muted-foreground mt-1">Click Edit on any card to change it.</p>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {slots.map((slot, idx) => {
@@ -186,7 +191,7 @@ const FeaturedDealsManager = () => {
           const pct = Math.round((1 - sale / original) * 100);
 
           return (
-            <Card key={idx} className="overflow-hidden flex flex-col">
+            <Card key={idx} className="overflow-hidden flex flex-col border-l-4 border-l-amber-500/50">
               {/* Card preview */}
               <div className="relative">
                 <span className="absolute top-2 left-2 z-10 bg-secondary text-secondary-foreground text-xs font-bold px-2 py-0.5 rounded-full">{pct}% OFF</span>

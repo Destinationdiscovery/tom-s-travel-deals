@@ -454,16 +454,24 @@ const BookingManager = () => {
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h1 className="font-display text-2xl font-bold text-foreground">Bookings</h1>
+        <div>
+          <h1 className="font-display text-2xl font-bold text-foreground">Bookings</h1>
+          <p className="text-sm text-muted-foreground mt-1">Manage client bookings and travel documents.</p>
+        </div>
         <Button onClick={openNewBooking} variant="outline" size="sm" className="gap-2">
           <Plus className="h-4 w-4" /> Manual Add
         </Button>
       </div>
 
       {/* Client Files Table */}
-      <Card className="flex-1 min-h-0 overflow-auto mb-4">
+      <Card className="flex-1 min-h-0 overflow-auto mb-4 border-l-4 border-l-emerald-500">
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg flex items-center gap-2"><ClipboardList className="h-5 w-5" /> Client Files</CardTitle>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <div className="p-1.5 rounded-lg bg-emerald-500/10">
+              <ClipboardList className="h-5 w-5 text-emerald-400" />
+            </div>
+            Client Files
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (

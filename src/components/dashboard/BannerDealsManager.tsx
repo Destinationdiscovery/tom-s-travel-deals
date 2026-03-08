@@ -128,10 +128,15 @@ const BannerDealsManager = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="font-display text-2xl font-bold text-foreground flex items-center gap-2">
-        <ImageIcon className="h-6 w-6" /> Banner Deals Manager
-      </h1>
-      <p className="text-sm text-muted-foreground">Manage the 2 promotional banners at the top of the Travel Deals section. Upload images, set affiliate links, and add sale labels.</p>
+      <div>
+        <h1 className="font-display text-2xl font-bold text-foreground flex items-center gap-2">
+          <div className="p-1.5 rounded-lg bg-violet-500/10">
+            <ImageIcon className="h-6 w-6 text-violet-400" />
+          </div>
+          Banner Deals Manager
+        </h1>
+        <p className="text-sm text-muted-foreground mt-1">Manage the 2 promotional banners at the top of the Travel Deals section.</p>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {[0, 1].map((idx) => {
@@ -140,7 +145,7 @@ const BannerDealsManager = () => {
           const displayImage = isEditing && imagePreview ? imagePreview : slot?.image_url;
 
           return (
-            <Card key={idx} className="overflow-hidden flex flex-col">
+            <Card key={idx} className="overflow-hidden flex flex-col border-l-4 border-l-violet-500/50">
               {displayImage && (
                 <div className="relative">
                   <img src={displayImage} alt={slot?.alt_text || labels[idx]} className="w-full h-32 object-cover" />

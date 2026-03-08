@@ -31,7 +31,6 @@ const AffiliateDisclosure = lazy(() => import("./pages/AffiliateDisclosure"));
 const BookingReport = lazy(() => import("./pages/BookingReport"));
 const ClientFile = lazy(() => import("./pages/ClientFile"));
 const PublicQuote = lazy(() => import("./pages/PublicQuote"));
-const RevenueInsights = lazy(() => import("./pages/RevenueInsights"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -76,8 +75,6 @@ const App = () => (
                 <Route path="/booking/:bookingNumber" element={<BookingReport />} />
                 <Route path="/client/:clientSlug" element={<ClientFile />} />
                 <Route path="/quote/:token" element={<PublicQuote />} />
-                <Route path="/admin/revenue" element={<RevenueInsights />} />
-                
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
