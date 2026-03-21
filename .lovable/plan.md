@@ -1,60 +1,110 @@
 
 
-# Phase 3: Schema & Structured Data + Quick Verdict
+# Dynamic Reviews Pages — `/reviews/[query]` Flow
 
-## Overview
-Add AggregateRating and Review JSON-LD schema to review pages, add a "Quick Verdict" summary block at the top of AI-generated reviews, and create property-style URL redirects.
+## What We're Building
+A new dynamic page at `/reviews/:query` that loads when users click question cards. Instead of leaving the site or going to `/search`, users stay on-site and see a rich, SEO-optimized results page with 5 hotel cards, affiliate sidebar, and sticky search — all generated via the existing `travel-search` edge function.
+
+## Architecture
+
+```text
+User clicks "Best hotels Paris" card
+  → navigates to /reviews/best-hotels-paris
+  → ReviewsPage extracts query from URL slug
+  → Calls travel-search edge function
+  → Renders 5 hotel cards + affiliate sidebar + sticky search
+  → Each card has "Review It" → generates full review at /review/:slug
+```
 
 ## Changes
 
-### 1. Quick Verdict Block on AI Review Pages
-**File: `src/components/AIReviewResult.tsx`**
-- Add a new "Quick Verdict" card at the very top of the review (before the summary card)
-- Shows: Overall score, top 3 pros, top 3 cons (derived from ratings), "Worth booking if" (from bestFor), review sources note
-- Structured with bold headings and bullet points so AI can quote verbatim
+### 1. New Page: `src/pages/Reviews.tsx`
+The core new page. Structure:
+- **Sticky search bar** at top (always visible, lets user search another query)
+- **H1**: "Best Hotels Paris: Real Reviews 2026" (derived from slug)
+- **5 hotel result cards** in main column (left), each with:
+  - Hotel name + location
+  - Star rating + category breakdown (Rooms, Service, Value, Location)
+  - Top Pros (green checkmarks) / Top Cons (red X)
+  - "Worth Booking If" line (from bestFor tags)
+  - Sources note
+  - "Review It" button → calls generate-review → navigates to `/review/:slug`
+- **Right sidebar** (desktop) / bottom section (mobile):
+  - "Ready to Book?" affiliate card (Expedia, Hotels.com, VRBO links using existing `buildDeepLinks`)
+  - "Compare Rates" table if multiple results
+  - Travel gear link to `/gear`
+- **Things to Do** section (if activities returned from search)
+- **Email capture**: "Get [destination] hotel alerts" inline form
+- **Bottom sticky search**: "Try another destination?"
+- **Footer affiliate disclosure**
 
-### 2. SEOHead on AI Review Pages
-**File: `src/pages/AIReview.tsx`**
-- Add `<SEOHead>` with:
-  - Title: `"{property_name} Real Reviews 2026 | ReviewThenGo"`
-  - Description from summary
-  - `aggregateRating` prop (overallRating, ratings count derived from data)
-  - `faq` prop with 3 auto-generated Q&As (e.g. "Is {property} worth it?", "What do travelers say about {property}?", "What's the rating for {property}?")
-  - BreadcrumbList schema (Home > Reviews > {property_name})
-  - URL set to `/review/{slug}`
+### 2. New Component: `src/components/reviews/HotelResultCard.tsx`
+Reusable card matching the spec:
+- Photo placeholder (gradient with hotel icon — no real photos from search)
+- H2 hotel name + location
+- Overall rating + category scores row
+- Pros/Cons lists
+- "Worth Booking If" line
+- Sources line
+- "Review It" CTA button
 
-### 3. SEOHead on Destination Review Pages
-**File: `src/pages/DestinationReview.tsx`**
-- Add `aggregateRating` prop to existing SEOHead (using the review's rating + ratings object)
-- Add `faq` prop with destination-specific Q&As
+### 3. New Component: `src/components/reviews/BookingSidebar.tsx`
+Right sidebar with affiliate links:
+- Uses existing `buildDeepLinks` + `detectCountry` from AffiliateLinks
+- Expedia, Hotels.com, VRBO deep links with property name
+- Affiliate disclosure text
+- Sticky on desktop (`sticky top-20`)
 
-### 4. Property-Style URL Redirects
-**File: `src/App.tsx`**
-- Add route: `/properties/:city/:name` that redirects to `/review/:name` (simple redirect component)
-- This gives crawlers a clean property-hierarchy URL pattern
+### 4. New Component: `src/components/reviews/StickySearchBar.tsx`
+Compact sticky search bar:
+- Fixed at top below header
+- Input + search button
+- On submit → navigates to `/reviews/[new-kebab-query]`
 
-### 5. Destinations Hub Enhancement
-**File: `src/pages/Destinations.tsx`**
-- Add A-Z letter filter bar at top
-- Add region filter chips (Caribbean, North America, Europe, Asia, etc.)
-- Add SearchAction schema for the search bar
+### 5. Update: `src/components/TravelersAskSection.tsx`
+- Change click handler from `/search?q=...` to `/reviews/[kebab-slug]`
+- Expand to 10 question cards (add: Adults-only Punta Cana, Beach resorts Cancun, Boutique hotels Paris, Family resorts Jamaica)
+- Add rotation/randomization showing 6 of 10
+
+### 6. Route: `src/App.tsx`
+- Add lazy import for Reviews page
+- Add `<Route path="/reviews/:query" element={<Reviews />} />`
+
+### 7. Update: `src/pages/TravelSearch.tsx`
+- Keep as-is (it's the broader search page)
+- No changes needed — `/reviews` is the new card-click destination
+
+## Affiliate Rules (Enforced)
+- Affiliate links appear ONLY in:
+  1. BookingSidebar (right side / mobile footer)
+  2. Compare table at bottom
+  3. Gear footer link to `/gear`
+- Zero affiliate links inside hotel review cards or content sections
+
+## SEO
+- Meta title: "[Query] Real Reviews 2026 | ReviewThenGo"
+- Meta desc: "Honest ratings from Google, TripAdvisor + more. Top 5 [destination] properties ranked."
+- AggregateRating schema on each hotel card
+- FAQPage schema with auto-generated Q&As
+- BreadcrumbList: Home > Reviews > [Query]
+- Clean `/reviews/best-hotels-paris` URLs
 
 ## Files
 
 | File | Action |
 |------|--------|
-| `src/components/AIReviewResult.tsx` | Add Quick Verdict block |
-| `src/components/QuickVerdict.tsx` | New — reusable verdict component |
-| `src/pages/AIReview.tsx` | Add SEOHead with aggregateRating + FAQ schema |
-| `src/pages/DestinationReview.tsx` | Add aggregateRating + FAQ to existing SEOHead |
-| `src/App.tsx` | Add `/properties/:city/:name` redirect route |
-| `src/pages/Destinations.tsx` | Add A-Z filter + region chips |
+| `src/pages/Reviews.tsx` | **New** — dynamic results page |
+| `src/components/reviews/HotelResultCard.tsx` | **New** — hotel card component |
+| `src/components/reviews/BookingSidebar.tsx` | **New** — affiliate sidebar |
+| `src/components/reviews/StickySearchBar.tsx` | **New** — sticky search bar |
+| `src/components/TravelersAskSection.tsx` | **Update** — link to /reviews/, expand to 10 cards |
+| `src/App.tsx` | **Update** — add /reviews/:query route |
 
 ## Order
-1. Create QuickVerdict component
-2. Integrate into AIReviewResult
-3. Add SEOHead to AIReview.tsx
-4. Add schema to DestinationReview.tsx
-5. Add property URL redirect
-6. Enhance Destinations hub
+1. Create StickySearchBar component
+2. Create HotelResultCard component
+3. Create BookingSidebar component
+4. Create Reviews page (assembles all above)
+5. Add route to App.tsx
+6. Update TravelersAskSection to link to /reviews/
 
