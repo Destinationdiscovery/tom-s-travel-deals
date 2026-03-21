@@ -1,10 +1,11 @@
-import { Shield, MapPin, Award, Users } from "lucide-react";
+import { Shield, Globe, Award, Users, Database } from "lucide-react";
 
 const badges = [
   { icon: Shield, label: "100% Real Reviews" },
-  { icon: MapPin, label: "Canadian Traveler Focused" },
+  { icon: Globe, label: "Global Traveler Trusted" },
   { icon: Award, label: "Expedia Partner" },
-  { icon: Users, label: "10,000+ Travelers Helped" },
+  { icon: Database, label: "50,000+ Reviews Analyzed" },
+  { icon: Users, label: "10+ Review Sources Aggregated" },
 ];
 
 const TrustBadges = () => (

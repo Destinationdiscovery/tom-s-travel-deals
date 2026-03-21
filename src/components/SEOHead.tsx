@@ -9,6 +9,22 @@ interface JsonLdData {
   [key: string]: unknown;
 }
 
+interface FAQItem {
+  question: string;
+  answer: string;
+}
+
+interface AggregateRatingData {
+  ratingValue: number;
+  reviewCount: number;
+  bestRating?: number;
+  worstRating?: number;
+  itemReviewed: {
+    type: string;
+    name: string;
+  };
+}
+
 interface SEOHeadProps {
   title: string;
   description: string;
@@ -19,13 +35,15 @@ interface SEOHeadProps {
   breadcrumbs?: BreadcrumbItem[];
   jsonLd?: JsonLdData | JsonLdData[];
   keywords?: string[];
+  faq?: FAQItem[];
+  aggregateRating?: AggregateRatingData;
 }
 
 const SITE_NAME = "ReviewThenGo";
 const DEFAULT_IMAGE = "https://reviewthengo.lovable.app/og-image.jpg";
 const BASE_URL = "https://reviewthengo.lovable.app";
 
-const SEOHead = ({ title, description, image, url, type = "website", noindex, breadcrumbs, jsonLd, keywords }: SEOHeadProps) => {
+const SEOHead = ({ title, description, image, url, type = "website", noindex, breadcrumbs, jsonLd, keywords, faq, aggregateRating }: SEOHeadProps) => {
   const fullTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
   const fullUrl = url ? `${BASE_URL}${url}` : BASE_URL;
   const ogImage = image || DEFAULT_IMAGE;
@@ -40,6 +58,36 @@ const SEOHead = ({ title, description, image, url, type = "website", noindex, br
           name: b.name,
           item: `${BASE_URL}${b.url}`,
         })),
+      }
+    : null;
+
+  const faqJsonLd = faq?.length
+    ? {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: faq.map((item) => ({
+          "@type": "Question",
+          name: item.question,
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: item.answer,
+          },
+        })),
+      }
+    : null;
+
+  const ratingJsonLd = aggregateRating
+    ? {
+        "@context": "https://schema.org",
+        "@type": aggregateRating.itemReviewed.type,
+        name: aggregateRating.itemReviewed.name,
+        aggregateRating: {
+          "@type": "AggregateRating",
+          ratingValue: aggregateRating.ratingValue,
+          reviewCount: aggregateRating.reviewCount,
+          bestRating: aggregateRating.bestRating || 5,
+          worstRating: aggregateRating.worstRating || 1,
+        },
       }
     : null;
 
@@ -66,6 +114,12 @@ const SEOHead = ({ title, description, image, url, type = "website", noindex, br
 
       {breadcrumbJsonLd && (
         <script type="application/ld+json">{JSON.stringify(breadcrumbJsonLd)}</script>
+      )}
+      {faqJsonLd && (
+        <script type="application/ld+json">{JSON.stringify(faqJsonLd)}</script>
+      )}
+      {ratingJsonLd && (
+        <script type="application/ld+json">{JSON.stringify(ratingJsonLd)}</script>
       )}
       {jsonLd && (
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
