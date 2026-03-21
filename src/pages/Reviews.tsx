@@ -135,6 +135,8 @@ const Reviews = () => {
               </script>
             </Helmet>
           <div className="flex flex-col lg:flex-row gap-8">
+            {/* Main column */}
+            <div className="flex-1 space-y-6">
               {results.slice(0, 5).map((r) => (
                 <HotelResultCard
                   key={r.name}
