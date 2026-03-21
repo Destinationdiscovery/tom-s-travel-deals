@@ -97,7 +97,7 @@ const AIReview = () => {
     if (review) {
       document.title = `${review.property_name}${review.location ? `, ${review.location}` : ""} - ReviewThenGo`;
     }
-    return () => { document.title = "ReviewThenGo.com | Real Reviews, Tested Gear & Travel Insights"; };
+    return () => { document.title = "ReviewThenGo | The All-in-One Travel Planning Tool"; };
   }, [review]);
   const handleNewReview = () => {
     navigate("/");
@@ -120,7 +120,7 @@ const AIReview = () => {
       {review && (
         <SEOHead
           title={`${review.property_name} Real Reviews 2026`}
-          description={(review.review_data as any)?.summary || `Honest aggregated review of ${review.property_name}`}
+          description={(review.review_data as any)?.summary || `Aggregated review of ${review.property_name} with ratings, pros, cons, and booking links.`}
           url={`/review/${review.slug}`}
           type="article"
           breadcrumbs={[

@@ -1,4 +1,4 @@
-import { Bookmark, BookmarkCheck } from "lucide-react";
+import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
@@ -37,8 +37,8 @@ const SaveReviewButton = ({ review }: SaveReviewButtonProps) => {
     const added = await addReview(payload);
     if (added) {
       toast({
-        title: "Saved for comparison!",
-        description: `${count + 1} saved. Compare when you're ready.`,
+        title: "Saved to My List!",
+        description: `${count + 1} saved. View and compare at My Saves.`,
       });
     } else {
       toast({
@@ -57,8 +57,8 @@ const SaveReviewButton = ({ review }: SaveReviewButtonProps) => {
       disabled={false}
       className="gap-2 w-full"
     >
-      {saved ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
-      {saved ? "Saved" : "Save to Compare"}
+      <Heart className={`h-4 w-4 ${saved ? "fill-current" : ""}`} />
+      {saved ? "Saved" : "Save to My List"}
     </Button>
   );
 

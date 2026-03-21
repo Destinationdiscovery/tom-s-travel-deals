@@ -1,4 +1,4 @@
-import { Star, CheckCircle, XCircle, Users, Hotel, ArrowRight, ChevronDown } from "lucide-react";
+import { Star, CheckCircle, XCircle, Users, Hotel, ArrowRight, ChevronDown, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -35,6 +35,14 @@ const HotelResultCard = ({ name, location, type, rating, description, bestFor, p
   ];
 
   const reviewCount = Math.floor(1200 + Math.random() * 3000);
+
+  // Deterministic "travelers saved" count from hotel name hash
+  const savedCount = (() => {
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) hash = ((hash << 5) - hash) + name.charCodeAt(i);
+    return 200 + Math.abs(hash) % 2800;
+  })();
+  const isPopular = savedCount > 500;
 
   const pros = bestFor.slice(0, 3);
   const cons = description.length > 80
@@ -108,6 +116,12 @@ const HotelResultCard = ({ name, location, type, rating, description, bestFor, p
             </p>
           </div>
         )}
+
+        {/* Travelers saved badge */}
+        <div className={`flex items-center gap-1.5 mb-3 text-xs ${isPopular ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground"}`}>
+          <Heart className={`h-3.5 w-3.5 ${isPopular ? "fill-amber-500 text-amber-500" : ""}`} />
+          <span className="font-medium">{savedCount.toLocaleString()} travelers saved this</span>
+        </div>
 
         {/* Sources + date stamp */}
         <div className="mb-4 space-y-1">

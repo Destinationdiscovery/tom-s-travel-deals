@@ -78,6 +78,7 @@ const App = () => (
                 <Route path="/about" element={<About />} />
                 <Route path="/guides" element={<Guides />} />
                 <Route path="/compare" element={<Compare />} />
+                <Route path="/my-saves" element={<Compare />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/travel-intel" element={<TravelIntel />} />
                 <Route path="/top/:location" element={<TopDestinations />} />

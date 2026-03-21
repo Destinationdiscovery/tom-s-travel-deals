@@ -1,4 +1,4 @@
-import { BarChart3 } from "lucide-react";
+import { Heart } from "lucide-react";
 
 interface PromoSaveBadgeProps {
   visible: boolean;
@@ -14,7 +14,7 @@ const PromoSaveBadge = ({ visible, pulsing }: PromoSaveBadgeProps) => {
         pulsing ? "animate-pulse" : ""
       }`}
     >
-      <BarChart3 className="h-4 w-4" />
+      <Heart className="h-4 w-4 fill-current" />
       <span>2/5 saved</span>
       <span className="ml-1 border-l border-primary-foreground/30 pl-2">Compare Now</span>
     </div>

@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { Heart, ArrowRight } from "lucide-react";
 import Header from "@/components/Header";
 import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import HeroSection from "@/components/HeroSection";
@@ -124,6 +125,21 @@ const Index = () => {
         <GearPreviewSection />
 
         <RecentReviewsHomepage />
+
+        {/* Saves CTA */}
+        <section className="py-10">
+          <div className="container mx-auto px-4">
+            <div className="max-w-2xl mx-auto text-center bg-card rounded-2xl border border-border p-8 shadow-soft">
+              <Heart className="h-8 w-8 text-primary mx-auto mb-3 fill-primary/20" />
+              <h2 className="font-display text-xl font-bold text-foreground mb-2">Start Your Saves List</h2>
+              <p className="text-muted-foreground text-sm mb-4">Save hotels and resorts as you browse, then compare them side-by-side to find your perfect match.</p>
+              <a href="/my-saves" className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline">
+                View My Saves <ArrowRight className="h-4 w-4" />
+              </a>
+            </div>
+          </div>
+        </section>
+
         <TravelDealsSection />
         <BlogPreviewSection />
         <HomepageFAQ />
