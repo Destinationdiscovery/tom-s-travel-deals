@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate, useLocation, Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 import Header from "@/components/Header";
 import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import HeroSection from "@/components/HeroSection";
@@ -26,16 +25,6 @@ import AIReviewResult from "@/components/AIReviewResult";
 import SEOHead from "@/components/SEOHead";
 import { useGenerateReview } from "@/hooks/useGenerateReview";
 
-const SectionConnector = ({ text, linkText, to }: { text: string; linkText: string; to: string }) => (
-  <div className="container mx-auto px-4 py-4 text-center">
-    <p className="text-sm text-muted-foreground">
-      {text}{" "}
-      <Link to={to} className="text-secondary hover:text-secondary/80 font-medium inline-flex items-center gap-1 transition-colors">
-        {linkText} <ArrowRight className="h-3 w-3" />
-      </Link>
-    </p>
-  </div>
-);
 
 const Index = () => {
   const { review, isLoading, error, generateReview, clearReview } = useGenerateReview();
@@ -107,19 +96,16 @@ const Index = () => {
         <HowItWorks />
         <TravelersAskSection />
 
-        <RecentReviewsHomepage />
-        <SectionConnector text="Need gear for your trip?" linkText="Check our Trip Planner" to="/gear" />
-        <TravelDealsSection />
-
         <GearPreviewSection />
         <BestTimePreviewSection />
         <ItineraryPreviewSection />
         <CurrencyPreviewSection />
         <FlightsPreviewSection />
         <IntelPreviewSection />
-
         <TrendingQueriesSection />
 
+        <RecentReviewsHomepage />
+        <TravelDealsSection />
         <BlogPreviewSection />
         <HomepageFAQ />
       </main>
