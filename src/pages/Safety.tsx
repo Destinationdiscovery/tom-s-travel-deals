@@ -69,8 +69,8 @@ const Safety = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title={`${data?.destination || "Destination"} Safety Score | ReviewThenGo`}
-        description="Get safety ratings, scam alerts, health tips, and emergency numbers for any travel destination."
+        title={`${data?.destination ? data.destination + " Safety Score" : "Destination Safety Scores, Scam Alerts, and Travel Advisories"}`}
+        description="Get safety ratings, common scam alerts, health tips, and emergency contacts for any travel destination before you go."
         url="/safety"
       />
       <Header />

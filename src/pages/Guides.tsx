@@ -42,7 +42,7 @@ const Guides = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="Travel Guides. Honest Insights Before You Book"
+        title="Travel Guides: Expert Insights Before You Book"
         description="Free, research-backed travel guides from ReviewThenGo. Learn how to spot fake reviews, compare Airbnb vs hotels, find the best golf resorts, and avoid common booking mistakes."
         url="/guides"
         faq={hubFaq}

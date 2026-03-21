@@ -70,8 +70,8 @@ const Flights = () => {
   return (
     <>
       <SEOHead
-        title="Flight Deals Finder | ReviewThenGo"
-        description="Find the best upcoming flight deals for any route. AI-powered search with real-time pricing."
+        title="Cheap Flight Deals Finder: Compare Prices and Book"
+        description="Search for the best upcoming flight deals on any route. Compare prices and book directly through Expedia."
         url="/flights"
       />
       <Header />

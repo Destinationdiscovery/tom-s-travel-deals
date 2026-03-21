@@ -60,7 +60,7 @@ const TravelersAskSection = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-10">
           <h2 id="travelers-ask-heading" className="font-display text-2xl md:text-4xl font-bold text-foreground mb-3">
-            What Travelers Ask Us
+            Common Travel Questions Answered
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             Reviews, packing lists, best times to visit, tap any question for an instant AI-powered answer.

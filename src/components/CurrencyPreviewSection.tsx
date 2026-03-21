@@ -14,7 +14,7 @@ const CurrencyPreviewSection = () => (
       <div className="flex items-center justify-between mb-6">
         <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
           <DollarSign className="h-6 w-6 text-primary" />
-          Currency Tracker
+          Travel Currency Exchange Rates
         </h2>
         <Link to="/currency" className="text-sm font-medium text-primary hover:underline flex items-center gap-1">
           Check exchange rates <ArrowRight className="h-4 w-4" />

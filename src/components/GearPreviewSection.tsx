@@ -81,7 +81,7 @@ const GearPreviewSection = () => {
         <div className="flex items-center justify-between mb-6">
           <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
             <Luggage className="h-6 w-6 text-primary" />
-            Trip Packing Toolkit
+            Trip Packing Lists and Travel Gear
           </h2>
           <Link to="/gear" className="text-sm font-medium text-primary hover:underline flex items-center gap-1">
             Pack Your Trip <ArrowRight className="h-4 w-4" />
