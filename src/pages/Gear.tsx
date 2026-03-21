@@ -83,9 +83,11 @@ const Gear = () => {
     window.scrollTo({ top: 400, behavior: "smooth" });
   };
 
+  const navigate = useNavigate();
   const handleBackToCards = () => {
     clearAll();
     setSearchQuery("");
+    navigate("/");
   };
 
   const hasResults = packingData || reviewData || loading || reviewLoading;
