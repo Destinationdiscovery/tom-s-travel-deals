@@ -21,6 +21,7 @@ const BestTime = lazy(() => import("./pages/BestTime"));
 const Itinerary = lazy(() => import("./pages/Itinerary"));
 const Currency = lazy(() => import("./pages/Currency"));
 const Flights = lazy(() => import("./pages/Flights"));
+const Safety = lazy(() => import("./pages/Safety"));
 const GearAdmin = lazy(() => import("./pages/GearAdmin"));
 const About = lazy(() => import("./pages/About"));
 const Compare = lazy(() => import("./pages/Compare"));
@@ -72,6 +73,7 @@ const App = () => (
                 <Route path="/itinerary" element={<Itinerary />} />
                 <Route path="/currency" element={<Currency />} />
                 <Route path="/flights" element={<Flights />} />
+                <Route path="/safety" element={<Safety />} />
                 <Route path="/gear-admin" element={<GearAdmin />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/guides" element={<Guides />} />

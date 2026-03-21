@@ -69,3 +69,6 @@ verify_jwt = false
 [functions.flight-deals]
 verify_jwt = false
 
+[functions.safety-intel]
+verify_jwt = false
+

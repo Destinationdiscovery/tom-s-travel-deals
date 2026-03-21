@@ -37,7 +37,7 @@ const Footer = () => {
   return (
     <footer className="bg-primary text-primary-foreground py-16">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
           {/* Brand */}
           <div>
             <h3 className="font-display text-3xl font-bold mb-2">
@@ -65,20 +65,33 @@ const Footer = () => {
               {[
                 { to: "/", label: "Home" },
                 { to: "/destinations", label: "Destinations" },
-                { to: "/gear", label: "Trip Planner" },
-                { to: "/best-time", label: "Best Time" },
-                { to: "/travel-intel", label: "Intel" },
                 { to: "/compass", label: "Blog" },
                 { to: "/guides", label: "Guides" },
                 { to: "/about", label: "About" },
                 { to: "/contact", label: "Contact" },
                 { to: "/install", label: "Install App" },
               ].map((link) => (
-                <Link
-                  key={link.to}
-                  to={link.to}
-                  className="text-primary-foreground/70 hover:text-secondary transition-colors text-base"
-                >
+                <Link key={link.to} to={link.to} className="text-primary-foreground/70 hover:text-secondary transition-colors text-base">
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+
+          {/* Tools */}
+          <div>
+            <h4 className="font-display font-semibold text-lg mb-4">Tools</h4>
+            <nav className="flex flex-col gap-2">
+              {[
+                { to: "/gear", label: "Trip Planner" },
+                { to: "/best-time", label: "Best Time to Visit" },
+                { to: "/itinerary", label: "Itinerary Builder" },
+                { to: "/currency", label: "Currency Tracker" },
+                { to: "/flights", label: "Flight Deals" },
+                { to: "/travel-intel", label: "Travel Intel" },
+                { to: "/safety", label: "Safety Scores" },
+              ].map((link) => (
+                <Link key={link.to} to={link.to} className="text-primary-foreground/70 hover:text-secondary transition-colors text-base">
                   {link.label}
                 </Link>
               ))}
