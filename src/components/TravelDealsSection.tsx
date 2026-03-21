@@ -110,6 +110,7 @@ const defaultBanners: BannerData[] = [
 ];
 
 const TravelDealsSection = () => {
+  const navigate = useNavigate();
   const [mergedDeals, setMergedDeals] = useState<FeaturedDeal[]>(featuredDeals);
   const [banners, setBanners] = useState<BannerData[]>(defaultBanners);
 
