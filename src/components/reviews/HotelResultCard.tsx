@@ -1,4 +1,4 @@
-import { Star, CheckCircle, XCircle, Users, Hotel, ArrowRight, ChevronDown } from "lucide-react";
+import { Star, CheckCircle, XCircle, Users, Hotel, ArrowRight, ChevronDown, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
