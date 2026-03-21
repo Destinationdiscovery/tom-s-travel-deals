@@ -26,6 +26,8 @@ import AIReviewResult from "@/components/AIReviewResult";
 import SEOHead from "@/components/SEOHead";
 import { useGenerateReview } from "@/hooks/useGenerateReview";
 import PopularSavesSection from "@/components/PopularSavesSection";
+import ToolsDirectorySection from "@/components/ToolsDirectorySection";
+import AboutPreviewSection from "@/components/AboutPreviewSection";
 
 
 const Index = () => {
