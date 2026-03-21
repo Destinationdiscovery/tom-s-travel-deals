@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { useTravelIntel, type IntelType } from "@/hooks/useTravelIntel";
 import { Shield, FileText, Newspaper, Loader2, Globe } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
+import { supabase } from "@/integrations/supabase/client";
 import heroImg from "@/assets/snowbird-beach-sunset.jpg";
 import { IntelLoading, RequirementsResult, AdvisoriesResult, NewsResult } from "@/components/intel/IntelResults";
 
