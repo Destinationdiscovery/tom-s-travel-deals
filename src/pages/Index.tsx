@@ -126,6 +126,7 @@ const Index = () => {
         <GearPreviewSection />
 
         <RecentReviewsHomepage />
+        <PopularSavesSection />
 
         {/* Saves CTA */}
         <section className="py-10">
