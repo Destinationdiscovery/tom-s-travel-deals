@@ -14,7 +14,7 @@ const BestTimePreviewSection = () => (
       <div className="flex items-center justify-between mb-6">
         <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
           <Calendar className="h-6 w-6 text-primary" />
-          Best Time to Visit
+          Best Time to Visit Any Destination
         </h2>
         <Link to="/best-time" className="text-sm font-medium text-primary hover:underline flex items-center gap-1">
           Find your perfect window <ArrowRight className="h-4 w-4" />

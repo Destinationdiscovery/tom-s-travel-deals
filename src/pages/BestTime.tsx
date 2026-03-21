@@ -95,8 +95,8 @@ const BestTime = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="Best Time to Visit Any Destination | ReviewThenGo"
-        description="Find the best time to visit any destination, weather, crowds, flight prices, and local events all in one place."
+        title="Best Time to Visit Any Destination: Weather, Crowds, and Prices"
+        description="Find the best month to visit any country or city. Get weather forecasts, crowd levels, flight price trends, and local events to plan your perfect trip."
         url="/best-time"
       />
       <Header />

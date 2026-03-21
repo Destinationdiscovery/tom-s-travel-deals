@@ -14,7 +14,7 @@ const features = [
   {
     icon: Camera,
     title: "Real Experiences Shared",
-    description: "No stock photos here. My reviews feature my own photos, videos, and honest opinions.",
+    description: "No stock photos here. My reviews feature my own photos, videos, and real opinions.",
   },
 ];
 
@@ -42,7 +42,7 @@ const AboutSection = () => {
                 This site exists to help travelers make better decisions before they book.
               </p>
               <p className="text-muted-foreground text-lg leading-relaxed mb-4">
-                ReviewThenGo focuses on honest insights, common experiences, and real-world feedback 
+                ReviewThenGo focuses on clear insights, common experiences, and real-world feedback 
                 about destinations, resorts, and travel experiences. It's not about selling. It's about clarity.
               </p>
               <p className="text-muted-foreground text-lg leading-relaxed">

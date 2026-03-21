@@ -50,30 +50,49 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="Your Travel Aggregator That Answers Every Question"
-        description="ReviewThenGo is a travel aggregator that answers any question travelers have. Destination reviews, packing lists, best times to visit, itineraries, currency, flights, and safety scores, all in one place."
+        title="The All-in-One Travel Planning Tool"
+        description="ReviewThenGo is the all-in-one travel planning tool that answers any question travelers have. Destination reviews, packing lists, best times to visit, itineraries, currency, flights, and safety scores, all in one place."
         url="/"
-        keywords={["travel aggregator", "travel questions answered", "hotel reviews", "resort reviews", "travel reviews", "packing lists", "best time to visit", "travel tools"]}
+        keywords={["travel planning tool", "travel aggregator", "hotel reviews", "resort reviews", "best time to visit", "travel itinerary builder", "flight deals", "packing list", "currency exchange rates", "travel safety scores", "travel advisories", "visa requirements"]}
         faq={homepageFaqData}
         jsonLd={[
           {
             "@context": "https://schema.org",
             "@type": "Organization",
             name: "ReviewThenGo",
-            url: "https://reviewthengo.lovable.app",
-            logo: "https://reviewthengo.lovable.app/favicon.png",
+            url: "https://reviewthengo.com",
+            logo: "https://reviewthengo.com/favicon.png",
             sameAs: ["https://x.com/TomLaracyTravel", "https://www.instagram.com/reviewthengo"]
           },
           {
             "@context": "https://schema.org",
             "@type": "WebSite",
             name: "ReviewThenGo",
-            url: "https://reviewthengo.lovable.app",
+            url: "https://reviewthengo.com",
             potentialAction: {
               "@type": "SearchAction",
-              target: "https://reviewthengo.lovable.app/destinations?q={search_term_string}",
+              target: "https://reviewthengo.com/destinations?q={search_term_string}",
               "query-input": "required name=search_term_string"
             }
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            name: "ReviewThenGo",
+            url: "https://reviewthengo.com",
+            applicationCategory: "TravelApplication",
+            operatingSystem: "Web",
+            offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+            featureList: [
+              "Aggregated hotel and resort reviews from 10+ sources",
+              "Best time to visit any destination with weather, crowds, and prices",
+              "Day-by-day travel itinerary builder",
+              "Flight deals finder with booking links",
+              "Personalized trip packing list generator",
+              "Live currency exchange rate tracker and converter",
+              "Destination safety scores, scam alerts, and emergency contacts",
+              "Travel entry requirements, visa policies, and advisories"
+            ]
           }
         ]}
       />

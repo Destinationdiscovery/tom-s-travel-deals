@@ -14,7 +14,7 @@ const ALL_QUERIES: QueryItem[] = [
   // Reviews
   { label: "Best hotels in Paris real reviews", path: "/reviews/best-hotels-paris", type: "review" },
   { label: "Is Bali worth it 2026?", path: "/reviews/is-bali-worth-it-2026", type: "review" },
-  { label: "Golf resorts honest feedback", path: "/reviews/best-golf-resorts", type: "review" },
+  { label: "Golf resorts real reviews", path: "/reviews/best-golf-resorts", type: "review" },
   { label: "Caribbean all-inclusive reviews", path: "/reviews/caribbean-all-inclusive-resorts", type: "review" },
   { label: "Tokyo hotels budget vs luxury", path: "/reviews/tokyo-hotels-budget-vs-luxury", type: "review" },
   { label: "Adults-only Punta Cana resorts", path: "/reviews/adults-only-punta-cana-resorts", type: "review" },
@@ -60,7 +60,7 @@ const TravelersAskSection = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-10">
           <h2 id="travelers-ask-heading" className="font-display text-2xl md:text-4xl font-bold text-foreground mb-3">
-            What Travelers Ask Us
+            Common Travel Questions Answered
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             Reviews, packing lists, best times to visit, tap any question for an instant AI-powered answer.

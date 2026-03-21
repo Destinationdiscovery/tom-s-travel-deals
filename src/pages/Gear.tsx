@@ -95,15 +95,15 @@ const Gear = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="Trip Packing Toolkit"
-        description="Enter your trip and get a personalized packing list, weather tips, and gear recommendations, all powered by AI."
+        title="Trip Packing Lists and Travel Gear Recommendations"
+        description="Get a personalized packing list for any trip. AI-powered recommendations for what to pack based on your destination, weather, and activities."
         url="/gear"
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "WebPage",
-          name: "Trip Packing Toolkit - ReviewThenGo",
+          name: "Trip Packing Lists and Travel Gear - ReviewThenGo",
           description: "AI-powered packing lists, weather tips, and gear recommendations for travelers.",
-          url: "https://reviewthengo.lovable.app/gear"
+          url: "https://reviewthengo.com/gear"
         }}
       />
       <Header />

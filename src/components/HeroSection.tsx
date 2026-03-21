@@ -109,7 +109,7 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
             </Button>
           </div>
           <p className="text-white/70 text-xs mt-2">
-            Search any hotel, resort, or destination worldwide, get honest, AI-powered reviews instantly.
+            Search any hotel, resort, or destination worldwide and get AI-powered reviews instantly.
           </p>
         </div>
 

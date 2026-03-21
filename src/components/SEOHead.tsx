@@ -40,8 +40,8 @@ interface SEOHeadProps {
 }
 
 const SITE_NAME = "ReviewThenGo";
-const DEFAULT_IMAGE = "https://reviewthengo.lovable.app/og-image.jpg";
-const BASE_URL = "https://reviewthengo.lovable.app";
+const DEFAULT_IMAGE = "https://reviewthengo.com/og-image.jpg";
+const BASE_URL = "https://reviewthengo.com";
 
 const SEOHead = ({ title, description, image, url, type = "website", noindex, breadcrumbs, jsonLd, keywords, faq, aggregateRating }: SEOHeadProps) => {
   const fullTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;

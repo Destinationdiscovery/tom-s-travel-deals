@@ -64,7 +64,7 @@ const IntelPreviewSection = () => {
         <div className="flex items-center justify-between mb-6">
           <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
             <Globe className="h-6 w-6 text-primary" />
-            Travel Intel
+            Travel Advisories, Visa Requirements, and News
           </h2>
           <Link
             to="/travel-intel"

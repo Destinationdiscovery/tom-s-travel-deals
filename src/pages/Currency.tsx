@@ -54,8 +54,8 @@ const Currency = () => {
   return (
     <>
       <SEOHead
-        title="Currency Tracker for Travelers | ReviewThenGo"
-        description="Live exchange rates, conversion tables, and travel money tips for any destination."
+        title="Travel Currency Exchange Rates and Converter"
+        description="Check live exchange rates, conversion tables, and money-saving tips for any travel destination."
         url="/currency"
       />
       <Header />
