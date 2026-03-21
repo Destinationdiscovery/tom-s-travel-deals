@@ -23,8 +23,14 @@ const AIReview = () => {
   useEffect(() => {
     if (!slug) return;
 
+    const toTitleCase = (s: string) =>
+      s.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+
     const fetchReview = async () => {
       setLoading(true);
+      setError(null);
+
+      // 1. Try cache first
       const { data, error: dbError } = await supabase
         .from("cached_reviews")
         .select("*")
@@ -34,28 +40,50 @@ const AIReview = () => {
       if (dbError) {
         setError("Could not load this review.");
         console.error(dbError);
-      } else if (!data) {
-        setError("Review not found.");
-      } else {
-        setReview({
-          id: data.id,
-          property_name: data.property_name,
-          slug: data.slug,
-          location: data.location,
-          property_type: data.property_type,
-          review_data: data.review_data as unknown as CachedReview["review_data"],
-          created_at: data.created_at,
-        });
-        // Look up featured_reviews for affiliate URL
-        const { data: featured } = await supabase
-          .from("featured_reviews")
-          .select("affiliate_url")
-          .eq("slug", data.slug)
-          .maybeSingle();
-        if (featured?.affiliate_url) {
-          setAffiliateUrl(featured.affiliate_url);
-        }
+        setLoading(false);
+        return;
       }
+
+      let reviewData = data;
+
+      // 2. If not cached, auto-generate from slug
+      if (!reviewData) {
+        const propertyName = toTitleCase(slug);
+        const { data: genData, error: genError } = await supabase.functions.invoke(
+          "generate-review",
+          { body: { propertyName } }
+        );
+
+        if (genError || genData?.error || !genData?.review) {
+          setError(genData?.error || "Could not generate this review. Please try again.");
+          console.error("Auto-generate failed:", genError || genData?.error);
+          setLoading(false);
+          return;
+        }
+        reviewData = genData.review;
+      }
+
+      // 3. Set review state
+      setReview({
+        id: reviewData.id,
+        property_name: reviewData.property_name,
+        slug: reviewData.slug,
+        location: reviewData.location,
+        property_type: reviewData.property_type,
+        review_data: reviewData.review_data as unknown as CachedReview["review_data"],
+        created_at: reviewData.created_at,
+      });
+
+      // Look up featured_reviews for affiliate URL
+      const { data: featured } = await supabase
+        .from("featured_reviews")
+        .select("affiliate_url")
+        .eq("slug", reviewData.slug)
+        .maybeSingle();
+      if (featured?.affiliate_url) {
+        setAffiliateUrl(featured.affiliate_url);
+      }
+
       setLoading(false);
     };
 
