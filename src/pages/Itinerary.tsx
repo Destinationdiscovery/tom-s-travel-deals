@@ -85,7 +85,7 @@ const Itinerary = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="AI Itinerary Builder. Plan Your Trip | ReviewThenGo"
+        title="Itinerary Builder. Plan Your Trip | ReviewThenGo"
         description="Get a personalized day-by-day travel itinerary with costs, activities, restaurants, and insider tips, powered by AI."
         url="/itinerary"
       />
@@ -95,7 +95,7 @@ const Itinerary = () => {
         <section className="bg-gradient-to-br from-primary via-primary to-primary/80 py-16 md:py-24">
           <div className="container mx-auto px-4 text-center">
             <h1 className="font-display text-4xl md:text-5xl font-bold text-primary-foreground mb-4">
-              AI Itinerary <span className="text-secondary">Builder</span>
+              Itinerary <span className="text-secondary">Builder</span>
             </h1>
             <p className="text-primary-foreground/70 text-lg mb-8 max-w-2xl mx-auto">
               Tell us your destination and trip style, get a complete day-by-day plan with costs and restaurant picks.
