@@ -62,8 +62,9 @@ const Flights = () => {
   useState(() => { if (initialQuery) handleSearch(initialQuery); });
 
   const buildExpediaFlightUrl = (route: string) => {
+    const country = detectCountry();
     const encoded = encodeURIComponent(route);
-    return `https://www.expedia.com/Flights?destination=${encoded}`;
+    return `${EXPEDIA_LINKS[country]}?destination=${encoded}`;
   };
 
   return (
