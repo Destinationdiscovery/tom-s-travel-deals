@@ -14,7 +14,7 @@ const features = [
   {
     icon: Camera,
     title: "Real Experiences Shared",
-    description: "No stock photos here. My reviews feature my own photos, videos, and honest opinions.",
+    description: "No stock photos here. My reviews feature my own photos, videos, and real opinions.",
   },
 ];
 
