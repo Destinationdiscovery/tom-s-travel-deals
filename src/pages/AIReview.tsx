@@ -9,6 +9,7 @@ import ReviewEngagement from "@/components/ReviewEngagement";
 import type { CachedReview } from "@/hooks/useGenerateReview";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useReviewHistory } from "@/hooks/useReviewHistory";
+import SEOHead from "@/components/SEOHead";
 
 const AIReview = () => {
   const { slug } = useParams<{ slug: string }>();
