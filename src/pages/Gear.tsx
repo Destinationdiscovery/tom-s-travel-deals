@@ -38,6 +38,10 @@ const Gear = () => {
   const [cards, setCards] = useState<GearCard[]>(DEFAULT_CARDS);
 
   useEffect(() => {
+    supabase.functions.invoke("track-review-view", { body: { slug: "gear" } }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
     const fetchCards = async () => {
       const { data } = await supabase.from("featured_gear_cards").select("*").order("slot_number") as any;
       if (data && data.length > 0) {

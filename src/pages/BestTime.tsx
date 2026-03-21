@@ -58,6 +58,10 @@ const BestTime = () => {
   const [data, setData] = useState<BestTimeData | null>(null);
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    supabase.functions.invoke("track-review-view", { body: { slug: "best-time" } }).catch(() => {});
+  }, []);
+
   const doSearch = useCallback(async (dest: string) => {
     setLoading(true);
     setError("");

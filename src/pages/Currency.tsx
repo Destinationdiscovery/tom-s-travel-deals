@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { ArrowLeft, DollarSign, ArrowRightLeft, Lightbulb, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,10 @@ const Currency = () => {
   const [result, setResult] = useState<CurrencyResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    supabase.functions.invoke("track-review-view", { body: { slug: "currency" } }).catch(() => {});
+  }, []);
 
   const handleSearch = async (q?: string) => {
     const searchQuery = q || query;

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Shield, AlertTriangle, Heart, Phone, MapPin, Star, Loader2, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
@@ -45,6 +45,10 @@ const Safety = () => {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<SafetyData | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.functions.invoke("track-review-view", { body: { slug: "safety" } }).catch(() => {});
+  }, []);
 
   const handleSearch = async () => {
     const trimmed = query.trim();

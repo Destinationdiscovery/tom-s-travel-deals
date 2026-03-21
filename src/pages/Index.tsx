@@ -1,4 +1,5 @@
 import { useRef, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Heart, ArrowRight } from "lucide-react";
 import Header from "@/components/Header";
@@ -35,6 +36,10 @@ const Index = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const resultsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    supabase.functions.invoke("track-review-view", { body: { slug: "homepage" } }).catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (location.hash) {

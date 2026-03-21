@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Star, Trash2, Sparkles, Trophy, Loader2 } from "lucide-react";
 import Header from "@/components/Header";
@@ -116,6 +116,10 @@ const Compare = () => {
   const [isComparing, setIsComparing] = useState(false);
   const [compareError, setCompareError] = useState<string | null>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    supabase.functions.invoke("track-review-view", { body: { slug: "my-saves" } }).catch(() => {});
+  }, []);
 
   const handleCompare = async () => {
     if (savedReviews.length < 2) {
