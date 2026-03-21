@@ -1,18 +1,35 @@
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Star, Luggage, Calendar } from "lucide-react";
 
-const ALL_QUERIES = [
-  { label: "Best hotels in Paris real reviews", query: "best-hotels-paris" },
-  { label: "Is Bali worth it 2026?", query: "is-bali-worth-it-2026" },
-  { label: "Golf resorts honest feedback", query: "best-golf-resorts" },
-  { label: "Caribbean all-inclusive reviews", query: "caribbean-all-inclusive-resorts" },
-  { label: "Tokyo hotels budget vs luxury", query: "tokyo-hotels-budget-vs-luxury" },
-  { label: "Best Airbnbs in NYC real reviews", query: "best-airbnbs-new-york-city" },
-  { label: "Adults-only Punta Cana resorts", query: "adults-only-punta-cana-resorts" },
-  { label: "Beach resorts Cancun reviews", query: "beach-resorts-cancun" },
-  { label: "Boutique hotels Barcelona", query: "boutique-hotels-barcelona" },
-  { label: "Family resorts Jamaica reviews", query: "family-resorts-jamaica" },
+type QueryType = "review" | "packing" | "besttime";
+
+interface QueryItem {
+  label: string;
+  path: string;
+  type: QueryType;
+}
+
+const ALL_QUERIES: QueryItem[] = [
+  // Reviews
+  { label: "Best hotels in Paris real reviews", path: "/reviews/best-hotels-paris", type: "review" },
+  { label: "Is Bali worth it 2026?", path: "/reviews/is-bali-worth-it-2026", type: "review" },
+  { label: "Golf resorts honest feedback", path: "/reviews/best-golf-resorts", type: "review" },
+  { label: "Caribbean all-inclusive reviews", path: "/reviews/caribbean-all-inclusive-resorts", type: "review" },
+  { label: "Tokyo hotels budget vs luxury", path: "/reviews/tokyo-hotels-budget-vs-luxury", type: "review" },
+  { label: "Adults-only Punta Cana resorts", path: "/reviews/adults-only-punta-cana-resorts", type: "review" },
+  { label: "Beach resorts Cancun reviews", path: "/reviews/beach-resorts-cancun", type: "review" },
+  { label: "Family resorts Jamaica reviews", path: "/reviews/family-resorts-jamaica", type: "review" },
+  // Trip Planner
+  { label: "Cancun beach trip packing list", path: "/gear?q=Cancun+beach+trip+August", type: "packing" },
+  { label: "Italy August wedding trip packing", path: "/gear?q=Italy+August+wedding+trip", type: "packing" },
+  { label: "Japan ski week essentials", path: "/gear?q=Japan+ski+week+essentials", type: "packing" },
+  { label: "Europe backpack trip must-haves", path: "/gear?q=Europe+backpack+trip", type: "packing" },
+  // Best Time
+  { label: "Best time to visit Japan", path: "/best-time?q=Japan", type: "besttime" },
+  { label: "Best time to visit Bali", path: "/best-time?q=Bali", type: "besttime" },
+  { label: "Best time to visit Paris", path: "/best-time?q=Paris", type: "besttime" },
+  { label: "Best time to visit Thailand", path: "/best-time?q=Thailand", type: "besttime" },
 ];
 
 function shuffle<T>(arr: T[]): T[] {
@@ -24,12 +41,18 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
+const typeConfig: Record<QueryType, { icon: typeof Star; label: string; color: string }> = {
+  review: { icon: Star, label: "Review", color: "text-secondary" },
+  packing: { icon: Luggage, label: "Packing", color: "text-primary" },
+  besttime: { icon: Calendar, label: "Best Time", color: "text-emerald-500" },
+};
+
 const TravelersAskSection = () => {
   const navigate = useNavigate();
-  const visible = useMemo(() => shuffle(ALL_QUERIES).slice(0, 6), []);
+  const visible = useMemo(() => shuffle(ALL_QUERIES).slice(0, 8), []);
 
-  const handleClick = (slug: string) => {
-    navigate(`/reviews/${slug}`);
+  const handleClick = (path: string) => {
+    navigate(path);
   };
 
   return (
@@ -40,22 +63,29 @@ const TravelersAskSection = () => {
             What Travelers Ask Us
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            These are the most popular questions travelers search before booking. Tap any to get instant insights.
+            Reviews, packing lists, best times to visit — tap any question for an instant AI-powered answer.
           </p>
         </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
-          {visible.map((q) => (
-            <button
-              key={q.label}
-              onClick={() => handleClick(q.query)}
-              className="group flex items-center justify-between gap-3 rounded-xl border border-border bg-card p-4 text-left transition-all hover:border-primary/40 hover:shadow-md"
-            >
-              <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
-                "{q.label}"
-              </span>
-              <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary shrink-0 transition-colors" />
-            </button>
-          ))}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
+          {visible.map((q) => {
+            const cfg = typeConfig[q.type];
+            const Icon = cfg.icon;
+            return (
+              <button
+                key={q.label}
+                onClick={() => handleClick(q.path)}
+                className="group flex items-center justify-between gap-3 rounded-xl border border-border bg-card p-4 text-left transition-all hover:border-primary/40 hover:shadow-md"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <Icon className={`h-4 w-4 shrink-0 ${cfg.color}`} />
+                  <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors truncate">
+                    {q.label}
+                  </span>
+                </div>
+                <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary shrink-0 transition-colors" />
+              </button>
+            );
+          })}
         </div>
       </div>
     </section>
