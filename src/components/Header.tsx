@@ -13,6 +13,7 @@ const navLinks = [
   { to: "/destinations", label: "Destinations" },
   { to: "/gear", label: "Trip Planner" },
   { to: "/best-time", label: "Best Time" },
+  { to: "/itinerary", label: "Itinerary" },
   { to: "/travel-intel", label: "Intel" },
   { to: "/compass", label: "Blog" },
   { to: "/guides", label: "Guides" },

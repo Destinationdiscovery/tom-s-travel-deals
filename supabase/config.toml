@@ -57,3 +57,9 @@ verify_jwt = false
 [functions.dashboard-search]
 verify_jwt = false
 
+[functions.best-time-intel]
+verify_jwt = false
+
+[functions.generate-itinerary]
+verify_jwt = false
+

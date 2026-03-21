@@ -18,6 +18,7 @@ const CompassArticle = lazy(() => import("./pages/CompassArticle"));
 const Guides = lazy(() => import("./pages/Guides"));
 const Gear = lazy(() => import("./pages/Gear"));
 const BestTime = lazy(() => import("./pages/BestTime"));
+const Itinerary = lazy(() => import("./pages/Itinerary"));
 const GearAdmin = lazy(() => import("./pages/GearAdmin"));
 const About = lazy(() => import("./pages/About"));
 const Compare = lazy(() => import("./pages/Compare"));
@@ -66,6 +67,7 @@ const App = () => (
                 <Route path="/compass/:slug" element={<CompassArticle />} />
                 <Route path="/gear" element={<Gear />} />
                 <Route path="/best-time" element={<BestTime />} />
+                <Route path="/itinerary" element={<Itinerary />} />
                 <Route path="/gear-admin" element={<GearAdmin />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/guides" element={<Guides />} />
