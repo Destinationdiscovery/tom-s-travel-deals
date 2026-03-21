@@ -583,7 +583,7 @@ const ClientFile = () => {
                             <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1">Trip Dates</p>
                             <p className="text-sm font-medium">
                               {card.tripStart && card.tripEnd
-                                ? `${format(new Date(card.tripStart), "MMM d")} – ${format(new Date(card.tripEnd), "MMM d, yyyy")}`
+                                ? `${format(new Date(card.tripStart), "MMM d")} to ${format(new Date(card.tripEnd), "MMM d, yyyy")}`
                                 : card.tripStart
                                 ? `From ${format(new Date(card.tripStart), "MMM d, yyyy")}`
                                 : "-"}
@@ -628,7 +628,7 @@ const ClientFile = () => {
                     const tripName = first.resortName || first.details?.ship_name || "Trip";
                     const supplier = first.supplier || first.details?.supplier || "";
                     const tripDates = first.tripStart && first.tripEnd
-                      ? `${format(new Date(first.tripStart), "MMM d")} – ${format(new Date(first.tripEnd), "MMM d, yyyy")}`
+                      ? `${format(new Date(first.tripStart), "MMM d")} to ${format(new Date(first.tripEnd), "MMM d, yyyy")}`
                       : first.tripStart
                       ? `From ${format(new Date(first.tripStart), "MMM d, yyyy")}`
                       : "";

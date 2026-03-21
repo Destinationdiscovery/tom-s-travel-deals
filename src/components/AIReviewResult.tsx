@@ -105,7 +105,7 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview, onReviewReady, 
 
           {/* Two-Column Grid */}
           <div className="grid lg:grid-cols-3 gap-10">
-            {/* LEFT COLUMN – Main Content */}
+            {/* LEFT COLUMN - Main Content */}
             <div className="lg:col-span-2 flex flex-col gap-10">
               {/* 0. Quick Verdict */}
               <div className="order-0">
@@ -252,7 +252,7 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview, onReviewReady, 
               </div>
             </div>
 
-            {/* RIGHT COLUMN – Sidebar (desktop only) */}
+            {/* RIGHT COLUMN - Sidebar (desktop only) */}
             <div className="hidden lg:flex flex-col gap-8">
               {/* Ratings Breakdown */}
               <RatingsCard data={data} />

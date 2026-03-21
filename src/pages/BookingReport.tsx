@@ -413,7 +413,7 @@ const BookingReport = () => {
                       <CalendarIcon className="h-4 w-4 text-primary" />
                       <span className="font-semibold">
                         {format(new Date(tripStart), "MMMM d")}
-                        {tripEnd ? ` – ${format(new Date(tripEnd), "MMMM d, yyyy")}` : `, ${format(new Date(tripStart), "yyyy")}`}
+                        {tripEnd ? ` to ${format(new Date(tripEnd), "MMMM d, yyyy")}` : `, ${format(new Date(tripStart), "yyyy")}`}
                       </span>
                     </div>
                   )}
