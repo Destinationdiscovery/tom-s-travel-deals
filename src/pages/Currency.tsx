@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { ArrowLeft, DollarSign, ArrowRightLeft, Lightbulb, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
