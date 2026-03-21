@@ -165,16 +165,23 @@ const RecentReviewsHomepage = () => {
                     Read Review →
                   </span>
                 </Link>
-                <div className="px-5 pb-4">
-                  <a href={expediaLink} target="_blank" rel="noopener noreferrer">
+                <div className="px-5 pb-4 space-y-2">
+                  <Link to={`/review/${card.slug}`}>
                     <Button
                       variant="default"
                       size="sm"
                       className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold"
                     >
-                      Book on Expedia
-                      <ExternalLink className="h-3.5 w-3.5 ml-1" />
+                      Read Review
                     </Button>
+                  </Link>
+                  <a
+                    href={expediaLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    Book on Expedia <ExternalLink className="h-3 w-3" />
                   </a>
                 </div>
               </div>
