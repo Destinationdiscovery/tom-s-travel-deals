@@ -105,7 +105,7 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview, onReviewReady, 
 
           {/* Two-Column Grid */}
           <div className="grid lg:grid-cols-3 gap-10">
-            {/* LEFT COLUMN – Main Content */}
+            {/* LEFT COLUMN - Main Content */}
             <div className="lg:col-span-2 flex flex-col gap-10">
               {/* 0. Quick Verdict */}
               <div className="order-0">
@@ -214,7 +214,7 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview, onReviewReady, 
                   <div className="rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div>
                       <p className="font-display font-bold text-foreground text-lg">Ready to book?</p>
-                      <p className="text-sm text-muted-foreground">Exclusive deal — book directly through our partner link.</p>
+                      <p className="text-sm text-muted-foreground">Exclusive deal, book directly through our partner link.</p>
                     </div>
                     <a
                       href={affiliateUrl}
@@ -252,7 +252,7 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview, onReviewReady, 
               </div>
             </div>
 
-            {/* RIGHT COLUMN – Sidebar (desktop only) */}
+            {/* RIGHT COLUMN - Sidebar (desktop only) */}
             <div className="hidden lg:flex flex-col gap-8">
               {/* Ratings Breakdown */}
               <RatingsCard data={data} />

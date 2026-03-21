@@ -147,7 +147,7 @@ const ClientFile = () => {
 
   useEffect(() => {
     if (clientName) {
-      document.title = `${clientName} — Client File`;
+      document.title = `${clientName}. Client File`;
     }
     return () => { document.title = "ReviewThenGo.com | Honest Reviews, Tested Gear & Travel Insights"; };
   }, [clientName]);
@@ -583,25 +583,25 @@ const ClientFile = () => {
                             <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1">Trip Dates</p>
                             <p className="text-sm font-medium">
                               {card.tripStart && card.tripEnd
-                                ? `${format(new Date(card.tripStart), "MMM d")} – ${format(new Date(card.tripEnd), "MMM d, yyyy")}`
+                                ? `${format(new Date(card.tripStart), "MMM d")} to ${format(new Date(card.tripEnd), "MMM d, yyyy")}`
                                 : card.tripStart
                                 ? `From ${format(new Date(card.tripStart), "MMM d, yyyy")}`
-                                : "—"}
+                                : "-"}
                             </p>
                           </div>
                         )}
                         <div>
                           <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1">{compact ? "Cabin" : "Room"}</p>
-                          <p className="text-sm font-medium">{card.details?.cabin_category || card.details?.room_type || "—"}</p>
+                          <p className="text-sm font-medium">{card.details?.cabin_category || card.details?.room_type || "-"}</p>
                         </div>
                         <div>
                           <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1">Travellers</p>
-                          <p className="text-sm font-medium">{card.details?.num_travellers || "—"}</p>
+                          <p className="text-sm font-medium">{card.details?.num_travellers || "-"}</p>
                         </div>
                         <div>
                           <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1">Total</p>
                           <p className="text-sm font-bold">
-                            {pricingTotal > 0 ? `${card.details?.pricing?.currency || "$"}${pricingTotal.toLocaleString()}` : "—"}
+                            {pricingTotal > 0 ? `${card.details?.pricing?.currency || "$"}${pricingTotal.toLocaleString()}` : "-"}
                           </p>
                         </div>
                       </div>
@@ -628,7 +628,7 @@ const ClientFile = () => {
                     const tripName = first.resortName || first.details?.ship_name || "Trip";
                     const supplier = first.supplier || first.details?.supplier || "";
                     const tripDates = first.tripStart && first.tripEnd
-                      ? `${format(new Date(first.tripStart), "MMM d")} – ${format(new Date(first.tripEnd), "MMM d, yyyy")}`
+                      ? `${format(new Date(first.tripStart), "MMM d")} to ${format(new Date(first.tripEnd), "MMM d, yyyy")}`
                       : first.tripStart
                       ? `From ${format(new Date(first.tripStart), "MMM d, yyyy")}`
                       : "";

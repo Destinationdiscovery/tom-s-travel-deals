@@ -14,7 +14,7 @@ export const homepageFaqData = [
   {
     question: "Is ReviewThenGo free to use?",
     answer:
-      "Yes — ReviewThenGo is completely free to use. The site is supported by ads and clearly disclosed affiliate links. We never accept payment from properties in exchange for positive reviews.",
+      "Yes. ReviewThenGo is completely free to use. The site is supported by ads and clearly disclosed affiliate links. We never accept payment from properties in exchange for positive reviews.",
   },
   {
     question: "How can I spot fake hotel reviews?",
@@ -29,12 +29,12 @@ export const homepageFaqData = [
   {
     question: "Does ReviewThenGo cover destinations worldwide?",
     answer:
-      "Absolutely. We cover properties in 190+ countries — from Paris boutique hotels to Bali beach resorts, NYC Airbnbs to Dubai golf clubs. If travelers have reviewed it, we aggregate it.",
+      "Absolutely. We cover properties in 190+ countries, from Paris boutique hotels to Bali beach resorts, NYC Airbnbs to Dubai golf clubs. If travelers have reviewed it, we aggregate it.",
   },
   {
     question: "How is ReviewThenGo different from TripAdvisor?",
     answer:
-      "Instead of showing you thousands of individual reviews to scroll through, we aggregate scores from multiple platforms and distill them into a clear verdict with pros, cons, and a \"worth it?\" recommendation — saving you hours of research.",
+      "Instead of showing you thousands of individual reviews to scroll through, we aggregate scores from multiple platforms and distill them into a clear verdict with pros, cons, and a \"worth it?\" recommendation, saving you hours of research.",
   },
 ];
 

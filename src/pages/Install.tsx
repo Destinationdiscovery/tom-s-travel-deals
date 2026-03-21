@@ -52,7 +52,7 @@ const Install = () => {
     <>
       <SEOHead
         title="Install ReviewThenGo App"
-        description="Install ReviewThenGo on your device for fast access to travel reviews, gear guides, and expert insights — even offline."
+        description="Install ReviewThenGo on your device for fast access to travel reviews, gear guides, and expert insights, even offline."
       />
       <Header />
       <main className="min-h-screen bg-background pt-20 pb-16">
@@ -65,7 +65,7 @@ const Install = () => {
               Install ReviewThenGo
             </h1>
             <p className="text-muted-foreground text-base">
-              Get instant access from your home screen — loads fast, works offline.
+              Get instant access from your home screen, loads fast, works offline.
             </p>
           </div>
 
@@ -100,7 +100,7 @@ const Install = () => {
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="shrink-0 w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">3</span>
-                  <span>Tap <strong>"Add"</strong> — that's it!</span>
+                  <span>Tap <strong>"Add"</strong>, that's it!</span>
                 </li>
               </ol>
             </div>

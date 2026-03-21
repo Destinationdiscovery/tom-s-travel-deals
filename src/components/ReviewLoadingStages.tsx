@@ -13,7 +13,7 @@ const STAGES = [
 
 const TRAVEL_TIPS = [
   { text: "Booking mid-week flights can save you up to 20% compared to weekend departures.", hasLink: false },
-  { text: "Travel insurance typically costs 4–8% of your trip — worth it for international travel.", hasLink: false },
+  { text: "Travel insurance typically costs 4 to 8% of your trip, worth it for international travel.", hasLink: false },
   { text: "Packing cubes can reduce luggage volume by up to 30% and keep you organized.", hasLink: false },
   { text: "Pro tip: Bundle your hotel and flight to save up to 30% on your trip.", hasLink: true },
   { text: "Shoulder season (just before or after peak) offers better prices and fewer crowds.", hasLink: false },

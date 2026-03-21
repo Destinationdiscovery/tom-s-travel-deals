@@ -66,7 +66,7 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
           Answers Every Travel Question Before You Book
         </h1>
         <p className="text-white/80 text-base md:text-lg font-light mb-6">
-          Reviews, packing lists, best times to visit, and more — all powered by AI, all in one place.
+          Reviews, packing lists, best times to visit, and more, all powered by AI, all in one place.
         </p>
 
         {/* Integrated search bar */}
@@ -109,7 +109,7 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
             </Button>
           </div>
           <p className="text-white/70 text-xs mt-2">
-            Search any hotel, resort, or destination worldwide — get honest, AI-powered reviews instantly.
+            Search any hotel, resort, or destination worldwide, get honest, AI-powered reviews instantly.
           </p>
         </div>
 

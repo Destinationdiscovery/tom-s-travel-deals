@@ -142,7 +142,7 @@ const tools = [
     function: {
       name: "create_booking",
       description:
-        "Create a new booking from extracted document data. Extract EVERY detail you can find including cruise itinerary, passenger details with passport info, payment history, cabin/deck info, agency details, and rate codes. IMPORTANT: Use this tool whenever the document contains a booking number that does NOT match any existing booking — even if the trip, ship, dates, or client are the same. Different booking numbers = different cabins/rooms.",
+        "Create a new booking from extracted document data. Extract EVERY detail you can find including cruise itinerary, passenger details with passport info, payment history, cabin/deck info, agency details, and rate codes. IMPORTANT: Use this tool whenever the document contains a booking number that does NOT match any existing booking, even if the trip, ship, dates, or client are the same. Different booking numbers = different cabins/rooms.",
       parameters: {
         type: "object",
         properties: {
@@ -212,7 +212,7 @@ When the user asks to create a new booking, use the create_booking tool with ALL
 When the user asks to add files to an existing booking, use the add_to_booking tool with the matching booking number AND any new details found.
 
 CRITICAL MULTI-CABIN / MULTI-ROOM RULE:
-- The BOOKING NUMBER is the unique identifier. If the document contains a booking number that does NOT match any existing booking in the context, you MUST use create_booking — even if the trip name, ship, dates, destination, or client are identical.
+- The BOOKING NUMBER is the unique identifier. If the document contains a booking number that does NOT match any existing booking in the context, you MUST use create_booking, even if the trip name, ship, dates, destination, or client are identical.
 - Different booking numbers = different cabins or rooms. NEVER merge data from one booking number into a different booking number's record.
 - When creating a new cabin/room for the same trip, set trip_group_id to the booking number of the FIRST existing cabin in that group. This links them visually as one trip with multiple cabins.
 - If this is the very first booking for a trip, you may leave trip_group_id empty.
@@ -250,7 +250,7 @@ If you can match to an existing booking by number, prefer add_to_booking. But ON
 ROOM UPDATES FOR EXISTING BOOKINGS:
 When the user explicitly says to add data to a specific room (e.g., "add this to Room 3") for an existing booking, ALWAYS use add_to_booking with the EXISTING booking number from the context (the trip-level one), not the booking number found in the uploaded document. The document's booking number is a room-level reference to be stored as metadata, not a trip identifier.
 Include the extracted booking_number and cruise_line_booking_number in the response so the frontend can store them on the specific room.
-When context shows existing bookings, treat those as the current trip — do NOT create a new booking just because the document has a different booking number. Use add_to_booking instead.`;
+When context shows existing bookings, treat those as the current trip, do NOT create a new booking just because the document has a different booking number. Use add_to_booking instead.`;
 
 /* ── Handler ── */
 
@@ -278,7 +278,7 @@ serve(async (req) => {
         `Existing bookings:\n${existing_bookings
           .map(
             (b: any) =>
-              `- ${b.bookingNumber}: ${b.clientName} — ${b.title}`
+              `- ${b.bookingNumber}: ${b.clientName}, ${b.title}`
           )
           .join("\n")}`
       );

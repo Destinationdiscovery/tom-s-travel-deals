@@ -107,7 +107,7 @@ const TripDetailsCard = ({
               {nights ? (
                 <p className="text-sm font-bold text-foreground mt-1">{nights} {nights === 1 ? "night" : "nights"}</p>
               ) : (
-                <p className="text-sm text-muted-foreground mt-1">—</p>
+                <p className="text-sm text-muted-foreground mt-1">-</p>
               )}
             </div>
           </div>

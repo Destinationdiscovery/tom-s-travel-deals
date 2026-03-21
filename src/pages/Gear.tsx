@@ -93,7 +93,7 @@ const Gear = () => {
     <div className="min-h-screen bg-background">
       <SEOHead
         title="Trip Planner Toolkit"
-        description="Enter your trip and get a personalized packing list, weather tips, and gear recommendations — all powered by AI."
+        description="Enter your trip and get a personalized packing list, weather tips, and gear recommendations, all powered by AI."
         url="/gear"
         jsonLd={{
           "@context": "https://schema.org",
@@ -167,7 +167,7 @@ const Gear = () => {
             <div className="space-y-6">
               <div className="text-center">
                 <h2 className="font-display text-2xl font-bold text-foreground mb-2">Featured Gear</h2>
-                <p className="text-muted-foreground">Curated travel essentials — click to shop or search above for custom packing lists.</p>
+                <p className="text-muted-foreground">Curated travel essentials, click to shop or search above for custom packing lists.</p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-5xl mx-auto">
                 {cards.map((card) => {

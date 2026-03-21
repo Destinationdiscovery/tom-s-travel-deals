@@ -20,7 +20,7 @@ const FlightsPreviewSection = () => (
           Find flight deals <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
-      <p className="text-muted-foreground mb-6 max-w-xl">Best upcoming flight deals for any route — with links to book on Expedia and Google Flights.</p>
+      <p className="text-muted-foreground mb-6 max-w-xl">Best upcoming flight deals for any route, with links to book on Expedia and Google Flights.</p>
       <div className="flex flex-wrap gap-3">
         {chips.map((chip) => (
           <Link key={chip.query} to={`/flights?q=${encodeURIComponent(chip.query)}`}>

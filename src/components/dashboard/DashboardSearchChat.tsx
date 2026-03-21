@@ -65,7 +65,7 @@ const DashboardSearchChat = () => {
           <div className="text-center py-6 space-y-2">
             <Search className="h-8 w-8 text-muted-foreground/40 mx-auto" />
             <p className="text-sm text-muted-foreground">
-              Search for resorts, packages, flights — ask follow-ups like a conversation.
+              Search for resorts, packages, flights, ask follow-ups like a conversation.
             </p>
             <div className="flex flex-wrap justify-center gap-2 mt-3">
               {["Top 5 all-inclusives in Punta Cana", "Family resort Riviera Maya under $3000", "Best cruise deals Caribbean May 2026"].map((q) => (

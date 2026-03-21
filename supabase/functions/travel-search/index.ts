@@ -28,22 +28,22 @@ serve(async (req) => {
     const systemPrompt = `You are a travel search assistant. Given a user query about travel destinations, hotels, resorts, or experiences, return a JSON object with:
 
 1. A "results" array of 8-10 REAL, currently operating properties that match the query. Each result must have:
-- "name": string — the exact real name of the property
-- "location": string — city/area, country
-- "type": string — hotel, resort, villa, boutique hotel, etc.
-- "rating": number — approximate rating out of 5 (e.g. 4.5)
-- "description": string — 1-2 sentence summary of what makes it special
-- "bestFor": string[] — 2-4 tags like "Couples", "Families", "Luxury", "Budget", "Adults Only", "All-Inclusive", "Beach", "Adventure"
-- "priceRange": string — one of "$", "$$", "$$$", "$$$$"
+- "name": string, the exact real name of the property
+- "location": string, city/area, country
+- "type": string, hotel, resort, villa, boutique hotel, etc.
+- "rating": number, approximate rating out of 5 (e.g. 4.5)
+- "description": string, 1-2 sentence summary of what makes it special
+- "bestFor": string[], 2-4 tags like "Couples", "Families", "Luxury", "Budget", "Adults Only", "All-Inclusive", "Beach", "Adventure"
+- "priceRange": string, one of "$", "$$", "$$$", "$$$$"
 
-2. An OPTIONAL "activities" array of 6-8 REAL things to do / experiences / attractions. ONLY include this array when the query implies the user wants experiences, sightseeing, exploration, or "things to do" — for example queries like "hidden gems in Rome", "best things to do in Tokyo", or "what to see in Barcelona". Do NOT include activities for queries that are clearly about accommodation only, like "adults only resorts in Punta Cana" or "luxury hotels in Maldives". Each activity must have:
-- "name": string — the real name of the activity, tour, or attraction
-- "location": string — neighborhood or area
-- "category": string — e.g. "Food & Drink", "Sightseeing", "Adventure", "Culture", "Nightlife", "Nature", "Shopping"
-- "rating": number — approximate rating out of 5
-- "description": string — 1-2 sentence summary
-- "bestFor": string[] — 2-4 tags like "Couples", "Foodies", "History Buffs", "Families", "Solo Travelers"
-- "priceRange": string — one of "$", "$$", "$$$", "$$$$"
+2. An OPTIONAL "activities" array of 6-8 REAL things to do / experiences / attractions. ONLY include this array when the query implies the user wants experiences, sightseeing, exploration, or "things to do", for example queries like "hidden gems in Rome", "best things to do in Tokyo", or "what to see in Barcelona". Do NOT include activities for queries that are clearly about accommodation only, like "adults only resorts in Punta Cana" or "luxury hotels in Maldives". Each activity must have:
+- "name": string, the real name of the activity, tour, or attraction
+- "location": string, neighborhood or area
+- "category": string, e.g. "Food & Drink", "Sightseeing", "Adventure", "Culture", "Nightlife", "Nature", "Shopping"
+- "rating": number, approximate rating out of 5
+- "description": string, 1-2 sentence summary
+- "bestFor": string[], 2-4 tags like "Couples", "Foodies", "History Buffs", "Families", "Solo Travelers"
+- "priceRange": string, one of "$", "$$", "$$$", "$$$$"
 
 IMPORTANT:
 - Only include REAL properties and activities that currently exist and operate

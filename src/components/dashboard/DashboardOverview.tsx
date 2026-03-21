@@ -150,7 +150,7 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
   };
 
   const activityLabel = (item: any) => {
-    if (item._type === "quote") return `Quote created for ${item.client_name} — ${item.resort_name}`;
+    if (item._type === "quote") return `Quote created for ${item.client_name}, ${item.resort_name}`;
     if (item._type === "booking") return `Booking added: ${item.title}`;
     return `Email sent to ${item.client_name}: ${item.subject}`;
   };

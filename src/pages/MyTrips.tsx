@@ -76,7 +76,7 @@ const MyTrips = () => {
   const handleCreateTrip = async () => {
     const name = newTripName.trim();
     if (!name) return;
-    // Just create the trip name — user will assign reviews later
+    // Just create the trip name, user will assign reviews later
     setNewTripOpen(false);
     setNewTripName("");
     toast({ title: `Trip "${name}" created`, description: "Assign reviews to it from your saved reviews." });

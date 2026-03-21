@@ -30,7 +30,7 @@ interface SlotData {
 }
 
 const DEFAULTS: Omit<SlotData, "isCustom" | "dbId">[] = [
-  { name: "Temptation Cancun Resort All Inclusive — Adults Only", location: "Cancun, Mexico", affiliateUrl: "https://expedia.com/affiliate/sCSkKSm", originalPrice: 389, salePrice: 249, originalPriceWeekly: null, salePriceWeekly: null, rating: 4.3, imageUrl: dealTemptation, expiresAt: "2026-04-30" },
+  { name: "Temptation Cancun Resort All Inclusive. Adults Only", location: "Cancun, Mexico", affiliateUrl: "https://expedia.com/affiliate/sCSkKSm", originalPrice: 389, salePrice: 249, originalPriceWeekly: null, salePriceWeekly: null, rating: 4.3, imageUrl: dealTemptation, expiresAt: "2026-04-30" },
   { name: "Hotel Riu Plaza Toronto", location: "Toronto, Canada", affiliateUrl: "https://expedia.com/affiliate/4XUFIIR", originalPrice: 279, salePrice: 179, originalPriceWeekly: null, salePriceWeekly: null, rating: 4.1, imageUrl: dealRiu, expiresAt: "2026-03-31" },
   { name: "OUTRIGGER Honua Kai Resort & Spa", location: "Lahaina, Hawaii", affiliateUrl: "https://expedia.com/affiliate/N2Bmgth", originalPrice: 499, salePrice: 329, originalPriceWeekly: null, salePriceWeekly: null, rating: 4.6, imageUrl: dealOutrigger, expiresAt: "2026-05-15" },
   { name: "Save on Eligible Flights to Top Destinations", location: "Multiple Destinations", affiliateUrl: "https://expedia.com/affiliate/bPJ1N3S", originalPrice: 650, salePrice: 399, originalPriceWeekly: null, salePriceWeekly: null, rating: 4.0, imageUrl: dealFlights, expiresAt: "2026-04-15" },

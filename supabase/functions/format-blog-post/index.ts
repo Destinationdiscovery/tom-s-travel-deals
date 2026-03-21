@@ -20,14 +20,14 @@ Your job:
 1. Split the raw text into well-sized paragraphs (3-6 sentences each, never too long)
 2. Detect natural topic changes and insert section headings (h2-style) at those points
 3. You have ${imageCount} images available (referenced as IMAGE_0, IMAGE_1, etc.)
-4. Distribute images logically throughout the article — after introductory paragraphs, between major sections, NOT all at the end
+4. Distribute images logically throughout the article, after introductory paragraphs, between major sections, NOT all at the end
 5. Generate a short caption for each image based on the surrounding text context
 6. Also generate a short excerpt (1-2 sentences) summarizing the article
 7. Estimate a read time like "X min read"
 
 Rules:
 - The first block should be a text paragraph (the intro), NOT a heading
-- Don't repeat text — use all the original content
+- Don't repeat text, use all the original content
 - Keep the author's voice and tone intact
 - Headings should be concise and engaging (3-8 words)
 - Space images roughly evenly, placing them at natural visual breakpoints

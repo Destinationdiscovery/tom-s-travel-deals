@@ -96,7 +96,7 @@ const BestTime = () => {
     <div className="min-h-screen bg-background">
       <SEOHead
         title="Best Time to Visit Any Destination | ReviewThenGo"
-        description="Find the best time to visit any destination — weather, crowds, flight prices, and local events all in one place."
+        description="Find the best time to visit any destination, weather, crowds, flight prices, and local events all in one place."
         url="/best-time"
       />
       <Header />
@@ -108,7 +108,7 @@ const BestTime = () => {
               Best Time to Visit <span className="text-secondary">Anywhere</span>
             </h1>
             <p className="text-primary-foreground/70 text-lg mb-8 max-w-2xl mx-auto">
-              Weather, crowds, flight prices, local events — get the complete picture before you book.
+              Weather, crowds, flight prices, local events, get the complete picture before you book.
             </p>
             <div className="max-w-xl mx-auto">
               <div className="flex gap-2">
@@ -241,7 +241,7 @@ const BestTime = () => {
                     <AlertTriangle className="h-5 w-5 text-destructive" /> Months to Avoid
                   </h3>
                   <p className="text-sm text-foreground">
-                    <strong>{data.avoidMonths.join(", ")}</strong> — {data.avoidReason}
+                    <strong>{data.avoidMonths.join(", ")}</strong>, {data.avoidReason}
                   </p>
                 </div>
               )}

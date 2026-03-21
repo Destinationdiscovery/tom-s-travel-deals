@@ -210,7 +210,7 @@ const reviews: Record<string, ReviewData> = {
     image: curacaoImg,
     destination: "Villa in Blue Bay Resort",
     country: "Curaçao",
-    dateVisited: "November 23 – 30, 2024",
+    dateVisited: "November 23 to 30, 2024",
     duration: "7 nights",
     rating: 5,
     ratings: {
@@ -370,7 +370,7 @@ const DestinationReview = () => {
 
   // Share helpers
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
-  const shareTitle = review ? `${review.destination} — ReviewThenGo` : "";
+  const shareTitle = review ? `${review.destination}. ReviewThenGo` : "";
 
   const handleShare = async () => {
     if (navigator.share) {

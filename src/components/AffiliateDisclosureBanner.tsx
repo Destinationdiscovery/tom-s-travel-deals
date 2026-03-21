@@ -20,7 +20,7 @@ const AffiliateDisclosureBanner = () => {
 
   return (
     <div className="bg-muted/60 border-b border-border/50 py-2 px-4 text-center text-sm text-muted-foreground relative">
-      This site contains affiliate links — we earn a commission at no extra cost to you.{" "}
+      This site contains affiliate links, we earn a commission at no extra cost to you.{" "}
       <Link to="/affiliate-disclosure" className="underline font-medium text-primary hover:text-primary/80">
         Learn more
       </Link>

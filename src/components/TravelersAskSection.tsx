@@ -63,7 +63,7 @@ const TravelersAskSection = () => {
             What Travelers Ask Us
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Reviews, packing lists, best times to visit — tap any question for an instant AI-powered answer.
+            Reviews, packing lists, best times to visit, tap any question for an instant AI-powered answer.
           </p>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
