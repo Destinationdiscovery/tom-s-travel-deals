@@ -14,6 +14,7 @@ const navLinks = [
   { to: "/gear", label: "Gear" },
   { to: "/travel-intel", label: "Intel" },
   { to: "/compass", label: "Blog" },
+  { to: "/guides", label: "Guides" },
   { to: "/#travel-deals", label: "Deals" },
 ];
 
