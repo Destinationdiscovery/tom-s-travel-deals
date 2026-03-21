@@ -25,6 +25,7 @@ import EmailCapturePopup from "@/components/EmailCapturePopup";
 import AIReviewResult from "@/components/AIReviewResult";
 import SEOHead from "@/components/SEOHead";
 import { useGenerateReview } from "@/hooks/useGenerateReview";
+import PopularSavesSection from "@/components/PopularSavesSection";
 
 
 const Index = () => {
@@ -125,6 +126,7 @@ const Index = () => {
         <GearPreviewSection />
 
         <RecentReviewsHomepage />
+        <PopularSavesSection />
 
         {/* Saves CTA */}
         <section className="py-10">
