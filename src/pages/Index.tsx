@@ -5,11 +5,15 @@ import Header from "@/components/Header";
 import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import HeroSection from "@/components/HeroSection";
 import TrustBadges from "@/components/TrustBadges";
+import HowItWorks from "@/components/HowItWorks";
+import TravelersAskSection from "@/components/TravelersAskSection";
 import RecentReviewsHomepage from "@/components/RecentReviewsHomepage";
 import TravelDealsSection from "@/components/TravelDealsSection";
 import GearPreviewSection from "@/components/GearPreviewSection";
 import IntelPreviewSection from "@/components/IntelPreviewSection";
 import BlogPreviewSection from "@/components/BlogPreviewSection";
+import HomepageFAQ from "@/components/HomepageFAQ";
+import { homepageFaqData } from "@/components/HomepageFAQ";
 import ComparisonFloatingBadge from "@/components/ComparisonFloatingBadge";
 import Footer from "@/components/Footer";
 import EmailCapturePopup from "@/components/EmailCapturePopup";
@@ -53,9 +57,11 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="Real Travel Reviews, Deals & Insights for Travellers"
-        description="Real destination reviews, tested travel gear, and expert insights from an Ontario travel consultant. Plan your perfect trip."
+        title="Honest Hotel & Resort Reviews Before You Book"
+        description="Stop wasting hours on reviews. ReviewThenGo aggregates real traveler feedback from 10+ sources into clear verdicts for hotels, resorts, Airbnbs & more worldwide."
         url="/"
+        keywords={["hotel reviews", "resort reviews", "travel reviews", "honest reviews", "aggregated reviews", "is it worth it", "real traveler feedback"]}
+        faq={homepageFaqData}
         jsonLd={[
           {
             "@context": "https://schema.org",
@@ -95,6 +101,9 @@ const Index = () => {
           />
         </div>
 
+        <HowItWorks />
+        <TravelersAskSection />
+
         <RecentReviewsHomepage />
         <SectionConnector text="Need gear for your trip?" linkText="Check our Travel Gear picks" to="/gear" />
         <TravelDealsSection />
@@ -102,6 +111,8 @@ const Index = () => {
         <GearPreviewSection />
         <IntelPreviewSection />
         <BlogPreviewSection />
+
+        <HomepageFAQ />
       </main>
       <ComparisonFloatingBadge />
       <EmailCapturePopup />
