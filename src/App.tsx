@@ -15,6 +15,7 @@ const Destinations = lazy(() => import("./pages/Destinations"));
 const DestinationReview = lazy(() => import("./pages/DestinationReview"));
 const Compass = lazy(() => import("./pages/Compass"));
 const CompassArticle = lazy(() => import("./pages/CompassArticle"));
+const Guides = lazy(() => import("./pages/Guides"));
 const Gear = lazy(() => import("./pages/Gear"));
 const GearAdmin = lazy(() => import("./pages/GearAdmin"));
 const About = lazy(() => import("./pages/About"));
