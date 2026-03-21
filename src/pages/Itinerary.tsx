@@ -85,7 +85,7 @@ const Itinerary = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="AI Itinerary Builder. Plan Your Trip | ReviewThenGo"
+        title="Itinerary Builder. Plan Your Trip | ReviewThenGo"
         description="Get a personalized day-by-day travel itinerary with costs, activities, restaurants, and insider tips, powered by AI."
         url="/itinerary"
       />
