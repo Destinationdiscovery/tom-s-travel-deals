@@ -27,6 +27,7 @@ const MyReviews = lazy(() => import("./pages/MyReviews"));
 const MyTrips = lazy(() => import("./pages/MyTrips"));
 const Promo = lazy(() => import("./pages/Promo"));
 const TravelSearch = lazy(() => import("./pages/TravelSearch"));
+const Reviews = lazy(() => import("./pages/Reviews"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const AffiliateDisclosure = lazy(() => import("./pages/AffiliateDisclosure"));
 const BookingReport = lazy(() => import("./pages/BookingReport"));
@@ -74,6 +75,7 @@ const App = () => (
                 <Route path="/my-trips" element={<MyTrips />} />
                 <Route path="/promo" element={<Promo />} />
                 <Route path="/search" element={<TravelSearch />} />
+                <Route path="/reviews/:query" element={<Reviews />} />
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                 <Route path="/affiliate-disclosure" element={<AffiliateDisclosure />} />
                 <Route path="/booking/:bookingNumber" element={<BookingReport />} />
