@@ -14,7 +14,7 @@ import DashboardFunnel from "./DashboardFunnel";
 import RevenueChart from "./RevenueChart";
 import QuickLinksManager from "./QuickLinksManager";
 import AgentPinboard from "./AgentPinboard";
-import SiteActivityWidget from "./SiteActivityWidget";
+import SiteAnalyticsDashboard from "./SiteAnalyticsDashboard";
 import ClientInsights from "./ClientInsights";
 import DashboardSearchChat from "./DashboardSearchChat";
 import { useTravelIntel, type IntelType } from "@/hooks/useTravelIntel";
@@ -333,12 +333,11 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
         <DashboardFunnel />
       </div>
 
-      {/* Insights Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ClientInsights />
-        <SiteActivityWidget />
-      </div>
+      {/* Site Analytics Dashboard */}
+      <SiteAnalyticsDashboard />
 
+      {/* Client Insights */}
+      <ClientInsights />
       {/* Intel Pinboard + Deadlines + Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <AgentPinboard />
