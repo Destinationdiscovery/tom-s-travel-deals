@@ -11,7 +11,7 @@ const steps = [
     icon: FileText,
     step: "2",
     title: "Read the Verdict",
-    description: "Get an honest summary with real pros, cons, ratings, and a clear \"worth it?\" verdict, no fluff.",
+    description: "Get a clear summary with real pros, cons, ratings, and a clear \"worth it?\" verdict, no fluff.",
   },
   {
     icon: CheckCircle,
