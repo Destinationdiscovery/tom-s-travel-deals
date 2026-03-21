@@ -154,8 +154,32 @@ const Compare = () => {
     toast({ title: "Removed", description: "Review removed from comparison." });
   };
 
+  const itemListJsonLd = savedReviews.length > 0 ? {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "My Saved Hotels and Resorts",
+    numberOfItems: savedReviews.length,
+    itemListElement: savedReviews.map((r, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      item: {
+        "@type": "Hotel",
+        name: r.propertyName,
+        ...(r.location ? { address: r.location } : {}),
+        aggregateRating: {
+          "@type": "AggregateRating",
+          ratingValue: r.overallRating,
+          bestRating: 5,
+        },
+      },
+    })),
+  } : null;
+
   return (
     <div className="min-h-screen bg-background">
+      {itemListJsonLd && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
+      )}
       <Header />
       <AffiliateDisclosureBanner />
       <main className="container mx-auto px-4 pt-28 pb-16">
@@ -165,15 +189,15 @@ const Compare = () => {
             to="/"
             className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors mb-4"
           >
-            <ArrowLeft className="h-4 w-4" /> Back to Search
+            <ArrowLeft className="h-4 w-4" /> Back to Home
           </Link>
           <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground">
-            Your Comparison
+            My Saved Properties ({savedReviews.length})
           </h1>
           <p className="text-muted-foreground mt-1">
             {savedReviews.length === 0
-              ? "No reviews saved yet."
-              : `${savedReviews.length} ${savedReviews.length === 1 ? "property" : "properties"} saved`}
+              ? "No reviews saved yet. Browse hotels and tap the heart to save."
+              : `${savedReviews.length} ${savedReviews.length === 1 ? "property" : "properties"} saved for comparison`}
           </p>
         </div>
 
