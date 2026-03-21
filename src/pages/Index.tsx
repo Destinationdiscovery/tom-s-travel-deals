@@ -66,6 +66,10 @@ const Index = () => {
             name: "ReviewThenGo",
             url: "https://reviewthengo.com",
             logo: "https://reviewthengo.com/favicon.png",
+            description: "ReviewThenGo is an all-in-one travel planning tool that aggregates unbiased hotel and resort reviews from 10+ sources and offers 8 free tools covering every stage of trip planning.",
+            founder: { "@type": "Person", name: "Tom" },
+            address: { "@type": "PostalAddress", addressRegion: "Ontario", addressCountry: "CA" },
+            areaServed: "Worldwide",
             sameAs: ["https://x.com/TomLaracyTravel", "https://www.instagram.com/reviewthengo"]
           },
           {
