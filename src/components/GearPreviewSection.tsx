@@ -103,7 +103,7 @@ const GearPreviewSection = () => {
               />
             </div>
             <Button onClick={handleSearch} disabled={gear.loading || query.trim().length < 2} className="h-11 px-6 bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold">
-              {gear.loading && !gear.packingData ? "Searching..." : "Find Gear"}
+              {gear.loading && !gear.packingData ? "Searching..." : "Search"}
             </Button>
           </div>
         </div>
