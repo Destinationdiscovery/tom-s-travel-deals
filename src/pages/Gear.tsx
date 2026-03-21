@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Search, Loader2, ArrowLeft, ExternalLink } from "lucide-react";
+import { Search, Loader2, ArrowLeft, ExternalLink, Home } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
