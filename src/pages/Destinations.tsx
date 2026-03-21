@@ -286,7 +286,7 @@ const Destinations = () => {
             {!review && !isLoading && !error && (
               <>
                 {/* Region Filter Chips */}
-                <div className="flex flex-wrap gap-2 mb-8">
+                <div className="flex flex-wrap gap-2 mb-4">
                   {regions.map((region) => (
                     <button
                       key={region}
@@ -302,13 +302,30 @@ const Destinations = () => {
                   ))}
                 </div>
 
+                {/* A-Z Letter Filter */}
+                <div className="flex flex-wrap gap-1 mb-8">
+                  {["All", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")].map((letter) => (
+                    <button
+                      key={letter}
+                      onClick={() => setSelectedLetter(letter)}
+                      className={`w-8 h-8 rounded text-xs font-medium transition-colors ${
+                        selectedLetter === letter
+                          ? "bg-secondary text-secondary-foreground"
+                          : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                      }`}
+                    >
+                      {letter}
+                    </button>
+                  ))}
+                </div>
+
                 <div className="flex items-center justify-between mb-8">
                   <p className="text-muted-foreground">
-                    {(selectedRegion === "All" ? destinations : destinations.filter(d => d.region === selectedRegion)).length} destinations
+                    {filteredDestinations.length} destination{filteredDestinations.length !== 1 ? "s" : ""}
                   </p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {(selectedRegion === "All" ? destinations : destinations.filter(d => d.region === selectedRegion)).map((dest, index) => (
+                  {filteredDestinations.map((dest, index) => (
                     <DestinationCard key={dest.slug} destination={dest} index={index} />
                   ))}
                 </div>
