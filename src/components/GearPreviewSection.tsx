@@ -81,10 +81,10 @@ const GearPreviewSection = () => {
         <div className="flex items-center justify-between mb-6">
           <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
             <Luggage className="h-6 w-6 text-primary" />
-            Trip Planner Toolkit
+            Trip Packing Toolkit
           </h2>
           <Link to="/gear" className="text-sm font-medium text-primary hover:underline flex items-center gap-1">
-            Plan Your Trip <ArrowRight className="h-4 w-4" />
+            Pack Your Trip <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
@@ -103,7 +103,7 @@ const GearPreviewSection = () => {
               />
             </div>
             <Button onClick={handleSearch} disabled={gear.loading || query.trim().length < 2} className="h-11 px-6 bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold">
-              {gear.loading && !gear.packingData ? "Searching..." : "Find Gear"}
+              {gear.loading && !gear.packingData ? "Searching..." : "Search"}
             </Button>
           </div>
         </div>
@@ -113,7 +113,7 @@ const GearPreviewSection = () => {
           {hasResults && (
             <div className="mb-4">
               <Button variant="ghost" size="sm" className="gap-1.5 text-primary" onClick={handleBackToCards}>
-                <ArrowLeft className="h-4 w-4" /> Back to Home
+                <ArrowLeft className="h-4 w-4" /> Back to Trip Packing Toolkit
               </Button>
             </div>
           )}

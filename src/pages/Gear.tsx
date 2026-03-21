@@ -95,13 +95,13 @@ const Gear = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="Trip Planner Toolkit"
+        title="Trip Packing Toolkit"
         description="Enter your trip and get a personalized packing list, weather tips, and gear recommendations, all powered by AI."
         url="/gear"
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "WebPage",
-          name: "Trip Planner Toolkit - ReviewThenGo",
+          name: "Trip Packing Toolkit - ReviewThenGo",
           description: "AI-powered packing lists, weather tips, and gear recommendations for travelers.",
           url: "https://reviewthengo.lovable.app/gear"
         }}
@@ -114,7 +114,7 @@ const Gear = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60" />
           <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
             <h1 className="font-display text-4xl md:text-6xl font-bold text-white mb-4">
-              Trip Planner <span className="text-secondary">Toolkit</span>
+              Trip Packing <span className="text-secondary">Toolkit</span>
             </h1>
             <p className="text-white/80 max-w-2xl mx-auto text-lg mb-8">Enter your trip → Get a personalized packing list, weather tips, and gear recommendations.</p>
             <div className="max-w-2xl mx-auto">
@@ -147,7 +147,7 @@ const Gear = () => {
           {hasResults && (
             <div className="mb-4">
               <Button variant="ghost" size="sm" className="gap-1.5 text-primary" onClick={handleBackToCards}>
-                <ArrowLeft className="h-4 w-4" /> Back to Home
+                <ArrowLeft className="h-4 w-4" /> Back to Trip Packing Toolkit
               </Button>
             </div>
           )}
