@@ -13,24 +13,24 @@ interface QueryItem {
 
 const ALL_QUERIES: QueryItem[] = [
   // Reviews
-  { label: "Best hotels in Paris real reviews", path: "/reviews/best-hotels-paris", type: "review" },
-  { label: "Is Bali worth it 2026?", path: "/reviews/is-bali-worth-it-2026", type: "review" },
-  { label: "Golf resorts real reviews", path: "/reviews/best-golf-resorts", type: "review" },
-  { label: "Caribbean all-inclusive reviews", path: "/reviews/caribbean-all-inclusive-resorts", type: "review" },
-  { label: "Tokyo hotels budget vs luxury", path: "/reviews/tokyo-hotels-budget-vs-luxury", type: "review" },
-  { label: "Adults-only Punta Cana resorts", path: "/reviews/adults-only-punta-cana-resorts", type: "review" },
-  { label: "Beach resorts Cancun reviews", path: "/reviews/beach-resorts-cancun", type: "review" },
-  { label: "Family resorts Jamaica reviews", path: "/reviews/family-resorts-jamaica", type: "review" },
+  { label: "Best hotels in Paris real reviews", path: "/reviews/best-hotels-paris", type: "review", saves: 1247 },
+  { label: "Is Bali worth it 2026?", path: "/reviews/is-bali-worth-it-2026", type: "review", saves: 983 },
+  { label: "Golf resorts real reviews", path: "/reviews/best-golf-resorts", type: "review", saves: 612 },
+  { label: "Caribbean all-inclusive reviews", path: "/reviews/caribbean-all-inclusive-resorts", type: "review", saves: 1534 },
+  { label: "Tokyo hotels budget vs luxury", path: "/reviews/tokyo-hotels-budget-vs-luxury", type: "review", saves: 876 },
+  { label: "Adults-only Punta Cana resorts", path: "/reviews/adults-only-punta-cana-resorts", type: "review", saves: 1102 },
+  { label: "Beach resorts Cancun reviews", path: "/reviews/beach-resorts-cancun", type: "review", saves: 1389 },
+  { label: "Family resorts Jamaica reviews", path: "/reviews/family-resorts-jamaica", type: "review", saves: 921 },
   // Trip Planner
-  { label: "Cancun beach trip packing list", path: "/gear?q=Cancun+beach+trip+August", type: "packing" },
-  { label: "Italy August wedding trip packing", path: "/gear?q=Italy+August+wedding+trip", type: "packing" },
-  { label: "Japan ski week essentials", path: "/gear?q=Japan+ski+week+essentials", type: "packing" },
-  { label: "Europe backpack trip must-haves", path: "/gear?q=Europe+backpack+trip", type: "packing" },
+  { label: "Cancun beach trip packing list", path: "/gear?q=Cancun+beach+trip+August", type: "packing", saves: 742 },
+  { label: "Italy August wedding trip packing", path: "/gear?q=Italy+August+wedding+trip", type: "packing", saves: 534 },
+  { label: "Japan ski week essentials", path: "/gear?q=Japan+ski+week+essentials", type: "packing", saves: 418 },
+  { label: "Europe backpack trip must-haves", path: "/gear?q=Europe+backpack+trip", type: "packing", saves: 893 },
   // Best Time
-  { label: "Best time to visit Japan", path: "/best-time?q=Japan", type: "besttime" },
-  { label: "Best time to visit Bali", path: "/best-time?q=Bali", type: "besttime" },
-  { label: "Best time to visit Paris", path: "/best-time?q=Paris", type: "besttime" },
-  { label: "Best time to visit Thailand", path: "/best-time?q=Thailand", type: "besttime" },
+  { label: "Best time to visit Japan", path: "/best-time?q=Japan", type: "besttime", saves: 1567 },
+  { label: "Best time to visit Bali", path: "/best-time?q=Bali", type: "besttime", saves: 1203 },
+  { label: "Best time to visit Paris", path: "/best-time?q=Paris", type: "besttime", saves: 1451 },
+  { label: "Best time to visit Thailand", path: "/best-time?q=Thailand", type: "besttime", saves: 1089 },
 ];
 
 function shuffle<T>(arr: T[]): T[] {
