@@ -41,7 +41,7 @@ const CompassArticle = () => {
 
   // Build JSON-LD description from best available source
   const jsonLdDescription = article?.excerpt
-    || (article?.richContent?.find((b: any) => b.type === "text")?.value)
+    || (article?.richContent?.find((b: any) => b.type === "text")?.value || (article?.richContent?.find((b: any) => b.type === "text") as any)?.content)
     || article?.content?.[0]
     || "";
 
