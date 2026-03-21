@@ -8,6 +8,7 @@ interface QueryItem {
   label: string;
   path: string;
   type: QueryType;
+  saves: number;
 }
 
 const ALL_QUERIES: QueryItem[] = [
