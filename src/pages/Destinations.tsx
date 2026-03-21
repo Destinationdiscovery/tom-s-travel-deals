@@ -152,9 +152,16 @@ const Destinations = () => {
   const [query, setQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedRegion, setSelectedRegion] = useState("All");
+  const [selectedLetter, setSelectedLetter] = useState("All");
   const { suggestions } = useSearchSuggestions(query);
   const { review, isLoading, error, generateReview, clearReview } = useGenerateReview();
   const resultsRef = useRef<HTMLDivElement>(null);
+
+  const filteredDestinations = destinations.filter((d) => {
+    const regionMatch = selectedRegion === "All" || d.region === selectedRegion;
+    const letterMatch = selectedLetter === "All" || d.destination.charAt(0).toUpperCase() === selectedLetter;
+    return regionMatch && letterMatch;
+  });
 
   const handleSearch = () => {
     const trimmed = query.trim();
