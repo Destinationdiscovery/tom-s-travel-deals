@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Star, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Star, ArrowRight, ExternalLink } from "lucide-react";
 import { trackAffiliateClick } from "@/lib/analytics";
 import { detectCountry, EXPEDIA_LINKS } from "@/components/AffiliateLinks";
 import dealBanner from "@/assets/deal-expedia-vacation-sale-banner.png";
