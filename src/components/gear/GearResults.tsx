@@ -63,12 +63,25 @@ export const PackingResultCard = ({ item, onReview }: { item: GearItem; onReview
 
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 group border-border/50 bg-card">
+      {item.imageUrl && (
+        <div className="h-40 overflow-hidden bg-muted">
+          <img
+            src={item.imageUrl}
+            alt={item.name}
+            className="w-full h-full object-contain"
+            loading="lazy"
+            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+          />
+        </div>
+      )}
       <CardContent className="p-5">
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex items-center gap-2.5">
-            <div className={`p-2 rounded-lg ${categoryColors[item.category] || "bg-primary/10 text-primary"}`}>
-              <Icon className="h-4 w-4" />
-            </div>
+            {!item.imageUrl && (
+              <div className={`p-2 rounded-lg ${categoryColors[item.category] || "bg-primary/10 text-primary"}`}>
+                <Icon className="h-4 w-4" />
+              </div>
+            )}
             <div>
               <h3 className="font-semibold text-foreground text-base line-clamp-2">{item.name}</h3>
               <p className="text-xs text-muted-foreground">{item.brand}</p>
@@ -83,15 +96,13 @@ export const PackingResultCard = ({ item, onReview }: { item: GearItem; onReview
           <span className="text-lg font-bold text-primary tracking-wide">{dollars}</span>
           <span className="text-xs text-muted-foreground">{label}</span>
         </div>
-        <div className="flex flex-col sm:flex-row gap-2">
-          <a href={item.amazonUrl} target="_blank" rel="noopener noreferrer" className="flex-1">
-            <Button variant="outline" size="sm" className="w-full gap-1.5">
-              Get it on Amazon <ExternalLink className="h-3.5 w-3.5" />
-            </Button>
-          </a>
-          <Button size="sm" onClick={() => onReview(item.name)} className="flex-1 gap-1.5">
+        <div className="flex flex-col gap-2">
+          <Button size="sm" onClick={() => onReview(item.name)} className="w-full gap-1.5">
             <Sparkles className="h-3.5 w-3.5" /> Review This
           </Button>
+          <a href={item.amazonUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors">
+            Get it on Amazon <ExternalLink className="h-3 w-3" />
+          </a>
         </div>
       </CardContent>
     </Card>
