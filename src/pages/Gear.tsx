@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Search, Loader2, ArrowLeft, ExternalLink } from "lucide-react";
+import { Search, Loader2, ArrowLeft, ExternalLink, Home } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
@@ -82,9 +83,11 @@ const Gear = () => {
     window.scrollTo({ top: 400, behavior: "smooth" });
   };
 
+  const navigate = useNavigate();
   const handleBackToCards = () => {
     clearAll();
     setSearchQuery("");
+    navigate("/");
   };
 
   const hasResults = packingData || reviewData || loading || reviewLoading;
@@ -134,11 +137,17 @@ const Gear = () => {
         </section>
 
         <div className="container mx-auto px-4 py-10">
+          {/* Persistent back to home */}
+          <div className="mb-6">
+            <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline">
+              <Home className="h-4 w-4" /> Back to Home
+            </Link>
+          </div>
           {/* Back button when results showing */}
           {hasResults && (
-            <div className="mb-6">
+            <div className="mb-4">
               <Button variant="ghost" size="sm" className="gap-1.5 text-primary" onClick={handleBackToCards}>
-                <ArrowLeft className="h-4 w-4" /> Back to Featured Gear
+                <ArrowLeft className="h-4 w-4" /> Back to Home
               </Button>
             </div>
           )}

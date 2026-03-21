@@ -113,7 +113,7 @@ const GearPreviewSection = () => {
           {hasResults && (
             <div className="mb-4">
               <Button variant="ghost" size="sm" className="gap-1.5 text-primary" onClick={handleBackToCards}>
-                <ArrowLeft className="h-4 w-4" /> Back to Featured Gear
+                <ArrowLeft className="h-4 w-4" /> Back to Home
               </Button>
             </div>
           )}

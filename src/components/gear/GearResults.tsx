@@ -58,26 +58,28 @@ const getPriceIndicator = (priceRange: string): { dollars: string; label: string
 };
 
 export const PackingResultCard = ({ item, onReview }: { item: GearItem; onReview: (name: string) => void }) => {
+  const [imgFailed, setImgFailed] = useState(false);
   const { dollars, label } = getPriceIndicator(item.priceRange);
   const { Icon } = getCategoryFallback(item.category);
+  const showImage = item.imageUrl && !imgFailed;
 
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 group border-border/50 bg-card">
-      {item.imageUrl && (
+      {showImage && (
         <div className="h-40 overflow-hidden bg-muted">
           <img
             src={item.imageUrl}
             alt={item.name}
             className="w-full h-full object-contain"
             loading="lazy"
-            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            onError={() => setImgFailed(true)}
           />
         </div>
       )}
       <CardContent className="p-5">
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex items-center gap-2.5">
-            {!item.imageUrl && (
+            {!showImage && (
               <div className={`p-2 rounded-lg ${categoryColors[item.category] || "bg-primary/10 text-primary"}`}>
                 <Icon className="h-4 w-4" />
               </div>
