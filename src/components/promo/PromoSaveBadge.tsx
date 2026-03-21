@@ -1,4 +1,4 @@
-import { BarChart3 } from "lucide-react";
+import { Heart } from "lucide-react";
 
 interface PromoSaveBadgeProps {
   visible: boolean;
