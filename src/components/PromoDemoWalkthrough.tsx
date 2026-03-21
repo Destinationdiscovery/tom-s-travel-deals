@@ -29,7 +29,7 @@ const PromoDemoWalkthrough = ({ onComplete, loop = false }: PromoDemoWalkthrough
     setScrollProgress(0);
   }, []);
 
-  // Stage machine — fast transitions
+  // Stage machine, fast transitions
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
 

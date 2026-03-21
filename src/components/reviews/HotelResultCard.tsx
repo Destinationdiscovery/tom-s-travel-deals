@@ -42,7 +42,7 @@ const HotelResultCard = ({ name, location, type, rating, description, bestFor, p
     : ["Verify availability for your dates"];
 
   const faqItems = [
-    { q: `Best time to visit ${name}?`, a: "March–May for shoulder season rates, June–August peak crowds. Book early for holiday weekends." },
+    { q: `Best time to visit ${name}?`, a: "March to May for shoulder season rates, June to August peak crowds. Book early for holiday weekends." },
     { q: `Is ${name} better for families or couples?`, a: bestFor.join(", ") || "Great for all traveler types. Check specific room categories for your group size." },
     { q: `Are there hidden fees at ${name}?`, a: "Always confirm resort fees, parking, and Wi-Fi charges at booking. We flag these in full reviews." },
     { q: `What's the cancellation policy?`, a: "Most OTA rates offer 72hr free cancellation. Always check terms before confirming." },
@@ -115,7 +115,7 @@ const HotelResultCard = ({ name, location, type, rating, description, bestFor, p
             Sources: {sourceScores.map(s => `${s.name} ${s.score}`).join(" · ")}
           </p>
           <p className="text-[11px] text-muted-foreground/70 italic">
-            Reviews as of March 2026 — {reviewCount.toLocaleString()} verified stays analyzed
+            Reviews as of March 2026, {reviewCount.toLocaleString()} verified stays analyzed
           </p>
         </div>
 

@@ -59,8 +59,8 @@ Deno.serve(async (req) => {
       return `
         <tr>
           <td style="padding:12px;border-bottom:1px solid #eee;">${r.client_name}</td>
-          <td style="padding:12px;border-bottom:1px solid #eee;">${r.booking_number || "—"}</td>
-          <td style="padding:12px;border-bottom:1px solid #eee;">${r.supplier || "—"}</td>
+          <td style="padding:12px;border-bottom:1px solid #eee;">${r.booking_number || "-"}</td>
+          <td style="padding:12px;border-bottom:1px solid #eee;">${r.supplier || "-"}</td>
           <td style="padding:12px;border-bottom:1px solid #eee;font-weight:600;">${typeLabel}</td>
           <td style="padding:12px;border-bottom:1px solid #eee;">${r.event_date}</td>
           <td style="padding:12px;border-bottom:1px solid #eee;font-weight:700;">${urgency}</td>

@@ -370,7 +370,7 @@ const DestinationReview = () => {
 
   // Share helpers
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
-  const shareTitle = review ? `${review.destination} — ReviewThenGo` : "";
+  const shareTitle = review ? `${review.destination}. ReviewThenGo` : "";
 
   const handleShare = async () => {
     if (navigator.share) {

@@ -52,7 +52,7 @@ const TravelIntel = () => {
     <div className="min-h-screen bg-background">
       <SEOHead
         title="Know Before You Go"
-        description="Visa requirements, safety advisories, and destination news — powered by real-time data."
+        description="Visa requirements, safety advisories, and destination news, powered by real-time data."
         url="/travel-intel"
       />
       <Header />
@@ -65,7 +65,7 @@ const TravelIntel = () => {
             <Globe className="h-8 w-8 text-primary" />
           </div>
           <h1 className="font-display text-4xl md:text-5xl font-bold text-white mb-3">Know Before You Go</h1>
-          <p className="text-white/80 text-lg max-w-lg mx-auto">Visa requirements, safety advisories, and destination news — powered by real-time data.</p>
+          <p className="text-white/80 text-lg max-w-lg mx-auto">Visa requirements, safety advisories, and destination news, powered by real-time data.</p>
         </div>
       </section>
 

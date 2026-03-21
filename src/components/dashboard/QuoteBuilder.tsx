@@ -171,7 +171,7 @@ const BookingFromQuoteDialog = ({ open, onOpenChange, quoteData, onSaved }: Book
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div><span className="text-muted-foreground">Client:</span> <span className="font-medium text-foreground">{quoteData.client_name}</span></div>
-            <div><span className="text-muted-foreground">Email:</span> <span className="font-medium text-foreground">{quoteData.client_email || "—"}</span></div>
+            <div><span className="text-muted-foreground">Email:</span> <span className="font-medium text-foreground">{quoteData.client_email || "-"}</span></div>
           </div>
           <div>
             <Label>Booking Number *</Label>
@@ -355,7 +355,7 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
       setAiAttachmentNames([]);
       setAiClientName("");
       setAiClientEmail("");
-      setStep(4); // Jump to preview — auto-save will trigger via useEffect
+      setStep(4); // Jump to preview, auto-save will trigger via useEffect
       toast({ title: "✨ Quote generated!", description: "Auto-saving to client file..." });
     } catch (e: any) {
       console.error("AI quote error:", e);
@@ -953,7 +953,7 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
               <label htmlFor="include-review" className="text-sm font-medium text-foreground cursor-pointer">
                 Include resort review in this quote
               </label>
-              <span className="text-xs text-muted-foreground ml-1">(ratings, summary, tips — no affiliate links)</span>
+              <span className="text-xs text-muted-foreground ml-1">(ratings, summary, tips, no affiliate links)</span>
             </div>
 
             <div className="relative" ref={suggestionsRef}>
@@ -1031,7 +1031,7 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
       {step === 2 && (
         <Card>
           <CardContent className="p-6 space-y-5">
-            <h3 className="font-semibold text-foreground">Vacation Details — {quote.resortName}</h3>
+            <h3 className="font-semibold text-foreground">Vacation Details, {quote.resortName}</h3>
             {quote.includeReview && quote.reviewData && (
               <Badge variant="secondary" className="text-xs">✓ Resort review will be included in quote</Badge>
             )}
@@ -1044,7 +1044,7 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
                   <SelectContent>
                     <SelectItem value="__new__">+ New Client</SelectItem>
                     {uniqueClients.map((c) => (
-                      <SelectItem key={c.name} value={c.name}>{c.name}{c.email ? ` — ${c.email}` : ""}</SelectItem>
+                      <SelectItem key={c.name} value={c.name}>{c.name}{c.email ? `, ${c.email}` : ""}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

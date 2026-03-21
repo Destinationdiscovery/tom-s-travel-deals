@@ -86,7 +86,7 @@ const Safety = () => {
               Destination Safety Scores
             </h1>
             <p className="text-muted-foreground text-lg">
-              Safety ratings, common scams, health tips, and emergency contacts — before you travel.
+              Safety ratings, common scams, health tips, and emergency contacts, before you travel.
             </p>
           </div>
 

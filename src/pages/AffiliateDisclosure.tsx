@@ -22,17 +22,17 @@ const AffiliateDisclosure = () => {
             <h2 className="font-display text-2xl font-semibold text-foreground mt-8 mb-3">Our Affiliate Partners</h2>
             <p>We currently have affiliate relationships with the following companies:</p>
             <ul className="list-disc pl-6 space-y-2 mt-3">
-              <li><strong>Expedia</strong> — Hotels, flights, vacation packages, and car rentals</li>
-              <li><strong>Hotels.com</strong> — Hotel and accommodation bookings</li>
-              <li><strong>VRBO</strong> — Vacation rental properties</li>
-              <li><strong>Amazon</strong> — Travel gear, accessories, and products</li>
+              <li><strong>Expedia</strong>. Hotels, flights, vacation packages, and car rentals</li>
+              <li><strong>Hotels.com</strong>. Hotel and accommodation bookings</li>
+              <li><strong>VRBO</strong>. Vacation rental properties</li>
+              <li><strong>Amazon</strong>. Travel gear, accessories, and products</li>
             </ul>
           </section>
 
           <section>
             <h2 className="font-display text-2xl font-semibold text-foreground mt-8 mb-3">Our Commitment to Transparency</h2>
             <p>Our reviews and recommendations are based on real personal travel experiences and thorough research. Affiliate partnerships <strong>never influence</strong> our ratings, reviews, or recommendations. We only recommend products and services we genuinely believe will benefit our readers.</p>
-            <p>If we feature a product or destination, it's because we think it's worth your time and money — not because of a commission.</p>
+            <p>If we feature a product or destination, it's because we think it's worth your time and money, not because of a commission.</p>
           </section>
 
           <section>

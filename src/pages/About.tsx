@@ -9,7 +9,7 @@ const features = [
   {
     icon: Globe,
     title: "190+ Countries Covered",
-    description: "From Caribbean beaches to Asian temples to European cities — we aggregate reviews for properties worldwide.",
+    description: "From Caribbean beaches to Asian temples to European cities, we aggregate reviews for properties worldwide.",
   },
   {
     icon: Heart,
@@ -19,7 +19,7 @@ const features = [
   {
     icon: Camera,
     title: "Real Experiences Shared",
-    description: "No stock photos here — our reviews feature real photos, videos, and honest opinions from verified travelers.",
+    description: "No stock photos here, our reviews feature real photos, videos, and honest opinions from verified travelers.",
   },
 ];
 
@@ -52,7 +52,7 @@ const About = () => {
             <h1 className="font-display text-4xl md:text-6xl font-bold text-white mb-3">
               About <span className="text-primary-foreground">ReviewThenGo</span>
             </h1>
-            <p className="text-white/80 text-lg">Real insights for real travelers — worldwide.</p>
+            <p className="text-white/80 text-lg">Real insights for real travelers, worldwide.</p>
           </div>
         </section>
 
@@ -67,7 +67,7 @@ const About = () => {
                   </h2>
                   <p className="text-muted-foreground text-lg leading-relaxed mb-4">
                     Planning a trip shouldn't mean drowning in thousands of reviews across a dozen websites.
-                    ReviewThenGo was built to solve that — we aggregate real traveler feedback from 10+ trusted
+                    ReviewThenGo was built to solve that, we aggregate real traveler feedback from 10+ trusted
                     sources and distill it into clear, honest verdicts.
                   </p>
                   <p className="text-muted-foreground text-lg leading-relaxed mb-4">
@@ -126,11 +126,11 @@ const About = () => {
                 <div className="bg-card rounded-3xl p-8 md:p-10 shadow-elevated">
                   <div className="flex items-center gap-3 mb-6">
                     <Scale className="h-6 w-6 text-accent" />
-                    <h3 className="font-display text-xl font-bold text-card-foreground">No Pay-for-Play — Ever</h3>
+                    <h3 className="font-display text-xl font-bold text-card-foreground">No Pay-for-Play. Ever</h3>
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-4">
                     Properties cannot pay to improve their ReviewThenGo verdict. Our revenue comes from clearly
-                    disclosed affiliate links and advertising — never from review manipulation.
+                    disclosed affiliate links and advertising, never from review manipulation.
                   </p>
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     We believe travelers deserve unbiased information. That principle is non-negotiable.
@@ -152,7 +152,7 @@ const About = () => {
                   </div>
                   <div className="mt-6 pt-4 border-t border-border">
                     <p className="text-xs text-muted-foreground italic">
-                      "The world is a book, and those who do not travel read only one page." — Saint Augustine
+                      "The world is a book, and those who do not travel read only one page.". Saint Augustine
                     </p>
                   </div>
                 </div>

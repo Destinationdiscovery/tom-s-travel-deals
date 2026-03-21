@@ -6,13 +6,13 @@ const TABS = ["Requirements", "Advisories", "News"] as const;
 const TAB_CONTENT = {
   Requirements: [
     { icon: CheckCircle, text: "Valid passport (6+ months validity)", color: "text-green-500" },
-    { icon: Info, text: "Tourist card required — available on arrival", color: "text-blue-500" },
+    { icon: Info, text: "Tourist card required, available on arrival", color: "text-blue-500" },
     { icon: CheckCircle, text: "Travel medical insurance mandatory", color: "text-green-500" },
     { icon: XCircle, text: "US credit/debit cards not accepted", color: "text-red-500" },
   ],
   Advisories: [
-    { icon: AlertTriangle, text: "Level 2 — Exercise Increased Caution", color: "text-amber-500" },
-    { icon: Shield, text: "Petty crime in tourist areas — keep valuables secure", color: "text-amber-500" },
+    { icon: AlertTriangle, text: "Level 2. Exercise Increased Caution", color: "text-amber-500" },
+    { icon: Shield, text: "Petty crime in tourist areas, keep valuables secure", color: "text-amber-500" },
     { icon: Info, text: "Limited internet & phone connectivity", color: "text-blue-500" },
     { icon: CheckCircle, text: "Healthcare available but bring prescriptions", color: "text-green-500" },
   ],

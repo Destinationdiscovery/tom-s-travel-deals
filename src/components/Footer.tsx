@@ -127,7 +127,7 @@ const Footer = () => {
                 <Send className="h-3.5 w-3.5" />
               </Button>
             </form>
-            <p className="text-xs text-primary-foreground/40 mt-1 mb-4">Get weekly deals — no spam.</p>
+            <p className="text-xs text-primary-foreground/40 mt-1 mb-4">Get weekly deals, no spam.</p>
 
             <div className="flex items-center gap-4 mb-4">
               <a href="https://x.com/TomLaracyTravel" target="_blank" rel="noopener noreferrer" aria-label="Twitter" className="text-primary-foreground/60 hover:text-secondary transition-colors">

@@ -85,8 +85,8 @@ const Itinerary = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="AI Itinerary Builder — Plan Your Trip | ReviewThenGo"
-        description="Get a personalized day-by-day travel itinerary with costs, activities, restaurants, and insider tips — powered by AI."
+        title="AI Itinerary Builder. Plan Your Trip | ReviewThenGo"
+        description="Get a personalized day-by-day travel itinerary with costs, activities, restaurants, and insider tips, powered by AI."
         url="/itinerary"
       />
       <Header />
@@ -98,7 +98,7 @@ const Itinerary = () => {
               AI Itinerary <span className="text-secondary">Builder</span>
             </h1>
             <p className="text-primary-foreground/70 text-lg mb-8 max-w-2xl mx-auto">
-              Tell us your destination and trip style — get a complete day-by-day plan with costs and restaurant picks.
+              Tell us your destination and trip style, get a complete day-by-day plan with costs and restaurant picks.
             </p>
             <div className="max-w-xl mx-auto">
               <div className="flex gap-2">
@@ -271,7 +271,7 @@ const Itinerary = () => {
               <MapPin className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
               <h2 className="font-display text-2xl font-bold text-foreground mb-2">Plan Your Perfect Trip</h2>
               <p className="text-muted-foreground max-w-md mx-auto">
-                Type your destination and trip style above — we'll create a day-by-day itinerary with costs, restaurants, and insider tips.
+                Type your destination and trip style above, we'll create a day-by-day itinerary with costs, restaurants, and insider tips.
               </p>
               <div className="flex flex-wrap items-center justify-center gap-2 mt-6">
                 {["Tokyo 5 days budget", "Paris romantic weekend", "Bali 7 days adventure", "Italy 10 days family"].map((ex) => (

@@ -11,7 +11,7 @@ const steps = [
     icon: FileText,
     step: "2",
     title: "Read the Verdict",
-    description: "Get an honest summary with real pros, cons, ratings, and a clear \"worth it?\" verdict — no fluff.",
+    description: "Get an honest summary with real pros, cons, ratings, and a clear \"worth it?\" verdict, no fluff.",
   },
   {
     icon: CheckCircle,
@@ -29,7 +29,7 @@ const HowItWorks = () => (
           How ReviewThenGo Works
         </h2>
         <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-          Aggregated insights from real travelers — in three simple steps.
+          Aggregated insights from real travelers, in three simple steps.
         </p>
       </div>
       <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">

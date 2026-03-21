@@ -165,7 +165,7 @@ const EmailComposer = () => {
                           <SelectItem key={q.id} value={q.id}>
                             <span className="flex items-center gap-2">
                               <Link2 className="h-3 w-3" />
-                              {q.client_name} — {q.resort_name}
+                              {q.client_name}, {q.resort_name}
                             </span>
                           </SelectItem>
                         ))}

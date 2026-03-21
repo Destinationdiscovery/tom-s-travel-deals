@@ -20,7 +20,7 @@ const BestTimePreviewSection = () => (
           Find your perfect window <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
-      <p className="text-muted-foreground mb-6 max-w-xl">Weather, crowds, and flight prices — find the cheapest and best months for any destination.</p>
+      <p className="text-muted-foreground mb-6 max-w-xl">Weather, crowds, and flight prices, find the cheapest and best months for any destination.</p>
       <div className="flex flex-wrap gap-3">
         {chips.map((chip) => {
           const Icon = chip.icon;

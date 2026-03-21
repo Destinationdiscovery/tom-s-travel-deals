@@ -93,7 +93,7 @@ const BookingReport = () => {
 
   useEffect(() => {
     if (resortName) {
-      document.title = `${resortName} — Trip Report`;
+      document.title = `${resortName}. Trip Report`;
     }
     return () => { document.title = "ReviewThenGo.com | Real Reviews, Tested Gear & Travel Insights"; };
   }, [resortName]);
@@ -399,7 +399,7 @@ const BookingReport = () => {
                 <div className="flex items-center gap-3 flex-wrap">
                   {bookingDetails?.ship_name && <Ship className="h-5 w-5 text-primary" />}
                   <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">
-                    {bookingDetails?.ship_name ? `${bookingDetails.ship_name} — ` : ""}{resortName}
+                    {bookingDetails?.ship_name ? `${bookingDetails.ship_name}, ` : ""}{resortName}
                   </h1>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">

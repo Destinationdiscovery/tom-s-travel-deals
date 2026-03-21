@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
       });
 
     if (updateError) {
-      // User might not exist — create fresh
+      // User might not exist, create fresh
       const { data: created, error: createError } =
         await supabaseAdmin.auth.admin.createUser({
           email: adminEmail,

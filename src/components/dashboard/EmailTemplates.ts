@@ -9,7 +9,7 @@ export const emailTemplates: EmailTemplate[] = [
   {
     id: "quote",
     name: "Quote Email",
-    subject: "Your Vacation Quote — {resortName}",
+    subject: "Your Vacation Quote, {resortName}",
     body: `Hi {clientName},
 
 Thank you for reaching out! I'm excited to share your personalized vacation quote.
@@ -31,14 +31,14 @@ Best regards`,
   {
     id: "followup",
     name: "Follow-Up",
-    subject: "Following Up on Your Vacation Quote — {resortName}",
+    subject: "Following Up on Your Vacation Quote, {resortName}",
     body: `Hi {clientName},
 
 I wanted to follow up on the vacation quote I sent over recently for {resortName}.
 
 Have you had a chance to review it? I'd love to answer any questions or make adjustments to better fit your plans.
 
-Just a reminder — availability and pricing can change, so it's best to lock in your dates soon!
+Just a reminder, availability and pricing can change, so it's best to lock in your dates soon!
 
 Let me know how you'd like to proceed.
 
@@ -47,7 +47,7 @@ Best regards`,
   {
     id: "pre_departure",
     name: "Pre-Departure",
-    subject: "Your Trip to {destination} — Everything You Need to Know!",
+    subject: "Your Trip to {destination}. Everything You Need to Know!",
     body: `Hi {clientName},
 
 Your trip is almost here! Here are some important reminders before you go:
@@ -73,7 +73,7 @@ Best regards`,
 
 Welcome home! I hope you had an incredible time at {resortName} in {destination}.
 
-I'd love to hear how everything went — your feedback helps me continue to provide the best travel experiences.
+I'd love to hear how everything went, your feedback helps me continue to provide the best travel experiences.
 
 A few quick questions:
 - How was the resort and room?

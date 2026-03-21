@@ -158,11 +158,11 @@ const CompassArticle = () => {
         <div className="absolute top-24 left-0 right-0">
           <div className="container mx-auto px-4">
             <Link 
-              to="/compass"
+              to="/"
               className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors bg-black/30 backdrop-blur-sm px-4 py-2 rounded-full"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to The Compass
+              Back to Home
             </Link>
           </div>
         </div>

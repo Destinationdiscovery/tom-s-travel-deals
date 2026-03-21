@@ -81,7 +81,7 @@ const PromoReviewScene = ({ visible, scrollProgress }: PromoReviewSceneProps) =>
                 <h3 className="font-display text-lg font-bold text-foreground mb-3">What Travelers Say</h3>
                 <div className="space-y-3">
                   <blockquote className="border-l-2 border-primary/30 pl-4 text-sm text-muted-foreground italic">
-                    "The rooftop pool is absolutely breathtaking — the views of the Caribbean at sunset
+                    "The rooftop pool is absolutely breathtaking, the views of the Caribbean at sunset
                     are worth the trip alone. Staff remembered our names by day two."
                   </blockquote>
                   <blockquote className="border-l-2 border-primary/30 pl-4 text-sm text-muted-foreground italic">

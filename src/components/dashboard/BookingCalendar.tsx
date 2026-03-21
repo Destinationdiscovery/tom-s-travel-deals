@@ -322,7 +322,7 @@ const BookingCalendar = () => {
                   <SelectTrigger><SelectValue placeholder="Choose a client..." /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__new__">+ New Client</SelectItem>
-                    {clientList.map((c) => <SelectItem key={c.name} value={c.name}>{c.name}{c.email ? ` — ${c.email}` : ""}</SelectItem>)}
+                    {clientList.map((c) => <SelectItem key={c.name} value={c.name}>{c.name}{c.email ? `, ${c.email}` : ""}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>

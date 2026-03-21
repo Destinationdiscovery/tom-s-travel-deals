@@ -31,7 +31,7 @@ interface FeaturedDeal {
 }
 
 const featuredDeals: FeaturedDeal[] = [
-  { image: dealTemptation, name: "Temptation Cancun Resort All Inclusive — Adults Only", location: "Cancun, Mexico", affiliateUrl: "https://expedia.com/affiliate/sCSkKSm", originalPrice: 389, salePrice: 249, originalLabel: "$389/night", saleLabel: "$249/night", rating: 4.3, expiresAt: "2026-04-30T23:59:59Z" },
+  { image: dealTemptation, name: "Temptation Cancun Resort All Inclusive. Adults Only", location: "Cancun, Mexico", affiliateUrl: "https://expedia.com/affiliate/sCSkKSm", originalPrice: 389, salePrice: 249, originalLabel: "$389/night", saleLabel: "$249/night", rating: 4.3, expiresAt: "2026-04-30T23:59:59Z" },
   { image: dealRiu, name: "Hotel Riu Plaza Toronto", location: "Toronto, Canada", affiliateUrl: "https://expedia.com/affiliate/4XUFIIR", originalPrice: 279, salePrice: 179, originalLabel: "$279/night", saleLabel: "$179/night", rating: 4.1, expiresAt: "2026-03-31T23:59:59Z" },
   { image: dealOutrigger, name: "OUTRIGGER Honua Kai Resort & Spa", location: "Lahaina, Hawaii", affiliateUrl: "https://expedia.com/affiliate/N2Bmgth", originalPrice: 499, salePrice: 329, originalLabel: "$499/night", saleLabel: "$329/night", rating: 4.6, expiresAt: "2026-05-15T23:59:59Z" },
   { image: dealFlights, name: "Save on Eligible Flights to Top Destinations", location: "Multiple Destinations", affiliateUrl: "https://expedia.com/affiliate/bPJ1N3S", originalPrice: 650, salePrice: 399, originalLabel: "$650", saleLabel: "$399", rating: 4.0, expiresAt: "2026-04-15T23:59:59Z" },
@@ -176,7 +176,7 @@ const TravelDealsSection = () => {
           <span className="text-foreground"> Deals</span>
         </h2>
 
-        {/* Banners — compact */}
+        {/* Banners, compact */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {banners.map((b, i) => (
             <a key={i} href={b.affiliateUrl} target="_blank" rel="noopener noreferrer" className="block rounded-xl overflow-hidden group relative">

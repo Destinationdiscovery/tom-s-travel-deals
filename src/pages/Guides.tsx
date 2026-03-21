@@ -42,7 +42,7 @@ const Guides = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="Travel Guides — Honest Insights Before You Book"
+        title="Travel Guides. Honest Insights Before You Book"
         description="Free, research-backed travel guides from ReviewThenGo. Learn how to spot fake reviews, compare Airbnb vs hotels, find the best golf resorts, and avoid common booking mistakes."
         url="/guides"
         faq={hubFaq}
@@ -75,7 +75,7 @@ const Guides = () => {
               ))}
             </div>
           ) : guides.length === 0 ? (
-            <p className="text-center text-muted-foreground py-12">Guides coming soon — check back shortly!</p>
+            <p className="text-center text-muted-foreground py-12">Guides coming soon, check back shortly!</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {guides.map((guide, index) => (

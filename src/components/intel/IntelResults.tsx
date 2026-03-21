@@ -87,10 +87,10 @@ export const IntelLoading = ({ type }: { type: IntelType }) => {
 
 const AdvisoryBadge = ({ level }: { level: number }) => {
   const config: Record<number, { label: string; className: string }> = {
-    1: { label: "Level 1 — Exercise Normal Precautions", className: "bg-emerald-500/15 text-emerald-700 border-emerald-500/30" },
-    2: { label: "Level 2 — Exercise Increased Caution", className: "bg-amber-500/15 text-amber-700 border-amber-500/30" },
-    3: { label: "Level 3 — Reconsider Travel", className: "bg-orange-500/15 text-orange-700 border-orange-500/30" },
-    4: { label: "Level 4 — Do Not Travel", className: "bg-red-500/15 text-red-700 border-red-500/30" },
+    1: { label: "Level 1. Exercise Normal Precautions", className: "bg-emerald-500/15 text-emerald-700 border-emerald-500/30" },
+    2: { label: "Level 2. Exercise Increased Caution", className: "bg-amber-500/15 text-amber-700 border-amber-500/30" },
+    3: { label: "Level 3. Reconsider Travel", className: "bg-orange-500/15 text-orange-700 border-orange-500/30" },
+    4: { label: "Level 4. Do Not Travel", className: "bg-red-500/15 text-red-700 border-red-500/30" },
   };
   const c = config[level] || config[1];
   return <span className={`inline-block px-3 py-1.5 rounded-full text-sm font-semibold border ${c.className}`}>{c.label}</span>;
@@ -122,7 +122,7 @@ export const AdvisoriesResult = ({ data }: { data: AdvisoriesData }) => (
       <AdvisoryBadge level={data.advisoryLevel} />
       {data.advisories?.map((adv, i) => (
         <div key={i} className="mt-5 p-4 rounded-xl bg-muted/50">
-          <p className="text-xs text-primary font-medium mb-1">{adv.source} — {adv.level}</p>
+          <p className="text-xs text-primary font-medium mb-1">{adv.source}, {adv.level}</p>
           {adv.url ? (
             <a href={adv.url} target="_blank" rel="noopener noreferrer" className="font-semibold text-sm mb-1 text-primary hover:underline inline-flex items-center gap-1">
               {adv.summary} <ExternalLink className="h-3.5 w-3.5 shrink-0" />

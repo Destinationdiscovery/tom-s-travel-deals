@@ -363,7 +363,7 @@ const BookingManager = () => {
 
       toast({
         title: "Booking created!",
-        description: `${d.resort_or_trip} for ${d.client_name} (${d.booking_number}) — ${count} calendar events added.`,
+        description: `${d.resort_or_trip} for ${d.client_name} (${d.booking_number}), ${count} calendar events added.`,
       });
       fetchBookings();
 
@@ -595,7 +595,7 @@ const BookingManager = () => {
                   <SelectTrigger><SelectValue placeholder="Choose a client..." /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__new__">+ New Client</SelectItem>
-                    {clientList.map((c) => <SelectItem key={c.name} value={c.name}>{c.name}{c.email ? ` — ${c.email}` : ""}</SelectItem>)}
+                    {clientList.map((c) => <SelectItem key={c.name} value={c.name}>{c.name}{c.email ? `, ${c.email}` : ""}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>

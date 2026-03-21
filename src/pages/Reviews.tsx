@@ -88,7 +88,7 @@ const Reviews = () => {
           {displayTitle}: Real Reviews 2026
         </h1>
         <p className="text-muted-foreground mb-8 max-w-2xl">
-          Honest, aggregated insights from verified travelers. No pay-for-play — just real ratings and verdicts.
+          Honest, aggregated insights from verified travelers. No pay-for-play, just real ratings and verdicts.
         </p>
 
         {isLoading && <SearchLoadingStages />}
@@ -128,7 +128,7 @@ const Reviews = () => {
                   "@context": "https://schema.org",
                   "@type": "FAQPage",
                   "mainEntity": results.slice(0, 5).flatMap((r) => [
-                    { "@type": "Question", "name": `Best time to visit ${r.name}?`, "acceptedAnswer": { "@type": "Answer", "text": "March–May for shoulder season rates, June–August peak crowds." } },
+                    { "@type": "Question", "name": `Best time to visit ${r.name}?`, "acceptedAnswer": { "@type": "Answer", "text": "March to May for shoulder season rates, June to August peak crowds." } },
                     { "@type": "Question", "name": `What's the cancellation policy at ${r.name}?`, "acceptedAnswer": { "@type": "Answer", "text": "Most OTA rates offer 72hr free cancellation. Always check terms." } },
                   ])
                 })}

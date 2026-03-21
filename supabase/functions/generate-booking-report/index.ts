@@ -14,13 +14,13 @@ FORMAT GUIDELINES:
 - Use prose summaries where appropriate
 - Include emoji sparingly for visual interest (🚢 ✈️ 🏨 💰 📅 👤 🎒)
 - Format currency values with proper symbols
-- Make the report scannable — use bold for key facts
+- Make the report scannable, use bold for key facts
 - If there are multiple rooms/cabins, give each its own subsection with passenger details
 - Include a "Trip at a Glance" summary section at the top
 - End with any extras, special requests, or notes
 
 IMPORTANT:
-- Include ALL data provided — don't skip any fields
+- Include ALL data provided, don't skip any fields
 - If flight details exist, format them clearly with airports and times
 - If itinerary exists (cruise ports), create a nice table with dates, ports, arrival/departure times
 - If payment history exists, create a payment timeline table
