@@ -10,7 +10,7 @@ import BookingSidebar from "@/components/reviews/BookingSidebar";
 import SearchLoadingStages from "@/components/SearchLoadingStages";
 import { useTravelSearch, SearchResult, SearchActivity } from "@/hooks/useTravelSearch";
 import { useGenerateReview } from "@/hooks/useGenerateReview";
-import { MapPin, Compass } from "lucide-react";
+import { MapPin, Compass, ArrowLeft } from "lucide-react";
 
 function slugToTitle(slug: string) {
   return slug
