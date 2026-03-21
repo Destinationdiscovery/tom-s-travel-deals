@@ -10,8 +10,13 @@ import TravelersAskSection from "@/components/TravelersAskSection";
 import RecentReviewsHomepage from "@/components/RecentReviewsHomepage";
 import TravelDealsSection from "@/components/TravelDealsSection";
 import GearPreviewSection from "@/components/GearPreviewSection";
+import BestTimePreviewSection from "@/components/BestTimePreviewSection";
+import ItineraryPreviewSection from "@/components/ItineraryPreviewSection";
+import CurrencyPreviewSection from "@/components/CurrencyPreviewSection";
+import FlightsPreviewSection from "@/components/FlightsPreviewSection";
 import IntelPreviewSection from "@/components/IntelPreviewSection";
 import BlogPreviewSection from "@/components/BlogPreviewSection";
+import TrendingQueriesSection from "@/components/TrendingQueriesSection";
 import HomepageFAQ from "@/components/HomepageFAQ";
 import { homepageFaqData } from "@/components/HomepageFAQ";
 import ComparisonFloatingBadge from "@/components/ComparisonFloatingBadge";
@@ -38,7 +43,6 @@ const Index = () => {
   const location = useLocation();
   const resultsRef = useRef<HTMLDivElement>(null);
 
-  // Handle hash scroll on load
   useEffect(() => {
     if (location.hash) {
       const id = location.hash.replace("#", "");
@@ -90,7 +94,6 @@ const Index = () => {
         <HeroSection onSearch={handleHeroSearch} isSearching={isLoading} />
         <TrustBadges />
 
-        {/* Inline search results from hero */}
         <div ref={resultsRef} className="container mx-auto px-4">
           <AIReviewResult
             review={review}
@@ -105,13 +108,19 @@ const Index = () => {
         <TravelersAskSection />
 
         <RecentReviewsHomepage />
-        <SectionConnector text="Need gear for your trip?" linkText="Check our Travel Gear picks" to="/gear" />
+        <SectionConnector text="Need gear for your trip?" linkText="Check our Trip Planner" to="/gear" />
         <TravelDealsSection />
-        
-        <GearPreviewSection />
-        <IntelPreviewSection />
-        <BlogPreviewSection />
 
+        <GearPreviewSection />
+        <BestTimePreviewSection />
+        <ItineraryPreviewSection />
+        <CurrencyPreviewSection />
+        <FlightsPreviewSection />
+        <IntelPreviewSection />
+
+        <TrendingQueriesSection />
+
+        <BlogPreviewSection />
         <HomepageFAQ />
       </main>
       <ComparisonFloatingBadge />

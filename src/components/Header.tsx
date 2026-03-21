@@ -1,25 +1,34 @@
 import { useState, useCallback } from "react";
 import { useLocation } from "react-router-dom";
-import { Shield, Search, Menu, Download } from "lucide-react";
+import { Shield, Search, Menu, Download, ChevronDown, Luggage, Calendar, Map, DollarSign, Plane, Brain } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import AdminLoginDialog from "@/components/auth/AdminLoginDialog";
 import ExpediaSearchWidget from "@/components/ExpediaSearchWidget";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const navLinks = [
   { to: "/", label: "Home" },
   { to: "/destinations", label: "Destinations" },
-  { to: "/gear", label: "Trip Planner" },
-  { to: "/best-time", label: "Best Time" },
-  { to: "/itinerary", label: "Itinerary" },
-  { to: "/currency", label: "Currency" },
-  { to: "/flights", label: "Flights" },
-  { to: "/travel-intel", label: "Intel" },
   { to: "/compass", label: "Blog" },
   { to: "/guides", label: "Guides" },
   { to: "/#travel-deals", label: "Deals" },
+];
+
+const toolLinks = [
+  { to: "/gear", label: "Trip Planner", icon: Luggage },
+  { to: "/best-time", label: "Best Time", icon: Calendar },
+  { to: "/itinerary", label: "Itinerary", icon: Map },
+  { to: "/currency", label: "Currency", icon: DollarSign },
+  { to: "/flights", label: "Flights", icon: Plane },
+  { to: "/travel-intel", label: "Intel", icon: Brain },
 ];
 
 const Header = () => {
@@ -27,6 +36,7 @@ const Header = () => {
   const location = useLocation();
   const [widgetOpen, setWidgetOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [toolsExpanded, setToolsExpanded] = useState(false);
 
   const handleDealsClick = useCallback((e: React.MouseEvent) => {
     if (location.pathname === "/") {
@@ -61,7 +71,7 @@ const Header = () => {
           </div>
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-6">
+          <nav className="hidden md:flex items-center gap-5">
             {navLinks.map((link) => (
               <Link
                 key={link.to}
@@ -72,9 +82,29 @@ const Header = () => {
                 {link.label}
               </Link>
             ))}
+
+            {/* Tools Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger className="text-sm font-medium text-primary-foreground/80 hover:text-primary-foreground transition-colors flex items-center gap-1 outline-none">
+                Tools <ChevronDown className="h-3.5 w-3.5" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                {toolLinks.map((tool) => {
+                  const Icon = tool.icon;
+                  return (
+                    <DropdownMenuItem key={tool.to} asChild>
+                      <Link to={tool.to} className="flex items-center gap-2 cursor-pointer">
+                        <Icon className="h-4 w-4 text-muted-foreground" />
+                        {tool.label}
+                      </Link>
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </nav>
 
-          {/* Right actions — compact on mobile */}
+          {/* Right actions */}
           <div className="flex items-center gap-1 md:gap-3 shrink-0">
             <ThemeToggle />
             <button
@@ -85,7 +115,6 @@ const Header = () => {
               <Search className="h-4 w-4" />
             </button>
 
-            {/* Install icon — always visible on mobile */}
             <Link
               to="/install"
               className="md:hidden p-2 rounded-lg text-secondary hover:text-secondary/80 hover:bg-primary-foreground/10 transition-colors"
@@ -94,7 +123,6 @@ const Header = () => {
               <Download className="h-4 w-4" />
             </Link>
 
-            {/* Admin link — desktop only */}
             {isAdmin && (
               <Link
                 to="/gear-admin"
@@ -130,6 +158,34 @@ const Header = () => {
                       {link.label}
                     </Link>
                   ))}
+
+                  {/* Mobile tools sub-group */}
+                  <button
+                    onClick={() => setToolsExpanded(!toolsExpanded)}
+                    className="text-lg font-medium text-primary-foreground/80 hover:text-primary-foreground transition-colors py-2 flex items-center justify-between"
+                  >
+                    Tools
+                    <ChevronDown className={`h-4 w-4 transition-transform ${toolsExpanded ? "rotate-180" : ""}`} />
+                  </button>
+                  {toolsExpanded && (
+                    <div className="flex flex-col gap-2 pl-4">
+                      {toolLinks.map((tool) => {
+                        const Icon = tool.icon;
+                        return (
+                          <Link
+                            key={tool.to}
+                            to={tool.to}
+                            onClick={() => setMobileOpen(false)}
+                            className="text-base font-medium text-primary-foreground/70 hover:text-primary-foreground transition-colors flex items-center gap-2 py-1.5"
+                          >
+                            <Icon className="h-4 w-4" />
+                            {tool.label}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+
                   <Link
                     to="/install"
                     onClick={() => setMobileOpen(false)}
