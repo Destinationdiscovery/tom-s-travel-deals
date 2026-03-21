@@ -15,9 +15,9 @@ const BookingSidebar = ({ propertyName }: BookingSidebarProps) => {
   }, [propertyName]);
 
   const platforms = [
-    { name: "Expedia", url: links.expedia, tagline: "Bundle hotel + flight" },
-    { name: "Hotels.com", url: links.hotels, tagline: "Earn free nights" },
-    { name: "VRBO", url: links.vrbo, tagline: "Great for groups" },
+    { name: "Expedia", url: links.expedia },
+    { name: "Hotels.com", url: links.hotels },
+    { name: "VRBO", url: links.vrbo },
   ];
 
   const handleClick = (name: string) => {
