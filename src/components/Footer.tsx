@@ -68,6 +68,7 @@ const Footer = () => {
                 { to: "/gear", label: "Gear" },
                 { to: "/travel-intel", label: "Intel" },
                 { to: "/compass", label: "Blog" },
+                { to: "/guides", label: "Guides" },
                 { to: "/about", label: "About" },
                 { to: "/contact", label: "Contact" },
                 { to: "/install", label: "Install App" },

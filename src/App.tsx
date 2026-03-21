@@ -15,6 +15,7 @@ const Destinations = lazy(() => import("./pages/Destinations"));
 const DestinationReview = lazy(() => import("./pages/DestinationReview"));
 const Compass = lazy(() => import("./pages/Compass"));
 const CompassArticle = lazy(() => import("./pages/CompassArticle"));
+const Guides = lazy(() => import("./pages/Guides"));
 const Gear = lazy(() => import("./pages/Gear"));
 const GearAdmin = lazy(() => import("./pages/GearAdmin"));
 const About = lazy(() => import("./pages/About"));
@@ -63,6 +64,7 @@ const App = () => (
                 <Route path="/gear" element={<Gear />} />
                 <Route path="/gear-admin" element={<GearAdmin />} />
                 <Route path="/about" element={<About />} />
+                <Route path="/guides" element={<Guides />} />
                 <Route path="/compare" element={<Compare />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/travel-intel" element={<TravelIntel />} />
