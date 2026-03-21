@@ -137,11 +137,17 @@ const Gear = () => {
         </section>
 
         <div className="container mx-auto px-4 py-10">
+          {/* Persistent back to home */}
+          <div className="mb-6">
+            <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline">
+              <Home className="h-4 w-4" /> Back to Home
+            </Link>
+          </div>
           {/* Back button when results showing */}
           {hasResults && (
-            <div className="mb-6">
+            <div className="mb-4">
               <Button variant="ghost" size="sm" className="gap-1.5 text-primary" onClick={handleBackToCards}>
-                <ArrowLeft className="h-4 w-4" /> Back to Featured Gear
+                <ArrowLeft className="h-4 w-4" /> Back to Home
               </Button>
             </div>
           )}
