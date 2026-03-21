@@ -26,8 +26,8 @@ const BookingSidebar = ({ propertyName }: BookingSidebarProps) => {
 
   return (
     <div className="bg-card rounded-2xl p-5 shadow-soft border border-border sticky top-20">
-      <h3 className="font-display text-base font-bold text-foreground mb-1">🔥 Ready to Book?</h3>
-      <p className="text-xs text-muted-foreground mb-4">Best deals found for this search</p>
+      <h3 className="font-display text-base font-bold text-foreground mb-1">🔥 Save Now</h3>
+      <p className="text-xs text-muted-foreground mb-4">Best deals for this search</p>
 
       <div className="flex flex-col gap-3">
         {platforms.map((p) => (
@@ -39,10 +39,7 @@ const BookingSidebar = ({ propertyName }: BookingSidebarProps) => {
             onClick={() => handleClick(p.name)}
             className="flex items-center justify-between gap-3 rounded-xl border border-border bg-background p-3.5 transition-all hover:border-primary/40 hover:shadow-sm group"
           >
-            <div>
-              <span className="font-semibold text-sm text-foreground">{p.name}</span>
-              <p className="text-xs text-muted-foreground">{p.tagline}</p>
-            </div>
+            <span className="font-semibold text-sm text-foreground">{p.name}</span>
             <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary shrink-0 transition-colors" />
           </a>
         ))}

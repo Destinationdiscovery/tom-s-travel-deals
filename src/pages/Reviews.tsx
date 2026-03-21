@@ -234,8 +234,8 @@ const Reviews = () => {
               <BookingSidebar propertyName={topResult?.name} />
             </aside>
           </div>
+          </>
         )}
-
         {!isLoading && !error && results.length === 0 && slug && (
           <div className="text-center py-16">
             <MapPin className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
