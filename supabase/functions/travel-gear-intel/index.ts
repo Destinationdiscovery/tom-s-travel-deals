@@ -139,7 +139,7 @@ Be specific with product names. Example: "Osprey Farpoint 40 Travel Backpack" no
   review: (query) =>
     `You are a travel gear reviewer. Research "${query}" thoroughly using Amazon reviews, expert reviews, YouTube reviews, and travel blogs.
 
-Do NOT include an imageUrl field. Images are handled separately.
+For the product, include an "imageUrl" field with a direct URL to a product image found online (official brand site, Amazon CDN, or retailer). Use a real, publicly accessible image URL.
 
 Return your response as valid JSON only (no markdown, no code blocks):
 
@@ -148,6 +148,7 @@ Return your response as valid JSON only (no markdown, no code blocks):
   "brand": "Brand Name",
   "priceRange": "$XX - $XX",
   "overallRating": 4.2,
+  "imageUrl": "https://example.com/product-image.jpg",
   "ratings": {
     "Durability": 4.5,
     "Value": 3.8,
