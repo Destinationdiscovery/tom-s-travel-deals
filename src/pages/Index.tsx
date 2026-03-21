@@ -96,13 +96,13 @@ const Index = () => {
         <HowItWorks />
         <TravelersAskSection />
 
-        <GearPreviewSection />
+        <TrendingQueriesSection />
         <BestTimePreviewSection />
         <ItineraryPreviewSection />
         <CurrencyPreviewSection />
         <FlightsPreviewSection />
         <IntelPreviewSection />
-        <TrendingQueriesSection />
+        <GearPreviewSection />
 
         <RecentReviewsHomepage />
         <TravelDealsSection />

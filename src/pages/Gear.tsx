@@ -114,7 +114,7 @@ const Gear = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60" />
           <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
             <h1 className="font-display text-4xl md:text-6xl font-bold text-white mb-4">
-              Trip Planner <span className="text-secondary">Toolkit</span>
+              Trip Packing <span className="text-secondary">Toolkit</span>
             </h1>
             <p className="text-white/80 max-w-2xl mx-auto text-lg mb-8">Enter your trip → Get a personalized packing list, weather tips, and gear recommendations.</p>
             <div className="max-w-2xl mx-auto">

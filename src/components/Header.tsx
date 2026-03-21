@@ -23,7 +23,7 @@ const navLinks = [
 ];
 
 const toolLinks = [
-  { to: "/gear", label: "Trip Planner", icon: Luggage },
+  { to: "/gear", label: "Trip Packing", icon: Luggage },
   { to: "/best-time", label: "Best Time", icon: Calendar },
   { to: "/itinerary", label: "Itinerary", icon: Map },
   { to: "/currency", label: "Currency", icon: DollarSign },

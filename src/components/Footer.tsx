@@ -83,7 +83,7 @@ const Footer = () => {
             <h4 className="font-display font-semibold text-lg mb-4">Tools</h4>
             <nav className="flex flex-col gap-2">
               {[
-                { to: "/gear", label: "Trip Planner" },
+                { to: "/gear", label: "Trip Packing Toolkit" },
                 { to: "/best-time", label: "Best Time to Visit" },
                 { to: "/itinerary", label: "Itinerary Builder" },
                 { to: "/currency", label: "Currency Tracker" },
