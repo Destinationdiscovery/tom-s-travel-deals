@@ -109,7 +109,7 @@ const Itinerary = () => {
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                     placeholder="e.g. Tokyo 5 days budget, Paris romantic weekend..."
-                    className="pl-10 h-12 bg-white text-gray-900 border-0"
+                    className="pl-10 h-12 bg-card text-foreground border-0"
                   />
                 </div>
                 <Button onClick={handleSearch} disabled={loading || query.trim().length < 3} className="h-12 px-6 bg-secondary text-secondary-foreground hover:bg-secondary/90">
