@@ -172,7 +172,7 @@ const RecentReviewsHomepage = () => {
                       size="sm"
                       className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold"
                     >
-                      Book on Expedia — Save Now
+                      Book on Expedia
                       <ExternalLink className="h-3.5 w-3.5 ml-1" />
                     </Button>
                   </a>
