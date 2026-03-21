@@ -1,52 +1,60 @@
 
 
-# Phase 2: Guides Hub
+# Phase 3: Schema & Structured Data + Quick Verdict
 
 ## Overview
-Create a `/guides` hub page and seed 5 evergreen AI-quotable guide articles. Guides reuse the existing `blog_posts` table (with category "Guide") and `CompassArticle` renderer, so no new DB tables are needed.
+Add AggregateRating and Review JSON-LD schema to review pages, add a "Quick Verdict" summary block at the top of AI-generated reviews, and create property-style URL redirects.
 
 ## Changes
 
-### 1. New Page: `src/pages/Guides.tsx`
-- Hero section with "Travel Guides" branding
-- Fetches all `blog_posts` where `category = 'Guide'` (same pattern as Compass.tsx)
-- Grid layout of guide cards with title, excerpt, read time
-- Each card links to `/compass/:slug` (reuses existing article renderer)
-- SEOHead with FAQPage schema for the hub page itself
-- Header + Footer wrapper
+### 1. Quick Verdict Block on AI Review Pages
+**File: `src/components/AIReviewResult.tsx`**
+- Add a new "Quick Verdict" card at the very top of the review (before the summary card)
+- Shows: Overall score, top 3 pros, top 3 cons (derived from ratings), "Worth booking if" (from bestFor), review sources note
+- Structured with bold headings and bullet points so AI can quote verbatim
 
-### 2. Route: `src/App.tsx`
-- Add lazy import for Guides page
-- Add `<Route path="/guides" element={<Guides />} />`
+### 2. SEOHead on AI Review Pages
+**File: `src/pages/AIReview.tsx`**
+- Add `<SEOHead>` with:
+  - Title: `"{property_name} Real Reviews 2026 | ReviewThenGo"`
+  - Description from summary
+  - `aggregateRating` prop (overallRating, ratings count derived from data)
+  - `faq` prop with 3 auto-generated Q&As (e.g. "Is {property} worth it?", "What do travelers say about {property}?", "What's the rating for {property}?")
+  - BreadcrumbList schema (Home > Reviews > {property_name})
+  - URL set to `/review/{slug}`
 
-### 3. Navigation Updates
-- **Header.tsx**: Add "Guides" to `navLinks` array (between "Blog" and "Deals")
-- **Footer.tsx**: Add "Guides" link to Explore nav list
+### 3. SEOHead on Destination Review Pages
+**File: `src/pages/DestinationReview.tsx`**
+- Add `aggregateRating` prop to existing SEOHead (using the review's rating + ratings object)
+- Add `faq` prop with destination-specific Q&As
 
-### 4. Seed 5 Guide Articles via DB Insert
-Insert 5 rows into `blog_posts` with category "Guide" and `rich_content` JSON. Each follows the AI-quotable format: direct answer intro, H2/H3 structure, FAQ at bottom.
+### 4. Property-Style URL Redirects
+**File: `src/App.tsx`**
+- Add route: `/properties/:city/:name` that redirects to `/review/:name` (simple redirect component)
+- This gives crawlers a clean property-hierarchy URL pattern
 
-Articles:
-1. "How to Spot Fake Hotel Reviews" — Red flags, patterns, tools
-2. "Best Way to Check Resort Reviews Before Booking" — Step-by-step process
-3. "Airbnb vs Hotel: Real Reviews Compared" — Comparison with pros/cons table
-4. "Top Golf Resorts Worldwide: Honest Reviews" — Curated list with verdicts
-5. "Travel Review Mistakes to Avoid" — Common pitfalls and fixes
-
-Each article: ~800-1200 words via rich_content blocks, category "Guide", category_color "bg-emerald-500", author "Tom".
+### 5. Destinations Hub Enhancement
+**File: `src/pages/Destinations.tsx`**
+- Add A-Z letter filter bar at top
+- Add region filter chips (Caribbean, North America, Europe, Asia, etc.)
+- Add SearchAction schema for the search bar
 
 ## Files
 
 | File | Action |
 |------|--------|
-| `src/pages/Guides.tsx` | New — guides hub page |
-| `src/App.tsx` | Add `/guides` route |
-| `src/components/Header.tsx` | Add "Guides" nav link |
-| `src/components/Footer.tsx` | Add "Guides" footer link |
-| `blog_posts` table | Insert 5 guide articles (DB insert, no migration) |
+| `src/components/AIReviewResult.tsx` | Add Quick Verdict block |
+| `src/components/QuickVerdict.tsx` | New — reusable verdict component |
+| `src/pages/AIReview.tsx` | Add SEOHead with aggregateRating + FAQ schema |
+| `src/pages/DestinationReview.tsx` | Add aggregateRating + FAQ to existing SEOHead |
+| `src/App.tsx` | Add `/properties/:city/:name` redirect route |
+| `src/pages/Destinations.tsx` | Add A-Z filter + region chips |
 
 ## Order
-1. Create Guides.tsx page
-2. Add route + nav links
-3. Insert 5 guide articles into blog_posts
+1. Create QuickVerdict component
+2. Integrate into AIReviewResult
+3. Add SEOHead to AIReview.tsx
+4. Add schema to DestinationReview.tsx
+5. Add property URL redirect
+6. Enhance Destinations hub
 
