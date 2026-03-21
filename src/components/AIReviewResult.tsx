@@ -9,6 +9,7 @@ import PhotoGallery from "@/components/review/PhotoGallery";
 import ThingsToDoSection from "@/components/review/ThingsToDoSection";
 
 import type { CachedReview } from "@/hooks/useGenerateReview";
+import QuickVerdict from "@/components/QuickVerdict";
 
 interface AIReviewResultProps {
   review: CachedReview | null;
