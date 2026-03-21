@@ -148,8 +148,10 @@ const Index = () => {
           </div>
         </section>
 
+        <ToolsDirectorySection />
         <TravelDealsSection />
         <BlogPreviewSection />
+        <AboutPreviewSection />
         <HomepageFAQ />
       </main>
       <ComparisonFloatingBadge />
