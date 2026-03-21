@@ -98,7 +98,7 @@ const GearPreviewSection = () => {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                placeholder='e.g. "Cancun packing list" or "best travel pillow"'
+                placeholder='Where are you going? e.g. "Cancun beach trip August"'
                 className="w-full h-11 pl-10 pr-4 rounded-lg border border-border bg-card text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
             </div>

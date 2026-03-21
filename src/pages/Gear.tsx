@@ -119,7 +119,7 @@ const Gear = () => {
                 <div className="relative flex-1">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                   <Input
-                    placeholder="e.g. 7 day all inclusive in Mexico, backpacking Japan..."
+                    placeholder="Where are you going? e.g. Cancun beach trip August"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleSearch()}

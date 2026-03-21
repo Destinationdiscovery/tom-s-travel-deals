@@ -80,7 +80,7 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
                 onChange={(e) => { setQuery(e.target.value); setShowSuggestions(true); }}
                 onFocus={() => query.trim().length >= 2 && setShowSuggestions(true)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                placeholder="Search a hotel, resort, or destination..."
+                placeholder="Ask anything: hotel reviews, packing lists, best time to visit..."
                 className="w-full h-12 pl-10 pr-4 rounded-lg border-0 bg-white text-gray-900 placeholder:text-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-secondary/50 shadow-lg"
               />
               {showSuggestions && suggestions.length > 0 && (
