@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ArrowLeft } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
@@ -105,6 +106,12 @@ const AIReview = () => {
       )}
       <Header />
       <main className="pt-20">
+        <div className="container mx-auto px-4 mt-4">
+          <button onClick={() => navigate(-1)} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-2">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Results
+          </button>
+        </div>
         {loading ? (
           <div className="container mx-auto px-4 py-12">
             <div className="max-w-6xl mx-auto space-y-8">

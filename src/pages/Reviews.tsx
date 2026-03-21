@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -10,7 +10,7 @@ import BookingSidebar from "@/components/reviews/BookingSidebar";
 import SearchLoadingStages from "@/components/SearchLoadingStages";
 import { useTravelSearch, SearchResult, SearchActivity } from "@/hooks/useTravelSearch";
 import { useGenerateReview } from "@/hooks/useGenerateReview";
-import { MapPin, Compass } from "lucide-react";
+import { MapPin, Compass, ArrowLeft } from "lucide-react";
 
 function slugToTitle(slug: string) {
   return slug
@@ -80,6 +80,10 @@ const Reviews = () => {
       </div>
 
       <main className="container mx-auto px-4 py-8">
+        <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4">
+          <ArrowLeft className="h-4 w-4" />
+          Back to Home
+        </Link>
         <h1 className="font-display text-2xl md:text-4xl font-bold text-foreground mb-2">
           {displayTitle}: Real Reviews 2026
         </h1>
