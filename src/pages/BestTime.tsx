@@ -58,16 +58,13 @@ const BestTime = () => {
   const [data, setData] = useState<BestTimeData | null>(null);
   const [error, setError] = useState("");
 
-  const handleSearch = async () => {
-    const trimmed = query.trim();
-    if (trimmed.length < 2) return;
+  const doSearch = useCallback(async (dest: string) => {
     setLoading(true);
     setError("");
     setData(null);
-
     try {
       const { data: fnData, error: fnError } = await supabase.functions.invoke("best-time-intel", {
-        body: { destination: trimmed },
+        body: { destination: dest },
       });
       if (fnError) throw fnError;
       if (fnData?.error) throw new Error(fnData.error);
@@ -77,19 +74,23 @@ const BestTime = () => {
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  const handleSearch = () => {
+    const trimmed = query.trim();
+    if (trimmed.length < 2) return;
+    doSearch(trimmed);
   };
 
-  // Extract query from URL params on mount
-  useState(() => {
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const q = params.get("q");
     if (q && q.trim().length >= 2) {
       setQuery(q);
-      setTimeout(() => {
-        handleSearch();
-      }, 0);
+      doSearch(q.trim());
     }
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
