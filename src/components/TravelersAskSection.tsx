@@ -75,15 +75,21 @@ const TravelersAskSection = () => {
               <button
                 key={q.label}
                 onClick={() => handleClick(q.path)}
-                className="group flex items-center justify-between gap-3 rounded-xl border border-border bg-card p-4 text-left transition-all hover:border-primary/40 hover:shadow-md"
+                className="group flex flex-col gap-2 rounded-xl border border-border bg-card p-4 text-left transition-all hover:border-primary/40 hover:shadow-md"
               >
-                <div className="flex items-center gap-2 min-w-0">
-                  <Icon className={`h-4 w-4 shrink-0 ${cfg.color}`} />
-                  <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors truncate">
-                    {q.label}
-                  </span>
+                <div className="flex items-center justify-between gap-3 w-full">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Icon className={`h-4 w-4 shrink-0 ${cfg.color}`} />
+                    <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors truncate">
+                      {q.label}
+                    </span>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary shrink-0 transition-colors" />
                 </div>
-                <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary shrink-0 transition-colors" />
+                <div className="flex items-center gap-1 text-[11px] text-muted-foreground/70">
+                  <Heart className="h-3 w-3" />
+                  <span>{q.saves.toLocaleString()} saved</span>
+                </div>
               </button>
             );
           })}
