@@ -65,7 +65,8 @@ const Footer = () => {
               {[
                 { to: "/", label: "Home" },
                 { to: "/destinations", label: "Destinations" },
-                { to: "/gear", label: "Gear" },
+                { to: "/gear", label: "Trip Planner" },
+                { to: "/best-time", label: "Best Time" },
                 { to: "/travel-intel", label: "Intel" },
                 { to: "/compass", label: "Blog" },
                 { to: "/guides", label: "Guides" },

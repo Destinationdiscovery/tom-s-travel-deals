@@ -92,14 +92,14 @@ const Gear = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="Travel Gear"
-        description="Tell us where you're going, we'll tell you what to pack. AI-powered packing lists and product reviews."
+        title="Trip Planner Toolkit"
+        description="Enter your trip and get a personalized packing list, weather tips, and gear recommendations — all powered by AI."
         url="/gear"
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "WebPage",
-          name: "Travel Gear - ReviewThenGo",
-          description: "AI-powered packing lists and product reviews for travelers.",
+          name: "Trip Planner Toolkit - ReviewThenGo",
+          description: "AI-powered packing lists, weather tips, and gear recommendations for travelers.",
           url: "https://reviewthengo.lovable.app/gear"
         }}
       />
@@ -111,15 +111,15 @@ const Gear = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60" />
           <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
             <h1 className="font-display text-4xl md:text-6xl font-bold text-white mb-4">
-              <span className="text-primary">Travel</span> Gear
+              Trip Planner <span className="text-secondary">Toolkit</span>
             </h1>
-            <p className="text-white/80 max-w-2xl mx-auto text-lg mb-8">Tell us where you're going, we'll tell you what to pack.</p>
+            <p className="text-white/80 max-w-2xl mx-auto text-lg mb-8">Enter your trip → Get a personalized packing list, weather tips, and gear recommendations.</p>
             <div className="max-w-2xl mx-auto">
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                   <Input
-                    placeholder="e.g. 7 day all inclusive in Mexico, backpacking Japan..."
+                    placeholder="Where are you going? e.g. Cancun beach trip August"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleSearch()}

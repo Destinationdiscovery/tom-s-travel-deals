@@ -81,10 +81,10 @@ const GearPreviewSection = () => {
         <div className="flex items-center justify-between mb-6">
           <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
             <Luggage className="h-6 w-6 text-primary" />
-            Travel Gear
+            Trip Planner Toolkit
           </h2>
           <Link to="/gear" className="text-sm font-medium text-primary hover:underline flex items-center gap-1">
-            View All Gear <ArrowRight className="h-4 w-4" />
+            Plan Your Trip <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
@@ -98,7 +98,7 @@ const GearPreviewSection = () => {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                placeholder='e.g. "Cancun packing list" or "best travel pillow"'
+                placeholder='Where are you going? e.g. "Cancun beach trip August"'
                 className="w-full h-11 pl-10 pr-4 rounded-lg border border-border bg-card text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
             </div>
