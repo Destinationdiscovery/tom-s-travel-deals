@@ -67,6 +67,7 @@ const App = () => (
                 <Route path="/compass/:slug" element={<CompassArticle />} />
                 <Route path="/gear" element={<Gear />} />
                 <Route path="/best-time" element={<BestTime />} />
+                <Route path="/itinerary" element={<Itinerary />} />
                 <Route path="/gear-admin" element={<GearAdmin />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/guides" element={<Guides />} />
