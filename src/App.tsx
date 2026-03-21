@@ -70,6 +70,8 @@ const App = () => (
                 <Route path="/gear" element={<Gear />} />
                 <Route path="/best-time" element={<BestTime />} />
                 <Route path="/itinerary" element={<Itinerary />} />
+                <Route path="/currency" element={<Currency />} />
+                <Route path="/flights" element={<Flights />} />
                 <Route path="/gear-admin" element={<GearAdmin />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/guides" element={<Guides />} />
