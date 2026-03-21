@@ -117,7 +117,7 @@ IMPORTANT RULES:
 - NEVER include non-purchasable items like passports, travel insurance, cash/currency, visas, documents, or tickets.
 - Only recommend physical products that can be purchased on Amazon.
 - For each category, find a real, specific product with brand and model name.
-- Do NOT include an imageUrl field. Images are handled separately.
+- For each product, include an "imageUrl" field with a direct URL to a product image found online (official brand site, Amazon CDN, or retailer). Use real, publicly accessible image URLs.
 
 Return your response as valid JSON only (no markdown, no code blocks):
 
@@ -128,7 +128,8 @@ Return your response as valid JSON only (no markdown, no code blocks):
       "brand": "Brand Name",
       "priceRange": "$XX - $XX",
       "reason": "Why this specific product is the best choice for this trip (1-2 sentences)",
-      "category": "Category like Packing, Tech, Comfort, Safety, Health, Clothing, Beach, etc."
+      "category": "Category like Packing, Tech, Comfort, Safety, Health, Clothing, Beach, etc.",
+      "imageUrl": "https://example.com/product-image.jpg"
     }
   ]
 }
@@ -138,7 +139,7 @@ Be specific with product names. Example: "Osprey Farpoint 40 Travel Backpack" no
   review: (query) =>
     `You are a travel gear reviewer. Research "${query}" thoroughly using Amazon reviews, expert reviews, YouTube reviews, and travel blogs.
 
-Do NOT include an imageUrl field. Images are handled separately.
+For the product, include an "imageUrl" field with a direct URL to a product image found online (official brand site, Amazon CDN, or retailer). Use a real, publicly accessible image URL.
 
 Return your response as valid JSON only (no markdown, no code blocks):
 
@@ -147,6 +148,7 @@ Return your response as valid JSON only (no markdown, no code blocks):
   "brand": "Brand Name",
   "priceRange": "$XX - $XX",
   "overallRating": 4.2,
+  "imageUrl": "https://example.com/product-image.jpg",
   "ratings": {
     "Durability": 4.5,
     "Value": 3.8,
@@ -319,7 +321,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "sonar-pro",
         messages: [
-          { role: "system", content: "You are a travel gear expert. Always respond with valid JSON only, no markdown formatting. NEVER recommend non-purchasable items like passports, insurance, cash, visas, or documents. Do NOT include imageUrl fields — images are handled separately." },
+          { role: "system", content: "You are a travel gear expert. Always respond with valid JSON only, no markdown formatting. NEVER recommend non-purchasable items like passports, insurance, cash, visas, or documents. Always include an imageUrl field with a direct URL to a real product image." },
           { role: "user", content: prompt },
         ],
         temperature: 0.2,

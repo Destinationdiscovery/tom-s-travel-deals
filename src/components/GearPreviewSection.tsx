@@ -149,33 +149,40 @@ const GearPreviewSection = () => {
         {/* Featured gear cards */}
         {!hasResults && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {cards.map((card) => {
-              const Wrapper = card.affiliateUrl
-                ? (props: any) => <a href={card.affiliateUrl} target="_blank" rel="noopener noreferrer" {...props} />
-                : (props: any) => <div {...props} />;
-              return (
-                <Wrapper
-                  key={card.title}
-                  className="group rounded-2xl overflow-hidden bg-card shadow-sm hover:shadow-elevated transition-all duration-300 hover:-translate-y-1 border border-border/50 text-left block"
-                >
-                  <div className="aspect-[16/10] overflow-hidden relative">
-                    <img src={card.image} alt={card.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    {card.price && (
-                      <span className="absolute top-2 right-2 bg-secondary text-secondary-foreground text-xs font-bold px-2 py-0.5 rounded-full">{card.price}</span>
-                    )}
-                    {card.affiliateUrl && (
-                      <span className="absolute top-2 left-2 bg-black/60 text-white text-xs px-2 py-0.5 rounded-full flex items-center gap-1">
-                        <ExternalLink className="h-3 w-3" /> Shop
-                      </span>
-                    )}
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-display font-bold text-foreground group-hover:text-primary transition-colors">{card.title}</h3>
-                    <p className="text-xs text-muted-foreground mt-1">{card.description}</p>
-                  </div>
-                </Wrapper>
-              );
-            })}
+            {cards.map((card) => (
+              <div
+                key={card.title}
+                className="group rounded-2xl overflow-hidden bg-card shadow-sm hover:shadow-elevated transition-all duration-300 hover:-translate-y-1 border border-border/50 text-left block"
+              >
+                <div className="aspect-[16/10] overflow-hidden relative">
+                  <img src={card.image} alt={card.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  {card.price && (
+                    <span className="absolute top-2 right-2 bg-secondary text-secondary-foreground text-xs font-bold px-2 py-0.5 rounded-full">{card.price}</span>
+                  )}
+                </div>
+                <div className="p-4 space-y-2">
+                  <h3 className="font-display font-bold text-foreground group-hover:text-primary transition-colors">{card.title}</h3>
+                  <p className="text-xs text-muted-foreground">{card.description}</p>
+                  <Button
+                    size="sm"
+                    onClick={() => handleGearReview(card.title)}
+                    className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold text-xs"
+                  >
+                    Review It →
+                  </Button>
+                  {card.affiliateUrl && (
+                    <a
+                      href={card.affiliateUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      Shop on Amazon <ExternalLink className="h-3 w-3" />
+                    </a>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
