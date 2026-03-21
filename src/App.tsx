@@ -33,6 +33,7 @@ const BookingReport = lazy(() => import("./pages/BookingReport"));
 const ClientFile = lazy(() => import("./pages/ClientFile"));
 const PublicQuote = lazy(() => import("./pages/PublicQuote"));
 const Install = lazy(() => import("./pages/Install"));
+const PropertyRedirect = lazy(() => import("./pages/PropertyRedirect"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
