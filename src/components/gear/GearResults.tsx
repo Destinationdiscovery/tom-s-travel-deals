@@ -185,7 +185,7 @@ export const ProductReviewPanel = ({ review, onBack }: { review: GearReviewData;
               <a href={review.amazonUrl} target="_blank" rel="noopener noreferrer">
                 <Button size="lg" className="gap-2">Get it on Amazon <ExternalLink className="h-4 w-4" /></Button>
               </a>
-              <p className="text-xs text-muted-foreground mt-4 italic">Affiliate link – we may earn a small commission at no extra cost to you.</p>
+              <p className="text-xs text-muted-foreground mt-4 italic">Affiliate link. We may earn a small commission at no extra cost to you.</p>
             </CardContent>
           </Card>
           {review.citations && review.citations.length > 0 && (

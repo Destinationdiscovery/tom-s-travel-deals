@@ -210,7 +210,7 @@ const reviews: Record<string, ReviewData> = {
     image: curacaoImg,
     destination: "Villa in Blue Bay Resort",
     country: "Curaçao",
-    dateVisited: "November 23 – 30, 2024",
+    dateVisited: "November 23 to 30, 2024",
     duration: "7 nights",
     rating: 5,
     ratings: {

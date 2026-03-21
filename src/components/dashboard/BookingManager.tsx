@@ -510,7 +510,7 @@ const BookingManager = () => {
                     <TableCell className="text-sm">
                       {c.upcomingTrip
                         ? format(new Date(c.upcomingTrip), "MMM d, yyyy")
-                        : <span className="text-muted-foreground">—</span>}
+                        : <span className="text-muted-foreground">-</span>}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {format(new Date(c.lastActivity), "MMM d, yyyy")}
