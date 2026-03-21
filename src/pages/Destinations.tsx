@@ -152,9 +152,16 @@ const Destinations = () => {
   const [query, setQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedRegion, setSelectedRegion] = useState("All");
+  const [selectedLetter, setSelectedLetter] = useState("All");
   const { suggestions } = useSearchSuggestions(query);
   const { review, isLoading, error, generateReview, clearReview } = useGenerateReview();
   const resultsRef = useRef<HTMLDivElement>(null);
+
+  const filteredDestinations = destinations.filter((d) => {
+    const regionMatch = selectedRegion === "All" || d.region === selectedRegion;
+    const letterMatch = selectedLetter === "All" || d.destination.charAt(0).toUpperCase() === selectedLetter;
+    return regionMatch && letterMatch;
+  });
 
   const handleSearch = () => {
     const trimmed = query.trim();
@@ -175,20 +182,39 @@ const Destinations = () => {
     <div className="min-h-screen bg-background">
       <SEOHead
         title="Real Destination Reviews"
-        description="Explore curated reviews from real traveler experiences. Search any hotel, resort, or destination."
+        description="Explore curated reviews from real traveler experiences. Search any hotel, resort, or destination for honest, aggregated insights before you book."
         url="/destinations"
-        jsonLd={{
-          "@context": "https://schema.org",
-          "@type": "ItemList",
-          name: "Destination Reviews",
-          numberOfItems: destinations.length,
-          itemListElement: destinations.map((d, i) => ({
-            "@type": "ListItem",
-            position: i + 1,
-            name: d.destination,
-            url: `https://reviewthengo.lovable.app/review/${d.slug}`,
-          })),
-        }}
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            name: "Destination Reviews",
+            numberOfItems: destinations.length,
+            itemListElement: destinations.map((d, i) => ({
+              "@type": "ListItem",
+              position: i + 1,
+              name: d.destination,
+              url: `https://reviewthengo.lovable.app/review/${d.slug}`,
+            })),
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            url: "https://reviewthengo.lovable.app/destinations",
+            potentialAction: {
+              "@type": "SearchAction",
+              target: {
+                "@type": "EntryPoint",
+                urlTemplate: "https://reviewthengo.lovable.app/destinations?q={search_term_string}",
+              },
+              "query-input": "required name=search_term_string",
+            },
+          },
+        ]}
+        faq={[
+          { question: "How does ReviewThenGo aggregate destination reviews?", answer: "We pull real traveler reviews from Google, TripAdvisor, Booking.com and more, then summarize pros, cons, and verdicts using AI." },
+          { question: "Are ReviewThenGo destination reviews free?", answer: "Yes, all destination reviews on ReviewThenGo are completely free and ad-supported." },
+        ]}
       />
       <Header />
       <AffiliateDisclosureBanner />
@@ -260,7 +286,7 @@ const Destinations = () => {
             {!review && !isLoading && !error && (
               <>
                 {/* Region Filter Chips */}
-                <div className="flex flex-wrap gap-2 mb-8">
+                <div className="flex flex-wrap gap-2 mb-4">
                   {regions.map((region) => (
                     <button
                       key={region}
@@ -276,13 +302,30 @@ const Destinations = () => {
                   ))}
                 </div>
 
+                {/* A-Z Letter Filter */}
+                <div className="flex flex-wrap gap-1 mb-8">
+                  {["All", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")].map((letter) => (
+                    <button
+                      key={letter}
+                      onClick={() => setSelectedLetter(letter)}
+                      className={`w-8 h-8 rounded text-xs font-medium transition-colors ${
+                        selectedLetter === letter
+                          ? "bg-secondary text-secondary-foreground"
+                          : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                      }`}
+                    >
+                      {letter}
+                    </button>
+                  ))}
+                </div>
+
                 <div className="flex items-center justify-between mb-8">
                   <p className="text-muted-foreground">
-                    {(selectedRegion === "All" ? destinations : destinations.filter(d => d.region === selectedRegion)).length} destinations
+                    {filteredDestinations.length} destination{filteredDestinations.length !== 1 ? "s" : ""}
                   </p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {(selectedRegion === "All" ? destinations : destinations.filter(d => d.region === selectedRegion)).map((dest, index) => (
+                  {filteredDestinations.map((dest, index) => (
                     <DestinationCard key={dest.slug} destination={dest} index={index} />
                   ))}
                 </div>

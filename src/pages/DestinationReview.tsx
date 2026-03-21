@@ -470,6 +470,21 @@ const DestinationReview = () => {
         image={review.image}
         url={`/review/${slug}`}
         type="article"
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Destinations", url: "/destinations" },
+          { name: review.destination, url: `/destinations/${slug}` },
+        ]}
+        faq={[
+          { question: `Is ${review.destination} worth visiting?`, answer: review.summary },
+          { question: `What is the rating for ${review.destination}?`, answer: `${review.destination} receives ${review.rating}/5 based on our detailed review covering ${Object.keys(review.ratings).join(", ")}.` },
+          { question: `What are the best things about ${review.destination}?`, answer: review.bestFor.join(". ") + "." },
+        ]}
+        aggregateRating={{
+          ratingValue: review.rating,
+          reviewCount: Object.keys(review.ratings).length,
+          itemReviewed: { type: "Hotel", name: review.destination },
+        }}
       />
       <Header />
       <ReadingProgress />

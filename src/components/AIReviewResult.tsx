@@ -9,6 +9,7 @@ import PhotoGallery from "@/components/review/PhotoGallery";
 import ThingsToDoSection from "@/components/review/ThingsToDoSection";
 
 import type { CachedReview } from "@/hooks/useGenerateReview";
+import QuickVerdict from "@/components/QuickVerdict";
 
 interface AIReviewResultProps {
   review: CachedReview | null;
@@ -106,6 +107,17 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview, onReviewReady, 
           <div className="grid lg:grid-cols-3 gap-10">
             {/* LEFT COLUMN – Main Content */}
             <div className="lg:col-span-2 flex flex-col gap-10">
+              {/* 0. Quick Verdict */}
+              <div className="order-0">
+                <QuickVerdict
+                  propertyName={data.propertyName}
+                  overallRating={data.overallRating}
+                  ratings={data.ratings || {}}
+                  bestFor={data.bestFor}
+                  location={data.location}
+                />
+              </div>
+
               {/* 1. Summary Card */}
               <div className="bg-card rounded-2xl p-8 shadow-soft order-1">
                 <div className="mb-6">

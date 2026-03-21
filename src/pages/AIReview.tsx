@@ -9,6 +9,7 @@ import ReviewEngagement from "@/components/ReviewEngagement";
 import type { CachedReview } from "@/hooks/useGenerateReview";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useReviewHistory } from "@/hooks/useReviewHistory";
+import SEOHead from "@/components/SEOHead";
 
 const AIReview = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -73,8 +74,35 @@ const AIReview = () => {
     navigate("/");
   };
 
+  const seoFaq = review ? [
+    { question: `Is ${review.property_name} worth it?`, answer: (review.review_data as any)?.summary || `Read our aggregated review of ${review.property_name} on ReviewThenGo.` },
+    { question: `What do travelers say about ${review.property_name}?`, answer: `Travelers rate ${review.property_name} ${(review.review_data as any)?.overallRating || "N/A"}/5 overall. ${(review.review_data as any)?.summary || ""}` },
+    { question: `What is the rating for ${review.property_name}?`, answer: `${review.property_name} receives ${(review.review_data as any)?.overallRating || "N/A"}/5 based on aggregated real traveler reviews.` },
+  ] : undefined;
+
+  const seoRating = review ? {
+    ratingValue: (review.review_data as any)?.overallRating || 0,
+    reviewCount: Object.keys((review.review_data as any)?.ratings || {}).length || 1,
+    itemReviewed: { type: "Hotel", name: review.property_name },
+  } : undefined;
+
   return (
     <div className="min-h-screen bg-background">
+      {review && (
+        <SEOHead
+          title={`${review.property_name} Real Reviews 2026`}
+          description={(review.review_data as any)?.summary || `Honest aggregated review of ${review.property_name}`}
+          url={`/review/${review.slug}`}
+          type="article"
+          breadcrumbs={[
+            { name: "Home", url: "/" },
+            { name: "Reviews", url: "/destinations" },
+            { name: review.property_name, url: `/review/${review.slug}` },
+          ]}
+          faq={seoFaq}
+          aggregateRating={seoRating}
+        />
+      )}
       <Header />
       <main className="pt-20">
         {loading ? (
