@@ -151,7 +151,7 @@ const Itinerary = () => {
                   <span className="flex items-center gap-1 bg-secondary/20 text-secondary-foreground px-3 py-1 rounded-full">
                     <DollarSign className="h-3.5 w-3.5" /> {data.budget}
                   </span>
-                  <span className="flex items-center gap-1 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 px-3 py-1 rounded-full">
+                  <span className="flex items-center gap-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-3 py-1 rounded-full">
                     <MapPin className="h-3.5 w-3.5" /> {data.totalEstimatedCost}
                   </span>
                 </div>
