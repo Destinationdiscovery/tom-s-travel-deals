@@ -57,8 +57,8 @@ const SaveReviewButton = ({ review }: SaveReviewButtonProps) => {
       disabled={false}
       className="gap-2 w-full"
     >
-      {saved ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
-      {saved ? "Saved" : "Save to Compare"}
+      <Heart className={`h-4 w-4 ${saved ? "fill-current" : ""}`} />
+      {saved ? "Saved" : "Save to My List"}
     </Button>
   );
 

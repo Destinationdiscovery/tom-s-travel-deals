@@ -117,6 +117,12 @@ const HotelResultCard = ({ name, location, type, rating, description, bestFor, p
           </div>
         )}
 
+        {/* Travelers saved badge */}
+        <div className={`flex items-center gap-1.5 mb-3 text-xs ${isPopular ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground"}`}>
+          <Heart className={`h-3.5 w-3.5 ${isPopular ? "fill-amber-500 text-amber-500" : ""}`} />
+          <span className="font-medium">{savedCount.toLocaleString()} travelers saved this</span>
+        </div>
+
         {/* Sources + date stamp */}
         <div className="mb-4 space-y-1">
           <p className="text-[11px] text-muted-foreground">
