@@ -149,7 +149,7 @@ const ClientFile = () => {
     if (clientName) {
       document.title = `${clientName}. Client File`;
     }
-    return () => { document.title = "ReviewThenGo.com | Honest Reviews, Tested Gear & Travel Insights"; };
+    return () => { document.title = "ReviewThenGo.com | Your Travel Aggregator for Every Question"; };
   }, [clientName]);
 
   const fetchAll = async () => {

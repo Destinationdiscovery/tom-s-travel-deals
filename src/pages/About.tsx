@@ -37,9 +37,9 @@ const About = () => {
     <div className="min-h-screen bg-background">
       <SEOHead
         title="About ReviewThenGo"
-        description="ReviewThenGo aggregates real traveler reviews from 10+ sources into honest verdicts for hotels, resorts, and destinations worldwide. No pay-for-play, ever."
+        description="ReviewThenGo is a travel aggregator that answers any question travelers have. Reviews, packing lists, best times to visit, itineraries, currency, flights, and safety scores."
         url="/about"
-        keywords={["about ReviewThenGo", "travel review aggregator", "honest hotel reviews", "real traveler feedback"]}
+        keywords={["about ReviewThenGo", "travel aggregator", "travel questions answered", "real traveler feedback"]}
       />
       <Header />
       <AffiliateDisclosureBanner />

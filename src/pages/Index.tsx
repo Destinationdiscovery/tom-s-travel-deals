@@ -50,10 +50,10 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="Honest Hotel & Resort Reviews Before You Book"
-        description="Stop wasting hours on reviews. ReviewThenGo aggregates real traveler feedback from 10+ sources into clear verdicts for hotels, resorts, Airbnbs & more worldwide."
+        title="Your Travel Aggregator That Answers Every Question"
+        description="ReviewThenGo is a travel aggregator that answers any question travelers have. Destination reviews, packing lists, best times to visit, itineraries, currency, flights, and safety scores, all in one place."
         url="/"
-        keywords={["hotel reviews", "resort reviews", "travel reviews", "honest reviews", "aggregated reviews", "is it worth it", "real traveler feedback"]}
+        keywords={["travel aggregator", "travel questions answered", "hotel reviews", "resort reviews", "travel reviews", "packing lists", "best time to visit", "travel tools"]}
         faq={homepageFaqData}
         jsonLd={[
           {

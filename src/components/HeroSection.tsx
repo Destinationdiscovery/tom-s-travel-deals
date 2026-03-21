@@ -66,7 +66,7 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
           Answers Every Travel Question Before You Book
         </h1>
         <p className="text-white/80 text-base md:text-lg font-light mb-6">
-          Reviews, packing lists, best times to visit, and more, all powered by AI, all in one place.
+          Your travel aggregator for reviews, packing lists, best times to visit, and more, all in one place.
         </p>
 
         {/* Integrated search bar */}
