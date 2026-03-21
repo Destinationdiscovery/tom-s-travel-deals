@@ -29,6 +29,7 @@ const toolLinks = [
   { to: "/currency", label: "Currency", icon: DollarSign },
   { to: "/flights", label: "Flights", icon: Plane },
   { to: "/travel-intel", label: "Intel", icon: Brain },
+  { to: "/safety", label: "Safety Scores", icon: ShieldCheck },
 ];
 
 const Header = () => {

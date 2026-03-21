@@ -89,6 +89,7 @@ const Footer = () => {
                 { to: "/currency", label: "Currency Tracker" },
                 { to: "/flights", label: "Flight Deals" },
                 { to: "/travel-intel", label: "Travel Intel" },
+                { to: "/safety", label: "Safety Scores" },
               ].map((link) => (
                 <Link key={link.to} to={link.to} className="text-primary-foreground/70 hover:text-secondary transition-colors text-base">
                   {link.label}
