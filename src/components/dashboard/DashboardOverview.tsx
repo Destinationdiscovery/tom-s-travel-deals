@@ -333,12 +333,11 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
         <DashboardFunnel />
       </div>
 
-      {/* Insights Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ClientInsights />
-        <SiteActivityWidget />
-      </div>
+      {/* Site Analytics Dashboard */}
+      <SiteAnalyticsDashboard />
 
+      {/* Client Insights */}
+      <ClientInsights />
       {/* Intel Pinboard + Deadlines + Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <AgentPinboard />
