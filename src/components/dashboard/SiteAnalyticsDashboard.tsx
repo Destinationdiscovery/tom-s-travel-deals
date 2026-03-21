@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, MousePointerClick, Eye, Users, Heart, Gauge, BarChart3, TrendingUp } from "lucide-react";
-import { format } from "date-fns";
+import { Search, MousePointerClick, Eye, Users, Heart, Gauge, BarChart3, TrendingUp, RefreshCw } from "lucide-react";
+import { format, subDays, startOfDay } from "date-fns";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid } from "recharts";
 
 interface SearchItem { name: string; search_count: number; }
@@ -15,6 +17,8 @@ interface ReactionSlugItem { slug: string; count: number; }
 interface SubscriberSource { source: string; count: number; }
 interface VitalItem { metric_name: string; avg: number; page: string; }
 interface DailyClick { date: string; count: number; }
+
+type TimeRange = "today" | "7d" | "30d" | "all";
 
 const VITAL_THRESHOLDS: Record<string, { good: number; poor: number }> = {
   LCP: { good: 2500, poor: 4000 },
@@ -34,7 +38,28 @@ const vitalColor = (name: string, value: number) => {
 const formatSlug = (slug: string) =>
   slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
+const RANGE_LABELS: Record<TimeRange, string> = {
+  today: "Today",
+  "7d": "7 Days",
+  "30d": "30 Days",
+  all: "All Time",
+};
+
+const getStartDate = (range: TimeRange): string | null => {
+  if (range === "all") return null;
+  const now = new Date();
+  if (range === "today") return startOfDay(now).toISOString();
+  if (range === "7d") return subDays(startOfDay(now), 7).toISOString();
+  return subDays(startOfDay(now), 30).toISOString();
+};
+
+const AUTO_REFRESH_MS = 60_000; // 60 seconds
+
 const SiteAnalyticsDashboard = () => {
+  const [timeRange, setTimeRange] = useState<TimeRange>("30d");
+  const [loading, setLoading] = useState(false);
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+
   const [searches, setSearches] = useState<SearchItem[]>([]);
   const [clicks, setClicks] = useState<ClickItem[]>([]);
   const [views, setViews] = useState<ViewItem[]>([]);
@@ -50,27 +75,44 @@ const SiteAnalyticsDashboard = () => {
   const [vitals, setVitals] = useState<VitalItem[]>([]);
   const [vitalAverages, setVitalAverages] = useState<{ name: string; avg: number }[]>([]);
 
-  // Summary stats
   const [totalViews, setTotalViews] = useState(0);
   const [totalClicks, setTotalClicks] = useState(0);
   const [totalSearches, setTotalSearches] = useState(0);
   const [totalReactions, setTotalReactions] = useState(0);
 
-  useEffect(() => {
-    fetchAll();
-  }, []);
+  const fetchAll = useCallback(async () => {
+    setLoading(true);
+    const startDate = getStartDate(timeRange);
 
-  const fetchAll = async () => {
+    // Build queries — apply date filter where possible
+    let clickQuery = supabase.from("affiliate_clicks").select("platform, page, position, created_at");
+    let reactionQuery = supabase.from("review_reactions").select("reaction, slug, created_at");
+    let subQuery = supabase.from("subscribers").select("created_at, source_slug, interests");
+    let vitalsQuery = supabase.from("web_vitals").select("metric_name, value, page, created_at");
+
+    if (startDate) {
+      clickQuery = clickQuery.gte("created_at", startDate);
+      reactionQuery = reactionQuery.gte("created_at", startDate);
+      subQuery = subQuery.gte("created_at", startDate);
+      vitalsQuery = vitalsQuery.gte("created_at", startDate);
+    }
+
+    // Views don't have per-event timestamps, but filter by last_viewed_at
+    let viewQuery = supabase.from("review_views").select("slug, view_count, last_viewed_at").order("view_count", { ascending: false }).limit(20);
+    if (startDate) {
+      viewQuery = viewQuery.gte("last_viewed_at", startDate);
+    }
+
     const [searchRes, clickRes, viewRes, reactionRes, subRes, vitalsRes] = await Promise.all([
       supabase.from("search_suggestions").select("name, search_count").order("search_count", { ascending: false }).limit(20),
-      supabase.from("affiliate_clicks").select("platform, page, position, created_at"),
-      supabase.from("review_views").select("slug, view_count, last_viewed_at").order("view_count", { ascending: false }).limit(20),
-      supabase.from("review_reactions").select("reaction, slug"),
-      supabase.from("subscribers").select("created_at, source_slug, interests"),
-      supabase.from("web_vitals").select("metric_name, value, page"),
+      clickQuery,
+      viewQuery,
+      reactionQuery,
+      subQuery,
+      vitalsQuery,
     ]);
 
-    // Searches
+    // Searches (no created_at filter available — always show all)
     const searchData = searchRes.data || [];
     setSearches(searchData.slice(0, 15));
     setTotalSearches(searchData.reduce((s, item) => s + item.search_count, 0));
@@ -84,28 +126,24 @@ const SiteAnalyticsDashboard = () => {
     const clickData = clickRes.data || [];
     setTotalClicks(clickData.length);
 
-    // Clicks by page
     const clickPageMap: Record<string, number> = {};
     clickData.forEach((c) => { clickPageMap[c.page] = (clickPageMap[c.page] || 0) + 1; });
     setClicks(Object.entries(clickPageMap).map(([page, count]) => ({ page, count })).sort((a, b) => b.count - a.count).slice(0, 15));
 
-    // Clicks by platform
     const platMap: Record<string, number> = {};
     clickData.forEach((c) => { platMap[c.platform] = (platMap[c.platform] || 0) + 1; });
     setPlatforms(Object.entries(platMap).map(([platform, count]) => ({ platform, count })).sort((a, b) => b.count - a.count));
 
-    // Clicks by position
     const posMap: Record<string, number> = {};
     clickData.forEach((c) => { const p = c.position || "unknown"; posMap[p] = (posMap[p] || 0) + 1; });
     setPositions(Object.entries(posMap).map(([position, count]) => ({ position, count })).sort((a, b) => b.count - a.count));
 
-    // Daily clicks (last 30 days)
     const dayMap: Record<string, number> = {};
     clickData.forEach((c) => {
       const day = c.created_at?.substring(0, 10);
       if (day) dayMap[day] = (dayMap[day] || 0) + 1;
     });
-    setDailyClicks(Object.entries(dayMap).map(([date, count]) => ({ date, count })).sort((a, b) => a.date.localeCompare(b.date)).slice(-30));
+    setDailyClicks(Object.entries(dayMap).map(([date, count]) => ({ date, count })).sort((a, b) => a.date.localeCompare(b.date)));
 
     // Reactions
     const reactionData = reactionRes.data || [];
@@ -134,7 +172,6 @@ const SiteAnalyticsDashboard = () => {
 
     // Web Vitals
     const vData = vitalsRes.data || [];
-    // Per-page averages
     const vPageMap: Record<string, Record<string, { sum: number; count: number }>> = {};
     vData.forEach((v) => {
       if (!vPageMap[v.page]) vPageMap[v.page] = {};
@@ -150,7 +187,6 @@ const SiteAnalyticsDashboard = () => {
     });
     setVitals(vItems);
 
-    // Overall averages
     const overallMap: Record<string, { sum: number; count: number }> = {};
     vData.forEach((v) => {
       if (!overallMap[v.metric_name]) overallMap[v.metric_name] = { sum: 0, count: 0 };
@@ -160,7 +196,20 @@ const SiteAnalyticsDashboard = () => {
     setVitalAverages(Object.entries(overallMap).map(([name, { sum, count }]) => ({
       name, avg: Math.round((sum / count) * 100) / 100,
     })));
-  };
+
+    setLastRefresh(new Date());
+    setLoading(false);
+  }, [timeRange]);
+
+  useEffect(() => {
+    fetchAll();
+  }, [fetchAll]);
+
+  // Auto-refresh every 60s
+  useEffect(() => {
+    const interval = setInterval(fetchAll, AUTO_REFRESH_MS);
+    return () => clearInterval(interval);
+  }, [fetchAll]);
 
   const PLATFORM_COLORS = ["bg-sky-500", "bg-emerald-500", "bg-amber-500", "bg-violet-500", "bg-rose-500", "bg-cyan-500"];
 
@@ -172,11 +221,46 @@ const SiteAnalyticsDashboard = () => {
     { label: "Reactions", value: totalReactions.toLocaleString(), icon: Heart, color: "text-rose-400", bg: "bg-rose-500/10" },
   ];
 
+  const ranges: TimeRange[] = ["today", "7d", "30d", "all"];
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <BarChart3 className="h-5 w-5 text-primary" />
-        <h2 className="font-display text-lg font-bold text-foreground">Site Analytics</h2>
+      {/* Header with time range + refresh */}
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="flex items-center gap-2">
+          <BarChart3 className="h-5 w-5 text-primary" />
+          <h2 className="font-display text-lg font-bold text-foreground">Site Analytics</h2>
+        </div>
+        <div className="flex items-center gap-2">
+          {/* Time Range Buttons */}
+          <div className="flex bg-muted rounded-lg p-0.5 gap-0.5">
+            {ranges.map((r) => (
+              <button
+                key={r}
+                onClick={() => setTimeRange(r)}
+                className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                  timeRange === r
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {RANGE_LABELS[r]}
+              </button>
+            ))}
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={fetchAll}
+            disabled={loading}
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+          </Button>
+          <span className="text-[10px] text-muted-foreground hidden sm:inline">
+            Updated {format(lastRefresh, "h:mm:ss a")}
+          </span>
+        </div>
       </div>
 
       {/* Summary Cards */}
@@ -244,7 +328,7 @@ const SiteAnalyticsDashboard = () => {
 
             {/* Clicks Tab */}
             <TabsContent value="clicks" className="mt-4 space-y-4">
-              {clicks.length === 0 ? <p className="text-sm text-muted-foreground">No click data yet.</p> : (
+              {clicks.length === 0 ? <p className="text-sm text-muted-foreground">No click data for this period.</p> : (
                 <>
                   {dailyClicks.length > 1 && (
                     <div>
@@ -313,7 +397,7 @@ const SiteAnalyticsDashboard = () => {
 
             {/* Platforms Tab */}
             <TabsContent value="platforms" className="mt-4">
-              {platforms.length === 0 ? <p className="text-sm text-muted-foreground">No platform data yet.</p> : (
+              {platforms.length === 0 ? <p className="text-sm text-muted-foreground">No platform data for this period.</p> : (
                 <div className="space-y-3">
                   {platforms.map((p, i) => {
                     const maxCount = platforms[0]?.count || 1;
@@ -336,7 +420,7 @@ const SiteAnalyticsDashboard = () => {
 
             {/* Reactions Tab */}
             <TabsContent value="reactions" className="mt-4">
-              {reactions.length === 0 ? <p className="text-sm text-muted-foreground">No reaction data yet.</p> : (
+              {reactions.length === 0 ? <p className="text-sm text-muted-foreground">No reaction data for this period.</p> : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <p className="text-xs text-muted-foreground mb-2 font-medium">By Type</p>
@@ -369,10 +453,10 @@ const SiteAnalyticsDashboard = () => {
             {/* Subscribers Tab */}
             <TabsContent value="subscribers" className="mt-4">
               <div className="flex gap-4 mb-4">
-                <div className="text-sm"><span className="font-bold text-foreground">{subscriberCount}</span> <span className="text-muted-foreground">total</span></div>
+                <div className="text-sm"><span className="font-bold text-foreground">{subscriberCount}</span> <span className="text-muted-foreground">in period</span></div>
                 <div className="text-sm"><span className="font-bold text-emerald-400">{recentSubCount}</span> <span className="text-muted-foreground">last 7 days</span></div>
               </div>
-              {subscriberCount === 0 ? <p className="text-sm text-muted-foreground">No subscribers yet.</p> : (
+              {subscriberCount === 0 ? <p className="text-sm text-muted-foreground">No subscribers in this period.</p> : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <p className="text-xs text-muted-foreground mb-2 font-medium">Signup Source</p>
@@ -404,7 +488,7 @@ const SiteAnalyticsDashboard = () => {
 
             {/* Performance Tab */}
             <TabsContent value="performance" className="mt-4 space-y-4">
-              {vitalAverages.length === 0 ? <p className="text-sm text-muted-foreground">No performance data yet.</p> : (
+              {vitalAverages.length === 0 ? <p className="text-sm text-muted-foreground">No performance data for this period.</p> : (
                 <>
                   <div>
                     <p className="text-xs text-muted-foreground mb-2 font-medium">Overall Averages</p>
