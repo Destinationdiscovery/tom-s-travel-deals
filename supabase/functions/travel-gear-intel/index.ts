@@ -117,7 +117,7 @@ IMPORTANT RULES:
 - NEVER include non-purchasable items like passports, travel insurance, cash/currency, visas, documents, or tickets.
 - Only recommend physical products that can be purchased on Amazon.
 - For each category, find a real, specific product with brand and model name.
-- Do NOT include an imageUrl field. Images are handled separately.
+- For each product, include an "imageUrl" field with a direct URL to a product image found online (official brand site, Amazon CDN, or retailer). Use real, publicly accessible image URLs.
 
 Return your response as valid JSON only (no markdown, no code blocks):
 
@@ -128,7 +128,8 @@ Return your response as valid JSON only (no markdown, no code blocks):
       "brand": "Brand Name",
       "priceRange": "$XX - $XX",
       "reason": "Why this specific product is the best choice for this trip (1-2 sentences)",
-      "category": "Category like Packing, Tech, Comfort, Safety, Health, Clothing, Beach, etc."
+      "category": "Category like Packing, Tech, Comfort, Safety, Health, Clothing, Beach, etc.",
+      "imageUrl": "https://example.com/product-image.jpg"
     }
   ]
 }
