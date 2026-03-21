@@ -175,20 +175,39 @@ const Destinations = () => {
     <div className="min-h-screen bg-background">
       <SEOHead
         title="Real Destination Reviews"
-        description="Explore curated reviews from real traveler experiences. Search any hotel, resort, or destination."
+        description="Explore curated reviews from real traveler experiences. Search any hotel, resort, or destination for honest, aggregated insights before you book."
         url="/destinations"
-        jsonLd={{
-          "@context": "https://schema.org",
-          "@type": "ItemList",
-          name: "Destination Reviews",
-          numberOfItems: destinations.length,
-          itemListElement: destinations.map((d, i) => ({
-            "@type": "ListItem",
-            position: i + 1,
-            name: d.destination,
-            url: `https://reviewthengo.lovable.app/review/${d.slug}`,
-          })),
-        }}
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            name: "Destination Reviews",
+            numberOfItems: destinations.length,
+            itemListElement: destinations.map((d, i) => ({
+              "@type": "ListItem",
+              position: i + 1,
+              name: d.destination,
+              url: `https://reviewthengo.lovable.app/review/${d.slug}`,
+            })),
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            url: "https://reviewthengo.lovable.app/destinations",
+            potentialAction: {
+              "@type": "SearchAction",
+              target: {
+                "@type": "EntryPoint",
+                urlTemplate: "https://reviewthengo.lovable.app/destinations?q={search_term_string}",
+              },
+              "query-input": "required name=search_term_string",
+            },
+          },
+        ]}
+        faq={[
+          { question: "How does ReviewThenGo aggregate destination reviews?", answer: "We pull real traveler reviews from Google, TripAdvisor, Booking.com and more, then summarize pros, cons, and verdicts using AI." },
+          { question: "Are ReviewThenGo destination reviews free?", answer: "Yes, all destination reviews on ReviewThenGo are completely free and ad-supported." },
+        ]}
       />
       <Header />
       <AffiliateDisclosureBanner />

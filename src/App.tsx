@@ -80,6 +80,7 @@ const App = () => (
                 <Route path="/client/:clientSlug" element={<ClientFile />} />
                 <Route path="/quote/:token" element={<PublicQuote />} />
                 <Route path="/install" element={<Install />} />
+                <Route path="/properties/:city/:name" element={<PropertyRedirect />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
