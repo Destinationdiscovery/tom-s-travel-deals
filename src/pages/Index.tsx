@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { Heart, ArrowRight } from "lucide-react";
 import Header from "@/components/Header";
 import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import HeroSection from "@/components/HeroSection";
