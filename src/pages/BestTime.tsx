@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Search, Loader2, Sun, Cloud, Snowflake, Leaf, Calendar, TrendingDown, TrendingUp, Minus, ArrowLeft, Users, Plane, Lightbulb, AlertTriangle } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
