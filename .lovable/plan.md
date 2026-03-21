@@ -1,24 +1,53 @@
 
 
-# Add Back Navigation Buttons
+# Next Phase: Date Stamps, Schema, FAQ on Hotel Cards + Sidebar Text Fix
 
-## Problem
-After clicking a question card → `/reviews/best-golf-resorts`, there's no way to go back to the homepage. After clicking "Review It" → `/review/pebble-beach`, there's no way to go back to the search results.
+## What's Changing
 
-## Changes
+### 1. Shorten BookingSidebar CTA Text
+**File: `src/components/reviews/BookingSidebar.tsx`**
+- Change each platform link to just show "Save Now" with an external link icon (instead of verbose taglines like "Bundle hotel + flight")
+- Keep affiliate disclosure line
 
-### 1. `src/pages/Reviews.tsx`
-- Add a "← Back to Home" button/link below the header (above the H1), using `navigate("/")` or a `<Link to="/">`
+### 2. Date Stamps on Hotel Cards
+**File: `src/components/reviews/HotelResultCard.tsx`**
+- Add "Reviews as of March 2026" italic gray text below the sources line
+- Show source breakdown: "Google · TripAdvisor · Booking.com · VRBO" with simulated per-source scores
 
-### 2. `src/pages/AIReview.tsx`
-- Add a "← Back to Results" button below the header that uses `navigate(-1)` (browser back) to return to wherever the user came from (search results or homepage)
+### 3. AggregateRating Schema on Reviews Page
+**File: `src/pages/Reviews.tsx`**
+- Add per-hotel JSON-LD `Hotel` + `AggregateRating` schema blocks injected via `<Helmet>` for each result
+- Dynamic: uses each hotel's name, rating, location
 
-Both will be simple text links with an ArrowLeft icon, styled consistently, placed right after the Header component inside the main container.
+### 4. FAQ Accordion on Each Hotel Card
+**File: `src/components/reviews/HotelResultCard.tsx`**
+- Add a collapsible "Frequently Asked" section below "Worth Booking If" with 3-4 auto-generated Q&As (best time to visit, family or couples, hidden fees, cancellation)
+- Uses the existing `Accordion` UI component
+- Wrap with FAQPage JSON-LD per card
+
+### 5. Light Mode Palette Tuning
+**File: `src/index.css`**
+- Adjust `:root` (light mode) CSS variables to match the requested palette:
+  - Background: `#F8FAFC` (210 40% 98%)
+  - Cards: `#FFFFFF`
+  - Primary text: `#1E293B` (222 47% 17%)
+  - Primary blue: `#1E3A8A` (224 71% 33%)
+  - CTA orange stays (already secondary)
+  - Success green / destructive red already set
+- Dark mode: no changes (already good)
 
 ## Files
 
 | File | Action |
 |------|--------|
-| `src/pages/Reviews.tsx` | Add back-to-home link |
-| `src/pages/AIReview.tsx` | Add back-to-results link |
+| `src/components/reviews/BookingSidebar.tsx` | Shorten CTA to "Save Now" |
+| `src/components/reviews/HotelResultCard.tsx` | Add date stamp + FAQ accordion |
+| `src/pages/Reviews.tsx` | Add per-hotel AggregateRating JSON-LD |
+| `src/index.css` | Tune light mode palette |
+
+## Order
+1. BookingSidebar text fix
+2. HotelResultCard: date stamp + FAQ
+3. Reviews.tsx: schema injection
+4. index.css: light mode palette
 
