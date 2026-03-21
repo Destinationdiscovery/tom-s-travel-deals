@@ -46,6 +46,10 @@ const Safety = () => {
   const [data, setData] = useState<SafetyData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    supabase.functions.invoke("track-review-view", { body: { slug: "safety" } }).catch(() => {});
+  }, []);
+
   const handleSearch = async () => {
     const trimmed = query.trim();
     if (trimmed.length < 2) return;

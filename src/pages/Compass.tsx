@@ -16,6 +16,10 @@ const Compass = () => {
   const [allArticles, setAllArticles] = useState<CompassArticle[]>(compassArticles);
 
   useEffect(() => {
+    supabase.functions.invoke("track-review-view", { body: { slug: "compass" } }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
     const fetchDbPosts = async () => {
       const { data } = await supabase.from("blog_posts").select("*").order("created_at", { ascending: false }) as any;
       if (data && data.length > 0) {

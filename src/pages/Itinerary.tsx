@@ -49,6 +49,10 @@ const Itinerary = () => {
   const [data, setData] = useState<ItineraryData | null>(null);
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    supabase.functions.invoke("track-review-view", { body: { slug: "itinerary" } }).catch(() => {});
+  }, []);
+
   const doSearch = useCallback(async (q: string) => {
     setLoading(true);
     setError("");

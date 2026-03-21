@@ -117,6 +117,10 @@ const Compare = () => {
   const [compareError, setCompareError] = useState<string | null>(null);
   const { toast } = useToast();
 
+  useEffect(() => {
+    supabase.functions.invoke("track-review-view", { body: { slug: "my-saves" } }).catch(() => {});
+  }, []);
+
   const handleCompare = async () => {
     if (savedReviews.length < 2) {
       toast({ title: "Need at least 2 reviews", description: "Save more reviews to compare.", variant: "destructive" });

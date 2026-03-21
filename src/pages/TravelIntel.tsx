@@ -21,6 +21,10 @@ const TravelIntel = () => {
   const [newsDestination, setNewsDestination] = useState("");
 
   useEffect(() => {
+    supabase.functions.invoke("track-review-view", { body: { slug: "travel-intel" } }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const q = params.get("q");
     const type = params.get("type") as IntelType | null;

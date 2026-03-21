@@ -38,6 +38,10 @@ const Index = () => {
   const resultsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    supabase.functions.invoke("track-review-view", { body: { slug: "homepage" } }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
     if (location.hash) {
       const id = location.hash.replace("#", "");
       setTimeout(() => {
