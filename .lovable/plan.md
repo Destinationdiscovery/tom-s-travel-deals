@@ -1,88 +1,52 @@
 
 
-# Next Phase: Expand to "Travel Answer Engine" — Trip Planner + Best Time + Homepage Cards
+# Remaining Phases for ReviewThenGo
 
-Given the massive scope of the user's prompt, here are the most logical and impactful items to build now, prioritized by what adds the most value with existing infrastructure.
+Here's what's been completed and what's still on the roadmap from your master prompt.
 
----
+## Completed
+- Homepage restructure (hero, trust badges, How It Works, FAQ, SEO)
+- Guides hub + 5 evergreen articles
+- Schema (AggregateRating, FAQPage, Quick Verdict on reviews)
+- `/reviews/:query` dynamic pages with hotel cards, affiliate sidebar, sticky search
+- Back navigation buttons
+- Date stamps, FAQ accordions on hotel cards, light mode palette
+- Review-first CTA flow across all sections
+- Auto-generate reviews when not cached
+- Renamed Gear → Trip Planner Toolkit
+- Best Time to Visit tool (`/best-time`)
+- Expanded homepage question cards (16 mixed types)
+- Hero tagline → "Answer Engine" positioning
 
-## What We're Building (3 Items)
+## Remaining Phases
 
-### 1. Rename "Gear" → "Trip Planner" + Expand Functionality
-The existing `/gear` page already generates packing lists via Perplexity. We rename it and reposition it as a broader trip planning tool.
+### Phase 4: Quick Fix — Deploy Best Time Edge Function
+The `best-time-intel` edge function was created but not added to `supabase/config.toml`, so it won't deploy. One-line fix.
 
-**File: `src/pages/Gear.tsx`** (keep filename, update content)
-- Change page title/hero from "Travel Gear" to "Trip Planner Toolkit"
-- Update subtitle: "Enter your trip → Get a personalized packing list, weather tips, and gear recommendations"
-- Update search placeholder: "Where are you going? e.g. Cancun beach trip August"
+### Phase 5: Itinerary Builder
+New tool at `/itinerary` — user types "Tokyo 5 days budget" → gets a day-by-day plan with costs, activities, and restaurant picks. Powered by Perplexity. New edge function + page.
 
-**File: `src/components/Header.tsx`**
-- Rename nav link from "Gear" to "Trip Planner"
-- Keep route as `/gear` (avoid breaking existing URLs)
+### Phase 6: Currency Tracker
+New tool at `/currency` — user types a country → gets live exchange rate, 7-day trend, and tips. Uses a free exchange rate API (no key needed for basic rates).
 
-**File: `src/components/GearPreviewSection.tsx`**
-- Rename section heading from "Travel Gear" to "Trip Planner Toolkit"
-- Update subtitle to "Pack smart for any trip — get personalized gear lists"
+### Phase 7: Flight Deals Finder
+New tool at `/flights` — user types a route like "NYC to Paris" → gets best upcoming deals via Perplexity. Affiliate links to Expedia/Google Flights.
 
-**File: `src/components/Footer.tsx`**
-- Update "Travel Gear" link text to "Trip Planner"
+### Phase 8: Safety Scores
+New tool at `/safety` — user types a destination → gets safety rating, common scams, health tips, emergency numbers. Perplexity-powered.
 
-### 2. New "Best Time to Visit" Tool Page
-A new AI-powered page at `/best-time` where users type a country/city and get best months, weather, crowds, and flight price trends — all via Perplexity.
+### Phase 9: Trending Queries + Dynamic Homepage
+Auto-rotating "Trending Now" section on homepage. Start with 50 hardcoded evergreen queries that rotate, with infrastructure to add Google Trends integration later.
 
-**New file: `src/pages/BestTime.tsx`**
-- Hero with search: "Where do you want to go?"
-- Calls a new edge function that returns structured data: best months, weather by season, crowd levels, flight price trends, local events
-- Results rendered as a clean card layout with weather icons, price indicators, and a verdict
-
-**New file: `supabase/functions/best-time-intel/index.ts`**
-- Uses Perplexity sonar model
-- Prompt: "Best time to visit [destination] in 2026. Return JSON with: bestMonths, weather by season, crowdLevels, flightPriceTrends, localEvents, verdict"
-- Structured output via response_format json_schema
-
-**File: `src/App.tsx`**
-- Add route: `/best-time` → BestTime page
-
-**File: `src/components/Header.tsx`**
-- Add "Best Time" to nav links
-
-### 3. Expand Homepage Question Cards to Include New Tools
-Update the "What Travelers Ask Us" section to include Trip Planner and Best Time queries alongside review queries — routing to the appropriate tool page.
-
-**File: `src/components/TravelersAskSection.tsx`**
-- Expand `ALL_QUERIES` to 16 items mixing all three types:
-  - Reviews: "Best hotels Paris", "Is Bali worth it 2026?", etc. → `/reviews/:slug`
-  - Trip Planner: "Cancun beach trip packing", "Italy August wedding trip" → `/gear?q=...`
-  - Best Time: "Best time to visit Japan", "Best time Bali" → `/best-time?q=...`
-- Add small icon/tag on each card showing the type (review, packing, calendar)
-- Show 8 of 16 randomly
-
-### 4. Update Hero Tagline to "Answer Engine" Positioning
-**File: `src/components/HeroSection.tsx`**
-- Change H1: "Answers Every Travel Question Before You Book"
-- Change subtitle: "Reviews, packing lists, best times to visit, and more — all powered by AI, all in one place."
-- Change search placeholder: "Ask anything: hotel reviews, packing lists, best time to visit..."
+### Phase 10: Polish & SEO Hardening
+- Sitemap auto-generation for all new tool pages
+- Internal linking between tools (e.g. Best Time page links to related reviews)
+- OpenGraph images for social sharing
+- Performance audit
 
 ---
 
-## Files Summary
+**Recommendation**: Start with Phase 4 (config fix — 30 seconds) then Phase 5 (Itinerary Builder — highest user value). Currency and Flights can follow. Safety Scores and Trending Queries are lower priority.
 
-| File | Action |
-|------|--------|
-| `src/components/HeroSection.tsx` | Update tagline + subtitle to answer-engine positioning |
-| `src/components/Header.tsx` | Rename "Gear" → "Trip Planner", add "Best Time" nav link |
-| `src/components/Footer.tsx` | Rename "Travel Gear" → "Trip Planner" |
-| `src/pages/Gear.tsx` | Rebrand to "Trip Planner Toolkit" (keep route) |
-| `src/components/GearPreviewSection.tsx` | Rename section heading |
-| `src/components/TravelersAskSection.tsx` | Expand to 16 cards with mixed tool types |
-| `src/pages/BestTime.tsx` | **New** — Best Time to Visit tool page |
-| `supabase/functions/best-time-intel/index.ts` | **New** — Perplexity-powered best-time data |
-| `src/App.tsx` | Add `/best-time` route |
-
-## Order
-1. Hero tagline update
-2. Rename Gear → Trip Planner (Header, Footer, page, preview section)
-3. Create best-time-intel edge function
-4. Create BestTime page + route
-5. Expand TravelersAskSection with mixed query types
+Want me to proceed with Phase 4 + 5 together?
 
