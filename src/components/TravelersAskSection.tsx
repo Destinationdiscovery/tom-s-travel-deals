@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Star, Luggage, Calendar } from "lucide-react";
+import { ArrowRight, Star, Luggage, Calendar, Heart } from "lucide-react";
 
 type QueryType = "review" | "packing" | "besttime";
 
