@@ -11,7 +11,7 @@ const Contact = () => {
     <div className="min-h-screen bg-background">
       <SEOHead
         title="Contact"
-        description="Get in touch with Tom, a Toronto-based travel consultant with over a decade of experience."
+        description="Get in touch with Tom, a travel consultant with over a decade of experience."
         url="/contact"
       />
       <Header />
