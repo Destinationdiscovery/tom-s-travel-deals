@@ -161,26 +161,16 @@ const Flights = () => {
               {/* Book CTA */}
               <Card className="bg-primary/5 border-primary/20">
                 <CardContent className="pt-5 pb-4">
-                  <p className="text-sm font-medium text-foreground mb-3">Ready to book? Compare prices:</p>
-                  <div className="flex flex-wrap gap-2">
-                    <a
-                      href={buildExpediaFlightUrl(result.route)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
-                    >
-                      Expedia Flights <ExternalLink className="h-3 w-3" />
-                    </a>
-                    <span className="text-muted-foreground">·</span>
-                    <a
-                      href={`https://www.google.com/travel/flights?q=${encodeURIComponent(result.route)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
-                    >
-                      Google Flights <ExternalLink className="h-3 w-3" />
-                    </a>
-                  </div>
+                  <p className="text-sm font-medium text-foreground mb-3">Ready to book?</p>
+                  <a
+                    href={buildExpediaFlightUrl(result.route)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => trackAffiliateClick("Expedia", "/flights", "flight_book_cta")}
+                    className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+                  >
+                    Book on Expedia <ExternalLink className="h-3 w-3" />
+                  </a>
                   <p className="text-xs text-muted-foreground mt-2">Affiliate links help keep this tool free</p>
                 </CardContent>
               </Card>
