@@ -75,6 +75,7 @@ const App = () => (
                 <Route path="/my-trips" element={<MyTrips />} />
                 <Route path="/promo" element={<Promo />} />
                 <Route path="/search" element={<TravelSearch />} />
+                <Route path="/reviews/:query" element={<Reviews />} />
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                 <Route path="/affiliate-disclosure" element={<AffiliateDisclosure />} />
                 <Route path="/booking/:bookingNumber" element={<BookingReport />} />
