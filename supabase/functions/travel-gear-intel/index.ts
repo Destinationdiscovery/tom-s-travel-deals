@@ -321,7 +321,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "sonar-pro",
         messages: [
-          { role: "system", content: "You are a travel gear expert. Always respond with valid JSON only, no markdown formatting. NEVER recommend non-purchasable items like passports, insurance, cash, visas, or documents. Do NOT include imageUrl fields — images are handled separately." },
+          { role: "system", content: "You are a travel gear expert. Always respond with valid JSON only, no markdown formatting. NEVER recommend non-purchasable items like passports, insurance, cash, visas, or documents. Always include an imageUrl field with a direct URL to a real product image." },
           { role: "user", content: prompt },
         ],
         temperature: 0.2,

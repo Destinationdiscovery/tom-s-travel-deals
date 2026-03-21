@@ -206,13 +206,11 @@ const TravelDealsSection = () => {
             </a>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mergedDeals.map((deal, i) => (
-              <a
+            {mergedDeals.map((deal, i) => {
+              const slug = deal.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+              return (
+              <div
                 key={i}
-                href={deal.affiliateUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => trackAffiliateClick("Expedia", "homepage", `deals_grid_${deal.name}`)}
                 className="group block rounded-2xl overflow-hidden bg-card shadow-sm hover:shadow-elevated transition-all duration-300 hover:-translate-y-1 border border-border/50 min-w-[280px] md:min-w-0 snap-start"
               >
                 <div className="relative">
@@ -246,13 +244,28 @@ const TravelDealsSection = () => {
                         </div>
                       )}
                     </div>
-                    <span className="text-xs font-bold bg-secondary text-secondary-foreground px-3 py-1.5 rounded-full group-hover:bg-secondary/90 transition-colors">
-                      Grab This Deal →
-                    </span>
+                  </div>
+                  <div className="mt-3 space-y-2">
+                    <button
+                      onClick={() => navigate(`/review/${slug}`)}
+                      className="w-full text-xs font-bold bg-secondary text-secondary-foreground px-3 py-1.5 rounded-full hover:bg-secondary/90 transition-colors"
+                    >
+                      Review It →
+                    </button>
+                    <a
+                      href={deal.affiliateUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => trackAffiliateClick("Expedia", "homepage", `deals_grid_${deal.name}`)}
+                      className="flex items-center justify-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      Grab This Deal <ExternalLink className="h-3 w-3" />
+                    </a>
                   </div>
                 </div>
-              </a>
-            ))}
+              </div>
+              );
+            })}
           </div>
         </div>
       </div>
