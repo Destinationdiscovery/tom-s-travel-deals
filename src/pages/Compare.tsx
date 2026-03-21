@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Star, Trash2, Sparkles, Trophy, Loader2 } from "lucide-react";
 import Header from "@/components/Header";
