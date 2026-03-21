@@ -1,34 +1,29 @@
 
 
-# Swap Trending Queries with Trip Planner + Rename to "Trip Packing Toolkit"
+# Remove Google Flights + Fix Expedia Affiliate Links on Flights Page
+
+## Problem
+1. The "Ready to book?" section on `/flights` shows a Google Flights link (no affiliate revenue).
+2. The Expedia Flights link uses a plain `expedia.com/Flights` URL with no affiliate tracking.
 
 ## Changes
 
-### 1. Swap section order in `src/pages/Index.tsx`
-Move `TrendingQueriesSection` to where `GearPreviewSection` currently sits (right after `TravelersAskSection`), and move `GearPreviewSection` to where `TrendingQueriesSection` was (after `IntelPreviewSection`).
+### `src/pages/Flights.tsx`
+- Import `detectCountry, EXPEDIA_LINKS` from `@/components/AffiliateLinks` and `trackAffiliateClick` from `@/lib/analytics`
+- Replace `buildExpediaFlightUrl` to use the affiliate base URL: `EXPEDIA_LINKS[detectCountry()]` + `?destination=` + encoded route
+- In the "Ready to book?" card, remove the Google Flights link and the separator dot
+- Add `onClick` handler with `trackAffiliateClick("Expedia", "/flights", "flight_book_cta")`
 
-New order:
-```text
-TravelersAskSection
-TrendingQueriesSection    ← moved up
-BestTimePreviewSection
-ItineraryPreviewSection
-CurrencyPreviewSection
-FlightsPreviewSection
-IntelPreviewSection
-GearPreviewSection        ← moved down
-```
+### `src/components/FlightsPreviewSection.tsx`
+- Update subtitle: remove "and Google Flights" so it just says "with links to book on Expedia."
 
-### 2. Rename "Trip Planner Toolkit" → "Trip Packing Toolkit" everywhere
+### `src/data/compassArticles.ts`
+- The Japan article mentions "Google Flights" in prose. Leave as-is since it's editorial content recommending tools to readers, not a CTA link.
 
-| File | What changes |
-|------|-------------|
-| `src/components/GearPreviewSection.tsx` | Heading: "Trip Packing Toolkit", link text: "Pack Your Trip →", button: "Search" instead of "Find Gear", back button: "Back to Trip Packing Toolkit" |
-| `src/pages/Gear.tsx` | H1: "Trip Packing Toolkit", SEO title/description, schema name, back button text: "Back to Trip Packing Toolkit" |
-| `src/components/Header.tsx` | Tools dropdown label: "Trip Packing" |
-| `src/components/Footer.tsx` | Link label: "Trip Packing Toolkit" |
+## Files
 
-### 3. Button text change
-- "Find Gear" → "Search" (in GearPreviewSection search bar)
-- Gear.tsx search button already says "Search" so no change needed there
+| File | Action |
+|------|--------|
+| `src/pages/Flights.tsx` | Use affiliate Expedia URL, remove Google Flights link |
+| `src/components/FlightsPreviewSection.tsx` | Update subtitle text |
 
