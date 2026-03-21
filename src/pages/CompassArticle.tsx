@@ -94,19 +94,20 @@ const CompassArticle = () => {
     );
   }
 
-  const renderContentBlock = (block: ContentBlock, index: number) => {
+  const renderContentBlock = (block: any, index: number) => {
+    const text = block.value || block.content || "";
     switch (block.type) {
       case "heading":
         return (
           <h2 key={index} className="font-display text-xl md:text-2xl font-semibold text-foreground mt-8 mb-4">
-            {block.value}
+            {text}
           </h2>
         );
       case "image":
         return (
           <figure key={index} className="my-8">
             <img
-              src={block.value}
+              src={text}
               alt={block.caption || "Article image"}
               loading="lazy"
               className="w-full rounded-xl object-cover"
@@ -122,7 +123,7 @@ const CompassArticle = () => {
       default:
         return (
           <p key={index} className="text-foreground/90 leading-relaxed mb-6">
-            {block.value}
+            {text}
           </p>
         );
     }
