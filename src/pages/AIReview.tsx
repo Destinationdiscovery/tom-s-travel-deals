@@ -97,7 +97,7 @@ const AIReview = () => {
     if (review) {
       document.title = `${review.property_name}${review.location ? `, ${review.location}` : ""} - ReviewThenGo`;
     }
-    return () => { document.title = "ReviewThenGo.com | Real Reviews, Tested Gear & Travel Insights"; };
+    return () => { document.title = "ReviewThenGo | The All-in-One Travel Planning Tool"; };
   }, [review]);
   const handleNewReview = () => {
     navigate("/");
