@@ -96,19 +96,16 @@ const Index = () => {
         <HowItWorks />
         <TravelersAskSection />
 
-        <RecentReviewsHomepage />
-        <SectionConnector text="Need gear for your trip?" linkText="Check our Trip Planner" to="/gear" />
-        <TravelDealsSection />
-
         <GearPreviewSection />
         <BestTimePreviewSection />
         <ItineraryPreviewSection />
         <CurrencyPreviewSection />
         <FlightsPreviewSection />
         <IntelPreviewSection />
-
         <TrendingQueriesSection />
 
+        <RecentReviewsHomepage />
+        <TravelDealsSection />
         <BlogPreviewSection />
         <HomepageFAQ />
       </main>
