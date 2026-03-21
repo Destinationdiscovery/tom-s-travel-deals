@@ -37,8 +37,8 @@ const SaveReviewButton = ({ review }: SaveReviewButtonProps) => {
     const added = await addReview(payload);
     if (added) {
       toast({
-        title: "Saved for comparison!",
-        description: `${count + 1} saved. Compare when you're ready.`,
+        title: "Saved to My List!",
+        description: `${count + 1} saved. View and compare at My Saves.`,
       });
     } else {
       toast({
