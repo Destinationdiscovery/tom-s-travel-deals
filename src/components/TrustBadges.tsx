@@ -1,6 +1,7 @@
-import { Shield, Globe, Award, Users, Database } from "lucide-react";
+import { Shield, Globe, Award, Users, Database, CalendarCheck } from "lucide-react";
 
 const badges = [
+  { icon: CalendarCheck, label: "Updated March 2026" },
   { icon: Shield, label: "100% Real Reviews" },
   { icon: Globe, label: "Global Traveler Trusted" },
   { icon: Award, label: "Expedia Partner" },

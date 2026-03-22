@@ -20,7 +20,7 @@ const ItineraryPreviewSection = () => (
           Build your itinerary <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
-      <p className="text-muted-foreground mb-6 max-w-xl">Day-by-day plans with activities, restaurants, and costs, powered by AI.</p>
+      <p className="text-muted-foreground mb-6 max-w-xl">Create personalized day-by-day travel plans with activities, restaurants, estimated costs, and transportation tips for any destination.</p>
       <div className="flex flex-wrap gap-3">
         {chips.map((chip) => (
           <Link key={chip.query} to={`/itinerary?q=${encodeURIComponent(chip.query)}`}>

@@ -72,8 +72,11 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
         <h1 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold mb-3 leading-tight text-white">
           Answers Every Travel Question Before You Book
         </h1>
-        <p className="text-white/80 text-base md:text-lg font-light mb-6">
+        <p className="text-white/80 text-base md:text-lg font-light mb-2">
           Your travel aggregator for reviews, packing lists, best times to visit, and more, all in one place.
+        </p>
+        <p className="text-white/60 text-xs mb-6">
+          By Travel Experts at ReviewThenGo | Aggregating 10M+ reviews from TripAdvisor, Booking.com, Google
         </p>
 
         {/* Integrated search bar */}
