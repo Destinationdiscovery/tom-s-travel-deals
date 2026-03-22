@@ -32,8 +32,9 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
   const { suggestions } = useSearchSuggestions(query);
 
   useEffect(() => {
+    const len = slides.length;
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
+      setCurrentSlide((prev) => (prev + 1) % len);
     }, 5000);
     return () => clearInterval(timer);
   }, []);
