@@ -59,10 +59,10 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="The All-in-One Travel Planning Tool"
-        description="ReviewThenGo is the all-in-one travel planning tool that answers any question travelers have. Destination reviews, packing lists, best times to visit, itineraries, currency, flights, and safety scores, all in one place."
+        title="All-in-One Travel Planner | Itineraries, Hotel Reviews, Best Time to Visit"
+        description="Plan your perfect trip with ReviewThenGo — build day-by-day itineraries, compare hotel reviews from 10+ sources, find the best time to visit any destination, and book flights. Free all-in-one travel planning tool."
         url="/"
-        keywords={["travel planning tool", "travel aggregator", "hotel reviews", "resort reviews", "best time to visit", "travel itinerary builder", "flight deals", "packing list", "currency exchange rates", "travel safety scores", "travel advisories", "visa requirements"]}
+        keywords={["travel planning tool", "travel aggregator", "hotel reviews", "resort reviews", "best time to visit", "travel itinerary builder", "flight deals", "packing list", "currency exchange rates", "travel safety scores", "travel advisories", "visa requirements", "all-in-one travel planner"]}
         faq={homepageFaqData}
         jsonLd={[
           {
