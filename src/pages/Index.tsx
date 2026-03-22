@@ -93,7 +93,7 @@ const Index = () => {
             "@context": "https://schema.org",
             "@type": "WebApplication",
             name: "ReviewThenGo",
-            url: "https://reviewthengo.com",
+            url: "https://www.reviewthengo.com",
             applicationCategory: "TravelApplication",
             operatingSystem: "Web",
             offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
