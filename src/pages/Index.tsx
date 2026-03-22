@@ -73,9 +73,13 @@ const Index = () => {
             logo: "https://www.reviewthengo.com/favicon.png",
             description: "ReviewThenGo is an all-in-one travel planning tool that aggregates unbiased hotel and resort reviews from 10+ sources and offers 8 free tools covering every stage of trip planning.",
             founder: { "@type": "Person", name: "Tom" },
-            address: { "@type": "PostalAddress", addressRegion: "Ontario", addressCountry: "CA" },
             contactPoint: { "@type": "ContactPoint", url: "https://www.reviewthengo.com/contact", contactType: "customer support" },
-            areaServed: "Worldwide",
+            serviceArea: [
+              { "@type": "Country", name: "United States" },
+              { "@type": "Country", name: "Canada" },
+              { "@type": "Country", name: "United Kingdom" },
+              { "@type": "Country", name: "Australia" }
+            ],
             sameAs: ["https://x.com/TomLaracyTravel", "https://www.instagram.com/reviewthengo"]
           },
           {

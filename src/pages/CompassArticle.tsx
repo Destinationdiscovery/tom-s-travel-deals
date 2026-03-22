@@ -48,7 +48,7 @@ const CompassArticle = () => {
   // Build BlogPosting JSON-LD (passed to SEOHead below)
   const blogPostingJsonLd = article ? {
     "@context": "https://schema.org",
-    "@type": "BlogPosting",
+    "@type": "Article",
     "headline": article.title,
     "author": { "@type": "Person", "name": article.author },
     "datePublished": article.datePublished,
