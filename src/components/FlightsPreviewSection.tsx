@@ -14,7 +14,7 @@ const FlightsPreviewSection = () => (
       <div className="flex items-center justify-between mb-6">
         <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
           <Plane className="h-6 w-6 text-primary" />
-          Flight Deals and Cheap Flights
+          Find Cheap Flights and Flight Deals
         </h2>
         <Link to="/flights" className="text-sm font-medium text-primary hover:underline flex items-center gap-1">
           Find flight deals <ArrowRight className="h-4 w-4" />
