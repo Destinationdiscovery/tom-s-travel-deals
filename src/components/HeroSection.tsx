@@ -55,11 +55,11 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
   return (
     <section className="relative h-[420px] md:h-[500px] flex items-center justify-center overflow-hidden" aria-label="Hero carousel">
       {/* Rotating backgrounds */}
-      {slides.map((src, i) => (
+      {slides.map((slide, i) => (
         <img
           key={i}
-          src={src}
-          alt=""
+          src={slide.src}
+          alt={slide.alt}
           loading={i === 0 ? "eager" : "lazy"}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
             i === currentSlide ? "opacity-100" : "opacity-0"
