@@ -1,59 +1,62 @@
 
 
-# SEO Audit: What's Already Done vs. What's Left
+# Schema Upgrades: Organization serviceArea, TouristDestination, Article
 
-## Already Implemented (No Changes Needed)
-- SEOHead component with react-helmet-async on every page ✅
-- JSON-LD: Organization, TravelAgency, WebSite, WebApplication, FAQPage ✅
-- Canonical tags via SEOHead on every page ✅
-- robots.txt allowing GPTBot, ClaudeBot, PerplexityBot, OAI-SearchBot ✅
-- Semantic HTML: `<header>`, `<nav>`, `<main>`, `<footer>` tags ✅
-- Skip-to-content link ✅
-- `<noscript>` block with full site content for AI crawlers ✅
-- Alt text on hero images ✅
-- `loading="lazy"` on below-fold images (14+ files) ✅
-- Viewport meta tag ✅
-- Preconnect for Google Fonts ✅
-- E-E-A-T credibility banner + "Updated March 2026" badge ✅
-- Internal linking with descriptive anchor text ✅
-- Keywords meta tag ✅
-- FAQ schema ✅
+## Current State
+- **No LocalBusiness schema** exists anywhere (confirmed via search) — nothing to remove
+- **Organization + TravelAgency** schema on homepage with `address` and `areaServed: "Worldwide"` — needs serviceArea upgrade
+- **BlogPosting** schema on CompassArticle pages — needs upgrade to Article
+- **No TouristDestination** schema on destination pages (TopDestinations, DestinationReview, AIReview)
+- **Guides page** has no article schema at all
 
-## Actual Remaining Gaps (5 items)
+## Changes
 
-### 1. Standardize all URLs to `www.reviewthengo.com`
-`SEOHead.tsx` uses `https://reviewthengo.com` (no www) as BASE_URL. The Organization schema in Index.tsx uses `www.`. This inconsistency confuses crawlers about canonical authority.
+### 1. Replace `address` + `areaServed` with `serviceArea` in Organization schema
+**`src/pages/Index.tsx`** (lines 70-79)
+- Remove `address: { "@type": "PostalAddress", addressRegion: "Ontario", addressCountry: "CA" }`
+- Remove `areaServed: "Worldwide"`
+- Add `serviceArea` array with key countries:
+```json
+"serviceArea": [
+  {"@type": "Country", "name": "United States"},
+  {"@type": "Country", "name": "Canada"},
+  {"@type": "Country", "name": "United Kingdom"},
+  {"@type": "Country", "name": "Australia"}
+]
+```
 
-**Fix**: Update `SEOHead.tsx` BASE_URL and DEFAULT_IMAGE to use `www.reviewthengo.com`. Update WebSite and WebApplication schema URLs in `Index.tsx`. Update OG image URLs in `index.html`.
+### 2. Add TouristDestination schema to review pages
+**`src/pages/AIReview.tsx`** (around line 121)
+- Add a `TouristDestination` JSON-LD block via the `jsonLd` prop on SEOHead, using the review's `location` field:
+```json
+{
+  "@type": "TouristDestination",
+  "name": "[location]",
+  "description": "Travel reviews and planning tools for [location]"
+}
+```
 
-### 2. Fix stale fallback document.titles
-Two files still have old branding:
-- `BookingReport.tsx`: "ReviewThenGo.com | Real Reviews, Tested Gear & Travel Insights"
-- `DestinationReview.tsx`: Same old string
+**`src/pages/TopDestinations.tsx`**
+- Import SEOHead, add it with TouristDestination schema using `displayLocation`
 
-**Fix**: Update both to "ReviewThenGo: All-in-One Travel Planner"
+### 3. Upgrade BlogPosting → Article on guide pages
+**`src/pages/CompassArticle.tsx`** (line 51)
+- Change `"@type": "BlogPosting"` to `"@type": "Article"`
+- Already has headline, author, datePublished, dateModified, publisher — all correct for Article
 
-### 3. Add `<link rel="preload">` for critical font
-Google Fonts stylesheet is render-blocking. Add a preload hint for the most critical font weight.
+### 4. Add Article schema to Guides hub page
+**`src/pages/Guides.tsx`**
+- Add `jsonLd` prop to SEOHead with an `Article` schema for the hub page itself
 
-**Fix**: Add `<link rel="preload" as="style">` for the Google Fonts CSS in `index.html`
-
-### 4. Add WebSite `SearchAction` with www URL
-The SearchAction target URL in Index.tsx uses non-www. Standardize.
-
-### 5. PopularSavesSection schema URLs
-Uses `reviewthengo.com` without www.
-
-## Files to Change
+## Files
 
 | File | Change |
 |------|--------|
-| `src/components/SEOHead.tsx` | BASE_URL → `https://www.reviewthengo.com` |
-| `src/pages/Index.tsx` | Standardize WebSite + WebApplication URLs to www |
-| `src/components/PopularSavesSection.tsx` | URL to www |
-| `index.html` | OG image URLs to www, add font preload |
-| `src/pages/BookingReport.tsx` | Fix fallback document.title |
-| `src/pages/DestinationReview.tsx` | Fix fallback document.title |
+| `src/pages/Index.tsx` | Replace address/areaServed with serviceArea array |
+| `src/pages/AIReview.tsx` | Add TouristDestination JSON-LD via jsonLd prop |
+| `src/pages/TopDestinations.tsx` | Add SEOHead with TouristDestination schema |
+| `src/pages/CompassArticle.tsx` | BlogPosting → Article |
+| `src/pages/Guides.tsx` | Add Article schema to hub |
 
-All changes are invisible to users — no visual or functional impact.
+All changes are schema-only — zero visual or functional impact.
 
