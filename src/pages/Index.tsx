@@ -67,9 +67,8 @@ const Index = () => {
         jsonLd={[
           {
             "@context": "https://schema.org",
-            "@type": "Organization",
-            name: "ReviewThenGo",
             "@type": ["Organization", "TravelAgency"],
+            name: "ReviewThenGo",
             url: "https://www.reviewthengo.com",
             logo: "https://www.reviewthengo.com/favicon.png",
             description: "ReviewThenGo is an all-in-one travel planning tool that aggregates unbiased hotel and resort reviews from 10+ sources and offers 8 free tools covering every stage of trip planning.",
