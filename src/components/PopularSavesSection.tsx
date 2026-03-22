@@ -81,7 +81,7 @@ const PopularSavesSection = () => {
         item: {
           "@type": "Hotel",
           name: item.property_name,
-          url: `https://reviewthengo.com/review/${item.slug}`,
+          url: `https://www.reviewthengo.com/review/${item.slug}`,
           ...(item.location ? { address: item.location } : {}),
           aggregateRating: {
             "@type": "AggregateRating",

@@ -82,10 +82,10 @@ const Index = () => {
             "@context": "https://schema.org",
             "@type": "WebSite",
             name: "ReviewThenGo",
-            url: "https://reviewthengo.com",
+            url: "https://www.reviewthengo.com",
             potentialAction: {
               "@type": "SearchAction",
-              target: "https://reviewthengo.com/destinations?q={search_term_string}",
+              target: "https://www.reviewthengo.com/destinations?q={search_term_string}",
               "query-input": "required name=search_term_string"
             }
           },
@@ -93,7 +93,7 @@ const Index = () => {
             "@context": "https://schema.org",
             "@type": "WebApplication",
             name: "ReviewThenGo",
-            url: "https://reviewthengo.com",
+            url: "https://www.reviewthengo.com",
             applicationCategory: "TravelApplication",
             operatingSystem: "Web",
             offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
