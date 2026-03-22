@@ -130,6 +130,12 @@ const AIReview = () => {
           ]}
           faq={seoFaq}
           aggregateRating={seoRating}
+          jsonLd={review.location ? {
+            "@context": "https://schema.org",
+            "@type": "TouristDestination",
+            name: review.location,
+            description: `Travel reviews and planning tools for ${review.location}`,
+          } : undefined}
         />
       )}
       <Header />

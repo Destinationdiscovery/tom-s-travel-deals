@@ -43,6 +43,17 @@ const TopDestinations = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title={`Top Resorts in ${displayLocation} | Travel Reviews`}
+        description={`Compare the top-rated resorts and hotels in ${displayLocation}. AI-curated ratings from real traveler reviews across top booking platforms.`}
+        url={`/top/${location}`}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "TouristDestination",
+          name: displayLocation,
+          description: `Top-rated resorts and hotels in ${displayLocation} with aggregated traveler reviews`,
+        }}
+      />
       <Header />
       <main className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">

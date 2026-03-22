@@ -46,6 +46,14 @@ const Guides = () => {
         description="Free, research-backed travel guides from ReviewThenGo. Learn how to spot fake reviews, compare Airbnb vs hotels, find the best golf resorts, and avoid common booking mistakes."
         url="/guides"
         faq={hubFaq}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: "ReviewThenGo Travel Guides: Expert Insights Before You Book",
+          author: { "@type": "Organization", name: "ReviewThenGo" },
+          publisher: { "@type": "Organization", name: "ReviewThenGo" },
+          description: "Free, research-backed travel guides covering hotel reviews, packing tips, destination comparisons, and booking strategies.",
+        }}
       />
       <Header />
 
