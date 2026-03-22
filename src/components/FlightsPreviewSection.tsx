@@ -14,13 +14,13 @@ const FlightsPreviewSection = () => (
       <div className="flex items-center justify-between mb-6">
         <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
           <Plane className="h-6 w-6 text-primary" />
-          Flight Deals and Cheap Flights
+          Find Cheap Flights and Flight Deals
         </h2>
         <Link to="/flights" className="text-sm font-medium text-primary hover:underline flex items-center gap-1">
           Find flight deals <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
-      <p className="text-muted-foreground mb-6 max-w-xl">Best upcoming flight deals for any route, with links to book on Expedia.</p>
+      <p className="text-muted-foreground mb-6 max-w-xl">Search for the best upcoming flight deals on any route. Compare prices and book directly through Expedia.</p>
       <div className="flex flex-wrap gap-3">
         {chips.map((chip) => (
           <Link key={chip.query} to={`/flights?q=${encodeURIComponent(chip.query)}`}>

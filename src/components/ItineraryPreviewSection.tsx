@@ -14,13 +14,13 @@ const ItineraryPreviewSection = () => (
       <div className="flex items-center justify-between mb-6">
         <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
           <Map className="h-6 w-6 text-primary" />
-          Travel Itinerary Builder
+          How to Build a Day-by-Day Travel Itinerary
         </h2>
         <Link to="/itinerary" className="text-sm font-medium text-primary hover:underline flex items-center gap-1">
           Build your itinerary <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
-      <p className="text-muted-foreground mb-6 max-w-xl">Day-by-day plans with activities, restaurants, and costs, powered by AI.</p>
+      <p className="text-muted-foreground mb-6 max-w-xl">Create personalized day-by-day travel plans with activities, restaurants, estimated costs, and transportation tips for any destination.</p>
       <div className="flex flex-wrap gap-3">
         {chips.map((chip) => (
           <Link key={chip.query} to={`/itinerary?q=${encodeURIComponent(chip.query)}`}>

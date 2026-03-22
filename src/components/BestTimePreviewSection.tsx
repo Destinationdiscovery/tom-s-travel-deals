@@ -14,13 +14,13 @@ const BestTimePreviewSection = () => (
       <div className="flex items-center justify-between mb-6">
         <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
           <Calendar className="h-6 w-6 text-primary" />
-          Best Time to Visit Any Destination
+          Find the Best Time to Visit Any Destination
         </h2>
         <Link to="/best-time" className="text-sm font-medium text-primary hover:underline flex items-center gap-1">
           Find your perfect window <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
-      <p className="text-muted-foreground mb-6 max-w-xl">Weather, crowds, and flight prices, find the cheapest and best months for any destination.</p>
+      <p className="text-muted-foreground mb-6 max-w-xl">Get weather forecasts, crowd levels, and flight price trends to find the cheapest and best months for any destination.</p>
       <div className="flex flex-wrap gap-3">
         {chips.map((chip) => {
           const Icon = chip.icon;

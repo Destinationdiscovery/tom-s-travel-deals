@@ -59,21 +59,22 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="The All-in-One Travel Planning Tool"
-        description="ReviewThenGo is the all-in-one travel planning tool that answers any question travelers have. Destination reviews, packing lists, best times to visit, itineraries, currency, flights, and safety scores, all in one place."
+        title="All-in-One Travel Planner | Itineraries, Hotel Reviews, Best Time to Visit"
+        description="Plan your perfect trip with ReviewThenGo — build day-by-day itineraries, compare hotel reviews from 10+ sources, find the best time to visit any destination, and book flights. Free all-in-one travel planning tool."
         url="/"
-        keywords={["travel planning tool", "travel aggregator", "hotel reviews", "resort reviews", "best time to visit", "travel itinerary builder", "flight deals", "packing list", "currency exchange rates", "travel safety scores", "travel advisories", "visa requirements"]}
+        keywords={["travel planning tool", "travel aggregator", "hotel reviews", "resort reviews", "best time to visit", "travel itinerary builder", "flight deals", "packing list", "currency exchange rates", "travel safety scores", "travel advisories", "visa requirements", "all-in-one travel planner"]}
         faq={homepageFaqData}
         jsonLd={[
           {
             "@context": "https://schema.org",
-            "@type": "Organization",
+            "@type": ["Organization", "TravelAgency"],
             name: "ReviewThenGo",
-            url: "https://reviewthengo.com",
-            logo: "https://reviewthengo.com/favicon.png",
+            url: "https://www.reviewthengo.com",
+            logo: "https://www.reviewthengo.com/favicon.png",
             description: "ReviewThenGo is an all-in-one travel planning tool that aggregates unbiased hotel and resort reviews from 10+ sources and offers 8 free tools covering every stage of trip planning.",
             founder: { "@type": "Person", name: "Tom" },
             address: { "@type": "PostalAddress", addressRegion: "Ontario", addressCountry: "CA" },
+            contactPoint: { "@type": "ContactPoint", url: "https://www.reviewthengo.com/contact", contactType: "customer support" },
             areaServed: "Worldwide",
             sameAs: ["https://x.com/TomLaracyTravel", "https://www.instagram.com/reviewthengo"]
           },

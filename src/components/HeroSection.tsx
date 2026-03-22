@@ -12,7 +12,13 @@ import snowbirdCaribbean from "@/assets/snowbird-caribbean-aerial.jpg";
 import dealSantorini from "@/assets/deal-santorini.jpg";
 import tokyoSkyline from "@/assets/japan-tokyo-skyline.jpg";
 
-const slides = [heroBeach, snowbirdBeach, snowbirdCaribbean, dealSantorini, tokyoSkyline];
+const slides = [
+  { src: heroBeach, alt: "Beach destination for travel planning on ReviewThenGo" },
+  { src: snowbirdBeach, alt: "Caribbean beach sunset resort view" },
+  { src: snowbirdCaribbean, alt: "Caribbean aerial view of tropical resort" },
+  { src: dealSantorini, alt: "Santorini hotel with ocean views travel deal" },
+  { src: tokyoSkyline, alt: "Tokyo skyline travel destination Japan" },
+];
 
 interface HeroSectionProps {
   onSearch?: (query: string) => void;
@@ -26,8 +32,9 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
   const { suggestions } = useSearchSuggestions(query);
 
   useEffect(() => {
+    const len = slides.length;
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
+      setCurrentSlide((prev) => (prev + 1) % len);
     }, 5000);
     return () => clearInterval(timer);
   }, []);
@@ -48,11 +55,11 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
   return (
     <section className="relative h-[420px] md:h-[500px] flex items-center justify-center overflow-hidden" aria-label="Hero carousel">
       {/* Rotating backgrounds */}
-      {slides.map((src, i) => (
+      {slides.map((slide, i) => (
         <img
           key={i}
-          src={src}
-          alt=""
+          src={slide.src}
+          alt={slide.alt}
           loading={i === 0 ? "eager" : "lazy"}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
             i === currentSlide ? "opacity-100" : "opacity-0"
@@ -65,8 +72,11 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
         <h1 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold mb-3 leading-tight text-white">
           Answers Every Travel Question Before You Book
         </h1>
-        <p className="text-white/80 text-base md:text-lg font-light mb-6">
+        <p className="text-white/80 text-base md:text-lg font-light mb-2">
           Your travel aggregator for reviews, packing lists, best times to visit, and more, all in one place.
+        </p>
+        <p className="text-white/60 text-xs mb-6">
+          By Travel Experts at ReviewThenGo | Aggregating 10M+ reviews from TripAdvisor, Booking.com, Google
         </p>
 
         {/* Integrated search bar */}
