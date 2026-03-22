@@ -12,7 +12,13 @@ import snowbirdCaribbean from "@/assets/snowbird-caribbean-aerial.jpg";
 import dealSantorini from "@/assets/deal-santorini.jpg";
 import tokyoSkyline from "@/assets/japan-tokyo-skyline.jpg";
 
-const slides = [heroBeach, snowbirdBeach, snowbirdCaribbean, dealSantorini, tokyoSkyline];
+const slides = [
+  { src: heroBeach, alt: "Beach destination for travel planning on ReviewThenGo" },
+  { src: snowbirdBeach, alt: "Caribbean beach sunset resort view" },
+  { src: snowbirdCaribbean, alt: "Caribbean aerial view of tropical resort" },
+  { src: dealSantorini, alt: "Santorini hotel with ocean views travel deal" },
+  { src: tokyoSkyline, alt: "Tokyo skyline travel destination Japan" },
+];
 
 interface HeroSectionProps {
   onSearch?: (query: string) => void;
