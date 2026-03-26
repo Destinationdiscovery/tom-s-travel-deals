@@ -318,10 +318,25 @@ const SiteAnalyticsDashboard = () => {
               <TabsTrigger value="performance" className="text-xs gap-1"><Gauge className="h-3 w-3" /> Performance</TabsTrigger>
             </TabsList>
 
-            {/* Views Tab */}
             <TabsContent value="views" className="mt-4 space-y-4">
               {views.length === 0 ? <p className="text-sm text-muted-foreground">No view data yet.</p> : (
                 <>
+                  {dailyViews.length > 1 && (
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-2 font-medium">Daily View Trend</p>
+                      <div className="h-40">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={dailyViews}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                            <XAxis dataKey="date" tickFormatter={(d) => format(new Date(d), "MMM d")} tick={{ fontSize: 10 }} />
+                            <YAxis tick={{ fontSize: 10 }} />
+                            <Tooltip labelFormatter={(d) => format(new Date(String(d)), "MMM d, yyyy")} />
+                            <Line type="monotone" dataKey="count" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+                  )}
                   <div className="h-48">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={views.slice(0, 10)}>
@@ -340,7 +355,9 @@ const SiteAnalyticsDashboard = () => {
                           {formatSlug(v.slug)}
                         </span>
                         <div className="flex items-center gap-3">
-                          <span className="text-muted-foreground text-xs">{format(new Date(v.last_viewed_at), "MMM d, h:mm a")}</span>
+                          {v.last_viewed_at && (
+                            <span className="text-muted-foreground text-xs">{format(new Date(v.last_viewed_at), "MMM d, h:mm a")}</span>
+                          )}
                           <span className="text-muted-foreground text-xs font-mono w-12 text-right">{v.view_count}</span>
                         </div>
                       </div>
