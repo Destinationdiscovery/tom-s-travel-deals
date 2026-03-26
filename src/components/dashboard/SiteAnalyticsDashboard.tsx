@@ -10,13 +10,14 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, L
 
 interface SearchItem { name: string; search_count: number; }
 interface ClickItem { page: string; count: number; }
-interface ViewItem { slug: string; view_count: number; last_viewed_at: string; }
+interface ViewItem { slug: string; view_count: number; last_viewed_at?: string; }
 interface PlatformItem { platform: string; count: number; }
 interface ReactionItem { reaction: string; count: number; }
 interface ReactionSlugItem { slug: string; count: number; }
 interface SubscriberSource { source: string; count: number; }
 interface VitalItem { metric_name: string; avg: number; page: string; }
 interface DailyClick { date: string; count: number; }
+interface DailyView { date: string; count: number; }
 
 type TimeRange = "today" | "7d" | "30d" | "all";
 
@@ -66,6 +67,8 @@ const SiteAnalyticsDashboard = () => {
   const [platforms, setPlatforms] = useState<PlatformItem[]>([]);
   const [positions, setPositions] = useState<{ position: string; count: number }[]>([]);
   const [dailyClicks, setDailyClicks] = useState<DailyClick[]>([]);
+  const [dailyViews, setDailyViews] = useState<DailyView[]>([]);
+  const [uniquePages, setUniquePages] = useState(0);
   const [reactions, setReactions] = useState<ReactionItem[]>([]);
   const [reactionSlugs, setReactionSlugs] = useState<ReactionSlugItem[]>([]);
   const [subscriberCount, setSubscriberCount] = useState(0);
@@ -97,16 +100,15 @@ const SiteAnalyticsDashboard = () => {
       vitalsQuery = vitalsQuery.gte("created_at", startDate);
     }
 
-    // Views don't have per-event timestamps, but filter by last_viewed_at
-    let viewQuery = supabase.from("review_views").select("slug, view_count, last_viewed_at").order("view_count", { ascending: false }).limit(20);
-    if (startDate) {
-      viewQuery = viewQuery.gte("last_viewed_at", startDate);
-    }
+    // Views: use page_view_events for time-filtered, review_views aggregate for "all"
+    const viewPromise = startDate
+      ? supabase.from("page_view_events" as any).select("slug, created_at").gte("created_at", startDate)
+      : supabase.from("review_views").select("slug, view_count, last_viewed_at").order("view_count", { ascending: false }).limit(50);
 
     const [searchRes, clickRes, viewRes, reactionRes, subRes, vitalsRes] = await Promise.all([
       supabase.from("search_suggestions").select("name, search_count").order("search_count", { ascending: false }).limit(20),
       clickQuery,
-      viewQuery,
+      viewPromise,
       reactionQuery,
       subQuery,
       vitalsQuery,
@@ -117,10 +119,31 @@ const SiteAnalyticsDashboard = () => {
     setSearches(searchData.slice(0, 15));
     setTotalSearches(searchData.reduce((s, item) => s + item.search_count, 0));
 
-    // Views
-    const viewData = viewRes.data || [];
-    setViews(viewData.slice(0, 15));
-    setTotalViews(viewData.reduce((s, item) => s + item.view_count, 0));
+    // Views — aggregate from events when time-filtered
+    const viewRaw = viewRes.data || [];
+    if (startDate) {
+      // Aggregate per-event rows into slug counts
+      const slugMap: Record<string, number> = {};
+      const viewDayMap: Record<string, number> = {};
+      viewRaw.forEach((e: any) => {
+        slugMap[e.slug] = (slugMap[e.slug] || 0) + 1;
+        const day = e.created_at?.substring(0, 10);
+        if (day) viewDayMap[day] = (viewDayMap[day] || 0) + 1;
+      });
+      const aggregated = Object.entries(slugMap)
+        .map(([slug, view_count]) => ({ slug, view_count }))
+        .sort((a, b) => b.view_count - a.view_count);
+      setViews(aggregated.slice(0, 15));
+      setTotalViews(viewRaw.length);
+      setUniquePages(aggregated.length);
+      setDailyViews(Object.entries(viewDayMap).map(([date, count]) => ({ date, count })).sort((a, b) => a.date.localeCompare(b.date)));
+    } else {
+      const viewData = viewRaw as ViewItem[];
+      setViews(viewData.slice(0, 15));
+      setTotalViews(viewData.reduce((s, item) => s + (item.view_count || 0), 0));
+      setUniquePages(viewData.length);
+      setDailyViews([]);
+    }
 
     // Clicks
     const clickData = clickRes.data || [];
@@ -215,6 +238,7 @@ const SiteAnalyticsDashboard = () => {
 
   const summaryCards = [
     { label: "Page Views", value: totalViews.toLocaleString(), icon: Eye, color: "text-sky-400", bg: "bg-sky-500/10" },
+    { label: "Unique Pages", value: uniquePages.toLocaleString(), icon: BarChart3, color: "text-cyan-400", bg: "bg-cyan-500/10" },
     { label: "Affiliate Clicks", value: totalClicks.toLocaleString(), icon: MousePointerClick, color: "text-emerald-400", bg: "bg-emerald-500/10" },
     { label: "Searches", value: totalSearches.toLocaleString(), icon: Search, color: "text-amber-400", bg: "bg-amber-500/10" },
     { label: "Subscribers", value: subscriberCount.toLocaleString(), icon: Users, color: "text-violet-400", bg: "bg-violet-500/10" },
@@ -264,7 +288,7 @@ const SiteAnalyticsDashboard = () => {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {summaryCards.map((c) => (
           <Card key={c.label}>
             <CardContent className="p-3 flex items-center gap-3">
@@ -294,10 +318,25 @@ const SiteAnalyticsDashboard = () => {
               <TabsTrigger value="performance" className="text-xs gap-1"><Gauge className="h-3 w-3" /> Performance</TabsTrigger>
             </TabsList>
 
-            {/* Views Tab */}
             <TabsContent value="views" className="mt-4 space-y-4">
               {views.length === 0 ? <p className="text-sm text-muted-foreground">No view data yet.</p> : (
                 <>
+                  {dailyViews.length > 1 && (
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-2 font-medium">Daily View Trend</p>
+                      <div className="h-40">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={dailyViews}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                            <XAxis dataKey="date" tickFormatter={(d) => format(new Date(d), "MMM d")} tick={{ fontSize: 10 }} />
+                            <YAxis tick={{ fontSize: 10 }} />
+                            <Tooltip labelFormatter={(d) => format(new Date(String(d)), "MMM d, yyyy")} />
+                            <Line type="monotone" dataKey="count" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+                  )}
                   <div className="h-48">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={views.slice(0, 10)}>
@@ -316,7 +355,9 @@ const SiteAnalyticsDashboard = () => {
                           {formatSlug(v.slug)}
                         </span>
                         <div className="flex items-center gap-3">
-                          <span className="text-muted-foreground text-xs">{format(new Date(v.last_viewed_at), "MMM d, h:mm a")}</span>
+                          {v.last_viewed_at && (
+                            <span className="text-muted-foreground text-xs">{format(new Date(v.last_viewed_at), "MMM d, h:mm a")}</span>
+                          )}
                           <span className="text-muted-foreground text-xs font-mono w-12 text-right">{v.view_count}</span>
                         </div>
                       </div>

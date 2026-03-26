@@ -66,6 +66,10 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Insert per-event row for granular time filtering
+    await supabase.from("page_view_events").insert({ slug });
+
+    // Update aggregate view count
     const { data: existing } = await supabase
       .from("review_views")
       .select("view_count")

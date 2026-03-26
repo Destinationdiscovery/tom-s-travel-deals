@@ -120,6 +120,14 @@ serve(async (req) => {
 - Use short paragraphs. Break up long sections.
 - Include practical tips, costs, and real advice where relevant
 
+SEO OPTIMIZATION RULES (follow strictly):
+- Front-load the primary keyword in the title (first 60 chars), the first paragraph, and at least 2 H2 headings
+- Include 3-5 LSI (latent semantic indexing) related keywords naturally throughout the article
+- Write the excerpt as a click-worthy meta description: under 155 characters, includes primary keyword, compelling action language
+- Structure at least 2 headings as questions (for featured snippet targeting, e.g. "What Is the Best Time to Visit Cancun?")
+- Use the primary keyword in the first 100 words of the article
+- Include a clear call-to-action in the final paragraph
+
 You must generate a complete blog article using the research provided. Structure it with clear headings and well-organized paragraphs.`,
           },
           {
@@ -151,6 +159,7 @@ IMPORTANT: For the image_search_queries field, provide short, descriptive search
                   slug: { type: "string", description: "URL slug, lowercase with hyphens, max 80 chars" },
                   category: { type: "string", enum: CATEGORIES, description: "Article category" },
                   excerpt: { type: "string", description: "2-3 sentence summary for the article card" },
+                  meta_description: { type: "string", description: "SEO meta description under 155 chars with primary keyword and compelling action language" },
                   read_time: { type: "string", description: "Estimated read time, e.g. '6 min read'" },
                   tags: {
                     type: "array",
