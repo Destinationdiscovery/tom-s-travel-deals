@@ -238,6 +238,7 @@ const SiteAnalyticsDashboard = () => {
 
   const summaryCards = [
     { label: "Page Views", value: totalViews.toLocaleString(), icon: Eye, color: "text-sky-400", bg: "bg-sky-500/10" },
+    { label: "Unique Pages", value: uniquePages.toLocaleString(), icon: BarChart3, color: "text-cyan-400", bg: "bg-cyan-500/10" },
     { label: "Affiliate Clicks", value: totalClicks.toLocaleString(), icon: MousePointerClick, color: "text-emerald-400", bg: "bg-emerald-500/10" },
     { label: "Searches", value: totalSearches.toLocaleString(), icon: Search, color: "text-amber-400", bg: "bg-amber-500/10" },
     { label: "Subscribers", value: subscriberCount.toLocaleString(), icon: Users, color: "text-violet-400", bg: "bg-violet-500/10" },
