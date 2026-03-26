@@ -67,6 +67,8 @@ const SiteAnalyticsDashboard = () => {
   const [platforms, setPlatforms] = useState<PlatformItem[]>([]);
   const [positions, setPositions] = useState<{ position: string; count: number }[]>([]);
   const [dailyClicks, setDailyClicks] = useState<DailyClick[]>([]);
+  const [dailyViews, setDailyViews] = useState<DailyView[]>([]);
+  const [uniquePages, setUniquePages] = useState(0);
   const [reactions, setReactions] = useState<ReactionItem[]>([]);
   const [reactionSlugs, setReactionSlugs] = useState<ReactionSlugItem[]>([]);
   const [subscriberCount, setSubscriberCount] = useState(0);
