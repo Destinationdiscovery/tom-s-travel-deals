@@ -119,10 +119,31 @@ const SiteAnalyticsDashboard = () => {
     setSearches(searchData.slice(0, 15));
     setTotalSearches(searchData.reduce((s, item) => s + item.search_count, 0));
 
-    // Views
-    const viewData = viewRes.data || [];
-    setViews(viewData.slice(0, 15));
-    setTotalViews(viewData.reduce((s, item) => s + item.view_count, 0));
+    // Views — aggregate from events when time-filtered
+    const viewRaw = viewRes.data || [];
+    if (startDate) {
+      // Aggregate per-event rows into slug counts
+      const slugMap: Record<string, number> = {};
+      const viewDayMap: Record<string, number> = {};
+      viewRaw.forEach((e: any) => {
+        slugMap[e.slug] = (slugMap[e.slug] || 0) + 1;
+        const day = e.created_at?.substring(0, 10);
+        if (day) viewDayMap[day] = (viewDayMap[day] || 0) + 1;
+      });
+      const aggregated = Object.entries(slugMap)
+        .map(([slug, view_count]) => ({ slug, view_count }))
+        .sort((a, b) => b.view_count - a.view_count);
+      setViews(aggregated.slice(0, 15));
+      setTotalViews(viewRaw.length);
+      setUniquePages(aggregated.length);
+      setDailyViews(Object.entries(viewDayMap).map(([date, count]) => ({ date, count })).sort((a, b) => a.date.localeCompare(b.date)));
+    } else {
+      const viewData = viewRaw as ViewItem[];
+      setViews(viewData.slice(0, 15));
+      setTotalViews(viewData.reduce((s, item) => s + (item.view_count || 0), 0));
+      setUniquePages(viewData.length);
+      setDailyViews([]);
+    }
 
     // Clicks
     const clickData = clickRes.data || [];
