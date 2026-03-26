@@ -98,16 +98,26 @@ const SiteAnalyticsDashboard = () => {
       vitalsQuery = vitalsQuery.gte("created_at", startDate);
     }
 
-    // Views don't have per-event timestamps, but filter by last_viewed_at
-    let viewQuery = supabase.from("review_views").select("slug, view_count, last_viewed_at").order("view_count", { ascending: false }).limit(20);
+    // Views: use page_view_events for time-filtered, review_views aggregate for "all"
+    let viewPromise: Promise<any>;
     if (startDate) {
-      viewQuery = viewQuery.gte("last_viewed_at", startDate);
+      // Query per-event table for accurate time-filtered counts
+      viewPromise = supabase
+        .from("page_view_events")
+        .select("slug, created_at")
+        .gte("created_at", startDate);
+    } else {
+      viewPromise = supabase
+        .from("review_views")
+        .select("slug, view_count, last_viewed_at")
+        .order("view_count", { ascending: false })
+        .limit(50);
     }
 
     const [searchRes, clickRes, viewRes, reactionRes, subRes, vitalsRes] = await Promise.all([
       supabase.from("search_suggestions").select("name, search_count").order("search_count", { ascending: false }).limit(20),
       clickQuery,
-      viewQuery,
+      viewPromise,
       reactionQuery,
       subQuery,
       vitalsQuery,
