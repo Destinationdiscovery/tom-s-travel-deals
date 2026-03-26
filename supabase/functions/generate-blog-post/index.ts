@@ -159,6 +159,7 @@ IMPORTANT: For the image_search_queries field, provide short, descriptive search
                   slug: { type: "string", description: "URL slug, lowercase with hyphens, max 80 chars" },
                   category: { type: "string", enum: CATEGORIES, description: "Article category" },
                   excerpt: { type: "string", description: "2-3 sentence summary for the article card" },
+                  meta_description: { type: "string", description: "SEO meta description under 155 chars with primary keyword and compelling action language" },
                   read_time: { type: "string", description: "Estimated read time, e.g. '6 min read'" },
                   tags: {
                     type: "array",

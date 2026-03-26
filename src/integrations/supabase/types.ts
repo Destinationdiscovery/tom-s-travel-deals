@@ -763,6 +763,24 @@ export type Database = {
         }
         Relationships: []
       }
+      page_view_events: {
+        Row: {
+          created_at: string
+          id: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          slug?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
