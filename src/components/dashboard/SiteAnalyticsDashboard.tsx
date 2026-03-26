@@ -10,13 +10,14 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, L
 
 interface SearchItem { name: string; search_count: number; }
 interface ClickItem { page: string; count: number; }
-interface ViewItem { slug: string; view_count: number; last_viewed_at: string; }
+interface ViewItem { slug: string; view_count: number; last_viewed_at?: string; }
 interface PlatformItem { platform: string; count: number; }
 interface ReactionItem { reaction: string; count: number; }
 interface ReactionSlugItem { slug: string; count: number; }
 interface SubscriberSource { source: string; count: number; }
 interface VitalItem { metric_name: string; avg: number; page: string; }
 interface DailyClick { date: string; count: number; }
+interface DailyView { date: string; count: number; }
 
 type TimeRange = "today" | "7d" | "30d" | "all";
 
