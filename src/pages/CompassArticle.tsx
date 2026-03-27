@@ -6,7 +6,6 @@ import ReadingProgress from "@/components/ReadingProgress";
 import { getArticleBySlug, getRelatedArticles, type ContentBlock, type CompassArticle as CompassArticleType } from "@/data/compassArticles";
 import { ArrowLeft, ArrowRight, Clock, User } from "lucide-react";
 import CommentsSection from "@/components/comments/CommentsSection";
-import InlineAffiliateCTA from "@/components/InlineAffiliateCTA";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import SEOHead from "@/components/SEOHead";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
@@ -255,9 +254,21 @@ const CompassArticle = () => {
               </div>
             )}
 
-            {/* Affiliate banner before comments */}
+            {/* Homepage tools CTA */}
             <div className="mt-8">
-              <InlineAffiliateCTA variant="banner" />
+              <div className="rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div>
+                  <p className="font-display font-bold text-foreground text-lg">Planning a trip?</p>
+                  <p className="text-sm text-muted-foreground">Check out the 8 planning tools on our main page — reviews, flights, gear, and more.</p>
+                </div>
+                <Link
+                  to="/"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity whitespace-nowrap"
+                >
+                  Explore Our Tools
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
             </div>
 
             {/* Comments Section */}
