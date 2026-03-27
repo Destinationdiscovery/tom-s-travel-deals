@@ -907,6 +907,39 @@ export type Database = {
         }
         Relationships: []
       }
+      sessions: {
+        Row: {
+          duration_seconds: number | null
+          first_page: string
+          id: string
+          is_bounce: boolean | null
+          last_activity_at: string | null
+          page_count: number | null
+          session_id: string
+          started_at: string | null
+        }
+        Insert: {
+          duration_seconds?: number | null
+          first_page: string
+          id?: string
+          is_bounce?: boolean | null
+          last_activity_at?: string | null
+          page_count?: number | null
+          session_id: string
+          started_at?: string | null
+        }
+        Update: {
+          duration_seconds?: number | null
+          first_page?: string
+          id?: string
+          is_bounce?: boolean | null
+          last_activity_at?: string | null
+          page_count?: number | null
+          session_id?: string
+          started_at?: string | null
+        }
+        Relationships: []
+      }
       subscribers: {
         Row: {
           created_at: string
