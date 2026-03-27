@@ -320,6 +320,9 @@ const BlogPostCreator = () => {
     setReadTime(post.read_time);
     setBlocks(post.rich_content?.length ? post.rich_content : [{ type: "text", value: "" }]);
     setTags((post as any).tags?.join(", ") || "");
+    setFaqItems((post as any).faq_items || []);
+    setInternalLinks((post as any).internal_links || []);
+    setPrimaryKeyword((post as any).primary_keyword || "");
     setHeroPreview(post.hero_image_url || "");
     setHeroFile(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
