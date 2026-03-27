@@ -506,6 +506,36 @@ const BlogPostCreator = () => {
             <p className="text-xs text-muted-foreground mt-1">Comma-separated keywords to help Google rank this article.</p>
           </div>
 
+          <div>
+            <Label>Primary Keyword</Label>
+            <Input value={primaryKeyword} onChange={e => setPrimaryKeyword(e.target.value)} placeholder="e.g. best time to visit Cancun" />
+            <p className="text-xs text-muted-foreground mt-1">The main keyword this article targets for SEO.</p>
+          </div>
+
+          {/* FAQ Items */}
+          {faqItems.length > 0 && (
+            <div>
+              <Label className="mb-2 block">FAQ Items (for FAQPage schema)</Label>
+              <div className="space-y-3">
+                {faqItems.map((faq, i) => (
+                  <div key={i} className="bg-muted/30 rounded-lg p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-muted-foreground">FAQ {i + 1}</span>
+                      <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => setFaqItems(faqItems.filter((_, j) => j !== i))}>
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                    <Input value={faq.question} onChange={e => setFaqItems(faqItems.map((f, j) => j === i ? { ...f, question: e.target.value } : f))} placeholder="Question..." />
+                    <Textarea value={faq.answer} onChange={e => setFaqItems(faqItems.map((f, j) => j === i ? { ...f, answer: e.target.value } : f))} placeholder="Answer..." className="min-h-[60px]" />
+                  </div>
+                ))}
+              </div>
+              <Button variant="outline" size="sm" className="mt-2" onClick={() => setFaqItems([...faqItems, { question: "", answer: "" }])}>
+                <Plus className="h-3 w-3 mr-1" /> Add FAQ
+              </Button>
+            </div>
+          )}
+
           {/* Block Editor */}
           <div>
             <Label className="mb-2 block">Article Content</Label>
