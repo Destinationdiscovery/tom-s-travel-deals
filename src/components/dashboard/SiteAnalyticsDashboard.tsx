@@ -110,14 +110,34 @@ const SiteAnalyticsDashboard = () => {
       ? supabase.from("page_view_events" as any).select("slug, created_at").gte("created_at", startDate)
       : supabase.from("review_views").select("slug, view_count, last_viewed_at").order("view_count", { ascending: false }).limit(50);
 
-    const [searchRes, clickRes, viewRes, reactionRes, subRes, vitalsRes] = await Promise.all([
+    // Sessions query
+    let sessionQuery = supabase.from("sessions" as any).select("page_count, duration_seconds, is_bounce, started_at");
+    if (startDate) {
+      sessionQuery = sessionQuery.gte("started_at", startDate);
+    }
+
+    const [searchRes, clickRes, viewRes, reactionRes, subRes, vitalsRes, sessionRes] = await Promise.all([
       supabase.from("search_suggestions").select("name, search_count").order("search_count", { ascending: false }).limit(20),
       clickQuery,
       viewPromise,
       reactionQuery,
       subQuery,
       vitalsQuery,
+      sessionQuery,
     ]);
+
+    // Sessions
+    const sessionData = (sessionRes as any).data || [];
+    setTotalSessions(sessionData.length);
+    if (sessionData.length > 0) {
+      const totalDur = sessionData.reduce((s: number, r: any) => s + (r.duration_seconds || 0), 0);
+      setAvgDuration(Math.round(totalDur / sessionData.length));
+      const bounces = sessionData.filter((r: any) => r.is_bounce).length;
+      setBounceRate(Math.round((bounces / sessionData.length) * 100));
+    } else {
+      setAvgDuration(0);
+      setBounceRate(0);
+    }
 
     // Searches (no created_at filter available — always show all)
     const searchData = searchRes.data || [];
