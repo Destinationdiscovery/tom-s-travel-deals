@@ -1,27 +1,22 @@
 
 
-# Add "Regenerate" Button to Published Blog Posts
+# Fix Blog Post Generation Schema Error
 
-## What It Does
-Adds a "Regenerate" button on each published post card. When clicked, it takes the post's existing title as the prompt, calls the `generate-blog-post` edge function (which now has the full SEO/FAQ/2500+ word format), and updates the post in-place with the new content while preserving the original slug and publish date.
+## Problem
+The `generate-blog-post` edge function fails with a 400 error: "property is not defined" for `primary_keyword`, `faq_items`, and `internal_links`. These three fields are placed **outside** the `properties` object (after the closing `}` on line 195) but listed in `required`. The AI gateway rejects the malformed schema.
 
-## Changes
+## Fix
 
-### `src/components/dashboard/BlogPostCreator.tsx`
+**`supabase/functions/generate-blog-post/index.ts`** (lines 194-223):
 
-1. Add a `regeneratingId` state to track which post is being regenerated
-2. Add a `handleRegenerate(post)` function that:
-   - Sets `regeneratingId` to the post ID
-   - Calls `supabase.functions.invoke("generate-blog-post", { body: { prompt: post.title } })`
-   - Updates the existing `blog_posts` row with new `rich_content`, `excerpt`, `read_time`, `tags`, `hero_image_url`, `faq_items`, `internal_links`, `primary_keyword`, and `updated_at`
-   - Preserves original `slug`, `date_published`, `author`, and `id`
-   - Refreshes the post list
-3. Add a "Regenerate" button (with `RefreshCw` icon) next to Edit/View/Delete on each post card
-4. Show a spinner on the button while regenerating
+Move `primary_keyword`, `faq_items`, and `internal_links` inside the `properties` object by fixing the brace placement:
+- Line 195: closing brace of `properties` → remove it
+- Line 222: add the closing brace for `properties` here instead
+- This puts all three fields inside `properties` where `required` can reference them
+
+Single structural fix, no logic changes. Redeploy the edge function.
 
 | File | Change |
 |------|--------|
-| `src/components/dashboard/BlogPostCreator.tsx` | Add regenerate state, handler, and button |
-
-Single file change. No database or edge function changes needed — it reuses the existing `generate-blog-post` function.
+| `supabase/functions/generate-blog-post/index.ts` | Move 3 fields inside `properties` object |
 
