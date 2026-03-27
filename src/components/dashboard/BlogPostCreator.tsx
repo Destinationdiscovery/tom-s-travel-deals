@@ -144,6 +144,9 @@ const BlogPostCreator = () => {
       if (data.tags) setTags(data.tags.join(", "));
       if (data.blocks) setBlocks(data.blocks);
       if (data.hero_image_url) setHeroPreview(data.hero_image_url);
+      if (data.faq_items) setFaqItems(data.faq_items);
+      if (data.internal_links) setInternalLinks(data.internal_links);
+      if (data.primary_keyword) setPrimaryKeyword(data.primary_keyword);
 
       setTopicPrompt("");
       toast({ title: "✨ Article generated!", description: "Review everything below and publish when ready." });
