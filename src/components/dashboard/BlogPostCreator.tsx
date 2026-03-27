@@ -76,6 +76,45 @@ const BlogPostCreator = () => {
 
   // Editing
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [regeneratingId, setRegeneratingId] = useState<string | null>(null);
+
+  const handleRegenerate = async (post: BlogPost) => {
+    if (!confirm(`Regenerate "${post.title}" with the latest SEO format? This will replace its content but keep the same URL and publish date.`)) return;
+    setRegeneratingId(post.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-blog-post", {
+        body: { prompt: post.title },
+      });
+      if (error) throw new Error(error.message || "Generation failed");
+      if (data?.error) throw new Error(data.error);
+
+      const updatePayload: any = {
+        rich_content: data.blocks?.filter((b: any) => b.value?.trim()) || [],
+        excerpt: data.excerpt || post.excerpt,
+        read_time: data.read_time || post.read_time,
+        tags: data.tags || [],
+        hero_image_url: data.hero_image_url || post.hero_image_url,
+        faq_items: data.faq_items || [],
+        internal_links: data.internal_links || [],
+        primary_keyword: data.primary_keyword || null,
+        updated_at: new Date().toISOString(),
+      };
+      if (data.category) {
+        updatePayload.category = data.category;
+        updatePayload.category_color = CATEGORIES.find(c => c.label === data.category)?.color || "bg-gray-500";
+      }
+
+      const { error: updateError } = await supabase.from("blog_posts").update(updatePayload).eq("id", post.id);
+      if (updateError) throw updateError;
+
+      toast({ title: "✨ Regenerated!", description: `"${post.title}" has been updated with the new SEO format.` });
+      fetchPosts();
+    } catch (e: any) {
+      console.error("Regenerate error:", e);
+      toast({ title: "Regeneration failed", description: e.message || "Unknown error", variant: "destructive" });
+    }
+    setRegeneratingId(null);
+  };
 
   useEffect(() => { fetchPosts(); }, []);
 
