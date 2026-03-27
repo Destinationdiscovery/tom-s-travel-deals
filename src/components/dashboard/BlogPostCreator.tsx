@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Trash2, ArrowUp, ArrowDown, Upload, Loader2, BookOpen, Eye, Sparkles, X, ImagePlus, Wand2 } from "lucide-react";
+import { Plus, Trash2, ArrowUp, ArrowDown, Upload, Loader2, BookOpen, Eye, Sparkles, X, ImagePlus, Wand2, RefreshCw } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -76,6 +76,45 @@ const BlogPostCreator = () => {
 
   // Editing
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [regeneratingId, setRegeneratingId] = useState<string | null>(null);
+
+  const handleRegenerate = async (post: BlogPost) => {
+    if (!confirm(`Regenerate "${post.title}" with the latest SEO format? This will replace its content but keep the same URL and publish date.`)) return;
+    setRegeneratingId(post.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-blog-post", {
+        body: { prompt: post.title },
+      });
+      if (error) throw new Error(error.message || "Generation failed");
+      if (data?.error) throw new Error(data.error);
+
+      const updatePayload: any = {
+        rich_content: data.blocks?.filter((b: any) => b.value?.trim()) || [],
+        excerpt: data.excerpt || post.excerpt,
+        read_time: data.read_time || post.read_time,
+        tags: data.tags || [],
+        hero_image_url: data.hero_image_url || post.hero_image_url,
+        faq_items: data.faq_items || [],
+        internal_links: data.internal_links || [],
+        primary_keyword: data.primary_keyword || null,
+        updated_at: new Date().toISOString(),
+      };
+      if (data.category) {
+        updatePayload.category = data.category;
+        updatePayload.category_color = CATEGORIES.find(c => c.label === data.category)?.color || "bg-gray-500";
+      }
+
+      const { error: updateError } = await supabase.from("blog_posts").update(updatePayload).eq("id", post.id);
+      if (updateError) throw updateError;
+
+      toast({ title: "✨ Regenerated!", description: `"${post.title}" has been updated with the new SEO format.` });
+      fetchPosts();
+    } catch (e: any) {
+      console.error("Regenerate error:", e);
+      toast({ title: "Regeneration failed", description: e.message || "Unknown error", variant: "destructive" });
+    }
+    setRegeneratingId(null);
+  };
 
   useEffect(() => { fetchPosts(); }, []);
 
@@ -616,9 +655,19 @@ const BlogPostCreator = () => {
                 <h3 className="font-semibold text-foreground line-clamp-1">{post.title}</h3>
                 <p className="text-xs text-muted-foreground mt-1">{post.category} · {post.date_published} · {post.read_time}</p>
                 <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{post.excerpt}</p>
-                <div className="flex gap-2 mt-3">
+                <div className="flex flex-wrap gap-2 mt-3">
                   <Button variant="outline" size="sm" onClick={() => handleEdit(post)}>Edit</Button>
                   <Button variant="outline" size="sm" onClick={() => window.open(`/compass/${post.slug}`, "_blank")} className="gap-1"><Eye className="h-3 w-3" /> View</Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleRegenerate(post)}
+                    disabled={regeneratingId === post.id}
+                    className="gap-1"
+                  >
+                    {regeneratingId === post.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+                    {regeneratingId === post.id ? "Regenerating..." : "Regenerate"}
+                  </Button>
                   <Button variant="destructive" size="sm" onClick={() => handleDelete(post.id)}>Delete</Button>
                 </div>
               </CardContent>
