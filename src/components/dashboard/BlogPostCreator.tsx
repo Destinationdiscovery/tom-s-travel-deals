@@ -655,9 +655,19 @@ const BlogPostCreator = () => {
                 <h3 className="font-semibold text-foreground line-clamp-1">{post.title}</h3>
                 <p className="text-xs text-muted-foreground mt-1">{post.category} · {post.date_published} · {post.read_time}</p>
                 <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{post.excerpt}</p>
-                <div className="flex gap-2 mt-3">
+                <div className="flex flex-wrap gap-2 mt-3">
                   <Button variant="outline" size="sm" onClick={() => handleEdit(post)}>Edit</Button>
                   <Button variant="outline" size="sm" onClick={() => window.open(`/compass/${post.slug}`, "_blank")} className="gap-1"><Eye className="h-3 w-3" /> View</Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleRegenerate(post)}
+                    disabled={regeneratingId === post.id}
+                    className="gap-1"
+                  >
+                    {regeneratingId === post.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+                    {regeneratingId === post.id ? "Regenerating..." : "Regenerate"}
+                  </Button>
                   <Button variant="destructive" size="sm" onClick={() => handleDelete(post.id)}>Delete</Button>
                 </div>
               </CardContent>
