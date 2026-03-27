@@ -83,6 +83,11 @@ const SiteAnalyticsDashboard = () => {
   const [totalSearches, setTotalSearches] = useState(0);
   const [totalReactions, setTotalReactions] = useState(0);
 
+  // Session metrics
+  const [totalSessions, setTotalSessions] = useState(0);
+  const [avgDuration, setAvgDuration] = useState(0);
+  const [bounceRate, setBounceRate] = useState(0);
+
   const fetchAll = useCallback(async () => {
     setLoading(true);
     const startDate = getStartDate(timeRange);
