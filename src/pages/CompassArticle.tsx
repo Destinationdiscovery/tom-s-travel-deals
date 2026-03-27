@@ -240,6 +240,21 @@ const CompassArticle = () => {
 
               </div>
 
+            {/* FAQ Section */}
+            {article.faq_items && article.faq_items.length > 0 && (
+              <div className="bg-card rounded-2xl shadow-soft p-8 md:p-12 mt-8">
+                <h2 className="font-display text-xl font-semibold text-foreground mb-4">Frequently Asked Questions</h2>
+                <Accordion type="single" collapsible className="w-full">
+                  {article.faq_items.map((faq, i) => (
+                    <AccordionItem key={i} value={`faq-${i}`}>
+                      <AccordionTrigger className="text-left text-foreground">{faq.question}</AccordionTrigger>
+                      <AccordionContent className="text-foreground/80">{faq.answer}</AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </div>
+            )}
+
             {/* Affiliate banner before comments */}
             <div className="mt-8">
               <InlineAffiliateCTA variant="banner" />
