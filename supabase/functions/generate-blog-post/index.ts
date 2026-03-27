@@ -273,7 +273,17 @@ IMPORTANT: For the image_search_queries field, provide short, descriptive search
       value: cleanEmDashes(b.value),
     }));
 
+    // Clean FAQ answers for em-dashes
+    if (Array.isArray(article.faq_items)) {
+      article.faq_items = article.faq_items.map((faq: any) => ({
+        ...faq,
+        question: cleanEmDashes(faq.question || ""),
+        answer: cleanEmDashes(faq.answer || ""),
+      }));
+    }
+
     console.log("Article generated:", article.title);
+    console.log(`FAQ items: ${article.faq_items?.length || 0}, Internal links: ${article.internal_links?.length || 0}, Primary keyword: ${article.primary_keyword || "none"}`);
 
     // Step 3: Fetch stock photos from Pexels
     console.log("Fetching stock photos from Pexels...");
