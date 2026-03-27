@@ -261,9 +261,18 @@ const SiteAnalyticsDashboard = () => {
 
   const PLATFORM_COLORS = ["bg-sky-500", "bg-emerald-500", "bg-amber-500", "bg-violet-500", "bg-rose-500", "bg-cyan-500"];
 
+  const formatDuration = (secs: number) => {
+    if (secs < 60) return `${secs}s`;
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${m}m ${s}s`;
+  };
+
   const summaryCards = [
     { label: "Page Views", value: totalViews.toLocaleString(), icon: Eye, color: "text-sky-400", bg: "bg-sky-500/10" },
-    { label: "Unique Pages", value: uniquePages.toLocaleString(), icon: BarChart3, color: "text-cyan-400", bg: "bg-cyan-500/10" },
+    { label: "Sessions", value: totalSessions.toLocaleString(), icon: Users, color: "text-cyan-400", bg: "bg-cyan-500/10" },
+    { label: "Avg Duration", value: formatDuration(avgDuration), icon: Clock, color: "text-teal-400", bg: "bg-teal-500/10" },
+    { label: "Bounce Rate", value: `${bounceRate}%`, icon: ArrowLeftRight, color: "text-orange-400", bg: "bg-orange-500/10" },
     { label: "Affiliate Clicks", value: totalClicks.toLocaleString(), icon: MousePointerClick, color: "text-emerald-400", bg: "bg-emerald-500/10" },
     { label: "Searches", value: totalSearches.toLocaleString(), icon: Search, color: "text-amber-400", bg: "bg-amber-500/10" },
     { label: "Subscribers", value: subscriberCount.toLocaleString(), icon: Users, color: "text-violet-400", bg: "bg-violet-500/10" },
