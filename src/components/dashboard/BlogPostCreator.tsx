@@ -69,6 +69,11 @@ const BlogPostCreator = () => {
   const [topicPrompt, setTopicPrompt] = useState("");
   const [generating, setGenerating] = useState(false);
 
+  // FAQ & SEO fields from AI
+  const [faqItems, setFaqItems] = useState<Array<{question: string; answer: string}>>([]);
+  const [internalLinks, setInternalLinks] = useState<Array<{text: string; url: string}>>([]);
+  const [primaryKeyword, setPrimaryKeyword] = useState("");
+
   // Editing
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -139,6 +144,9 @@ const BlogPostCreator = () => {
       if (data.tags) setTags(data.tags.join(", "));
       if (data.blocks) setBlocks(data.blocks);
       if (data.hero_image_url) setHeroPreview(data.hero_image_url);
+      if (data.faq_items) setFaqItems(data.faq_items);
+      if (data.internal_links) setInternalLinks(data.internal_links);
+      if (data.primary_keyword) setPrimaryKeyword(data.primary_keyword);
 
       setTopicPrompt("");
       toast({ title: "✨ Article generated!", description: "Review everything below and publish when ready." });
@@ -242,6 +250,7 @@ const BlogPostCreator = () => {
     setBlocks([{ type: "text", value: "" }]);
     setHeroFile(null); setHeroPreview(""); setEditingId(null);
     setRawText(""); setTopicPrompt("");
+    setFaqItems([]); setInternalLinks([]); setPrimaryKeyword("");
     setImagePool([]);
     imagePoolPreviews.forEach(u => URL.revokeObjectURL(u));
     setImagePoolPreviews([]);
@@ -279,6 +288,9 @@ const BlogPostCreator = () => {
         rich_content: blocks.filter(b => b.value.trim()),
         tags: parsedTags,
         date_published: new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
+        faq_items: faqItems.length > 0 ? faqItems : [],
+        internal_links: internalLinks.length > 0 ? internalLinks : [],
+        primary_keyword: primaryKeyword.trim() || null,
       };
 
       if (editingId) {
@@ -308,6 +320,9 @@ const BlogPostCreator = () => {
     setReadTime(post.read_time);
     setBlocks(post.rich_content?.length ? post.rich_content : [{ type: "text", value: "" }]);
     setTags((post as any).tags?.join(", ") || "");
+    setFaqItems((post as any).faq_items || []);
+    setInternalLinks((post as any).internal_links || []);
+    setPrimaryKeyword((post as any).primary_keyword || "");
     setHeroPreview(post.hero_image_url || "");
     setHeroFile(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -493,6 +508,36 @@ const BlogPostCreator = () => {
             <Input value={tags} onChange={e => setTags(e.target.value)} placeholder="Mexico all-inclusive 2026, best Cancun resorts, ..." />
             <p className="text-xs text-muted-foreground mt-1">Comma-separated keywords to help Google rank this article.</p>
           </div>
+
+          <div>
+            <Label>Primary Keyword</Label>
+            <Input value={primaryKeyword} onChange={e => setPrimaryKeyword(e.target.value)} placeholder="e.g. best time to visit Cancun" />
+            <p className="text-xs text-muted-foreground mt-1">The main keyword this article targets for SEO.</p>
+          </div>
+
+          {/* FAQ Items */}
+          {faqItems.length > 0 && (
+            <div>
+              <Label className="mb-2 block">FAQ Items (for FAQPage schema)</Label>
+              <div className="space-y-3">
+                {faqItems.map((faq, i) => (
+                  <div key={i} className="bg-muted/30 rounded-lg p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-muted-foreground">FAQ {i + 1}</span>
+                      <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => setFaqItems(faqItems.filter((_, j) => j !== i))}>
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                    <Input value={faq.question} onChange={e => setFaqItems(faqItems.map((f, j) => j === i ? { ...f, question: e.target.value } : f))} placeholder="Question..." />
+                    <Textarea value={faq.answer} onChange={e => setFaqItems(faqItems.map((f, j) => j === i ? { ...f, answer: e.target.value } : f))} placeholder="Answer..." className="min-h-[60px]" />
+                  </div>
+                ))}
+              </div>
+              <Button variant="outline" size="sm" className="mt-2" onClick={() => setFaqItems([...faqItems, { question: "", answer: "" }])}>
+                <Plus className="h-3 w-3 mr-1" /> Add FAQ
+              </Button>
+            </div>
+          )}
 
           {/* Block Editor */}
           <div>

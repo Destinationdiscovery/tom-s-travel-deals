@@ -7,6 +7,7 @@ import { getArticleBySlug, getRelatedArticles, type ContentBlock, type CompassAr
 import { ArrowLeft, ArrowRight, Clock, User } from "lucide-react";
 import CommentsSection from "@/components/comments/CommentsSection";
 import InlineAffiliateCTA from "@/components/InlineAffiliateCTA";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import SEOHead from "@/components/SEOHead";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const CompassArticle = () => {
   const { slug } = useParams<{ slug: string }>();
-  const [article, setArticle] = useState<(CompassArticleType & { tags?: string[]; updatedAt?: string }) | undefined>(undefined);
+  const [article, setArticle] = useState<(CompassArticleType & { tags?: string[]; updatedAt?: string; faq_items?: Array<{question: string; answer: string}>; internal_links?: Array<{text: string; url: string}>; primary_keyword?: string }) | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const relatedArticles = slug ? getRelatedArticles(slug, 3) : [];
 
@@ -30,6 +31,8 @@ const CompassArticle = () => {
           excerpt: data.excerpt || "", author: data.author, datePublished: data.date_published,
           readTime: data.read_time, content: [], richContent: data.rich_content || [],
           tags: data.tags || [], updatedAt: data.updated_at || data.date_published,
+          faq_items: data.faq_items || [], internal_links: data.internal_links || [],
+          primary_keyword: data.primary_keyword || "",
         });
       } else {
         setArticle(getArticleBySlug(slug));
@@ -144,6 +147,7 @@ const CompassArticle = () => {
         ]}
         jsonLd={blogPostingJsonLd || undefined}
         keywords={article.tags}
+        faq={article.faq_items && article.faq_items.length > 0 ? article.faq_items : undefined}
       />
       <Header />
       <ReadingProgress />
@@ -235,6 +239,21 @@ const CompassArticle = () => {
               </div>
 
               </div>
+
+            {/* FAQ Section */}
+            {article.faq_items && article.faq_items.length > 0 && (
+              <div className="bg-card rounded-2xl shadow-soft p-8 md:p-12 mt-8">
+                <h2 className="font-display text-xl font-semibold text-foreground mb-4">Frequently Asked Questions</h2>
+                <Accordion type="single" collapsible className="w-full">
+                  {article.faq_items.map((faq, i) => (
+                    <AccordionItem key={i} value={`faq-${i}`}>
+                      <AccordionTrigger className="text-left text-foreground">{faq.question}</AccordionTrigger>
+                      <AccordionContent className="text-foreground/80">{faq.answer}</AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </div>
+            )}
 
             {/* Affiliate banner before comments */}
             <div className="mt-8">

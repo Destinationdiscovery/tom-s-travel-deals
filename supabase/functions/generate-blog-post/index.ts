@@ -122,11 +122,19 @@ serve(async (req) => {
 
 SEO OPTIMIZATION RULES (follow strictly):
 - Front-load the primary keyword in the title (first 60 chars), the first paragraph, and at least 2 H2 headings
+- Include the primary keyword in the URL slug
 - Include 3-5 LSI (latent semantic indexing) related keywords naturally throughout the article
+- Distribute secondary keywords naturally across H2 headings, section intros, and bullet lists
 - Write the excerpt as a click-worthy meta description: under 155 characters, includes primary keyword, compelling action language
 - Structure at least 2 headings as questions (for featured snippet targeting, e.g. "What Is the Best Time to Visit Cancun?")
 - Use the primary keyword in the first 100 words of the article
 - Include a clear call-to-action in the final paragraph
+
+CONTENT DEPTH & EEAT RULES:
+- Target 2,500+ words minimum. Write comprehensive, in-depth content with detailed sections.
+- Reference fresh 2026 data, statistics, and dates throughout for EEAT credibility
+- Include a FAQ section at the end with 3-5 questions and direct answers related to the topic
+- Add internal links to related ReviewThenGo tools where relevant: /reviews (hotel reviews), /best-time (best time to visit), /itinerary (itinerary builder), /flights (flight deals), /gear (packing toolkit), /currency (currency tracker), /safety (safety scores), /travel-intel (travel advisories)
 
 You must generate a complete blog article using the research provided. Structure it with clear headings and well-organized paragraphs.`,
           },
@@ -185,7 +193,34 @@ IMPORTANT: For the image_search_queries field, provide short, descriptive search
                     description: "Article content as blocks. Use 'heading' for section titles and 'text' for paragraphs. Add image_query on heading blocks where a photo would enhance the section.",
                   },
                 },
-                required: ["title", "slug", "category", "excerpt", "read_time", "tags", "hero_image_query", "blocks"],
+                  primary_keyword: { type: "string", description: "The single primary SEO keyword this article targets" },
+                  faq_items: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        question: { type: "string", description: "FAQ question" },
+                        answer: { type: "string", description: "Direct, concise answer (2-4 sentences)" },
+                      },
+                      required: ["question", "answer"],
+                      additionalProperties: false,
+                    },
+                    description: "3-5 FAQ pairs for FAQPage schema",
+                  },
+                  internal_links: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        text: { type: "string", description: "Anchor text for the link" },
+                        url: { type: "string", description: "Internal URL path, e.g. /reviews or /best-time" },
+                      },
+                      required: ["text", "url"],
+                      additionalProperties: false,
+                    },
+                    description: "Suggested internal links to embed in the article",
+                  },
+                required: ["title", "slug", "category", "excerpt", "read_time", "tags", "hero_image_query", "blocks", "primary_keyword", "faq_items", "internal_links"],
                 additionalProperties: false,
               },
             },
