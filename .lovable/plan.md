@@ -1,16 +1,25 @@
 
 
-# Replace Blog Hero Image with Starry Night Sky
+# Replace Expedia CTA with Homepage CTA on Blog Articles
 
-## Change
-Replace the current `hero-tripreviews.jpg` hero image on the Compass/Blog page with the uploaded starry night sky mountain image.
+## What Changes
+The `InlineAffiliateCTA variant="banner"` on CompassArticle pages currently links to Expedia. Replace it with a CTA that says "Planning a trip?" and directs readers to the ReviewThenGo homepage to explore the planning tools.
 
-## Steps
-1. Copy `user-uploads://Screenshot_from_2026-03-26_21-18-01.png` to `src/assets/blog-hero-nightsky.png`
-2. Update `src/pages/Compass.tsx` — change import from `hero-tripreviews.jpg` to `blog-hero-nightsky.png`, update alt text
+**Important**: Only change the blog article usage. The Expedia CTA on `AIReviewResult` and `DestinationReview` pages stays as-is (those are review pages where Expedia links make sense).
+
+## Implementation
+
+### `src/pages/CompassArticle.tsx`
+- Remove the `InlineAffiliateCTA` import and usage (line 260)
+- Replace with an inline card:
+  - Heading: **"Planning a trip?"**
+  - Subtext: "Check out the 8 planning tools on our main page — reviews, flights, gear, and more."
+  - Button: `Link to="/"` with text "Explore Our Tools" and an arrow icon
+  - Same rounded-2xl card styling as the current banner for visual consistency
+
+Single file change. No other files affected — the `InlineAffiliateCTA` component stays intact for review pages.
 
 | File | Change |
 |------|--------|
-| `src/assets/blog-hero-nightsky.png` | New — copied from upload |
-| `src/pages/Compass.tsx` | Swap hero image import + alt text |
+| `src/pages/CompassArticle.tsx` | Replace Expedia banner with homepage CTA card |
 
