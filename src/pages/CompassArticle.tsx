@@ -6,7 +6,6 @@ import ReadingProgress from "@/components/ReadingProgress";
 import { getArticleBySlug, getRelatedArticles, type ContentBlock, type CompassArticle as CompassArticleType } from "@/data/compassArticles";
 import { ArrowLeft, ArrowRight, Clock, User } from "lucide-react";
 import CommentsSection from "@/components/comments/CommentsSection";
-import InlineAffiliateCTA from "@/components/InlineAffiliateCTA";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import SEOHead from "@/components/SEOHead";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
