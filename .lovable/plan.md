@@ -1,22 +1,32 @@
 
 
-# Fix Blog Post Generation Schema Error
+# Fix FAQ Items Not Appearing After Blog Post Regeneration
 
-## Problem
-The `generate-blog-post` edge function fails with a 400 error: "property is not defined" for `primary_keyword`, `faq_items`, and `internal_links`. These three fields are placed **outside** the `properties` object (after the closing `}` on line 195) but listed in `required`. The AI gateway rejects the malformed schema.
+## Root Cause Analysis
+
+The edge function successfully generates articles (confirmed in logs), and the code correctly saves `faq_items` to the database. The schema fix was just deployed. Two remaining issues:
+
+1. **No em-dash cleanup on FAQ answers** — the `cleanEmDashes` post-processing only runs on `title`, `excerpt`, and `blocks`, but NOT on `faq_items`. This means FAQ answers could contain em-dashes, but more importantly, this inconsistency suggests FAQs may need explicit post-processing validation.
+
+2. **No debug logging** — when regeneration appears to succeed but FAQs are missing, there's no way to verify the AI actually returned them. Adding a log of the FAQ count will confirm the data flow.
+
+3. **Silent data loss possibility** — if the AI returns `faq_items` as `undefined` (unlikely with `required` in schema, but possible if the tool call parsing strips it), the `|| []` fallback saves an empty array, which looks like "no FAQs."
 
 ## Fix
 
-**`supabase/functions/generate-blog-post/index.ts`** (lines 194-223):
+### `supabase/functions/generate-blog-post/index.ts`
+- Add em-dash cleanup to `faq_items` answers
+- Add a log line: `"FAQ items: N, Internal links: N"` after parsing
+- Clean FAQ answers for em-dashes just like blocks
 
-Move `primary_keyword`, `faq_items`, and `internal_links` inside the `properties` object by fixing the brace placement:
-- Line 195: closing brace of `properties` → remove it
-- Line 222: add the closing brace for `properties` here instead
-- This puts all three fields inside `properties` where `required` can reference them
+### `src/components/dashboard/BlogPostCreator.tsx`
+- Add `console.log` of the regeneration response data (faq count, internal link count) so we can debug in browser console
+- After successful regeneration, show FAQ count in the success toast message so the user has immediate confirmation
 
-Single structural fix, no logic changes. Redeploy the edge function.
+## Files
 
 | File | Change |
 |------|--------|
-| `supabase/functions/generate-blog-post/index.ts` | Move 3 fields inside `properties` object |
+| `supabase/functions/generate-blog-post/index.ts` | Add FAQ em-dash cleanup + logging |
+| `src/components/dashboard/BlogPostCreator.tsx` | Add response logging + FAQ count in toast |
 
