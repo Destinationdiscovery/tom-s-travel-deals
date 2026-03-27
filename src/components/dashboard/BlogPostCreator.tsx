@@ -88,6 +88,8 @@ const BlogPostCreator = () => {
       if (error) throw new Error(error.message || "Generation failed");
       if (data?.error) throw new Error(data.error);
 
+      console.log("Regenerate response:", { faq_items: data.faq_items?.length, internal_links: data.internal_links?.length, primary_keyword: data.primary_keyword, blocks: data.blocks?.length });
+
       const updatePayload: any = {
         rich_content: data.blocks?.filter((b: any) => b.value?.trim()) || [],
         excerpt: data.excerpt || post.excerpt,
@@ -107,7 +109,8 @@ const BlogPostCreator = () => {
       const { error: updateError } = await supabase.from("blog_posts").update(updatePayload).eq("id", post.id);
       if (updateError) throw updateError;
 
-      toast({ title: "✨ Regenerated!", description: `"${post.title}" has been updated with the new SEO format.` });
+      const faqCount = data.faq_items?.length || 0;
+      toast({ title: "✨ Regenerated!", description: `"${post.title}" updated with new SEO format. ${faqCount} FAQs added.` });
       fetchPosts();
     } catch (e: any) {
       console.error("Regenerate error:", e);
