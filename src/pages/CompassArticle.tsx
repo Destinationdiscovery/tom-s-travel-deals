@@ -31,6 +31,8 @@ const CompassArticle = () => {
           excerpt: data.excerpt || "", author: data.author, datePublished: data.date_published,
           readTime: data.read_time, content: [], richContent: data.rich_content || [],
           tags: data.tags || [], updatedAt: data.updated_at || data.date_published,
+          faq_items: data.faq_items || [], internal_links: data.internal_links || [],
+          primary_keyword: data.primary_keyword || "",
         });
       } else {
         setArticle(getArticleBySlug(slug));
