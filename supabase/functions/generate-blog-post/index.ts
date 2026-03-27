@@ -193,7 +193,34 @@ IMPORTANT: For the image_search_queries field, provide short, descriptive search
                     description: "Article content as blocks. Use 'heading' for section titles and 'text' for paragraphs. Add image_query on heading blocks where a photo would enhance the section.",
                   },
                 },
-                required: ["title", "slug", "category", "excerpt", "read_time", "tags", "hero_image_query", "blocks"],
+                  primary_keyword: { type: "string", description: "The single primary SEO keyword this article targets" },
+                  faq_items: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        question: { type: "string", description: "FAQ question" },
+                        answer: { type: "string", description: "Direct, concise answer (2-4 sentences)" },
+                      },
+                      required: ["question", "answer"],
+                      additionalProperties: false,
+                    },
+                    description: "3-5 FAQ pairs for FAQPage schema",
+                  },
+                  internal_links: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        text: { type: "string", description: "Anchor text for the link" },
+                        url: { type: "string", description: "Internal URL path, e.g. /reviews or /best-time" },
+                      },
+                      required: ["text", "url"],
+                      additionalProperties: false,
+                    },
+                    description: "Suggested internal links to embed in the article",
+                  },
+                required: ["title", "slug", "category", "excerpt", "read_time", "tags", "hero_image_query", "blocks", "primary_keyword", "faq_items", "internal_links"],
                 additionalProperties: false,
               },
             },

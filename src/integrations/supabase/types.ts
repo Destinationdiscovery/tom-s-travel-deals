@@ -136,8 +136,11 @@ export type Database = {
           created_at: string
           date_published: string
           excerpt: string | null
+          faq_items: Json | null
           hero_image_url: string | null
           id: string
+          internal_links: Json | null
+          primary_keyword: string | null
           read_time: string
           rich_content: Json
           slug: string
@@ -152,8 +155,11 @@ export type Database = {
           created_at?: string
           date_published?: string
           excerpt?: string | null
+          faq_items?: Json | null
           hero_image_url?: string | null
           id?: string
+          internal_links?: Json | null
+          primary_keyword?: string | null
           read_time?: string
           rich_content?: Json
           slug: string
@@ -168,8 +174,11 @@ export type Database = {
           created_at?: string
           date_published?: string
           excerpt?: string | null
+          faq_items?: Json | null
           hero_image_url?: string | null
           id?: string
+          internal_links?: Json | null
+          primary_keyword?: string | null
           read_time?: string
           rich_content?: Json
           slug?: string
