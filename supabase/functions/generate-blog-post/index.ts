@@ -191,8 +191,8 @@ IMPORTANT: For the image_search_queries field, provide short, descriptive search
                       additionalProperties: false,
                     },
                     description: "Article content as blocks. Use 'heading' for section titles and 'text' for paragraphs. Add image_query on heading blocks where a photo would enhance the section.",
+                    },
                   },
-                },
                   primary_keyword: { type: "string", description: "The single primary SEO keyword this article targets" },
                   faq_items: {
                     type: "array",
@@ -220,6 +220,7 @@ IMPORTANT: For the image_search_queries field, provide short, descriptive search
                     },
                     description: "Suggested internal links to embed in the article",
                   },
+                },
                 required: ["title", "slug", "category", "excerpt", "read_time", "tags", "hero_image_query", "blocks", "primary_keyword", "faq_items", "internal_links"],
                 additionalProperties: false,
               },
