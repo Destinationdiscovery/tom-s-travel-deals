@@ -322,7 +322,7 @@ const SiteAnalyticsDashboard = () => {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
         {summaryCards.map((c) => (
           <Card key={c.label}>
             <CardContent className="p-3 flex items-center gap-3">
