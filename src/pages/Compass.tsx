@@ -6,7 +6,7 @@ import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import { compassArticles, type CompassArticle } from "@/data/compassArticles";
 import { ArrowRight, Clock } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
-import heroImg from "@/assets/japan-cherry-blossoms.webp";
+import heroImg from "@/assets/hero-tripreviews.jpg";
 import { supabase } from "@/integrations/supabase/client";
 
 const categories = ["All", "Packing", "Guides", "Budget", "Insurance", "Timing"];
