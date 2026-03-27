@@ -15,7 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const CompassArticle = () => {
   const { slug } = useParams<{ slug: string }>();
-  const [article, setArticle] = useState<(CompassArticleType & { tags?: string[]; updatedAt?: string }) | undefined>(undefined);
+  const [article, setArticle] = useState<(CompassArticleType & { tags?: string[]; updatedAt?: string; faq_items?: Array<{question: string; answer: string}>; internal_links?: Array<{text: string; url: string}>; primary_keyword?: string }) | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const relatedArticles = slug ? getRelatedArticles(slug, 3) : [];
 
