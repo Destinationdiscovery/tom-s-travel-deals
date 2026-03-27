@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, MousePointerClick, Eye, Users, Heart, Gauge, BarChart3, TrendingUp, RefreshCw } from "lucide-react";
+import { Search, MousePointerClick, Eye, Users, Heart, Gauge, BarChart3, TrendingUp, RefreshCw, Clock, ArrowLeftRight } from "lucide-react";
 import { format, subDays, startOfDay } from "date-fns";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid } from "recharts";
 
@@ -83,6 +83,11 @@ const SiteAnalyticsDashboard = () => {
   const [totalSearches, setTotalSearches] = useState(0);
   const [totalReactions, setTotalReactions] = useState(0);
 
+  // Session metrics
+  const [totalSessions, setTotalSessions] = useState(0);
+  const [avgDuration, setAvgDuration] = useState(0);
+  const [bounceRate, setBounceRate] = useState(0);
+
   const fetchAll = useCallback(async () => {
     setLoading(true);
     const startDate = getStartDate(timeRange);
@@ -105,14 +110,34 @@ const SiteAnalyticsDashboard = () => {
       ? supabase.from("page_view_events" as any).select("slug, created_at").gte("created_at", startDate)
       : supabase.from("review_views").select("slug, view_count, last_viewed_at").order("view_count", { ascending: false }).limit(50);
 
-    const [searchRes, clickRes, viewRes, reactionRes, subRes, vitalsRes] = await Promise.all([
+    // Sessions query
+    let sessionQuery = supabase.from("sessions" as any).select("page_count, duration_seconds, is_bounce, started_at");
+    if (startDate) {
+      sessionQuery = sessionQuery.gte("started_at", startDate);
+    }
+
+    const [searchRes, clickRes, viewRes, reactionRes, subRes, vitalsRes, sessionRes] = await Promise.all([
       supabase.from("search_suggestions").select("name, search_count").order("search_count", { ascending: false }).limit(20),
       clickQuery,
       viewPromise,
       reactionQuery,
       subQuery,
       vitalsQuery,
+      sessionQuery,
     ]);
+
+    // Sessions
+    const sessionData = (sessionRes as any).data || [];
+    setTotalSessions(sessionData.length);
+    if (sessionData.length > 0) {
+      const totalDur = sessionData.reduce((s: number, r: any) => s + (r.duration_seconds || 0), 0);
+      setAvgDuration(Math.round(totalDur / sessionData.length));
+      const bounces = sessionData.filter((r: any) => r.is_bounce).length;
+      setBounceRate(Math.round((bounces / sessionData.length) * 100));
+    } else {
+      setAvgDuration(0);
+      setBounceRate(0);
+    }
 
     // Searches (no created_at filter available — always show all)
     const searchData = searchRes.data || [];
@@ -236,9 +261,18 @@ const SiteAnalyticsDashboard = () => {
 
   const PLATFORM_COLORS = ["bg-sky-500", "bg-emerald-500", "bg-amber-500", "bg-violet-500", "bg-rose-500", "bg-cyan-500"];
 
+  const formatDuration = (secs: number) => {
+    if (secs < 60) return `${secs}s`;
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${m}m ${s}s`;
+  };
+
   const summaryCards = [
     { label: "Page Views", value: totalViews.toLocaleString(), icon: Eye, color: "text-sky-400", bg: "bg-sky-500/10" },
-    { label: "Unique Pages", value: uniquePages.toLocaleString(), icon: BarChart3, color: "text-cyan-400", bg: "bg-cyan-500/10" },
+    { label: "Sessions", value: totalSessions.toLocaleString(), icon: Users, color: "text-cyan-400", bg: "bg-cyan-500/10" },
+    { label: "Avg Duration", value: formatDuration(avgDuration), icon: Clock, color: "text-teal-400", bg: "bg-teal-500/10" },
+    { label: "Bounce Rate", value: `${bounceRate}%`, icon: ArrowLeftRight, color: "text-orange-400", bg: "bg-orange-500/10" },
     { label: "Affiliate Clicks", value: totalClicks.toLocaleString(), icon: MousePointerClick, color: "text-emerald-400", bg: "bg-emerald-500/10" },
     { label: "Searches", value: totalSearches.toLocaleString(), icon: Search, color: "text-amber-400", bg: "bg-amber-500/10" },
     { label: "Subscribers", value: subscriberCount.toLocaleString(), icon: Users, color: "text-violet-400", bg: "bg-violet-500/10" },
@@ -288,7 +322,7 @@ const SiteAnalyticsDashboard = () => {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
         {summaryCards.map((c) => (
           <Card key={c.label}>
             <CardContent className="p-3 flex items-center gap-3">
