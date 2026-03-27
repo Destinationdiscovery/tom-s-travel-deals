@@ -122,11 +122,19 @@ serve(async (req) => {
 
 SEO OPTIMIZATION RULES (follow strictly):
 - Front-load the primary keyword in the title (first 60 chars), the first paragraph, and at least 2 H2 headings
+- Include the primary keyword in the URL slug
 - Include 3-5 LSI (latent semantic indexing) related keywords naturally throughout the article
+- Distribute secondary keywords naturally across H2 headings, section intros, and bullet lists
 - Write the excerpt as a click-worthy meta description: under 155 characters, includes primary keyword, compelling action language
 - Structure at least 2 headings as questions (for featured snippet targeting, e.g. "What Is the Best Time to Visit Cancun?")
 - Use the primary keyword in the first 100 words of the article
 - Include a clear call-to-action in the final paragraph
+
+CONTENT DEPTH & EEAT RULES:
+- Target 2,500+ words minimum. Write comprehensive, in-depth content with detailed sections.
+- Reference fresh 2026 data, statistics, and dates throughout for EEAT credibility
+- Include a FAQ section at the end with 3-5 questions and direct answers related to the topic
+- Add internal links to related ReviewThenGo tools where relevant: /reviews (hotel reviews), /best-time (best time to visit), /itinerary (itinerary builder), /flights (flight deals), /gear (packing toolkit), /currency (currency tracker), /safety (safety scores), /travel-intel (travel advisories)
 
 You must generate a complete blog article using the research provided. Structure it with clear headings and well-organized paragraphs.`,
           },
