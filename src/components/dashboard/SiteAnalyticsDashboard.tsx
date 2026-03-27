@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, MousePointerClick, Eye, Users, Heart, Gauge, BarChart3, TrendingUp, RefreshCw } from "lucide-react";
+import { Search, MousePointerClick, Eye, Users, Heart, Gauge, BarChart3, TrendingUp, RefreshCw, Clock, ArrowLeftRight } from "lucide-react";
 import { format, subDays, startOfDay } from "date-fns";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid } from "recharts";
 
