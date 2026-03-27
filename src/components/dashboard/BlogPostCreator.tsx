@@ -288,6 +288,9 @@ const BlogPostCreator = () => {
         rich_content: blocks.filter(b => b.value.trim()),
         tags: parsedTags,
         date_published: new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
+        faq_items: faqItems.length > 0 ? faqItems : [],
+        internal_links: internalLinks.length > 0 ? internalLinks : [],
+        primary_keyword: primaryKeyword.trim() || null,
       };
 
       if (editingId) {
