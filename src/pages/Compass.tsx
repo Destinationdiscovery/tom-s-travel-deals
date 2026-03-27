@@ -6,7 +6,7 @@ import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import { compassArticles, type CompassArticle } from "@/data/compassArticles";
 import { ArrowRight, Clock } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
-import heroImg from "@/assets/hero-tripreviews.jpg";
+import heroImg from "@/assets/blog-hero-nightsky.png";
 import { supabase } from "@/integrations/supabase/client";
 
 const categories = ["All", "Packing", "Guides", "Budget", "Insurance", "Timing"];
@@ -60,7 +60,7 @@ const Compass = () => {
       <Header />
       <AffiliateDisclosureBanner />
       <section className="relative h-[40vh] min-h-[320px] flex items-center justify-center pt-20">
-        <img src={heroImg} alt="Travel destinations around the world" className="absolute inset-0 w-full h-full object-cover" />
+        <img src={heroImg} alt="Starry night sky over mountains" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60" />
         <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
           <span className="inline-block px-4 py-2 rounded-full bg-white/20 text-white text-sm font-medium mb-4">
