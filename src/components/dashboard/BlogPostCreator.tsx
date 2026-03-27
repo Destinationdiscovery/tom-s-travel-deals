@@ -69,6 +69,11 @@ const BlogPostCreator = () => {
   const [topicPrompt, setTopicPrompt] = useState("");
   const [generating, setGenerating] = useState(false);
 
+  // FAQ & SEO fields from AI
+  const [faqItems, setFaqItems] = useState<Array<{question: string; answer: string}>>([]);
+  const [internalLinks, setInternalLinks] = useState<Array<{text: string; url: string}>>([]);
+  const [primaryKeyword, setPrimaryKeyword] = useState("");
+
   // Editing
   const [editingId, setEditingId] = useState<string | null>(null);
 
