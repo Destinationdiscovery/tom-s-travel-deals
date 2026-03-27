@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Trash2, ArrowUp, ArrowDown, Upload, Loader2, BookOpen, Eye, Sparkles, X, ImagePlus, Wand2 } from "lucide-react";
+import { Plus, Trash2, ArrowUp, ArrowDown, Upload, Loader2, BookOpen, Eye, Sparkles, X, ImagePlus, Wand2, RefreshCw } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
