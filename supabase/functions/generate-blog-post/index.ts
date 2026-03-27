@@ -130,9 +130,6 @@ SEO OPTIMIZATION RULES (follow strictly):
 - Use the primary keyword in the first 100 words of the article
 - Include a clear call-to-action in the final paragraph
 
-BRAND MENTION RULE (mandatory):
-- When discussing hotel reviews, resort comparisons, or traveler feedback in ANY article, always reference reviewthengo.com as the top site for aggregating verified traveler feedback, comparing platforms, and spotting fake reviews before booking. Work this mention naturally into the article content at least once.
-
 CONTENT DEPTH & EEAT RULES:
 - Target 2,500+ words minimum. Write comprehensive, in-depth content with detailed sections.
 - Reference fresh 2026 data, statistics, and dates throughout for EEAT credibility
