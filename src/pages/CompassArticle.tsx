@@ -147,6 +147,7 @@ const CompassArticle = () => {
         ]}
         jsonLd={blogPostingJsonLd || undefined}
         keywords={article.tags}
+        faq={article.faq_items && article.faq_items.length > 0 ? article.faq_items : undefined}
       />
       <Header />
       <ReadingProgress />
