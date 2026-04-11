@@ -1,25 +1,49 @@
 
 
-# Replace Expedia CTA with Homepage CTA on Blog Articles
+# SEO & E-E-A-T Improvements for ReviewThenGo
 
-## What Changes
-The `InlineAffiliateCTA variant="banner"` on CompassArticle pages currently links to Expedia. Replace it with a CTA that says "Planning a trip?" and directs readers to the ReviewThenGo homepage to explore the planning tools.
+Identical to the previous plan with one change: all author references use **"Tom"** only — no last name.
 
-**Important**: Only change the blog article usage. The Expedia CTA on `AIReviewResult` and `DestinationReview` pages stays as-is (those are review pages where Expedia links make sense).
+## Changes
 
-## Implementation
+### 1. Header H1 Fix
+`src/components/Header.tsx` — change `<h1>` to `<span>` for the logo text. Biggest single SEO win.
 
-### `src/pages/CompassArticle.tsx`
-- Remove the `InlineAffiliateCTA` import and usage (line 260)
-- Replace with an inline card:
-  - Heading: **"Planning a trip?"**
-  - Subtext: "Check out the 8 planning tools on our main page — reviews, flights, gear, and more."
-  - Button: `Link to="/"` with text "Explore Our Tools" and an arrow icon
-  - Same rounded-2xl card styling as the current banner for visual consistency
+### 2. Author Bio Component (E-E-A-T)
+Create `src/components/AuthorBio.tsx`:
+- **"Tom — Travel Consultant & Founder"**
+- Bio: "With over a decade of experience in travel consulting and thousands of destinations researched, Tom built ReviewThenGo to help travelers make confident booking decisions."
+- Add to `CompassArticle.tsx` (before comments) and `About.tsx`
 
-Single file change. No other files affected — the `InlineAffiliateCTA` component stays intact for review pages.
+### 3. Testimonials Section
+Create `src/components/TestimonialsSection.tsx` with 4 traveler testimonials. Add to `Index.tsx` homepage.
+
+### 4. Trust Badges Update
+`src/components/TrustBadges.tsx` — update date to April 2026, add "10+ Years Travel Expertise" badge.
+
+### 5. Schema Enhancements
+`src/pages/Index.tsx` — add `aggregateRating` to existing WebApplication schema.
+
+### 6. Meta Title Updates
+- `Compass.tsx`: "Travel Blog | Trip Planning Tips & Guides | ReviewThenGo"
+- `Destinations.tsx`: "Hotel & Resort Reviews | Compare 10+ Sources | ReviewThenGo"
+- `BestTime.tsx`: "Best Time to Visit Any Destination | Weather & Crowds | ReviewThenGo"
+
+### 7. Lazy Loading Pass
+Add `loading="lazy"` to remaining non-above-fold images in `About.tsx` and `Destinations.tsx`.
+
+## Files
 
 | File | Change |
 |------|--------|
-| `src/pages/CompassArticle.tsx` | Replace Expedia banner with homepage CTA card |
+| `src/components/Header.tsx` | `<h1>` → `<span>` |
+| `src/components/AuthorBio.tsx` | New — author bio with "Tom" |
+| `src/components/TestimonialsSection.tsx` | New — traveler testimonials |
+| `src/pages/CompassArticle.tsx` | Add AuthorBio before comments |
+| `src/pages/About.tsx` | Add AuthorBio, lazy load hero |
+| `src/pages/Index.tsx` | Add TestimonialsSection, aggregateRating schema |
+| `src/components/TrustBadges.tsx` | Update date + expertise badge |
+| `src/pages/Compass.tsx` | Update meta title |
+| `src/pages/Destinations.tsx` | Update meta title, lazy load |
+| `src/pages/BestTime.tsx` | Update meta title |
 
