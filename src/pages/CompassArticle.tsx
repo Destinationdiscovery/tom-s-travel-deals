@@ -271,6 +271,8 @@ const CompassArticle = () => {
               </div>
             </div>
 
+            <AuthorBio />
+
             {/* Comments Section */}
             <div className="bg-card rounded-2xl shadow-soft p-8 md:p-12 mt-8">
               <h3 className="font-display text-xl font-semibold text-foreground mb-6">
