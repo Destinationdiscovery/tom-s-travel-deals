@@ -181,7 +181,7 @@ const Destinations = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="Real Destination Reviews"
+        title="Hotel & Resort Reviews | Compare 10+ Sources"
         description="Explore curated reviews from real traveler experiences. Search any hotel, resort, or destination for honest, aggregated insights before you book."
         url="/destinations"
         jsonLd={[
@@ -221,7 +221,7 @@ const Destinations = () => {
       <main className="pt-24">
         {/* Hero */}
         <section className="relative h-[40vh] min-h-[320px] flex items-center justify-center pt-20">
-          <img src={heroImg} alt="Aerial view of a Caribbean beach" className="absolute inset-0 w-full h-full object-cover" />
+          <img src={heroImg} alt="Aerial view of a Caribbean beach" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60" />
           <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
             <h1 className="font-display text-4xl md:text-6xl font-bold text-white mb-4">

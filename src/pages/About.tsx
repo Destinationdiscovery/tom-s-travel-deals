@@ -46,7 +46,7 @@ const About = () => {
       <main className="pt-20">
         {/* Hero Section */}
         <section className="relative h-[40vh] min-h-[320px] flex items-center justify-center">
-          <img src={heroImg} alt="Aerial view of tropical destination" className="absolute inset-0 w-full h-full object-cover" />
+          <img src={heroImg} alt="Aerial view of tropical destination" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60" />
           <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
             <h1 className="font-display text-4xl md:text-6xl font-bold text-white mb-3">
