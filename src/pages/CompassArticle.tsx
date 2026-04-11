@@ -8,6 +8,7 @@ import { ArrowLeft, ArrowRight, Clock, User } from "lucide-react";
 import CommentsSection from "@/components/comments/CommentsSection";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import SEOHead from "@/components/SEOHead";
+import AuthorBio from "@/components/AuthorBio";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -270,6 +271,8 @@ const CompassArticle = () => {
                 </Link>
               </div>
             </div>
+
+            <AuthorBio />
 
             {/* Comments Section */}
             <div className="bg-card rounded-2xl shadow-soft p-8 md:p-12 mt-8">

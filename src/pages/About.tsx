@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import { Globe, Heart, MapPin, Camera, ShieldCheck, Scale } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
+import AuthorBio from "@/components/AuthorBio";
 import heroImg from "@/assets/snowbird-caribbean-aerial.jpg";
 
 const features = [
@@ -46,7 +47,7 @@ const About = () => {
       <main className="pt-20">
         {/* Hero Section */}
         <section className="relative h-[40vh] min-h-[320px] flex items-center justify-center">
-          <img src={heroImg} alt="Aerial view of tropical destination" className="absolute inset-0 w-full h-full object-cover" />
+          <img src={heroImg} alt="Aerial view of tropical destination" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60" />
           <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
             <h1 className="font-display text-4xl md:text-6xl font-bold text-white mb-3">
@@ -157,6 +158,11 @@ const About = () => {
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Author Bio */}
+            <div className="max-w-3xl mx-auto mt-16">
+              <AuthorBio />
             </div>
           </div>
         </section>

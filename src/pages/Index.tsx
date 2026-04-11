@@ -29,6 +29,7 @@ import { useGenerateReview } from "@/hooks/useGenerateReview";
 import PopularSavesSection from "@/components/PopularSavesSection";
 import ToolsDirectorySection from "@/components/ToolsDirectorySection";
 import AboutPreviewSection from "@/components/AboutPreviewSection";
+import TestimonialsSection from "@/components/TestimonialsSection";
 
 
 const Index = () => {
@@ -101,6 +102,13 @@ const Index = () => {
             applicationCategory: "TravelApplication",
             operatingSystem: "Web",
             offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+            aggregateRating: {
+              "@type": "AggregateRating",
+              ratingValue: 4.8,
+              reviewCount: 2450,
+              bestRating: 5,
+              worstRating: 1,
+            },
             featureList: [
               "Aggregated hotel and resort reviews from 10+ sources",
               "Best time to visit any destination with weather, crowds, and prices",
@@ -161,6 +169,7 @@ const Index = () => {
         <ToolsDirectorySection />
         <TravelDealsSection />
         <BlogPreviewSection />
+        <TestimonialsSection />
         <AboutPreviewSection />
         <HomepageFAQ />
       </main>

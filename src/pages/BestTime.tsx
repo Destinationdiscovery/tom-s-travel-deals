@@ -99,7 +99,7 @@ const BestTime = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="Best Time to Visit Any Destination: Weather, Crowds, and Prices"
+        title="Best Time to Visit Any Destination | Weather & Crowds"
         description="Find the best month to visit any country or city. Get weather forecasts, crowd levels, flight price trends, and local events to plan your perfect trip."
         url="/best-time"
       />

@@ -63,11 +63,11 @@ const Header = () => {
           <div className="flex items-center gap-1.5 md:gap-2 shrink-0">
             <AdminLoginDialog />
             <Link to="/">
-              <h1 className="font-display text-xl md:text-3xl font-bold whitespace-nowrap">
+              <span className="font-display text-xl md:text-3xl font-bold whitespace-nowrap">
                 <span className="text-sky-300">Review</span>
                 <span className="text-amber-400">Then</span>
                 <span className="text-emerald-400">Go</span>
-              </h1>
+              </span>
             </Link>
           </div>
 

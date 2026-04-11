@@ -53,7 +53,7 @@ const Compass = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="Travel Blog"
+        title="Travel Blog | Trip Planning Tips & Guides"
         description="Insider tips and travel wisdom from over a decade of experience. Practical advice to help you travel smarter."
         url="/compass"
       />
