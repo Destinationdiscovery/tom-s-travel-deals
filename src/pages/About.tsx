@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import { Globe, Heart, MapPin, Camera, ShieldCheck, Scale } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
+import AuthorBio from "@/components/AuthorBio";
 import heroImg from "@/assets/snowbird-caribbean-aerial.jpg";
 
 const features = [
@@ -157,6 +158,11 @@ const About = () => {
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Author Bio */}
+            <div className="max-w-3xl mx-auto mt-16">
+              <AuthorBio />
             </div>
           </div>
         </section>
