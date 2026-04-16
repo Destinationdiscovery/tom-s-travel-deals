@@ -50,7 +50,7 @@ const STATIC_URLS = [
   { loc: "/compass/rome-trevi-fountain-fee-genius-or-ripoff", changefreq: "monthly", priority: "0.7" },
 ];
 
-const BASE = "https://reviewthengo.com";
+const BASE = "https://www.reviewthengo.com";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
