@@ -97,13 +97,54 @@ const CompassArticle = () => {
     );
   }
 
+  // Parse inline markdown: links [text](url), **bold**, *italic*
+  const renderInlineMarkdown = (input: string): React.ReactNode[] => {
+    if (!input) return [];
+    const nodes: React.ReactNode[] = [];
+    // Combined regex: links | bold | italic
+    const regex = /\[([^\]]+)\]\(([^)]+)\)|\*\*([^*]+)\*\*|\*([^*\n]+)\*/g;
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+    let key = 0;
+    while ((match = regex.exec(input)) !== null) {
+      if (match.index > lastIndex) {
+        nodes.push(input.slice(lastIndex, match.index));
+      }
+      if (match[1] && match[2]) {
+        const url = match[2];
+        const isInternal = url.startsWith("/") || url.startsWith("#");
+        const rel = isInternal ? "noopener" : "sponsored noopener noreferrer";
+        nodes.push(
+          <a
+            key={`lnk-${key++}`}
+            href={url}
+            target={isInternal ? undefined : "_blank"}
+            rel={rel}
+            className="text-primary underline underline-offset-2 hover:opacity-80"
+          >
+            {match[1]}
+          </a>
+        );
+      } else if (match[3]) {
+        nodes.push(<strong key={`b-${key++}`}>{match[3]}</strong>);
+      } else if (match[4]) {
+        nodes.push(<em key={`i-${key++}`}>{match[4]}</em>);
+      }
+      lastIndex = match.index + match[0].length;
+    }
+    if (lastIndex < input.length) {
+      nodes.push(input.slice(lastIndex));
+    }
+    return nodes;
+  };
+
   const renderContentBlock = (block: any, index: number) => {
     const text = block.value || block.content || "";
     switch (block.type) {
       case "heading":
         return (
           <h2 key={index} className="font-display text-xl md:text-2xl font-semibold text-foreground mt-8 mb-4">
-            {text}
+            {renderInlineMarkdown(text)}
           </h2>
         );
       case "image":
@@ -126,7 +167,7 @@ const CompassArticle = () => {
       default:
         return (
           <p key={index} className="text-foreground/90 leading-relaxed mb-6">
-            {text}
+            {renderInlineMarkdown(text)}
           </p>
         );
     }
