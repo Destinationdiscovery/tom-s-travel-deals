@@ -1,36 +1,54 @@
 
 
-# Fix Sitemap & Robots.txt for Full Blog Discoverability
+The user wants to ensure affiliate links (and any other markdown links) render as clickable hyperlinks in published blog articles, without showing raw markdown syntax like `[text](url)`.
 
-## What's Already Working
-- Content Studio saves articles to DB ✓
-- Dynamic sitemap edge function queries `blog_posts` table and includes all slugs ✓
-- Each article gets its own URL at `/compass/{slug}` with proper JSON-LD schema ✓
+Let me check the current renderer to understand what needs patching.
 
-## What Needs Fixing
+From the CompassArticle.tsx code I already have in context, the `renderContentBlock` function for `text` type is:
 
-### 1. Sitemap Base URL Mismatch
-`supabase/functions/generate-sitemap/index.ts` line 53: Change `BASE` from `https://reviewthengo.com` to `https://www.reviewthengo.com`
+```tsx
+case "text":
+default:
+  return (
+    <p key={index} className="text-foreground/90 leading-relaxed mb-6">
+      {text}
+    </p>
+  );
+```
 
-### 2. Replace Static Sitemap with Redirect
-`public/sitemap.xml` — replace the stale hardcoded file with a minimal sitemap index that points to the dynamic edge function. This way crawlers hitting `/sitemap.xml` get directed to the live, auto-updating source.
+This dumps raw text — so `[book this resort](https://...)` would display as literal markdown. Same for headings (though links in headings are less common).
 
-### 3. Update robots.txt
-`public/robots.txt` — update the Sitemap directive to reference `https://www.reviewthengo.com/sitemap.xml` as the canonical entry point.
+I also need to handle:
+- **Bold** `**text**` 
+- *Italic* `*text*`
+- Links `[text](url)` — must render as `<a target="_blank" rel="sponsored noopener">`
 
-### 4. Expand noscript Block
-`index.html` — add links to key blog articles in the noscript block so AI bots that skip JavaScript can still discover them.
+Let me design this concisely.
 
-## After This Fix
-Every article you create in the Content Studio will automatically:
-- Appear in the dynamic sitemap with the correct `www` canonical URL
-- Be reachable by all crawlers via robots.txt → sitemap → article URL chain
-- Have proper Article JSON-LD schema (already working)
+# Make Markdown Links Clickable in Blog Articles
+
+## Problem
+Currently `CompassArticle.tsx` renders text blocks as raw strings inside a `<p>`. So when the AI writes `[book this resort](https://expedia.com/...)`, readers see literal brackets and parentheses instead of a clickable link.
+
+## Fix
+Add a small markdown-to-React parser to the `renderContentBlock` text/heading branches that converts:
+- `[anchor text](url)` → `<a href="url" target="_blank" rel="sponsored noopener">anchor text</a>`
+- `**bold**` → `<strong>bold</strong>`
+- `*italic*` → `<em>italic</em>`
+
+Affiliate links (the most important case) get `rel="sponsored noopener"` for Google compliance. Internal links (relative `/...` URLs) get `rel="noopener"` only.
+
+## Files Changed
 
 | File | Change |
 |------|--------|
-| `supabase/functions/generate-sitemap/index.ts` | Fix BASE URL to `www.reviewthengo.com` |
-| `public/sitemap.xml` | Replace with sitemap index pointing to edge function |
-| `public/robots.txt` | Update Sitemap directive to canonical domain |
-| `index.html` | Add blog article links to noscript block |
+| `src/pages/CompassArticle.tsx` | Add `renderInlineMarkdown()` helper that parses links + bold + italic. Use it inside the `text` and `heading` branches of `renderContentBlock`. |
+
+## Implementation Notes
+- Use a simple regex tokenizer (no heavy markdown library needed) that walks the string and emits React fragments
+- Links open in new tab with `target="_blank"`
+- Affiliate-style external URLs get `rel="sponsored noopener noreferrer"`
+- Styled with `text-primary underline underline-offset-2 hover:opacity-80` to match site theme
+
+That's it — single file, focused fix. After this, every affiliate link the Content Studio injects will render as a proper clickable, SEO-compliant hyperlink.
 
