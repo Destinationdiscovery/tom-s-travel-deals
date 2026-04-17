@@ -28,13 +28,14 @@ const BlogPreviewSection = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("blog_posts")
-        .select("slug, title, category, category_color, hero_image_url, excerpt, author, date_published, read_time")
-        .order("date_published", { ascending: false })
+        .select("slug, title, category, category_color, hero_image_url, excerpt, author, date_published, read_time, created_at")
+        .order("created_at", { ascending: false })
         .limit(10);
       if (error) throw error;
       return data ?? [];
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: 60 * 1000,
+    refetchOnWindowFocus: true,
   });
 
   const articles = useMemo<UnifiedArticle[]>(() => {
