@@ -176,7 +176,12 @@ const BlogPostCreator = () => {
     setGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-blog-post", {
-        body: { prompt: topicPrompt.trim() },
+        body: {
+          prompt: topicPrompt.trim(),
+          affiliateUrl: affiliateUrl.trim() || undefined,
+          affiliateBrand: affiliateBrand.trim() || undefined,
+          affiliateAnchor: affiliateAnchor.trim() || undefined,
+        },
       });
 
       if (error) throw new Error(error.message || "Generation failed");
