@@ -51,14 +51,33 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { prompt, affiliateUrl, affiliateBrand, affiliateAnchor } = await req.json();
+    const body = await req.json();
+    const { prompt, affiliateUrl, affiliateBrand, affiliateAnchor } = body;
     if (!prompt?.trim()) throw new Error("Prompt is required");
 
-    // Affiliate is active if a URL is provided. Brand defaults to "this product" if missing.
-    const hasAffiliate = !!(affiliateUrl && affiliateUrl.trim());
-    const brandLabel = (affiliateBrand && affiliateBrand.trim()) || "this product";
-    const anchorLabel = (affiliateAnchor && affiliateAnchor.trim()) || brandLabel;
-    console.log("Affiliate active:", hasAffiliate, "Brand:", brandLabel);
+    // Normalize affiliates: prefer new `affiliates` array, fall back to legacy single-field payload.
+    type Affiliate = { url: string; brand: string; anchor: string };
+    let affiliates: Affiliate[] = Array.isArray(body.affiliates)
+      ? body.affiliates
+          .map((a: any) => ({
+            url: (a?.url || "").trim(),
+            brand: (a?.brand || "").trim() || "this product",
+            anchor: (a?.anchor || "").trim() || (a?.brand || "").trim() || "this product",
+          }))
+          .filter((a: Affiliate) => a.url.length > 0)
+          .slice(0, 3)
+      : [];
+
+    if (affiliates.length === 0 && affiliateUrl && affiliateUrl.trim()) {
+      affiliates = [{
+        url: affiliateUrl.trim(),
+        brand: (affiliateBrand && affiliateBrand.trim()) || "this product",
+        anchor: (affiliateAnchor && affiliateAnchor.trim()) || (affiliateBrand && affiliateBrand.trim()) || "this product",
+      }];
+    }
+
+    const hasAffiliate = affiliates.length > 0;
+    console.log("Affiliate count:", affiliates.length, affiliates.map(a => a.brand));
 
     const PERPLEXITY_API_KEY = Deno.env.get("PERPLEXITY_API_KEY");
     if (!PERPLEXITY_API_KEY) throw new Error("PERPLEXITY_API_KEY is not configured");
