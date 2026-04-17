@@ -51,8 +51,10 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { prompt } = await req.json();
+    const { prompt, affiliateUrl, affiliateBrand, affiliateAnchor } = await req.json();
     if (!prompt?.trim()) throw new Error("Prompt is required");
+
+    const hasAffiliate = !!(affiliateUrl && affiliateBrand);
 
     const PERPLEXITY_API_KEY = Deno.env.get("PERPLEXITY_API_KEY");
     if (!PERPLEXITY_API_KEY) throw new Error("PERPLEXITY_API_KEY is not configured");
@@ -149,6 +151,18 @@ ${research}
 
 ${citations.length > 0 ? `\nSOURCES:\n${citations.map((c: string, i: number) => `[${i + 1}] ${c}`).join("\n")}` : ""}
 
+${hasAffiliate ? `
+AFFILIATE LINK INTEGRATION (MANDATORY):
+You MUST naturally weave 2 to 4 contextual mentions of "${affiliateBrand}" into body paragraphs where it is genuinely relevant (recommendations, examples, comparisons, gear suggestions, booking suggestions). Each mention MUST be hyperlinked using markdown syntax: [anchor text](${affiliateUrl})
+
+Rules:
+- Vary the anchor text every time. Never repeat the same phrase. Examples of varied anchors: "${affiliateAnchor || affiliateBrand}", "check current pricing", "see availability and reviews", "browse this option", "view the latest deals on ${affiliateBrand}", "compare prices here"
+- Place links in BODY text blocks only. NEVER in the intro paragraph, NEVER in headings, NEVER in the FAQ section, NEVER in the excerpt or meta description.
+- Maximum 4 affiliate links total. Spread them across different sections.
+- Do NOT use pushy phrases like "Click here", "Buy now", "Best deal ever". Keep it editorial and natural.
+- The link must read as a helpful recommendation, not an ad.
+- Use the EXACT URL: ${affiliateUrl}
+` : ""}
 Generate the full article with all metadata. Pick the most appropriate category from: ${CATEGORIES.join(", ")}
 
 IMPORTANT: For the image_search_queries field, provide short, descriptive search terms that would find great stock photos on Pexels. For example "tropical beach resort", "packing suitcase travel", "airport departure lounge". Provide one for the hero and one per section heading.`,

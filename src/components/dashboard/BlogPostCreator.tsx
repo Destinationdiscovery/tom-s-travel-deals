@@ -69,6 +69,11 @@ const BlogPostCreator = () => {
   const [topicPrompt, setTopicPrompt] = useState("");
   const [generating, setGenerating] = useState(false);
 
+  // Affiliate link state
+  const [affiliateUrl, setAffiliateUrl] = useState("");
+  const [affiliateBrand, setAffiliateBrand] = useState("");
+  const [affiliateAnchor, setAffiliateAnchor] = useState("");
+
   // FAQ & SEO fields from AI
   const [faqItems, setFaqItems] = useState<Array<{question: string; answer: string}>>([]);
   const [internalLinks, setInternalLinks] = useState<Array<{text: string; url: string}>>([]);
@@ -171,7 +176,12 @@ const BlogPostCreator = () => {
     setGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-blog-post", {
-        body: { prompt: topicPrompt.trim() },
+        body: {
+          prompt: topicPrompt.trim(),
+          affiliateUrl: affiliateUrl.trim() || undefined,
+          affiliateBrand: affiliateBrand.trim() || undefined,
+          affiliateAnchor: affiliateAnchor.trim() || undefined,
+        },
       });
 
       if (error) throw new Error(error.message || "Generation failed");
@@ -292,6 +302,7 @@ const BlogPostCreator = () => {
     setBlocks([{ type: "text", value: "" }]);
     setHeroFile(null); setHeroPreview(""); setEditingId(null);
     setRawText(""); setTopicPrompt("");
+    setAffiliateUrl(""); setAffiliateBrand(""); setAffiliateAnchor("");
     setFaqItems([]); setInternalLinks([]); setPrimaryKeyword("");
     setImagePool([]);
     imagePoolPreviews.forEach(u => URL.revokeObjectURL(u));
@@ -425,6 +436,44 @@ const BlogPostCreator = () => {
                   className="min-h-[120px] text-sm"
                 />
               </div>
+
+              {/* Affiliate Link (optional) */}
+              <div className="border border-border/60 rounded-lg p-4 space-y-3 bg-background/50">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-foreground">Affiliate Link</span>
+                  <span className="text-xs text-muted-foreground">(optional, naturally woven in 2-4 times)</span>
+                </div>
+                <div>
+                  <Label className="text-xs">Affiliate URL</Label>
+                  <Input
+                    value={affiliateUrl}
+                    onChange={e => setAffiliateUrl(e.target.value)}
+                    placeholder="https://www.amazon.ca/dp/...?tag=reviewthengo-20"
+                    className="text-sm"
+                  />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs">Brand / Product Name</Label>
+                    <Input
+                      value={affiliateBrand}
+                      onChange={e => setAffiliateBrand(e.target.value)}
+                      placeholder="EPICKA Universal Adapter"
+                      className="text-sm"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Suggested Anchor Text</Label>
+                    <Input
+                      value={affiliateAnchor}
+                      onChange={e => setAffiliateAnchor(e.target.value)}
+                      placeholder="this travel adapter"
+                      className="text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+
               <Button
                 onClick={handleGenerateFromTopic}
                 disabled={generating || !topicPrompt.trim()}
