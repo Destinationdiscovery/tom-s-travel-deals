@@ -1,33 +1,62 @@
 
 
-User wants the homepage "From the Blog" section to:
-1. Always show the 3 latest published articles (auto-update with new posts)
-2. Be SEO optimized
-3. Be in the sitemap
+User says PWA isn't picking up the new Content Studio updates (multi-affiliate fields + latest articles changes) despite many refreshes. This is a classic PWA service worker caching problem.
 
-Let me check the current state. From the files visible:
+Looking at vite.config.ts: `registerType: "autoUpdate"` is set, which is good, but the service worker still serves the old cached shell until the new SW activates. On mobile PWAs (especially iOS), the old version often persists for a long time because:
+1. SW updates only check on navigation events
+2. The "skipWaiting" + "clientsClaim" aren't set, so the new SW waits idle until ALL tabs/PWA windows close
+3. Cached JS chunks are served from `images-cache` / `api-cache` / precache
 
-**BlogPreviewSection.tsx** — already merges hardcoded `compassArticles` + DB `blog_posts`, dedupes by slug (DB wins), sorts by `datePublished` desc, slices top 3. So new DB posts DO appear automatically. Good.
+Also `main.tsx` calls `registerSW({ immediate: true })` but doesn't pass `onNeedRefresh` to actually swap to the new version, and there's no PWA guard for the preview iframe (per the PWA guidance — though that's a separate issue).
 
-**generate-sitemap edge function** — already pulls all blog_posts slugs from DB and adds them to the sitemap with lastmod dates. Good.
+The fix needs two parts: an immediate unstick for the user right now, and a code change so this doesn't happen again on future updates.
 
-**SEO** — Need to confirm:
-- Homepage has BlogPreviewSection mounted
-- Articles have proper JSON-LD on individual pages (CompassArticle)
-- Sitemap includes new posts (yes, via DB query in edge function)
+Keeping it tight per instructions.
 
-Issues to verify/fix:
-1. `staleTime: 5 * 60 * 1000` means freshly published posts may take up to 5 min to show on homepage for users with cached query. But this is per-session, not bad.
-2. The query orders by `date_published` (text field) which could sort lexicographically wrong if dates aren't ISO. Need to verify format.
-3. Need to add `ItemList` JSON-LD on homepage for the blog preview section to be SEO-optimized
-4. Need to verify Index.tsx mounts BlogPreviewSection
+# Plan: Fix PWA Stale Cache for Content Studio Updates
 
-Let me check Index.tsx and CompassArticle to see what's there before planning.
+## Why the PWA is showing old content
 
-Actually, the user's ask is short: "make sure latest articles update + SEO optimized + sitemap + show 3 latest". Most of this is already done. The plan should:
-- Verify/confirm what's already working
-- Add ItemList JSON-LD schema for the homepage blog section (SEO improvement)
-- Ensure date_published sorts correctly (use created_at as tiebreaker, or order by created_at)
-- Make sure homepage section actually appears in Index.tsx
+The service worker is set to `autoUpdate` but it doesn't force the new version to activate while the PWA window is open. So even after refreshing, you're still being served the old cached JavaScript bundle that doesn't include the new affiliate fields.
 
-Let me check Index.tsx quickly.
+## Immediate unstick (you do this once on the device)
+
+On your phone PWA, do one of these to force a fresh load right now:
+1. Fully close the installed PWA (swipe it out of the app switcher), then reopen it. Repeat once more.
+2. Or open the site in regular Chrome/Safari (not the installed PWA), confirm new fields appear there, then reopen the PWA.
+
+If that still shows old content, uninstall the PWA from your home screen and reinstall from `/install`.
+
+## Permanent fix (code changes so this stops happening)
+
+**`vite.config.ts`** — add two workbox flags so new service workers activate immediately instead of waiting:
+```
+workbox: {
+  skipWaiting: true,
+  clientsClaim: true,
+  cleanupOutdatedCaches: true,
+  ...
+}
+```
+
+**`src/main.tsx`** — replace the current `registerSW({ immediate: true })` with a version that auto-reloads the page when a new build is detected:
+```
+const updateSW = registerSW({
+  immediate: true,
+  onNeedRefresh() {
+    updateSW(true); // activates new SW and reloads
+  },
+});
+```
+
+**Result**: every time you publish a new build, PWA users get the new version on their next app open, no manual refresh needed.
+
+## Files Touched
+
+| File | Change |
+|---|---|
+| `vite.config.ts` | Add `skipWaiting`, `clientsClaim`, `cleanupOutdatedCaches` to workbox config |
+| `src/main.tsx` | Wire up `onNeedRefresh` callback to auto-activate new service worker |
+
+No design changes. No database changes. Backward compatible.
+
