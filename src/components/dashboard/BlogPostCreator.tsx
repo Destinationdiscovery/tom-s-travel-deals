@@ -69,10 +69,21 @@ const BlogPostCreator = () => {
   const [topicPrompt, setTopicPrompt] = useState("");
   const [generating, setGenerating] = useState(false);
 
-  // Affiliate link state
-  const [affiliateUrl, setAffiliateUrl] = useState("");
-  const [affiliateBrand, setAffiliateBrand] = useState("");
-  const [affiliateAnchor, setAffiliateAnchor] = useState("");
+  // Affiliate links state (up to 3)
+  const [affiliates, setAffiliates] = useState<Array<{ url: string; brand: string; anchor: string }>>([
+    { url: "", brand: "", anchor: "" },
+  ]);
+
+  const updateAffiliate = (i: number, patch: Partial<{ url: string; brand: string; anchor: string }>) => {
+    setAffiliates(prev => prev.map((a, idx) => (idx === i ? { ...a, ...patch } : a)));
+  };
+  const addAffiliate = () => {
+    if (affiliates.length >= 3) return;
+    setAffiliates(prev => [...prev, { url: "", brand: "", anchor: "" }]);
+  };
+  const removeAffiliate = (i: number) => {
+    setAffiliates(prev => (prev.length === 1 ? [{ url: "", brand: "", anchor: "" }] : prev.filter((_, idx) => idx !== i)));
+  };
 
   // FAQ & SEO fields from AI
   const [faqItems, setFaqItems] = useState<Array<{question: string; answer: string}>>([]);
