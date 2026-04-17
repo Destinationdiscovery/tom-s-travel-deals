@@ -54,7 +54,11 @@ serve(async (req) => {
     const { prompt, affiliateUrl, affiliateBrand, affiliateAnchor } = await req.json();
     if (!prompt?.trim()) throw new Error("Prompt is required");
 
-    const hasAffiliate = !!(affiliateUrl && affiliateBrand);
+    // Affiliate is active if a URL is provided. Brand defaults to "this product" if missing.
+    const hasAffiliate = !!(affiliateUrl && affiliateUrl.trim());
+    const brandLabel = (affiliateBrand && affiliateBrand.trim()) || "this product";
+    const anchorLabel = (affiliateAnchor && affiliateAnchor.trim()) || brandLabel;
+    console.log("Affiliate active:", hasAffiliate, "Brand:", brandLabel);
 
     const PERPLEXITY_API_KEY = Deno.env.get("PERPLEXITY_API_KEY");
     if (!PERPLEXITY_API_KEY) throw new Error("PERPLEXITY_API_KEY is not configured");
@@ -152,16 +156,28 @@ ${research}
 ${citations.length > 0 ? `\nSOURCES:\n${citations.map((c: string, i: number) => `[${i + 1}] ${c}`).join("\n")}` : ""}
 
 ${hasAffiliate ? `
-AFFILIATE LINK INTEGRATION (MANDATORY):
-You MUST naturally weave 2 to 4 contextual mentions of "${affiliateBrand}" into body paragraphs where it is genuinely relevant (recommendations, examples, comparisons, gear suggestions, booking suggestions). Each mention MUST be hyperlinked using markdown syntax: [anchor text](${affiliateUrl})
+============================================
+AFFILIATE LINK INTEGRATION (NON-NEGOTIABLE)
+============================================
+You MUST include 2 to 4 markdown hyperlinks pointing to this exact URL: ${affiliateUrl}
 
-Rules:
-- Vary the anchor text every time. Never repeat the same phrase. Examples of varied anchors: "${affiliateAnchor || affiliateBrand}", "check current pricing", "see availability and reviews", "browse this option", "view the latest deals on ${affiliateBrand}", "compare prices here"
-- Place links in BODY text blocks only. NEVER in the intro paragraph, NEVER in headings, NEVER in the FAQ section, NEVER in the excerpt or meta description.
-- Maximum 4 affiliate links total. Spread them across different sections.
-- Do NOT use pushy phrases like "Click here", "Buy now", "Best deal ever". Keep it editorial and natural.
-- The link must read as a helpful recommendation, not an ad.
-- Use the EXACT URL: ${affiliateUrl}
+Format each link EXACTLY like this in the body text:
+[varied anchor text](${affiliateUrl})
+
+Example sentences (study these patterns):
+- "I always recommend [${anchorLabel}](${affiliateUrl}) for travellers heading to warm climates."
+- "You can [check current pricing on ${brandLabel}](${affiliateUrl}) before your trip."
+- "For most Canadian travellers, [this option](${affiliateUrl}) hits the sweet spot of price and quality."
+- "Before you pack, [browse the latest deals](${affiliateUrl}) to compare what's available."
+
+REQUIREMENTS:
+1. Place the links inside the "value" field of "text" content blocks (NOT in headings, intro, FAQ, excerpt, or meta_description).
+2. Vary every anchor text. Never reuse the same phrase. Mix branded ("${brandLabel}") and generic ("this device", "current pricing", "the latest model") anchors.
+3. Spread links across at least 2 different sections of the article.
+4. Keep the tone editorial and helpful. Never use "Click here", "Buy now", or "Best deal".
+5. The URL inside parentheses must be EXACTLY: ${affiliateUrl}
+6. Do NOT skip this. The article will be rejected if it contains zero affiliate links.
+============================================
 ` : ""}
 Generate the full article with all metadata. Pick the most appropriate category from: ${CATEGORIES.join(", ")}
 
@@ -294,6 +310,28 @@ IMPORTANT: For the image_search_queries field, provide short, descriptive search
         question: cleanEmDashes(faq.question || ""),
         answer: cleanEmDashes(faq.answer || ""),
       }));
+    }
+
+    // Affiliate fallback: if affiliate is active but AI produced zero markdown links, inject one
+    if (hasAffiliate) {
+      const linkRegex = new RegExp(`\\]\\(${affiliateUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\)`);
+      const hasAnyLink = article.blocks.some((b: any) => b.type === "text" && linkRegex.test(b.value || ""));
+      if (!hasAnyLink) {
+        console.warn("AI produced zero affiliate links. Injecting fallback link.");
+        // Find longest text block (skip first which is intro)
+        const textBlocks = article.blocks
+          .map((b: any, i: number) => ({ b, i }))
+          .filter((x: any) => x.b.type === "text" && (x.b.value || "").length > 200);
+        const target = textBlocks[Math.floor(textBlocks.length / 2)] || textBlocks[0];
+        if (target) {
+          const sentences = target.b.value.split(/(?<=[.!?])\s+/);
+          const insertAt = Math.min(1, sentences.length - 1);
+          const linkSentence = ` You can [${anchorLabel}](${affiliateUrl}) to compare options before booking.`;
+          sentences.splice(insertAt + 1, 0, linkSentence.trim());
+          article.blocks[target.i].value = sentences.join(" ");
+          console.log("Fallback affiliate link injected at block", target.i);
+        }
+      }
     }
 
     console.log("Article generated:", article.title);
