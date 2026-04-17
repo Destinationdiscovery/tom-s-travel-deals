@@ -312,6 +312,28 @@ IMPORTANT: For the image_search_queries field, provide short, descriptive search
       }));
     }
 
+    // Affiliate fallback: if affiliate is active but AI produced zero markdown links, inject one
+    if (hasAffiliate) {
+      const linkRegex = new RegExp(`\\]\\(${affiliateUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\)`);
+      const hasAnyLink = article.blocks.some((b: any) => b.type === "text" && linkRegex.test(b.value || ""));
+      if (!hasAnyLink) {
+        console.warn("AI produced zero affiliate links. Injecting fallback link.");
+        // Find longest text block (skip first which is intro)
+        const textBlocks = article.blocks
+          .map((b: any, i: number) => ({ b, i }))
+          .filter((x: any) => x.b.type === "text" && (x.b.value || "").length > 200);
+        const target = textBlocks[Math.floor(textBlocks.length / 2)] || textBlocks[0];
+        if (target) {
+          const sentences = target.b.value.split(/(?<=[.!?])\s+/);
+          const insertAt = Math.min(1, sentences.length - 1);
+          const linkSentence = ` You can [${anchorLabel}](${affiliateUrl}) to compare options before booking.`;
+          sentences.splice(insertAt + 1, 0, linkSentence.trim());
+          article.blocks[target.i].value = sentences.join(" ");
+          console.log("Fallback affiliate link injected at block", target.i);
+        }
+      }
+    }
+
     console.log("Article generated:", article.title);
     console.log(`FAQ items: ${article.faq_items?.length || 0}, Internal links: ${article.internal_links?.length || 0}, Primary keyword: ${article.primary_keyword || "none"}`);
 
