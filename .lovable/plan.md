@@ -1,46 +1,64 @@
 
-The user wants me to test the Content Studio to verify affiliate links render as clickable hyperlinks in published articles. Testing requires browser automation + creating a real blog post, which is a default-mode action (writes to DB, calls edge functions).
 
-Let me check the current state of the renderer and the BlogPostCreator to confirm what's wired up before proposing the test plan.
+The user is asking: does the Content Studio currently produce articles where affiliate/markdown links render as clickable, and if not, can we make it so?
 
-I already have the CompassArticle.tsx context showing the renderInlineMarkdown helper was added. I should verify:
-1. BlogPostCreator passes affiliateUrl/anchorText/brandName to the edge function
-2. Edge function uses them in the prompt
-3. Renderer parses markdown links
+From the prior conversation:
+1. The renderer in CompassArticle.tsx WAS updated with `renderInlineMarkdown` that parses `[text](url)`, `**bold**`, `*italic*` — confirmed working in a test post.
+2. BUT the AI noted a "feature gap": BlogPostCreator.tsx doesn't have the affiliate input fields, and generate-blog-post edge function prompt wasn't updated to inject affiliate links.
 
-Let me quickly view those files to confirm wiring before testing.
+So the situation is:
+- ✅ Renderer can display clickable links if markdown is in the content
+- ❌ Content Studio has no UI to specify an affiliate link
+- ❌ Edge function doesn't instruct AI to insert affiliate hyperlinks
 
-# Test Plan: Verify Affiliate Links Render as Clickable
+Let me quickly verify the current state of BlogPostCreator and the edge function to confirm before planning.
 
-## What I'll Do
+I already have generate-blog-post/index.ts in context — confirmed: NO affiliate logic in the prompt, no affiliateUrl/anchorText/brandName fields accepted.
 
-1. **Quick wiring check** (read-only): Verify `BlogPostCreator.tsx` sends affiliate fields and `generate-blog-post/index.ts` injects them into the AI prompt. Confirm `CompassArticle.tsx` has the `renderInlineMarkdown` helper for `[text](url)`, `**bold**`, `*italic*`.
+I need to check BlogPostCreator.tsx briefly.
 
-2. **End-to-end browser test**:
-   - Navigate to `/gear-admin` → Content Studio
-   - Fill in a test prompt (e.g. "Best travel adapters for Europe 2026")
-   - Fill the 3 affiliate fields:
-     - URL: `https://www.amazon.ca/dp/B07S98YL3R`
-     - Anchor text: `this universal travel adapter`
-     - Brand: `EPICKA Universal Travel Adapter`
-   - Click Generate, wait for completion
-   - Open the published article at `/compass/{slug}`
-   - Verify:
-     - No raw `[text](url)` markdown visible
-     - Affiliate mentions are clickable, styled as primary-colored underlined links
-     - Links open in new tab with `rel="sponsored noopener noreferrer"` (inspect via observe)
-     - 2-4 affiliate links present, naturally placed (not in intro, varied anchor text)
-     - Bold/italic markdown also renders correctly
+# Make Content Studio Produce Clickable Affiliate Links
 
-3. **Report findings**: If any issue found (markdown not parsing, wrong rel attributes, AI ignoring affiliate instructions), I'll fix it in the same loop and re-test.
+## Current State
+- **Renderer**: ✅ Already converts `[text](url)` markdown into clickable `<a>` tags (verified in last test)
+- **Content Studio UI**: ❌ No affiliate fields exist yet
+- **AI Prompt**: ❌ Doesn't tell the AI to insert any links
 
-## What Could Go Wrong (and how I'll handle it)
-- AI ignores affiliate instructions → Strengthen the prompt in `generate-blog-post/index.ts`
-- Markdown still shows as raw text → Patch the renderer regex
-- Links missing `rel="sponsored"` → Adjust the renderInlineMarkdown helper
+So right now, the AI isn't producing affiliate hyperlinks because nothing tells it to. We just need to wire up the input → prompt instruction chain.
 
-## Files Possibly Touched (only if bugs found)
-- `supabase/functions/generate-blog-post/index.ts`
-- `src/pages/CompassArticle.tsx`
+## Plan
 
-The test article will be created in your DB. I'll note its slug so you can delete it after if you don't want to keep it.
+### 1. Add affiliate inputs to Content Studio
+`src/components/dashboard/BlogPostCreator.tsx` — add a collapsible "Affiliate Link (optional)" section with 3 fields:
+- **Affiliate URL** — e.g. `https://www.amazon.ca/dp/...?tag=reviewthengo-20`
+- **Brand/Product Name** — e.g. `EPICKA Universal Adapter`, `Expedia`
+- **Suggested Anchor Text** — e.g. `this travel adapter` (AI will vary it naturally)
+
+Pass these to the edge function call.
+
+### 2. Update edge function prompt
+`supabase/functions/generate-blog-post/index.ts` — when affiliate fields are provided, append to the system prompt:
+
+> **Affiliate Integration:**
+> - Naturally weave 2 to 4 contextual mentions of [Brand] in body paragraphs where genuinely relevant (recommendations, comparisons, examples)
+> - Hyperlink each using markdown: `[varied anchor text](AFFILIATE_URL)`
+> - Vary anchor text — never repeat the same phrase. Examples: "{anchor}", "check current pricing", "see availability", "view this option"
+> - DO NOT place affiliate links in the intro, FAQ, or every paragraph
+> - DO NOT use pushy phrases like "Click here", "Buy now", "Best deal"
+> - Maximum 4 links per article
+
+Also accept `affiliateUrl`, `brandName`, `anchorText` from request body.
+
+### 3. Renderer is already done
+`CompassArticle.tsx` already parses markdown links with proper `rel="sponsored noopener noreferrer"` for external URLs. No changes needed.
+
+## Files Changed
+
+| File | Change |
+|------|--------|
+| `src/components/dashboard/BlogPostCreator.tsx` | Add 3 optional affiliate input fields, send to edge function |
+| `supabase/functions/generate-blog-post/index.ts` | Accept affiliate params, conditionally inject natural-link rules into AI prompt |
+
+## After This
+You enter an affiliate URL in Content Studio → AI generates an article with 2-4 naturally placed `[anchor](url)` mentions → renderer displays them as clickable, SEO-compliant `<a rel="sponsored">` links in the published article.
+
