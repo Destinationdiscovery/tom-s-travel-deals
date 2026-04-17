@@ -54,7 +54,11 @@ serve(async (req) => {
     const { prompt, affiliateUrl, affiliateBrand, affiliateAnchor } = await req.json();
     if (!prompt?.trim()) throw new Error("Prompt is required");
 
-    const hasAffiliate = !!(affiliateUrl && affiliateBrand);
+    // Affiliate is active if a URL is provided. Brand defaults to "this product" if missing.
+    const hasAffiliate = !!(affiliateUrl && affiliateUrl.trim());
+    const brandLabel = (affiliateBrand && affiliateBrand.trim()) || "this product";
+    const anchorLabel = (affiliateAnchor && affiliateAnchor.trim()) || brandLabel;
+    console.log("Affiliate active:", hasAffiliate, "Brand:", brandLabel);
 
     const PERPLEXITY_API_KEY = Deno.env.get("PERPLEXITY_API_KEY");
     if (!PERPLEXITY_API_KEY) throw new Error("PERPLEXITY_API_KEY is not configured");
