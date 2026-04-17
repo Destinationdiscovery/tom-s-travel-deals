@@ -51,10 +51,11 @@ const BlogPreviewSection = () => {
       author: a.author,
       datePublished: a.datePublished,
       readTime: a.readTime,
+      sortDate: new Date(a.datePublished).toISOString(),
     }));
 
-    // Map DB articles
-    const dbArticles: UnifiedArticle[] = (dbPostsQuery.data ?? []).map((p) => ({
+    // Map DB articles (use created_at for reliable sorting since date_published is human text)
+    const dbArticles: UnifiedArticle[] = (dbPostsQuery.data ?? []).map((p: any) => ({
       slug: p.slug,
       title: p.title,
       category: p.category,
@@ -64,6 +65,7 @@ const BlogPreviewSection = () => {
       author: p.author,
       datePublished: p.date_published,
       readTime: p.read_time,
+      sortDate: p.created_at ?? new Date(p.date_published).toISOString(),
     }));
 
     // Merge, deduplicate by slug (DB wins), sort newest first, take 3
@@ -72,7 +74,7 @@ const BlogPreviewSection = () => {
     dbArticles.forEach((a) => slugMap.set(a.slug, a)); // DB overwrites
 
     return Array.from(slugMap.values())
-      .sort((a, b) => new Date(b.datePublished).getTime() - new Date(a.datePublished).getTime())
+      .sort((a, b) => new Date(b.sortDate).getTime() - new Date(a.sortDate).getTime())
       .slice(0, 3);
   }, [dbPostsQuery.data]);
 
