@@ -83,8 +83,38 @@ const BlogPreviewSection = () => {
     return DESTINATION_KEYWORDS.find(k => text.includes(k)) || null;
   };
 
+  // SEO: ItemList JSON-LD so search engines understand these are the latest posts
+  const itemListJsonLd = articles.length > 0 ? {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Latest Travel Articles from ReviewThenGo",
+    itemListOrder: "https://schema.org/ItemListOrderDescending",
+    numberOfItems: articles.length,
+    itemListElement: articles.map((a, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `https://www.reviewthengo.com/compass/${a.slug}`,
+      item: {
+        "@type": "BlogPosting",
+        "@id": `https://www.reviewthengo.com/compass/${a.slug}`,
+        headline: a.title,
+        description: a.excerpt,
+        image: a.image || undefined,
+        author: { "@type": "Person", name: a.author },
+        datePublished: a.datePublished,
+        url: `https://www.reviewthengo.com/compass/${a.slug}`,
+      },
+    })),
+  } : null;
+
   return (
-    <section className="py-12 bg-background">
+    <section className="py-12 bg-background" aria-labelledby="blog-preview-heading">
+      {itemListJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+        />
+      )}
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between mb-8">
           <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground">
