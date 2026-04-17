@@ -302,6 +302,7 @@ const BlogPostCreator = () => {
     setBlocks([{ type: "text", value: "" }]);
     setHeroFile(null); setHeroPreview(""); setEditingId(null);
     setRawText(""); setTopicPrompt("");
+    setAffiliateUrl(""); setAffiliateBrand(""); setAffiliateAnchor("");
     setFaqItems([]); setInternalLinks([]); setPrimaryKeyword("");
     setImagePool([]);
     imagePoolPreviews.forEach(u => URL.revokeObjectURL(u));
