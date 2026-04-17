@@ -51,14 +51,33 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { prompt, affiliateUrl, affiliateBrand, affiliateAnchor } = await req.json();
+    const body = await req.json();
+    const { prompt, affiliateUrl, affiliateBrand, affiliateAnchor } = body;
     if (!prompt?.trim()) throw new Error("Prompt is required");
 
-    // Affiliate is active if a URL is provided. Brand defaults to "this product" if missing.
-    const hasAffiliate = !!(affiliateUrl && affiliateUrl.trim());
-    const brandLabel = (affiliateBrand && affiliateBrand.trim()) || "this product";
-    const anchorLabel = (affiliateAnchor && affiliateAnchor.trim()) || brandLabel;
-    console.log("Affiliate active:", hasAffiliate, "Brand:", brandLabel);
+    // Normalize affiliates: prefer new `affiliates` array, fall back to legacy single-field payload.
+    type Affiliate = { url: string; brand: string; anchor: string };
+    let affiliates: Affiliate[] = Array.isArray(body.affiliates)
+      ? body.affiliates
+          .map((a: any) => ({
+            url: (a?.url || "").trim(),
+            brand: (a?.brand || "").trim() || "this product",
+            anchor: (a?.anchor || "").trim() || (a?.brand || "").trim() || "this product",
+          }))
+          .filter((a: Affiliate) => a.url.length > 0)
+          .slice(0, 3)
+      : [];
+
+    if (affiliates.length === 0 && affiliateUrl && affiliateUrl.trim()) {
+      affiliates = [{
+        url: affiliateUrl.trim(),
+        brand: (affiliateBrand && affiliateBrand.trim()) || "this product",
+        anchor: (affiliateAnchor && affiliateAnchor.trim()) || (affiliateBrand && affiliateBrand.trim()) || "this product",
+      }];
+    }
+
+    const hasAffiliate = affiliates.length > 0;
+    console.log("Affiliate count:", affiliates.length, affiliates.map(a => a.brand));
 
     const PERPLEXITY_API_KEY = Deno.env.get("PERPLEXITY_API_KEY");
     if (!PERPLEXITY_API_KEY) throw new Error("PERPLEXITY_API_KEY is not configured");
@@ -159,24 +178,26 @@ ${hasAffiliate ? `
 ============================================
 AFFILIATE LINK INTEGRATION (NON-NEGOTIABLE)
 ============================================
-You MUST include 2 to 4 markdown hyperlinks pointing to this exact URL: ${affiliateUrl}
+You have ${affiliates.length} affiliate ${affiliates.length === 1 ? "product" : "products"} to weave into the article:
+${affiliates.map((a, i) => `${i + 1}) ${a.brand} — URL: ${a.url} — suggested anchor phrase: "${a.anchor}"`).join("\n")}
 
-Format each link EXACTLY like this in the body text:
-[varied anchor text](${affiliateUrl})
+${affiliates.length > 1 ? `Treat these as comparison or companion product recommendations where it fits the article naturally (e.g. "the EPICKA adapter is great, but for heavier draw I prefer the Anker model").` : ""}
 
-Example sentences (study these patterns):
-- "I always recommend [${anchorLabel}](${affiliateUrl}) for travellers heading to warm climates."
-- "You can [check current pricing on ${brandLabel}](${affiliateUrl}) before your trip."
-- "For most Canadian travellers, [this option](${affiliateUrl}) hits the sweet spot of price and quality."
-- "Before you pack, [browse the latest deals](${affiliateUrl}) to compare what's available."
+For EACH product above, include 2 to 3 markdown hyperlinks pointing to that product's exact URL. Format:
+[varied anchor text](exact_product_url)
+
+Example sentences (study these patterns and vary every anchor):
+${affiliates.map(a => `- "I've tested [${a.anchor}](${a.url}) on multiple trips and it never disappoints."`).join("\n")}
+- "You can [check current pricing](URL) before your trip."
+- "For most Canadian travellers, [this option](URL) hits the sweet spot."
 
 REQUIREMENTS:
-1. Place the links inside the "value" field of "text" content blocks (NOT in headings, intro, FAQ, excerpt, or meta_description).
-2. Vary every anchor text. Never reuse the same phrase. Mix branded ("${brandLabel}") and generic ("this device", "current pricing", "the latest model") anchors.
-3. Spread links across at least 2 different sections of the article.
-4. Keep the tone editorial and helpful. Never use "Click here", "Buy now", or "Best deal".
-5. The URL inside parentheses must be EXACTLY: ${affiliateUrl}
-6. Do NOT skip this. The article will be rejected if it contains zero affiliate links.
+1. Place links inside the "value" field of "text" content blocks (NOT in headings, intro line, FAQ, excerpt, or meta_description).
+2. Vary every anchor text. Mix branded ("${affiliates[0].brand}") and generic ("this device", "current pricing", "the latest model") anchors.
+3. Spread each product's links across at least 2 different sections.
+4. Each product URL must appear EXACTLY as given above. Do not modify, shorten, or add tracking parameters.
+5. Keep the tone editorial and helpful. Never use "Click here", "Buy now", or "Best deal".
+6. The article will be rejected if any product has zero links.
 ============================================
 ` : ""}
 Generate the full article with all metadata. Pick the most appropriate category from: ${CATEGORIES.join(", ")}
@@ -312,24 +333,38 @@ IMPORTANT: For the image_search_queries field, provide short, descriptive search
       }));
     }
 
-    // Affiliate fallback: if affiliate is active but AI produced zero markdown links, inject one
+    // Affiliate fallback: for each affiliate product, ensure at least one markdown link exists.
     if (hasAffiliate) {
-      const linkRegex = new RegExp(`\\]\\(${affiliateUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\)`);
-      const hasAnyLink = article.blocks.some((b: any) => b.type === "text" && linkRegex.test(b.value || ""));
-      if (!hasAnyLink) {
-        console.warn("AI produced zero affiliate links. Injecting fallback link.");
-        // Find longest text block (skip first which is intro)
-        const textBlocks = article.blocks
+      const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const usedBlockIndexes = new Set<number>();
+
+      for (const aff of affiliates) {
+        const linkRegex = new RegExp(`\\]\\(${escapeRegex(aff.url)}\\)`);
+        const hasAnyLink = article.blocks.some(
+          (b: any) => b.type === "text" && linkRegex.test(b.value || "")
+        );
+        if (hasAnyLink) continue;
+
+        console.warn(`AI produced zero links for ${aff.brand}. Injecting fallback.`);
+        // Pick the longest text block we haven't already injected into
+        const candidates = article.blocks
           .map((b: any, i: number) => ({ b, i }))
-          .filter((x: any) => x.b.type === "text" && (x.b.value || "").length > 200);
-        const target = textBlocks[Math.floor(textBlocks.length / 2)] || textBlocks[0];
+          .filter((x: any) =>
+            x.b.type === "text" &&
+            (x.b.value || "").length > 200 &&
+            !usedBlockIndexes.has(x.i)
+          )
+          .sort((a: any, b: any) => (b.b.value.length - a.b.value.length));
+
+        const target = candidates[0];
         if (target) {
           const sentences = target.b.value.split(/(?<=[.!?])\s+/);
           const insertAt = Math.min(1, sentences.length - 1);
-          const linkSentence = ` You can [${anchorLabel}](${affiliateUrl}) to compare options before booking.`;
-          sentences.splice(insertAt + 1, 0, linkSentence.trim());
+          const linkSentence = `You can [${aff.anchor}](${aff.url}) to compare options before booking.`;
+          sentences.splice(insertAt + 1, 0, linkSentence);
           article.blocks[target.i].value = sentences.join(" ");
-          console.log("Fallback affiliate link injected at block", target.i);
+          usedBlockIndexes.add(target.i);
+          console.log(`Fallback link for ${aff.brand} injected at block`, target.i);
         }
       }
     }

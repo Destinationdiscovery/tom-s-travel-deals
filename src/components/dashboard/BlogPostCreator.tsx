@@ -69,10 +69,21 @@ const BlogPostCreator = () => {
   const [topicPrompt, setTopicPrompt] = useState("");
   const [generating, setGenerating] = useState(false);
 
-  // Affiliate link state
-  const [affiliateUrl, setAffiliateUrl] = useState("");
-  const [affiliateBrand, setAffiliateBrand] = useState("");
-  const [affiliateAnchor, setAffiliateAnchor] = useState("");
+  // Affiliate links state (up to 3)
+  const [affiliates, setAffiliates] = useState<Array<{ url: string; brand: string; anchor: string }>>([
+    { url: "", brand: "", anchor: "" },
+  ]);
+
+  const updateAffiliate = (i: number, patch: Partial<{ url: string; brand: string; anchor: string }>) => {
+    setAffiliates(prev => prev.map((a, idx) => (idx === i ? { ...a, ...patch } : a)));
+  };
+  const addAffiliate = () => {
+    if (affiliates.length >= 3) return;
+    setAffiliates(prev => [...prev, { url: "", brand: "", anchor: "" }]);
+  };
+  const removeAffiliate = (i: number) => {
+    setAffiliates(prev => (prev.length === 1 ? [{ url: "", brand: "", anchor: "" }] : prev.filter((_, idx) => idx !== i)));
+  };
 
   // FAQ & SEO fields from AI
   const [faqItems, setFaqItems] = useState<Array<{question: string; answer: string}>>([]);
@@ -175,12 +186,14 @@ const BlogPostCreator = () => {
     }
     setGenerating(true);
     try {
+      const cleanAffiliates = affiliates
+        .map(a => ({ url: a.url.trim(), brand: a.brand.trim(), anchor: a.anchor.trim() }))
+        .filter(a => a.url.length > 0);
+
       const { data, error } = await supabase.functions.invoke("generate-blog-post", {
         body: {
           prompt: topicPrompt.trim(),
-          affiliateUrl: affiliateUrl.trim() || undefined,
-          affiliateBrand: affiliateBrand.trim() || undefined,
-          affiliateAnchor: affiliateAnchor.trim() || undefined,
+          affiliates: cleanAffiliates.length > 0 ? cleanAffiliates : undefined,
         },
       });
 
@@ -302,7 +315,7 @@ const BlogPostCreator = () => {
     setBlocks([{ type: "text", value: "" }]);
     setHeroFile(null); setHeroPreview(""); setEditingId(null);
     setRawText(""); setTopicPrompt("");
-    setAffiliateUrl(""); setAffiliateBrand(""); setAffiliateAnchor("");
+    setAffiliates([{ url: "", brand: "", anchor: "" }]);
     setFaqItems([]); setInternalLinks([]); setPrimaryKeyword("");
     setImagePool([]);
     imagePoolPreviews.forEach(u => URL.revokeObjectURL(u));
@@ -437,41 +450,72 @@ const BlogPostCreator = () => {
                 />
               </div>
 
-              {/* Affiliate Link (optional) */}
-              <div className="border border-border/60 rounded-lg p-4 space-y-3 bg-background/50">
+              {/* Affiliate Links (optional, up to 3) */}
+              <div className="border border-border/60 rounded-lg p-4 space-y-4 bg-background/50">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-foreground">Affiliate Link</span>
-                  <span className="text-xs text-muted-foreground">(optional, naturally woven in 2-4 times)</span>
+                  <span className="text-sm font-semibold text-foreground">Affiliate Links</span>
+                  <span className="text-xs text-muted-foreground">
+                    (optional, up to 3 — great for comparison or companion product articles)
+                  </span>
                 </div>
-                <div>
-                  <Label className="text-xs">Affiliate URL</Label>
-                  <Input
-                    value={affiliateUrl}
-                    onChange={e => setAffiliateUrl(e.target.value)}
-                    placeholder="https://www.amazon.ca/dp/...?tag=reviewthengo-20"
-                    className="text-sm"
-                  />
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <Label className="text-xs">Brand / Product Name</Label>
-                    <Input
-                      value={affiliateBrand}
-                      onChange={e => setAffiliateBrand(e.target.value)}
-                      placeholder="EPICKA Universal Adapter"
-                      className="text-sm"
-                    />
+
+                {affiliates.map((aff, i) => (
+                  <div key={i} className="space-y-3 border-t border-border/40 pt-3 first:border-t-0 first:pt-0">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-muted-foreground">Product {i + 1}</span>
+                      {(affiliates.length > 1 || aff.url || aff.brand || aff.anchor) && (
+                        <button
+                          type="button"
+                          onClick={() => removeAffiliate(i)}
+                          className="text-xs text-destructive hover:underline inline-flex items-center gap-1"
+                        >
+                          <X className="h-3 w-3" /> Remove
+                        </button>
+                      )}
+                    </div>
+                    <div>
+                      <Label className="text-xs">Affiliate URL</Label>
+                      <Input
+                        value={aff.url}
+                        onChange={e => updateAffiliate(i, { url: e.target.value })}
+                        placeholder="https://www.amazon.ca/dp/...?tag=reviewthengo-20"
+                        className="text-sm"
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <Label className="text-xs">Brand / Product Name</Label>
+                        <Input
+                          value={aff.brand}
+                          onChange={e => updateAffiliate(i, { brand: e.target.value })}
+                          placeholder="EPICKA Universal Adapter"
+                          className="text-sm"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Suggested Anchor Text</Label>
+                        <Input
+                          value={aff.anchor}
+                          onChange={e => updateAffiliate(i, { anchor: e.target.value })}
+                          placeholder="this travel adapter"
+                          className="text-sm"
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <Label className="text-xs">Suggested Anchor Text</Label>
-                    <Input
-                      value={affiliateAnchor}
-                      onChange={e => setAffiliateAnchor(e.target.value)}
-                      placeholder="this travel adapter"
-                      className="text-sm"
-                    />
-                  </div>
-                </div>
+                ))}
+
+                {affiliates.length < 3 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={addAffiliate}
+                    className="gap-1"
+                  >
+                    <Plus className="h-3 w-3" /> Add another product
+                  </Button>
+                )}
               </div>
 
               <Button
