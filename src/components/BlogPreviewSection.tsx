@@ -117,8 +117,8 @@ const BlogPreviewSection = () => {
       )}
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground">
-            From the Blog
+          <h2 id="blog-preview-heading" className="font-display text-2xl md:text-3xl font-bold text-foreground">
+            Latest Travel Articles
           </h2>
           <Link
             to="/compass"
