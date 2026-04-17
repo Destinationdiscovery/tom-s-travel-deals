@@ -7,8 +7,13 @@ import { initSessionTracker } from "./lib/sessionTracker";
 
 createRoot(document.getElementById("root")!).render(<App />);
 
-// Register PWA service worker with auto-update
-registerSW({ immediate: true });
+// Register PWA service worker with auto-update and force activation
+const updateSW = registerSW({
+  immediate: true,
+  onNeedRefresh() {
+    updateSW(true);
+  },
+});
 
 // Initialize session tracking
 initSessionTracker();
