@@ -18,6 +18,7 @@ interface UnifiedArticle {
   author: string;
   datePublished: string;
   readTime: string;
+  sortDate: string; // ISO timestamp used for ordering
 }
 
 const BlogPreviewSection = () => {
@@ -28,13 +29,14 @@ const BlogPreviewSection = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("blog_posts")
-        .select("slug, title, category, category_color, hero_image_url, excerpt, author, date_published, read_time")
-        .order("date_published", { ascending: false })
+        .select("slug, title, category, category_color, hero_image_url, excerpt, author, date_published, read_time, created_at")
+        .order("created_at", { ascending: false })
         .limit(10);
       if (error) throw error;
       return data ?? [];
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: 60 * 1000,
+    refetchOnWindowFocus: true,
   });
 
   const articles = useMemo<UnifiedArticle[]>(() => {
@@ -49,10 +51,11 @@ const BlogPreviewSection = () => {
       author: a.author,
       datePublished: a.datePublished,
       readTime: a.readTime,
+      sortDate: new Date(a.datePublished).toISOString(),
     }));
 
-    // Map DB articles
-    const dbArticles: UnifiedArticle[] = (dbPostsQuery.data ?? []).map((p) => ({
+    // Map DB articles (use created_at for reliable sorting since date_published is human text)
+    const dbArticles: UnifiedArticle[] = (dbPostsQuery.data ?? []).map((p: any) => ({
       slug: p.slug,
       title: p.title,
       category: p.category,
@@ -62,6 +65,7 @@ const BlogPreviewSection = () => {
       author: p.author,
       datePublished: p.date_published,
       readTime: p.read_time,
+      sortDate: p.created_at ?? new Date(p.date_published).toISOString(),
     }));
 
     // Merge, deduplicate by slug (DB wins), sort newest first, take 3
@@ -70,7 +74,7 @@ const BlogPreviewSection = () => {
     dbArticles.forEach((a) => slugMap.set(a.slug, a)); // DB overwrites
 
     return Array.from(slugMap.values())
-      .sort((a, b) => new Date(b.datePublished).getTime() - new Date(a.datePublished).getTime())
+      .sort((a, b) => new Date(b.sortDate).getTime() - new Date(a.sortDate).getTime())
       .slice(0, 3);
   }, [dbPostsQuery.data]);
 
@@ -79,12 +83,42 @@ const BlogPreviewSection = () => {
     return DESTINATION_KEYWORDS.find(k => text.includes(k)) || null;
   };
 
+  // SEO: ItemList JSON-LD so search engines understand these are the latest posts
+  const itemListJsonLd = articles.length > 0 ? {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Latest Travel Articles from ReviewThenGo",
+    itemListOrder: "https://schema.org/ItemListOrderDescending",
+    numberOfItems: articles.length,
+    itemListElement: articles.map((a, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `https://www.reviewthengo.com/compass/${a.slug}`,
+      item: {
+        "@type": "BlogPosting",
+        "@id": `https://www.reviewthengo.com/compass/${a.slug}`,
+        headline: a.title,
+        description: a.excerpt,
+        image: a.image || undefined,
+        author: { "@type": "Person", name: a.author },
+        datePublished: a.datePublished,
+        url: `https://www.reviewthengo.com/compass/${a.slug}`,
+      },
+    })),
+  } : null;
+
   return (
-    <section className="py-12 bg-background">
+    <section className="py-12 bg-background" aria-labelledby="blog-preview-heading">
+      {itemListJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+        />
+      )}
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground">
-            From the Blog
+          <h2 id="blog-preview-heading" className="font-display text-2xl md:text-3xl font-bold text-foreground">
+            Latest Travel Articles
           </h2>
           <Link
             to="/compass"
