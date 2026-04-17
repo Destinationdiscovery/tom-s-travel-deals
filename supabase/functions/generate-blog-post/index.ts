@@ -178,24 +178,26 @@ ${hasAffiliate ? `
 ============================================
 AFFILIATE LINK INTEGRATION (NON-NEGOTIABLE)
 ============================================
-You MUST include 2 to 4 markdown hyperlinks pointing to this exact URL: ${affiliateUrl}
+You have ${affiliates.length} affiliate ${affiliates.length === 1 ? "product" : "products"} to weave into the article:
+${affiliates.map((a, i) => `${i + 1}) ${a.brand} — URL: ${a.url} — suggested anchor phrase: "${a.anchor}"`).join("\n")}
 
-Format each link EXACTLY like this in the body text:
-[varied anchor text](${affiliateUrl})
+${affiliates.length > 1 ? `Treat these as comparison or companion product recommendations where it fits the article naturally (e.g. "the EPICKA adapter is great, but for heavier draw I prefer the Anker model").` : ""}
 
-Example sentences (study these patterns):
-- "I always recommend [${anchorLabel}](${affiliateUrl}) for travellers heading to warm climates."
-- "You can [check current pricing on ${brandLabel}](${affiliateUrl}) before your trip."
-- "For most Canadian travellers, [this option](${affiliateUrl}) hits the sweet spot of price and quality."
-- "Before you pack, [browse the latest deals](${affiliateUrl}) to compare what's available."
+For EACH product above, include 2 to 3 markdown hyperlinks pointing to that product's exact URL. Format:
+[varied anchor text](exact_product_url)
+
+Example sentences (study these patterns and vary every anchor):
+${affiliates.map(a => `- "I've tested [${a.anchor}](${a.url}) on multiple trips and it never disappoints."`).join("\n")}
+- "You can [check current pricing](URL) before your trip."
+- "For most Canadian travellers, [this option](URL) hits the sweet spot."
 
 REQUIREMENTS:
-1. Place the links inside the "value" field of "text" content blocks (NOT in headings, intro, FAQ, excerpt, or meta_description).
-2. Vary every anchor text. Never reuse the same phrase. Mix branded ("${brandLabel}") and generic ("this device", "current pricing", "the latest model") anchors.
-3. Spread links across at least 2 different sections of the article.
-4. Keep the tone editorial and helpful. Never use "Click here", "Buy now", or "Best deal".
-5. The URL inside parentheses must be EXACTLY: ${affiliateUrl}
-6. Do NOT skip this. The article will be rejected if it contains zero affiliate links.
+1. Place links inside the "value" field of "text" content blocks (NOT in headings, intro line, FAQ, excerpt, or meta_description).
+2. Vary every anchor text. Mix branded ("${affiliates[0].brand}") and generic ("this device", "current pricing", "the latest model") anchors.
+3. Spread each product's links across at least 2 different sections.
+4. Each product URL must appear EXACTLY as given above. Do not modify, shorten, or add tracking parameters.
+5. Keep the tone editorial and helpful. Never use "Click here", "Buy now", or "Best deal".
+6. The article will be rejected if any product has zero links.
 ============================================
 ` : ""}
 Generate the full article with all metadata. Pick the most appropriate category from: ${CATEGORIES.join(", ")}
