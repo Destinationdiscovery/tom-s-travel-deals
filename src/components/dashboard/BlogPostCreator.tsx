@@ -186,12 +186,14 @@ const BlogPostCreator = () => {
     }
     setGenerating(true);
     try {
+      const cleanAffiliates = affiliates
+        .map(a => ({ url: a.url.trim(), brand: a.brand.trim(), anchor: a.anchor.trim() }))
+        .filter(a => a.url.length > 0);
+
       const { data, error } = await supabase.functions.invoke("generate-blog-post", {
         body: {
           prompt: topicPrompt.trim(),
-          affiliateUrl: affiliateUrl.trim() || undefined,
-          affiliateBrand: affiliateBrand.trim() || undefined,
-          affiliateAnchor: affiliateAnchor.trim() || undefined,
+          affiliates: cleanAffiliates.length > 0 ? cleanAffiliates : undefined,
         },
       });
 
