@@ -333,24 +333,38 @@ IMPORTANT: For the image_search_queries field, provide short, descriptive search
       }));
     }
 
-    // Affiliate fallback: if affiliate is active but AI produced zero markdown links, inject one
+    // Affiliate fallback: for each affiliate product, ensure at least one markdown link exists.
     if (hasAffiliate) {
-      const linkRegex = new RegExp(`\\]\\(${affiliateUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\)`);
-      const hasAnyLink = article.blocks.some((b: any) => b.type === "text" && linkRegex.test(b.value || ""));
-      if (!hasAnyLink) {
-        console.warn("AI produced zero affiliate links. Injecting fallback link.");
-        // Find longest text block (skip first which is intro)
-        const textBlocks = article.blocks
+      const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const usedBlockIndexes = new Set<number>();
+
+      for (const aff of affiliates) {
+        const linkRegex = new RegExp(`\\]\\(${escapeRegex(aff.url)}\\)`);
+        const hasAnyLink = article.blocks.some(
+          (b: any) => b.type === "text" && linkRegex.test(b.value || "")
+        );
+        if (hasAnyLink) continue;
+
+        console.warn(`AI produced zero links for ${aff.brand}. Injecting fallback.`);
+        // Pick the longest text block we haven't already injected into
+        const candidates = article.blocks
           .map((b: any, i: number) => ({ b, i }))
-          .filter((x: any) => x.b.type === "text" && (x.b.value || "").length > 200);
-        const target = textBlocks[Math.floor(textBlocks.length / 2)] || textBlocks[0];
+          .filter((x: any) =>
+            x.b.type === "text" &&
+            (x.b.value || "").length > 200 &&
+            !usedBlockIndexes.has(x.i)
+          )
+          .sort((a: any, b: any) => (b.b.value.length - a.b.value.length));
+
+        const target = candidates[0];
         if (target) {
           const sentences = target.b.value.split(/(?<=[.!?])\s+/);
           const insertAt = Math.min(1, sentences.length - 1);
-          const linkSentence = ` You can [${anchorLabel}](${affiliateUrl}) to compare options before booking.`;
-          sentences.splice(insertAt + 1, 0, linkSentence.trim());
+          const linkSentence = `You can [${aff.anchor}](${aff.url}) to compare options before booking.`;
+          sentences.splice(insertAt + 1, 0, linkSentence);
           article.blocks[target.i].value = sentences.join(" ");
-          console.log("Fallback affiliate link injected at block", target.i);
+          usedBlockIndexes.add(target.i);
+          console.log(`Fallback link for ${aff.brand} injected at block`, target.i);
         }
       }
     }
