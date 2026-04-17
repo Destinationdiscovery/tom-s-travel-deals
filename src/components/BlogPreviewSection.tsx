@@ -18,6 +18,7 @@ interface UnifiedArticle {
   author: string;
   datePublished: string;
   readTime: string;
+  sortDate: string; // ISO timestamp used for ordering
 }
 
 const BlogPreviewSection = () => {
