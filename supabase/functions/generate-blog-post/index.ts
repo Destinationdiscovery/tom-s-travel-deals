@@ -156,16 +156,28 @@ ${research}
 ${citations.length > 0 ? `\nSOURCES:\n${citations.map((c: string, i: number) => `[${i + 1}] ${c}`).join("\n")}` : ""}
 
 ${hasAffiliate ? `
-AFFILIATE LINK INTEGRATION (MANDATORY):
-You MUST naturally weave 2 to 4 contextual mentions of "${affiliateBrand}" into body paragraphs where it is genuinely relevant (recommendations, examples, comparisons, gear suggestions, booking suggestions). Each mention MUST be hyperlinked using markdown syntax: [anchor text](${affiliateUrl})
+============================================
+AFFILIATE LINK INTEGRATION (NON-NEGOTIABLE)
+============================================
+You MUST include 2 to 4 markdown hyperlinks pointing to this exact URL: ${affiliateUrl}
 
-Rules:
-- Vary the anchor text every time. Never repeat the same phrase. Examples of varied anchors: "${affiliateAnchor || affiliateBrand}", "check current pricing", "see availability and reviews", "browse this option", "view the latest deals on ${affiliateBrand}", "compare prices here"
-- Place links in BODY text blocks only. NEVER in the intro paragraph, NEVER in headings, NEVER in the FAQ section, NEVER in the excerpt or meta description.
-- Maximum 4 affiliate links total. Spread them across different sections.
-- Do NOT use pushy phrases like "Click here", "Buy now", "Best deal ever". Keep it editorial and natural.
-- The link must read as a helpful recommendation, not an ad.
-- Use the EXACT URL: ${affiliateUrl}
+Format each link EXACTLY like this in the body text:
+[varied anchor text](${affiliateUrl})
+
+Example sentences (study these patterns):
+- "I always recommend [${anchorLabel}](${affiliateUrl}) for travellers heading to warm climates."
+- "You can [check current pricing on ${brandLabel}](${affiliateUrl}) before your trip."
+- "For most Canadian travellers, [this option](${affiliateUrl}) hits the sweet spot of price and quality."
+- "Before you pack, [browse the latest deals](${affiliateUrl}) to compare what's available."
+
+REQUIREMENTS:
+1. Place the links inside the "value" field of "text" content blocks (NOT in headings, intro, FAQ, excerpt, or meta_description).
+2. Vary every anchor text. Never reuse the same phrase. Mix branded ("${brandLabel}") and generic ("this device", "current pricing", "the latest model") anchors.
+3. Spread links across at least 2 different sections of the article.
+4. Keep the tone editorial and helpful. Never use "Click here", "Buy now", or "Best deal".
+5. The URL inside parentheses must be EXACTLY: ${affiliateUrl}
+6. Do NOT skip this. The article will be rejected if it contains zero affiliate links.
+============================================
 ` : ""}
 Generate the full article with all metadata. Pick the most appropriate category from: ${CATEGORIES.join(", ")}
 
