@@ -69,6 +69,11 @@ const BlogPostCreator = () => {
   const [topicPrompt, setTopicPrompt] = useState("");
   const [generating, setGenerating] = useState(false);
 
+  // Affiliate link state
+  const [affiliateUrl, setAffiliateUrl] = useState("");
+  const [affiliateBrand, setAffiliateBrand] = useState("");
+  const [affiliateAnchor, setAffiliateAnchor] = useState("");
+
   // FAQ & SEO fields from AI
   const [faqItems, setFaqItems] = useState<Array<{question: string; answer: string}>>([]);
   const [internalLinks, setInternalLinks] = useState<Array<{text: string; url: string}>>([]);
