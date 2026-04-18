@@ -42,23 +42,48 @@ const CompassArticle = () => {
     load();
   }, [slug]);
 
-  // Build JSON-LD description from best available source
-  const jsonLdDescription = article?.excerpt
+  // Strip markdown syntax for clean meta description
+  const stripMarkdown = (s: string) =>
+    s.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+     .replace(/\*\*([^*]+)\*\*/g, "$1")
+     .replace(/\*([^*\n]+)\*/g, "$1")
+     .replace(/[#>`_~]/g, "")
+     .replace(/\s+/g, " ")
+     .trim();
+
+  // Build description from best available source
+  const rawDescription = article?.excerpt
     || (article?.richContent?.find((b: any) => b.type === "text")?.value || (article?.richContent?.find((b: any) => b.type === "text") as any)?.content)
     || article?.content?.[0]
     || "";
+  const cleanDescription = stripMarkdown(rawDescription).slice(0, 158);
+  const jsonLdDescription = cleanDescription;
+
+  // Convert datePublished to ISO if possible
+  const toIso = (d?: string) => {
+    if (!d) return undefined;
+    const parsed = new Date(d);
+    return isNaN(parsed.getTime()) ? undefined : parsed.toISOString();
+  };
+  const publishedIso = toIso(article?.datePublished);
+  const modifiedIso = toIso(article?.updatedAt) || publishedIso;
 
   // Build BlogPosting JSON-LD (passed to SEOHead below)
   const blogPostingJsonLd = article ? {
     "@context": "https://schema.org",
-    "@type": "Article",
+    "@type": "BlogPosting",
     "headline": article.title,
     "author": { "@type": "Person", "name": article.author },
-    "datePublished": article.datePublished,
-    "dateModified": article.updatedAt || article.datePublished,
+    "datePublished": publishedIso || article.datePublished,
+    "dateModified": modifiedIso || publishedIso || article.datePublished,
     "image": article.image,
     "description": jsonLdDescription,
-    "publisher": { "@type": "Organization", "name": "ReviewThenGo" },
+    "publisher": {
+      "@type": "Organization",
+      "name": "ReviewThenGo",
+      "logo": { "@type": "ImageObject", "url": "https://www.reviewthengo.com/favicon.png" }
+    },
+    "mainEntityOfPage": { "@type": "WebPage", "@id": `https://www.reviewthengo.com/compass/${slug}` },
     ...(article.tags?.length ? { "keywords": article.tags.join(", ") } : {}),
   } : null;
 
@@ -177,10 +202,13 @@ const CompassArticle = () => {
     <div className="min-h-screen bg-background">
       <SEOHead
         title={article.title}
-        description={article.excerpt || jsonLdDescription || ""}
+        description={cleanDescription || article.excerpt || ""}
         image={article.image}
         url={`/compass/${slug}`}
         type="article"
+        publishedTime={publishedIso}
+        modifiedTime={modifiedIso}
+        author={article.author}
         breadcrumbs={[
           { name: "Home", url: "/" },
           { name: "Blog", url: "/compass" },

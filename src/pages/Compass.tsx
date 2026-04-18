@@ -50,12 +50,34 @@ const Compass = () => {
     ? allArticles 
     : allArticles.filter(article => article.category === activeCategory);
 
+  const blogListJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "name": "ReviewThenGo Travel Blog",
+    "url": "https://www.reviewthengo.com/compass",
+    "description": "Insider travel tips, planning guides, and industry insights from a decade of travel consulting.",
+    "blogPost": allArticles.slice(0, 50).map((a) => ({
+      "@type": "BlogPosting",
+      "headline": a.title,
+      "url": `https://www.reviewthengo.com/compass/${a.slug}`,
+      "image": a.image,
+      "datePublished": a.datePublished,
+      "author": { "@type": "Person", "name": a.author },
+      ...(a.excerpt ? { "description": a.excerpt } : {}),
+    })),
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
         title="Travel Blog | Trip Planning Tips & Guides"
         description="Insider tips and travel wisdom from over a decade of experience. Practical advice to help you travel smarter."
         url="/compass"
+        jsonLd={blogListJsonLd}
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Blog", url: "/compass" },
+        ]}
       />
       <Header />
       <AffiliateDisclosureBanner />

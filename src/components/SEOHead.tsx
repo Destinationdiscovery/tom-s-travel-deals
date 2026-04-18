@@ -37,13 +37,16 @@ interface SEOHeadProps {
   keywords?: string[];
   faq?: FAQItem[];
   aggregateRating?: AggregateRatingData;
+  publishedTime?: string;
+  modifiedTime?: string;
+  author?: string;
 }
 
 const SITE_NAME = "ReviewThenGo";
 const DEFAULT_IMAGE = "https://www.reviewthengo.com/og-image.jpg";
 const BASE_URL = "https://www.reviewthengo.com";
 
-const SEOHead = ({ title, description, image, url, type = "website", noindex, breadcrumbs, jsonLd, keywords, faq, aggregateRating }: SEOHeadProps) => {
+const SEOHead = ({ title, description, image, url, type = "website", noindex, breadcrumbs, jsonLd, keywords, faq, aggregateRating, publishedTime, modifiedTime, author }: SEOHeadProps) => {
   const fullTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
   const fullUrl = url ? `${BASE_URL}${url}` : BASE_URL;
   const ogImage = image || DEFAULT_IMAGE;
@@ -105,6 +108,12 @@ const SEOHead = ({ title, description, image, url, type = "website", noindex, br
       <meta property="og:url" content={fullUrl} />
       <meta property="og:image" content={ogImage} />
       <meta property="og:site_name" content={SITE_NAME} />
+      {type === "article" && publishedTime && <meta property="article:published_time" content={publishedTime} />}
+      {type === "article" && modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
+      {type === "article" && author && <meta property="article:author" content={author} />}
+      {type === "article" && keywords?.map((kw) => (
+        <meta key={kw} property="article:tag" content={kw} />
+      ))}
 
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:site" content="@TomLaracyTravel" />
