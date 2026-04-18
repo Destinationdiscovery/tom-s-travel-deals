@@ -117,7 +117,8 @@ const Index = () => {
               "Personalized trip packing list generator",
               "Live currency exchange rate tracker and converter",
               "Destination safety scores, scam alerts, and emergency contacts",
-              "Travel entry requirements, visa policies, and advisories"
+              "Travel entry requirements, visa policies, and advisories",
+              "Expert travel guides, destination journalism, and travel industry trend reporting via the Compass blog"
             ]
           }
         ]}
