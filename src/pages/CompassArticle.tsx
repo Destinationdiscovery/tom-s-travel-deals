@@ -356,6 +356,30 @@ const CompassArticle = () => {
               </div>
             )}
 
+            {/* Internal Links - Related on ReviewThenGo */}
+            {article.internal_links && article.internal_links.length > 0 && (
+              <div className="bg-card rounded-2xl shadow-soft p-8 md:p-12 mt-8">
+                <h2 className="font-display text-xl font-semibold text-foreground mb-4">Related on ReviewThenGo</h2>
+                <ul className="space-y-2">
+                  {article.internal_links.map((link, i) => {
+                    const isInternal = link.url.startsWith("/") || link.url.startsWith("#");
+                    return (
+                      <li key={i}>
+                        <a
+                          href={link.url}
+                          target={isInternal ? undefined : "_blank"}
+                          rel={isInternal ? undefined : "noopener noreferrer"}
+                          className="text-primary underline underline-offset-2 hover:opacity-80"
+                        >
+                          {link.text}
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
+
             {/* Homepage tools CTA */}
             <div className="mt-8">
               <div className="rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
