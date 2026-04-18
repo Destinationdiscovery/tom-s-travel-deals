@@ -168,8 +168,8 @@ const Index = () => {
         </section>
 
         <ToolsDirectorySection />
-        <TravelDealsSection />
         <BlogPreviewSection />
+        <TravelDealsSection />
         <TestimonialsSection />
         <AboutPreviewSection />
         <HomepageFAQ />
