@@ -68,6 +68,16 @@ const CompassArticle = () => {
   const publishedIso = toIso(article?.datePublished);
   const modifiedIso = toIso(article?.updatedAt) || publishedIso;
 
+  // Compute word count from rich content for JSON-LD
+  const wordCount = article ? (() => {
+    const blocks = article.richContent || [];
+    const text = blocks
+      .map((b: any) => b.value || b.content || "")
+      .join(" ");
+    const fallback = article.content?.join(" ") || "";
+    return (text + " " + fallback).trim().split(/\s+/).filter(Boolean).length;
+  })() : 0;
+
   // Build BlogPosting JSON-LD (passed to SEOHead below)
   const blogPostingJsonLd = article ? {
     "@context": "https://schema.org",
@@ -78,14 +88,31 @@ const CompassArticle = () => {
     "dateModified": modifiedIso || publishedIso || article.datePublished,
     "image": article.image,
     "description": jsonLdDescription,
+    "inLanguage": "en-US",
+    ...(wordCount > 0 ? { "wordCount": wordCount } : {}),
     "publisher": {
       "@type": "Organization",
       "name": "ReviewThenGo",
       "logo": { "@type": "ImageObject", "url": "https://www.reviewthengo.com/favicon.png" }
     },
     "mainEntityOfPage": { "@type": "WebPage", "@id": `https://www.reviewthengo.com/compass/${slug}` },
+    "speakable": {
+      "@type": "SpeakableSpecification",
+      "cssSelector": ["h1", ".prose p"]
+    },
     ...(article.tags?.length ? { "keywords": article.tags.join(", ") } : {}),
   } : null;
+
+  // Show "Updated" line when meaningfully different from publish date
+  const showUpdated = (() => {
+    if (!publishedIso || !modifiedIso) return false;
+    const p = new Date(publishedIso).getTime();
+    const m = new Date(modifiedIso).getTime();
+    return m - p > 24 * 60 * 60 * 1000; // > 1 day later
+  })();
+  const updatedDisplay = modifiedIso
+    ? new Date(modifiedIso).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+    : "";
 
   if (loading) {
     return (
@@ -288,6 +315,11 @@ const CompassArticle = () => {
                   <Clock className="h-4 w-4" />
                   {article.readTime}
                 </span>
+                {showUpdated && (
+                  <span className="text-sm italic">
+                    Updated {updatedDisplay}
+                  </span>
+                )}
               </div>
             </div>
 
@@ -321,6 +353,30 @@ const CompassArticle = () => {
                     </AccordionItem>
                   ))}
                 </Accordion>
+              </div>
+            )}
+
+            {/* Internal Links - Related on ReviewThenGo */}
+            {article.internal_links && article.internal_links.length > 0 && (
+              <div className="bg-card rounded-2xl shadow-soft p-8 md:p-12 mt-8">
+                <h2 className="font-display text-xl font-semibold text-foreground mb-4">Related on ReviewThenGo</h2>
+                <ul className="space-y-2">
+                  {article.internal_links.map((link, i) => {
+                    const isInternal = link.url.startsWith("/") || link.url.startsWith("#");
+                    return (
+                      <li key={i}>
+                        <a
+                          href={link.url}
+                          target={isInternal ? undefined : "_blank"}
+                          rel={isInternal ? undefined : "noopener noreferrer"}
+                          className="text-primary underline underline-offset-2 hover:opacity-80"
+                        >
+                          {link.text}
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
               </div>
             )}
 
