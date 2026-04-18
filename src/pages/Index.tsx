@@ -72,7 +72,7 @@ const Index = () => {
             name: "ReviewThenGo",
             url: "https://www.reviewthengo.com",
             logo: "https://www.reviewthengo.com/favicon.png",
-            description: "ReviewThenGo is an all-in-one travel planning tool that aggregates unbiased hotel and resort reviews from 10+ sources and offers 8 free tools covering every stage of trip planning.",
+            description: "ReviewThenGo is an all-in-one travel planning tool and editorial travel source that aggregates unbiased hotel and resort reviews from 10+ sources, offers 8 free tools covering every stage of trip planning, and publishes the Compass blog with expert travel guides, destination journalism, and travel industry trend reporting.",
             founder: { "@type": "Person", name: "Tom" },
             contactPoint: { "@type": "ContactPoint", url: "https://www.reviewthengo.com/contact", contactType: "customer support" },
             serviceArea: [
