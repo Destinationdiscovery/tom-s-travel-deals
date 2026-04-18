@@ -75,8 +75,8 @@ Deno.serve(async (req) => {
       .filter((p: any) => !staticSlugs.has(`/compass/${p.slug}`))
       .map((p: any) => ({
         loc: `/compass/${p.slug}`,
-        changefreq: "monthly",
-        priority: "0.7",
+        changefreq: "weekly",
+        priority: "0.8",
         lastmod: p.updated_at ? new Date(p.updated_at).toISOString().split("T")[0] : undefined,
       }));
 
