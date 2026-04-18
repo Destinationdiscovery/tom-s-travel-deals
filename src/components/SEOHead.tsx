@@ -37,6 +37,9 @@ interface SEOHeadProps {
   keywords?: string[];
   faq?: FAQItem[];
   aggregateRating?: AggregateRatingData;
+  publishedTime?: string;
+  modifiedTime?: string;
+  author?: string;
 }
 
 const SITE_NAME = "ReviewThenGo";
