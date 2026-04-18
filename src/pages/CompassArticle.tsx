@@ -315,6 +315,11 @@ const CompassArticle = () => {
                   <Clock className="h-4 w-4" />
                   {article.readTime}
                 </span>
+                {showUpdated && (
+                  <span className="text-sm italic">
+                    Updated {updatedDisplay}
+                  </span>
+                )}
               </div>
             </div>
 
