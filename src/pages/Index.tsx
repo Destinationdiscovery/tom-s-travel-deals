@@ -60,10 +60,10 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="All-in-One Travel Planner | Itineraries, Hotel Reviews, Best Time to Visit"
-        description="Plan your perfect trip with ReviewThenGo — build day-by-day itineraries, compare hotel reviews from 10+ sources, find the best time to visit any destination, and book flights. Free all-in-one travel planning tool."
+        title="All-in-One Travel Planner & Travel Guides | Hotel Reviews, Itineraries, Best Time to Visit"
+        description="Plan trips with ReviewThenGo: hotel reviews from 10+ sources, day-by-day itineraries, best time to visit, flight deals, plus expert travel guides and trends."
         url="/"
-        keywords={["travel planning tool", "travel aggregator", "hotel reviews", "resort reviews", "best time to visit", "travel itinerary builder", "flight deals", "packing list", "currency exchange rates", "travel safety scores", "travel advisories", "visa requirements", "all-in-one travel planner"]}
+        keywords={["travel planning tool", "travel aggregator", "travel blog", "travel guides", "travel trends", "hotel reviews", "resort reviews", "best time to visit", "travel itinerary builder", "flight deals", "packing list", "currency exchange rates", "travel safety scores", "travel advisories", "visa requirements", "all-in-one travel planner"]}
         faq={homepageFaqData}
         jsonLd={[
           {
@@ -72,7 +72,7 @@ const Index = () => {
             name: "ReviewThenGo",
             url: "https://www.reviewthengo.com",
             logo: "https://www.reviewthengo.com/favicon.png",
-            description: "ReviewThenGo is an all-in-one travel planning tool that aggregates unbiased hotel and resort reviews from 10+ sources and offers 8 free tools covering every stage of trip planning.",
+            description: "ReviewThenGo is an all-in-one travel planning tool and editorial travel source that aggregates unbiased hotel and resort reviews from 10+ sources, offers 8 free tools covering every stage of trip planning, and publishes the Compass blog with expert travel guides, destination journalism, and travel industry trend reporting.",
             founder: { "@type": "Person", name: "Tom" },
             contactPoint: { "@type": "ContactPoint", url: "https://www.reviewthengo.com/contact", contactType: "customer support" },
             serviceArea: [
@@ -117,7 +117,8 @@ const Index = () => {
               "Personalized trip packing list generator",
               "Live currency exchange rate tracker and converter",
               "Destination safety scores, scam alerts, and emergency contacts",
-              "Travel entry requirements, visa policies, and advisories"
+              "Travel entry requirements, visa policies, and advisories",
+              "Expert travel guides, destination journalism, and travel industry trend reporting via the Compass blog"
             ]
           }
         ]}
