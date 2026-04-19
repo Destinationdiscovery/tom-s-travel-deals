@@ -520,6 +520,23 @@ const BlogPostCreator = () => {
             <Sparkles className="h-5 w-5 text-primary" /> AI Article Assistant
           </h2>
 
+          {/* Persona Selector */}
+          <div>
+            <Label className="text-xs">Writing Persona</Label>
+            <select
+              value={persona}
+              onChange={e => setPersona(e.target.value as "default" | "professional" | "casual")}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm mt-1"
+            >
+              <option value="default">Default — Tom (Toronto consultant, conversational)</option>
+              <option value="professional">Professional — neutral journalist voice</option>
+              <option value="casual">Casual — friendly travel-friend voice</option>
+            </select>
+            <p className="text-xs text-muted-foreground mt-1">
+              Applies to Generate, Format, and AI Edit. Default rotates openers so it isn't always "as a Toronto-based agent".
+            </p>
+          </div>
+
           {/* Mode Toggle */}
           <div className="flex gap-1 bg-muted rounded-lg p-1">
             <button
