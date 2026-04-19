@@ -745,6 +745,29 @@ const BlogPostCreator = () => {
         <CardContent className="p-6 space-y-4">
           <h2 className="font-semibold text-foreground">{editingId ? "Edit Post" : "New Blog Post"}</h2>
 
+          {editingId && (
+            <div className="border border-primary/30 bg-primary/5 rounded-lg p-4 space-y-3">
+              <Label className="flex items-center gap-2 text-sm font-semibold">
+                <Wand2 className="h-4 w-4 text-primary" /> Tell the AI what to change
+              </Label>
+              <Textarea
+                value={aiEditInstruction}
+                onChange={e => setAiEditInstruction(e.target.value)}
+                placeholder='e.g. "Make the intro shorter", "Add a section on shoulder season pricing", "Rewrite in a more casual tone", "Update the FAQ with current 2026 visa rules", "Replace all mentions of Cancun with Playa del Carmen"'
+                className="min-h-[80px] text-sm"
+              />
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-xs text-muted-foreground">
+                  AI applies your change using the selected persona, then you review and click Update Post to save.
+                </p>
+                <Button onClick={handleAiEdit} disabled={aiEditing || !aiEditInstruction.trim()} className="gap-2 shrink-0">
+                  {aiEditing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                  {aiEditing ? "Applying..." : "Apply AI Edit"}
+                </Button>
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label>Title</Label>
