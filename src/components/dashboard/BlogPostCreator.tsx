@@ -69,6 +69,17 @@ const BlogPostCreator = () => {
   const [topicPrompt, setTopicPrompt] = useState("");
   const [generating, setGenerating] = useState(false);
 
+  // Persona selector
+  const [persona, setPersona] = useState<"default" | "professional" | "casual">("default");
+
+  // Chart images for format mode (extract data only, never embedded)
+  const [chartFiles, setChartFiles] = useState<File[]>([]);
+  const [chartPreviews, setChartPreviews] = useState<string[]>([]);
+
+  // AI Edit (when editing an existing post)
+  const [aiEditInstruction, setAiEditInstruction] = useState("");
+  const [aiEditing, setAiEditing] = useState(false);
+
   // Affiliate links state (up to 3)
   const [affiliates, setAffiliates] = useState<Array<{ url: string; brand: string; anchor: string }>>([
     { url: "", brand: "", anchor: "" },
@@ -178,6 +189,29 @@ const BlogPostCreator = () => {
     setImagePoolPreviews(prev => prev.filter((_, i) => i !== index));
   };
 
+  // Chart image handlers (data extraction only — never embedded)
+  const handleChartAdd = (files: FileList | null) => {
+    if (!files) return;
+    const newFiles = Array.from(files);
+    const newPreviews = newFiles.map(f => URL.createObjectURL(f));
+    setChartFiles(prev => [...prev, ...newFiles]);
+    setChartPreviews(prev => [...prev, ...newPreviews]);
+  };
+
+  const removeChart = (index: number) => {
+    URL.revokeObjectURL(chartPreviews[index]);
+    setChartFiles(prev => prev.filter((_, i) => i !== index));
+    setChartPreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const fileToDataUrl = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
   // Generate from topic handler
   const handleGenerateFromTopic = async () => {
     if (!topicPrompt.trim()) {
@@ -193,6 +227,7 @@ const BlogPostCreator = () => {
       const { data, error } = await supabase.functions.invoke("generate-blog-post", {
         body: {
           prompt: topicPrompt.trim(),
+          persona,
           affiliates: cleanAffiliates.length > 0 ? cleanAffiliates : undefined,
         },
       });
@@ -241,9 +276,20 @@ const BlogPostCreator = () => {
         uploadedUrls.push(pub.publicUrl);
       }
 
-      // 2. Call the AI edge function
+      // 2. Convert chart images to data URLs (extracted to text, never embedded)
+      const chartDataUrls: string[] = [];
+      for (const f of chartFiles) {
+        chartDataUrls.push(await fileToDataUrl(f));
+      }
+
+      // 3. Call the AI edge function
       const { data, error } = await supabase.functions.invoke("format-blog-post", {
-        body: { rawText: rawText.trim(), imageCount: uploadedUrls.length },
+        body: {
+          rawText: rawText.trim(),
+          imageCount: uploadedUrls.length,
+          persona,
+          chartImages: chartDataUrls,
+        },
       });
 
       if (error) throw new Error(error.message || "AI formatting failed");
@@ -271,6 +317,9 @@ const BlogPostCreator = () => {
       setImagePool([]);
       imagePoolPreviews.forEach(u => URL.revokeObjectURL(u));
       setImagePoolPreviews([]);
+      chartPreviews.forEach(u => URL.revokeObjectURL(u));
+      setChartFiles([]);
+      setChartPreviews([]);
 
       toast({ title: "✨ Article formatted!", description: "Review the blocks below and publish when ready." });
     } catch (e: any) {
@@ -320,6 +369,58 @@ const BlogPostCreator = () => {
     setImagePool([]);
     imagePoolPreviews.forEach(u => URL.revokeObjectURL(u));
     setImagePoolPreviews([]);
+    chartPreviews.forEach(u => URL.revokeObjectURL(u));
+    setChartFiles([]);
+    setChartPreviews([]);
+    setAiEditInstruction("");
+  };
+
+  const handleAiEdit = async () => {
+    if (!editingId) return;
+    if (!aiEditInstruction.trim()) {
+      toast({ title: "No instruction", description: "Tell the AI what you want to change.", variant: "destructive" });
+      return;
+    }
+    setAiEditing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("edit-blog-post", {
+        body: {
+          instruction: aiEditInstruction.trim(),
+          persona,
+          title,
+          slug,
+          category,
+          excerpt,
+          read_time: readTime,
+          tags: tags.split(",").map(t => t.trim()).filter(Boolean),
+          blocks: blocks.filter(b => b.value.trim()),
+          faq_items: faqItems,
+          internal_links: internalLinks,
+          primary_keyword: primaryKeyword,
+          hero_image_url: heroPreview || null,
+        },
+      });
+      if (error) throw new Error(error.message || "AI edit failed");
+      if (data?.error) throw new Error(data.error);
+
+      if (data.title) { setTitle(data.title); }
+      if (data.slug) setSlug(data.slug);
+      if (data.category) setCategory(CATEGORIES.find(c => c.label === data.category) ? data.category : "Other");
+      if (data.excerpt) setExcerpt(data.excerpt);
+      if (data.read_time) setReadTime(data.read_time);
+      if (data.tags) setTags(data.tags.join(", "));
+      if (data.blocks) setBlocks(data.blocks);
+      if (data.faq_items) setFaqItems(data.faq_items);
+      if (data.internal_links) setInternalLinks(data.internal_links);
+      if (data.primary_keyword) setPrimaryKeyword(data.primary_keyword);
+
+      setAiEditInstruction("");
+      toast({ title: "✨ Edit applied!", description: "Review the changes below and click Update Post to save." });
+    } catch (e: any) {
+      console.error("AI edit error:", e);
+      toast({ title: "Edit failed", description: e.message || "Unknown error", variant: "destructive" });
+    }
+    setAiEditing(false);
   };
 
   const handlePublish = async () => {
@@ -418,6 +519,23 @@ const BlogPostCreator = () => {
           <h2 className="font-semibold text-foreground flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" /> AI Article Assistant
           </h2>
+
+          {/* Persona Selector */}
+          <div>
+            <Label className="text-xs">Writing Persona</Label>
+            <select
+              value={persona}
+              onChange={e => setPersona(e.target.value as "default" | "professional" | "casual")}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm mt-1"
+            >
+              <option value="default">Default — Tom (Toronto consultant, conversational)</option>
+              <option value="professional">Professional — neutral journalist voice</option>
+              <option value="casual">Casual — friendly travel-friend voice</option>
+            </select>
+            <p className="text-xs text-muted-foreground mt-1">
+              Applies to Generate, Format, and AI Edit. Default rotates openers so it isn't always "as a Toronto-based agent".
+            </p>
+          </div>
 
           {/* Mode Toggle */}
           <div className="flex gap-1 bg-muted rounded-lg p-1">
@@ -575,6 +693,36 @@ const BlogPostCreator = () => {
                 )}
               </div>
 
+              <div>
+                <Label className="flex items-center gap-2"><ImagePlus className="h-4 w-4" /> Charts & Data Images (extract numbers only)</Label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={e => handleChartAdd(e.target.files)}
+                  className="text-sm text-muted-foreground file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-secondary file:text-secondary-foreground file:font-medium file:cursor-pointer mt-1"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Upload bar charts, graphs, or stat images. The AI will read the numbers and weave them into sentences instead of embedding the image.
+                </p>
+                {chartPreviews.length > 0 && (
+                  <div className="flex flex-wrap gap-3 mt-3">
+                    {chartPreviews.map((url, i) => (
+                      <div key={i} className="relative group">
+                        <img src={url} alt={`Chart ${i + 1}`} className="w-24 h-24 object-cover rounded-lg border border-border" />
+                        <button
+                          onClick={() => removeChart(i)}
+                          className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                        <span className="absolute bottom-1 left-1 text-[10px] bg-background/80 text-foreground rounded px-1">📊 {i + 1}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <Button
                 onClick={handleAutoFormat}
                 disabled={formatting || !rawText.trim()}
@@ -596,6 +744,29 @@ const BlogPostCreator = () => {
       <Card>
         <CardContent className="p-6 space-y-4">
           <h2 className="font-semibold text-foreground">{editingId ? "Edit Post" : "New Blog Post"}</h2>
+
+          {editingId && (
+            <div className="border border-primary/30 bg-primary/5 rounded-lg p-4 space-y-3">
+              <Label className="flex items-center gap-2 text-sm font-semibold">
+                <Wand2 className="h-4 w-4 text-primary" /> Tell the AI what to change
+              </Label>
+              <Textarea
+                value={aiEditInstruction}
+                onChange={e => setAiEditInstruction(e.target.value)}
+                placeholder='e.g. "Make the intro shorter", "Add a section on shoulder season pricing", "Rewrite in a more casual tone", "Update the FAQ with current 2026 visa rules", "Replace all mentions of Cancun with Playa del Carmen"'
+                className="min-h-[80px] text-sm"
+              />
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-xs text-muted-foreground">
+                  AI applies your change using the selected persona, then you review and click Update Post to save.
+                </p>
+                <Button onClick={handleAiEdit} disabled={aiEditing || !aiEditInstruction.trim()} className="gap-2 shrink-0">
+                  {aiEditing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                  {aiEditing ? "Applying..." : "Apply AI Edit"}
+                </Button>
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>

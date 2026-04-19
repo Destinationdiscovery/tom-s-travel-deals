@@ -72,3 +72,6 @@ verify_jwt = false
 [functions.safety-intel]
 verify_jwt = false
 
+[functions.edit-blog-post]
+verify_jwt = false
+
