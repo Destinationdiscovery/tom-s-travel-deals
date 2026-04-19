@@ -693,8 +693,36 @@ const BlogPostCreator = () => {
                 )}
               </div>
 
-              <Button
-                onClick={handleAutoFormat}
+              <div>
+                <Label className="flex items-center gap-2"><ImagePlus className="h-4 w-4" /> Charts & Data Images (extract numbers only)</Label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={e => handleChartAdd(e.target.files)}
+                  className="text-sm text-muted-foreground file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-secondary file:text-secondary-foreground file:font-medium file:cursor-pointer mt-1"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Upload bar charts, graphs, or stat images. The AI will read the numbers and weave them into sentences instead of embedding the image.
+                </p>
+                {chartPreviews.length > 0 && (
+                  <div className="flex flex-wrap gap-3 mt-3">
+                    {chartPreviews.map((url, i) => (
+                      <div key={i} className="relative group">
+                        <img src={url} alt={`Chart ${i + 1}`} className="w-24 h-24 object-cover rounded-lg border border-border" />
+                        <button
+                          onClick={() => removeChart(i)}
+                          className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                        <span className="absolute bottom-1 left-1 text-[10px] bg-background/80 text-foreground rounded px-1">📊 {i + 1}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
                 disabled={formatting || !rawText.trim()}
                 className="gap-2"
               >
