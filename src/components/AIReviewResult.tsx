@@ -1,7 +1,9 @@
 import { useEffect, useRef, useMemo } from "react";
-import { Star, MapPin, Sparkles, Search, Camera, ExternalLink } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Star, MapPin, Sparkles, Search, Camera, ExternalLink, ListOrdered } from "lucide-react";
 import ReviewLoadingStages from "@/components/ReviewLoadingStages";
 import { Button } from "@/components/ui/button";
+import { toSlug } from "@/lib/searchIntent";
 import AffiliateLinks from "@/components/AffiliateLinks";
 import InlineAffiliateCTA from "@/components/InlineAffiliateCTA";
 import SaveReviewButton from "@/components/SaveReviewButton";
@@ -38,6 +40,7 @@ const RatingBar = ({ label, value }: { label: string; value: number }) => (
 
 const AIReviewResult = ({ review, isLoading, error, onNewReview, onReviewReady, affiliateUrl }: AIReviewResultProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   const functionUrl = useMemo(() => {
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -85,6 +88,49 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview, onReviewReady, 
   const data = review.review_data;
   const hasPhotos = data.photoReferences && data.photoReferences.length > 0;
   const hasThingsToDo = data.thingsToDo && data.thingsToDo.length > 0;
+
+  // Defensive fallback: if generate-review returned an empty/zero result
+  // (typically because the query was a broad listicle, not a real property),
+  // show a friendly "browse list results instead" card.
+  const isEmptyResult =
+    (!data.overallRating || data.overallRating === 0) &&
+    (!data.summary || data.summary.trim().length === 0);
+
+  if (isEmptyResult) {
+    const listSlug = toSlug(data.propertyName || review.property_name || "");
+    return (
+      <div ref={containerRef} className="bg-background animate-fade-up">
+        <div className="container mx-auto px-4 py-12">
+          <div className="max-w-2xl mx-auto text-center bg-card rounded-2xl border border-border p-8 shadow-soft">
+            <ListOrdered className="h-10 w-10 text-primary mx-auto mb-3" />
+            <h3 className="font-display text-2xl font-bold text-foreground mb-2">
+              That looks like a broad search
+            </h3>
+            <p className="text-muted-foreground mb-6">
+              We couldn't pull a single property review for "{data.propertyName || review.property_name}".
+              Try browsing a ranked list of matching options instead.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button
+                size="lg"
+                onClick={() => navigate(`/reviews/${listSlug}`)}
+                className="gap-2"
+              >
+                <ListOrdered className="h-4 w-4" />
+                Browse list results
+              </Button>
+              {onNewReview && (
+                <Button variant="outline" size="lg" onClick={onNewReview} className="gap-2">
+                  <Search className="h-4 w-4" />
+                  New search
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div ref={containerRef} className="bg-background animate-fade-up">
