@@ -189,6 +189,29 @@ const BlogPostCreator = () => {
     setImagePoolPreviews(prev => prev.filter((_, i) => i !== index));
   };
 
+  // Chart image handlers (data extraction only — never embedded)
+  const handleChartAdd = (files: FileList | null) => {
+    if (!files) return;
+    const newFiles = Array.from(files);
+    const newPreviews = newFiles.map(f => URL.createObjectURL(f));
+    setChartFiles(prev => [...prev, ...newFiles]);
+    setChartPreviews(prev => [...prev, ...newPreviews]);
+  };
+
+  const removeChart = (index: number) => {
+    URL.revokeObjectURL(chartPreviews[index]);
+    setChartFiles(prev => prev.filter((_, i) => i !== index));
+    setChartPreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const fileToDataUrl = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
   // Generate from topic handler
   const handleGenerateFromTopic = async () => {
     if (!topicPrompt.trim()) {
@@ -204,6 +227,7 @@ const BlogPostCreator = () => {
       const { data, error } = await supabase.functions.invoke("generate-blog-post", {
         body: {
           prompt: topicPrompt.trim(),
+          persona,
           affiliates: cleanAffiliates.length > 0 ? cleanAffiliates : undefined,
         },
       });
