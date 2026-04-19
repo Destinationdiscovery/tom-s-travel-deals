@@ -69,6 +69,17 @@ const BlogPostCreator = () => {
   const [topicPrompt, setTopicPrompt] = useState("");
   const [generating, setGenerating] = useState(false);
 
+  // Persona selector
+  const [persona, setPersona] = useState<"default" | "professional" | "casual">("default");
+
+  // Chart images for format mode (extract data only, never embedded)
+  const [chartFiles, setChartFiles] = useState<File[]>([]);
+  const [chartPreviews, setChartPreviews] = useState<string[]>([]);
+
+  // AI Edit (when editing an existing post)
+  const [aiEditInstruction, setAiEditInstruction] = useState("");
+  const [aiEditing, setAiEditing] = useState(false);
+
   // Affiliate links state (up to 3)
   const [affiliates, setAffiliates] = useState<Array<{ url: string; brand: string; anchor: string }>>([
     { url: "", brand: "", anchor: "" },
