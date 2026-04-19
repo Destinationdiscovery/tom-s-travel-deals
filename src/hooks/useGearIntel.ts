@@ -18,6 +18,7 @@ export interface GearItem {
 export interface GearIntelData {
   items: GearItem[];
   citations?: string[];
+  narrative?: string;
 }
 
 export interface GearReviewData {
