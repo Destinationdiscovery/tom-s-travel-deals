@@ -30,6 +30,7 @@ import PopularSavesSection from "@/components/PopularSavesSection";
 import ToolsDirectorySection from "@/components/ToolsDirectorySection";
 import AboutPreviewSection from "@/components/AboutPreviewSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
+import { classifySearchIntent, toSlug } from "@/lib/searchIntent";
 
 
 const Index = () => {
@@ -52,6 +53,11 @@ const Index = () => {
   }, [location.hash]);
 
   const handleHeroSearch = (query: string) => {
+    const intent = classifySearchIntent(query);
+    if (intent === "listicle") {
+      navigate(`/reviews/${toSlug(query)}`);
+      return;
+    }
     clearReview();
     generateReview(query);
     setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);

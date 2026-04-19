@@ -3,14 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { classifySearchIntent, toSlug } from "@/lib/searchIntent";
 
 interface StickySearchBarProps {
   placeholder?: string;
   className?: string;
-}
-
-function toKebab(str: string) {
-  return str.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
 const StickySearchBar = ({ placeholder = "Search hotels, resorts, cities… Paris, Bali, Cancun", className = "" }: StickySearchBarProps) => {
@@ -21,7 +18,9 @@ const StickySearchBar = ({ placeholder = "Search hotels, resorts, cities… Pari
     e.preventDefault();
     const trimmed = query.trim();
     if (trimmed.length < 3) return;
-    navigate(`/reviews/${toKebab(trimmed)}`);
+    // Always route to /reviews/:slug (list view). The list page will fall
+    // through to a single-property review when the slug matches a property.
+    navigate(`/reviews/${toSlug(trimmed)}`);
     setQuery("");
   };
 
