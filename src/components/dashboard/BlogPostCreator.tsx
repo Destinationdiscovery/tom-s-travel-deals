@@ -723,6 +723,8 @@ const BlogPostCreator = () => {
                 )}
               </div>
 
+              <Button
+                onClick={handleAutoFormat}
                 disabled={formatting || !rawText.trim()}
                 className="gap-2"
               >
