@@ -317,6 +317,9 @@ const BlogPostCreator = () => {
       setImagePool([]);
       imagePoolPreviews.forEach(u => URL.revokeObjectURL(u));
       setImagePoolPreviews([]);
+      chartPreviews.forEach(u => URL.revokeObjectURL(u));
+      setChartFiles([]);
+      setChartPreviews([]);
 
       toast({ title: "✨ Article formatted!", description: "Review the blocks below and publish when ready." });
     } catch (e: any) {
@@ -366,6 +369,58 @@ const BlogPostCreator = () => {
     setImagePool([]);
     imagePoolPreviews.forEach(u => URL.revokeObjectURL(u));
     setImagePoolPreviews([]);
+    chartPreviews.forEach(u => URL.revokeObjectURL(u));
+    setChartFiles([]);
+    setChartPreviews([]);
+    setAiEditInstruction("");
+  };
+
+  const handleAiEdit = async () => {
+    if (!editingId) return;
+    if (!aiEditInstruction.trim()) {
+      toast({ title: "No instruction", description: "Tell the AI what you want to change.", variant: "destructive" });
+      return;
+    }
+    setAiEditing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("edit-blog-post", {
+        body: {
+          instruction: aiEditInstruction.trim(),
+          persona,
+          title,
+          slug,
+          category,
+          excerpt,
+          read_time: readTime,
+          tags: tags.split(",").map(t => t.trim()).filter(Boolean),
+          blocks: blocks.filter(b => b.value.trim()),
+          faq_items: faqItems,
+          internal_links: internalLinks,
+          primary_keyword: primaryKeyword,
+          hero_image_url: heroPreview || null,
+        },
+      });
+      if (error) throw new Error(error.message || "AI edit failed");
+      if (data?.error) throw new Error(data.error);
+
+      if (data.title) { setTitle(data.title); }
+      if (data.slug) setSlug(data.slug);
+      if (data.category) setCategory(CATEGORIES.find(c => c.label === data.category) ? data.category : "Other");
+      if (data.excerpt) setExcerpt(data.excerpt);
+      if (data.read_time) setReadTime(data.read_time);
+      if (data.tags) setTags(data.tags.join(", "));
+      if (data.blocks) setBlocks(data.blocks);
+      if (data.faq_items) setFaqItems(data.faq_items);
+      if (data.internal_links) setInternalLinks(data.internal_links);
+      if (data.primary_keyword) setPrimaryKeyword(data.primary_keyword);
+
+      setAiEditInstruction("");
+      toast({ title: "✨ Edit applied!", description: "Review the changes below and click Update Post to save." });
+    } catch (e: any) {
+      console.error("AI edit error:", e);
+      toast({ title: "Edit failed", description: e.message || "Unknown error", variant: "destructive" });
+    }
+    setAiEditing(false);
   };
 
   const handlePublish = async () => {
