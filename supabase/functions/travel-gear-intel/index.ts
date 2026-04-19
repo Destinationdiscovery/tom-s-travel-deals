@@ -118,10 +118,12 @@ IMPORTANT RULES:
 - Only recommend physical products that can be purchased on Amazon.
 - For each category, find a real, specific product with brand and model name.
 - For each product, include an "imageUrl" field with a direct URL to a product image found online (official brand site, Amazon CDN, or retailer). Use real, publicly accessible image URLs.
+- Also write a "narrative" field: a friendly 2 to 3 paragraph write-up that opens by referencing the trip (destination, season, type of travel inferred from the query) and walks through the most important essentials in flowing sentences, naming each product and briefly explaining why it matters for this specific trip. Do NOT use em-dashes or en-dashes. Use periods, commas, hyphens, or the word "to" instead. Do not use bullet points in the narrative. Keep it conversational and useful, not a list.
 
 Return your response as valid JSON only (no markdown, no code blocks):
 
 {
+  "narrative": "For your [trip context] you'll want to focus on... A [Product Name] keeps... Pair that with a [Product Name] so you can... etc.",
   "items": [
     {
       "name": "Specific Product Name with Model",

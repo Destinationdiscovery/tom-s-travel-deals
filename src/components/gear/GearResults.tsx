@@ -254,6 +254,28 @@ export const ProductReviewPanel = ({ review, onBack }: { review: GearReviewData;
   </div>
 );
 
+export const PackingNarrative = ({ narrative }: { narrative?: string }) => {
+  if (!narrative || !narrative.trim()) return null;
+  // Sanitize em/en dashes per site rule
+  const clean = narrative.replace(/[—–]/g, ", ");
+  const paragraphs = clean.split(/\n{2,}|\r\n{2,}/).map((p) => p.trim()).filter(Boolean);
+  return (
+    <div className="max-w-4xl mx-auto mb-8 animate-fade-in">
+      <div className="bg-card rounded-2xl p-6 md:p-8 shadow-soft border border-border/50">
+        <div className="flex items-center gap-2 mb-4">
+          <Sparkles className="h-4 w-4 text-primary" />
+          <h3 className="font-display text-lg font-semibold text-foreground">Your Trip Briefing</h3>
+        </div>
+        <div className="space-y-4">
+          {paragraphs.map((p, i) => (
+            <p key={i} className="text-foreground/90 leading-relaxed text-base">{p}</p>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const GearCitations = ({ citations }: { citations?: string[] }) => {
   if (!citations?.length) return null;
   return (
