@@ -276,9 +276,20 @@ const BlogPostCreator = () => {
         uploadedUrls.push(pub.publicUrl);
       }
 
-      // 2. Call the AI edge function
+      // 2. Convert chart images to data URLs (extracted to text, never embedded)
+      const chartDataUrls: string[] = [];
+      for (const f of chartFiles) {
+        chartDataUrls.push(await fileToDataUrl(f));
+      }
+
+      // 3. Call the AI edge function
       const { data, error } = await supabase.functions.invoke("format-blog-post", {
-        body: { rawText: rawText.trim(), imageCount: uploadedUrls.length },
+        body: {
+          rawText: rawText.trim(),
+          imageCount: uploadedUrls.length,
+          persona,
+          chartImages: chartDataUrls,
+        },
       });
 
       if (error) throw new Error(error.message || "AI formatting failed");
