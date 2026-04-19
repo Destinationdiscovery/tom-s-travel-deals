@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight, ArrowLeft, Search, Luggage, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGearIntel } from "@/hooks/useGearIntel";
-import { GearLoading, PackingResultCard, ProductReviewPanel, GearCitations } from "@/components/gear/GearResults";
+import { GearLoading, PackingResultCard, ProductReviewPanel, GearCitations, PackingNarrative } from "@/components/gear/GearResults";
 import { supabase } from "@/integrations/supabase/client";
 
 import gearPackingCubes from "@/assets/gear-packing-cubes-main.jpg";
@@ -132,6 +132,7 @@ const GearPreviewSection = () => {
                 <h3 className="font-display text-xl font-bold text-foreground mb-1">Your Packing List</h3>
                 <p className="text-sm text-muted-foreground">Click "Review This" on any item for a full product review.</p>
               </div>
+              <PackingNarrative narrative={gear.packingData.narrative} />
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
                 {gear.packingData.items.map((item, i) => (
                   <PackingResultCard key={i} item={item} onReview={handleGearReview} />

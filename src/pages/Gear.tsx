@@ -7,7 +7,7 @@ import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useGearIntel } from "@/hooks/useGearIntel";
-import { GearLoading, PackingResultCard, ProductReviewPanel, GearCitations } from "@/components/gear/GearResults";
+import { GearLoading, PackingResultCard, ProductReviewPanel, GearCitations, PackingNarrative } from "@/components/gear/GearResults";
 import SEOHead from "@/components/SEOHead";
 import { supabase } from "@/integrations/supabase/client";
 import heroImg from "@/assets/gear-water-hammock-main.jpg";
@@ -165,6 +165,7 @@ const Gear = () => {
                 <h2 className="font-display text-2xl font-bold text-foreground mb-2">Your Packing List</h2>
                 <p className="text-muted-foreground">Click "Review This" on any item for a full product review based on real Amazon reviews.</p>
               </div>
+              <PackingNarrative narrative={packingData.narrative} />
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
                 {packingData.items.map((item, i) => (
                   <PackingResultCard key={i} item={item} onReview={handleReviewProduct} />
