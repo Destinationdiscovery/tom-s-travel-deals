@@ -172,7 +172,7 @@ const CompassArticle = () => {
             href={url}
             target={isInternal ? undefined : "_blank"}
             rel={rel}
-            className="text-primary underline underline-offset-2 hover:opacity-80"
+            className="!text-primary hover:!text-primary/80 underline underline-offset-2 font-medium decoration-primary/40 hover:decoration-primary"
           >
             {match[1]}
           </a>
