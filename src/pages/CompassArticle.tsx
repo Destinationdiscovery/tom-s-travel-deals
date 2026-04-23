@@ -172,7 +172,7 @@ const CompassArticle = () => {
             href={url}
             target={isInternal ? undefined : "_blank"}
             rel={rel}
-            className="text-primary underline underline-offset-2 hover:opacity-80"
+            className="!text-primary hover:!text-primary/80 underline underline-offset-2 font-medium decoration-primary/40 hover:decoration-primary"
           >
             {match[1]}
           </a>
@@ -325,7 +325,7 @@ const CompassArticle = () => {
 
             {/* Article Body */}
             <div className="bg-card rounded-2xl shadow-soft p-8 md:p-12">
-              <div className="prose prose-lg max-w-none">
+              <div className="prose prose-lg dark:prose-invert max-w-none prose-a:!text-primary prose-a:no-underline">
                 {article.richContent && article.richContent.length > 0 ? (
                   // Render rich content with images and headings
                   article.richContent.map((block, index) => renderContentBlock(block, index))

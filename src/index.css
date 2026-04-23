@@ -125,6 +125,21 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
   }
+
+  /* Article body links: always use brand primary, readable in both light and dark mode.
+     Overrides @tailwindcss/typography defaults that otherwise render dark-on-dark. */
+  .prose a,
+  .prose a:visited {
+    color: hsl(var(--primary)) !important;
+    text-decoration: underline;
+    text-decoration-color: hsl(var(--primary) / 0.45);
+    text-underline-offset: 2px;
+    font-weight: 500;
+  }
+  .prose a:hover {
+    color: hsl(var(--primary) / 0.85) !important;
+    text-decoration-color: hsl(var(--primary));
+  }
 }
 
 @layer utilities {
