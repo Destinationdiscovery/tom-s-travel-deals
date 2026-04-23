@@ -167,13 +167,19 @@ Use the format_article tool to return the structured result.`,
 
     // Em-dash sanitization
     const clean = (s: string) => (s || "").replace(/[—–]/g, ", ");
+    // Fix markdown links with empty anchor text: [](url) -> [learn more](url)
+    const fixEmptyAnchors = (s: string) =>
+      (s || "").replace(/\[\s*\]\(([^)]+)\)/g, "[learn more]($1)");
     if (result.excerpt) result.excerpt = clean(result.excerpt);
     if (Array.isArray(result.blocks)) {
-      result.blocks = result.blocks.map((b: any) => ({
-        ...b,
-        value: b.type === "image" ? b.value : clean(b.value || ""),
-        caption: b.caption ? clean(b.caption) : b.caption,
-      }));
+      result.blocks = result.blocks
+        .map((b: any) => ({
+          ...b,
+          value: b.type === "image" ? b.value : fixEmptyAnchors(clean(b.value || "")),
+          caption: b.caption ? clean(b.caption) : b.caption,
+        }))
+        // Drop empty/whitespace-only text/heading blocks (would render as visual gaps)
+        .filter((b: any) => b.type === "image" || (b.value && b.value.trim().length > 0));
     }
 
     return new Response(JSON.stringify(result), {
