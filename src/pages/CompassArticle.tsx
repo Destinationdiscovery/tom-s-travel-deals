@@ -325,7 +325,7 @@ const CompassArticle = () => {
 
             {/* Article Body */}
             <div className="bg-card rounded-2xl shadow-soft p-8 md:p-12">
-              <div className="prose prose-lg max-w-none">
+              <div className="prose prose-lg dark:prose-invert max-w-none prose-a:!text-primary prose-a:no-underline">
                 {article.richContent && article.richContent.length > 0 ? (
                   // Render rich content with images and headings
                   article.richContent.map((block, index) => renderContentBlock(block, index))
