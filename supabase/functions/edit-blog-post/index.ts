@@ -198,11 +198,17 @@ Apply this change. Return the full updated article. Categories allowed: ${CATEGO
 
     // Strip em/en dashes
     const clean = (s: string) => (s || "").replace(/[—–]/g, ", ");
+    // Fix markdown links with empty anchor text: [](url) -> [learn more](url)
+    const fixEmptyAnchors = (s: string) =>
+      (s || "").replace(/\[\s*\]\(([^)]+)\)/g, "[learn more]($1)");
     updated.title = clean(updated.title);
     updated.excerpt = clean(updated.excerpt);
     if (updated.meta_description) updated.meta_description = clean(updated.meta_description);
     if (Array.isArray(updated.blocks)) {
-      updated.blocks = updated.blocks.map((b: any) => ({ ...b, value: clean(b.value || "") }));
+      updated.blocks = updated.blocks
+        .map((b: any) => ({ ...b, value: b.type === "image" ? b.value : fixEmptyAnchors(clean(b.value || "")) }))
+        // Drop empty/whitespace-only text/heading blocks (would render as visual gaps)
+        .filter((b: any) => b.type === "image" || (b.value && b.value.trim().length > 0));
     }
     if (Array.isArray(updated.faq_items)) {
       updated.faq_items = updated.faq_items.map((f: any) => ({

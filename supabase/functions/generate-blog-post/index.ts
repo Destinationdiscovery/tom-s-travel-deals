@@ -338,12 +338,18 @@ IMPORTANT: For the image_search_queries field, provide short, descriptive search
 
     // Post-process: remove any em-dashes that slipped through
     const cleanEmDashes = (s: string) => s.replace(/[—–]/g, ", ");
+    // Fix markdown links with empty anchor text: [](url) -> [learn more](url)
+    const fixEmptyAnchors = (s: string) =>
+      (s || "").replace(/\[\s*\]\(([^)]+)\)/g, "[learn more]($1)");
     article.title = cleanEmDashes(article.title);
     article.excerpt = cleanEmDashes(article.excerpt);
-    article.blocks = article.blocks.map((b: any) => ({
-      ...b,
-      value: cleanEmDashes(b.value),
-    }));
+    article.blocks = article.blocks
+      .map((b: any) => ({
+        ...b,
+        value: fixEmptyAnchors(cleanEmDashes(b.value)),
+      }))
+      // Drop empty/whitespace-only blocks so they don't render as visual gaps
+      .filter((b: any) => b.value && b.value.trim().length > 0);
 
     // Clean FAQ answers for em-dashes
     if (Array.isArray(article.faq_items)) {
