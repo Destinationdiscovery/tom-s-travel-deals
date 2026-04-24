@@ -22,11 +22,52 @@ export function trackAffiliateClick(platform: string, page: string, position: st
   }).catch(() => {});
 }
 
-export function trackEmailSignup(source: string) {
+export function trackEmailSignup(source: string, leadMagnet?: string) {
   if (typeof window.gtag === "function") {
     window.gtag("event", "email_signup", {
       event_category: "conversion",
       event_label: source,
+      lead_magnet: leadMagnet,
+    });
+  }
+}
+
+export function trackToolSearch(toolName: string, query: string) {
+  if (typeof window.gtag === "function") {
+    window.gtag("event", "tool_search", {
+      event_category: "tool",
+      tool_name: toolName,
+      query: query.slice(0, 100),
+    });
+  }
+}
+
+export function trackBlogRead(postSlug: string, category?: string) {
+  if (typeof window.gtag === "function") {
+    window.gtag("event", "blog_read", {
+      event_category: "content",
+      post_slug: postSlug,
+      blog_category: category,
+    });
+  }
+}
+
+export function trackPropertySaved(propertyName: string, destination?: string) {
+  if (typeof window.gtag === "function") {
+    window.gtag("event", "property_saved", {
+      event_category: "engagement",
+      property_name: propertyName,
+      destination,
+    });
+  }
+}
+
+export function trackItineraryGenerated(destination: string, duration?: string | number) {
+  if (typeof window.gtag === "function") {
+    window.gtag("event", "itinerary_generated", {
+      event_category: "tool",
+      destination,
+      duration: duration ? String(duration) : undefined,
     });
   }
 }
