@@ -8,7 +8,7 @@ import SEOHead from "@/components/SEOHead";
 
 const popularLinks = [
   { to: "/destinations", label: "Browse Destinations", icon: MapPin },
-  { to: "/gear", label: "Travel Gear", icon: Compass },
+  { to: "/gear", label: "Trip Packing Toolkit", icon: Compass },
   { to: "/compass", label: "Read the Blog", icon: Compass },
 ];
 
