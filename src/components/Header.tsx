@@ -71,7 +71,7 @@ const Header = () => {
           </div>
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-5">
+          <nav className="hidden md:flex items-center gap-5" aria-label="Main navigation">
             {navLinks.map((link) => (
               <Link
                 key={link.to}

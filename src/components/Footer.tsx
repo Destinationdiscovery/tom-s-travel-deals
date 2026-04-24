@@ -35,7 +35,7 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-primary text-primary-foreground py-16">
+    <footer className="bg-primary text-primary-foreground py-16" role="contentinfo" aria-label="Site footer">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
           {/* Brand */}
