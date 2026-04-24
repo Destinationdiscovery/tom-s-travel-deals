@@ -14,6 +14,7 @@ import BlogPostCreator from "@/components/dashboard/BlogPostCreator";
 import FeaturedDealsManager from "@/components/dashboard/FeaturedDealsManager";
 import FeaturedReviewsManager from "@/components/dashboard/FeaturedReviewsManager";
 import BannerDealsManager from "@/components/dashboard/BannerDealsManager";
+import SEOHead from "@/components/SEOHead";
 
 const GearAdmin = () => {
   const { user, isAdmin } = useAuth();
@@ -28,6 +29,7 @@ const GearAdmin = () => {
   if (!user || !isAdmin) {
     return (
       <div className="min-h-screen bg-background">
+        <SEOHead title="Agent HQ" description="Internal admin dashboard." noindex />
         <Header />
         <main className="pt-32 text-center px-4">
           <h1 className="font-display text-3xl font-bold text-foreground mb-4">Agent HQ</h1>
@@ -40,6 +42,7 @@ const GearAdmin = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Agent HQ" description="Internal admin dashboard." noindex />
       <div className="print:hidden"><Header /></div>
       <div className="pt-16 flex">
         {!previewMode && (

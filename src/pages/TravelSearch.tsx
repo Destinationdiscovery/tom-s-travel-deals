@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Search, Star, MapPin, Loader2, X } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEOHead from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -74,6 +75,7 @@ const TravelSearch = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Search Travel" description="Search for hotels, resorts, and destinations across ReviewThenGo." noindex />
       <Header />
       <main className="pt-24 pb-16">
         {/* Hero Search */}

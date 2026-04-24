@@ -8,6 +8,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import QuoteReviewSection from "@/components/dashboard/QuoteReviewSection";
 import TripDetailsCard from "@/components/dashboard/TripDetailsCard";
+import SEOHead from "@/components/SEOHead";
 
 const AGENT_INFO = {
   name: "Tom Laracy",
@@ -51,6 +52,7 @@ const PublicQuote = () => {
 
   return (
     <div className="min-h-screen bg-background py-12 px-4">
+      <SEOHead title="Vacation Quote" description="Your private travel quote." noindex />
       <div className="max-w-5xl mx-auto">
         <Card>
           <CardContent className="p-8">

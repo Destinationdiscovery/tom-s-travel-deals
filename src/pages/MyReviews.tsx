@@ -4,6 +4,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEOHead from "@/components/SEOHead";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Star, MapPin, Clock, Bookmark, ExternalLink, Trash2 } from "lucide-react";
@@ -90,6 +91,7 @@ const MyReviews = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="My Reviews" description="Your saved hotel reviews and view history." noindex />
       <Header />
       <main className="pt-24 pb-16 container mx-auto px-4">
         <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-8">My Reviews</h1>
