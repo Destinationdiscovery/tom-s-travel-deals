@@ -1,9 +1,15 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEOHead from "@/components/SEOHead";
 
 const AffiliateDisclosure = () => {
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Affiliate Disclosure"
+        description="How ReviewThenGo earns commissions through affiliate links and our policy on impartial reviews."
+        url="/affiliate-disclosure"
+      />
       <Header />
       <main className="container mx-auto px-4 pt-24 pb-16 max-w-3xl">
         <h1 className="font-display text-4xl font-bold text-foreground mb-8">Affiliate Disclosure</h1>

@@ -1,9 +1,15 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEOHead from "@/components/SEOHead";
 
 const PrivacyPolicy = () => {
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Privacy Policy"
+        description="How ReviewThenGo collects, uses, and protects the information of visitors and subscribers."
+        url="/privacy-policy"
+      />
       <Header />
       <main className="container mx-auto px-4 pt-24 pb-16 max-w-3xl">
         <h1 className="font-display text-4xl font-bold text-foreground mb-8">Privacy Policy</h1>

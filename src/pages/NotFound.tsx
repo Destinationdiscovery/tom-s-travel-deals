@@ -8,7 +8,7 @@ import SEOHead from "@/components/SEOHead";
 
 const popularLinks = [
   { to: "/destinations", label: "Browse Destinations", icon: MapPin },
-  { to: "/gear", label: "Travel Gear", icon: Compass },
+  { to: "/gear", label: "Trip Packing Toolkit", icon: Compass },
   { to: "/compass", label: "Read the Blog", icon: Compass },
 ];
 
@@ -24,7 +24,8 @@ const NotFound = () => {
   const handleSearch = () => {
     const trimmed = query.trim();
     if (trimmed.length < 2) return;
-    navigate(`/destinations?q=${encodeURIComponent(trimmed)}`);
+    const slug = trimmed.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    navigate(`/reviews/${slug}`);
   };
 
   return (

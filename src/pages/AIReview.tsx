@@ -123,9 +123,10 @@ const AIReview = () => {
           description={(review.review_data as any)?.summary || `Aggregated review of ${review.property_name} with ratings, pros, cons, and booking links.`}
           url={`/review/${review.slug}`}
           type="article"
+          noindex
           breadcrumbs={[
             { name: "Home", url: "/" },
-            { name: "Reviews", url: "/destinations" },
+            { name: "Destinations", url: "/destinations" },
             { name: review.property_name, url: `/review/${review.slug}` },
           ]}
           faq={seoFaq}

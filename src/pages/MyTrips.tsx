@@ -4,6 +4,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEOHead from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -121,6 +122,7 @@ const MyTrips = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="My Trips" description="Your saved trips and saved properties." noindex />
       <Header />
       <main className="pt-24 pb-16 container mx-auto px-4">
         <div className="flex items-center justify-between mb-8">

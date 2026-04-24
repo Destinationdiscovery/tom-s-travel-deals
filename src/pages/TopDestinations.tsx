@@ -48,6 +48,7 @@ const TopDestinations = () => {
         title={`Top Resorts in ${displayLocation} | Travel Reviews`}
         description={`Compare the top-rated resorts and hotels in ${displayLocation}. AI-curated ratings from real traveler reviews across top booking platforms.`}
         url={`/top/${location}`}
+        noindex
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "TouristDestination",
