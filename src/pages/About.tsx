@@ -211,6 +211,33 @@ const About = () => {
             <div className="max-w-3xl mx-auto mt-16">
               <AuthorBio />
             </div>
+
+            {/* Editorial Standards */}
+            <div className="max-w-3xl mx-auto mt-16 bg-card rounded-3xl p-8 md:p-10 shadow-elevated">
+              <h2 className="font-display text-2xl font-bold text-card-foreground mb-4">
+                Editorial Standards
+              </h2>
+              <ul className="space-y-3 text-sm text-card-foreground/90 leading-relaxed">
+                <li><strong>No pay-for-play.</strong> No property, hotel, airline, or brand can pay to influence a verdict, ranking, or recommendation on this site.</li>
+                <li><strong>Aggregated review methodology.</strong> Verdicts pull from Google, TripAdvisor, Booking.com, Reddit, and other public sources, weighted toward recent verified stays.</li>
+                <li><strong>Affiliate disclosure.</strong> Some outbound links to Expedia, Hotels.com, VRBO, and Amazon earn a commission at no extra cost to you. Full disclosure: <a href="/affiliate-disclosure" className="text-primary underline">affiliate-disclosure</a>.</li>
+                <li><strong>Corrections.</strong> If you spot an inaccuracy, email <a href="mailto:hello@reviewthengo.com" className="text-primary underline">hello@reviewthengo.com</a> and we'll review and update within 7 days.</li>
+                <li><strong>AI-assisted research.</strong> Some destination summaries and itineraries are generated with AI from public review data, then reviewed by Tom before publication. AI never overrides a verified first-hand review.</li>
+              </ul>
+            </div>
+
+            {/* Press / Media */}
+            <div className="max-w-3xl mx-auto mt-8 bg-card rounded-3xl p-8 md:p-10 shadow-elevated">
+              <h2 className="font-display text-2xl font-bold text-card-foreground mb-3">
+                Press &amp; Media
+              </h2>
+              <p className="text-sm text-card-foreground/90 leading-relaxed mb-2">
+                Working on a travel story? Tom is available for expert commentary on Canadian travel trends, all-inclusive resorts, cruise travel, and the travel industry.
+              </p>
+              <p className="text-sm text-card-foreground/90 leading-relaxed">
+                Reach out at <a href="mailto:press@reviewthengo.com" className="text-primary underline">press@reviewthengo.com</a> or via the <a href="/contact" className="text-primary underline">contact page</a>.
+              </p>
+            </div>
           </div>
         </section>
       </main>
