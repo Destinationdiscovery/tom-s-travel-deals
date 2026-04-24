@@ -37,10 +37,57 @@ const About = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="About ReviewThenGo"
-        description="ReviewThenGo is a travel aggregator that answers any question travelers have. Reviews, packing lists, best times to visit, itineraries, currency, flights, and safety scores."
+        title="About ReviewThenGo — Built by Tom, Travel Consultant in Ontario"
+        description="ReviewThenGo is built by Tom, a travel consultant with 10+ years in the industry. Our editorial standards: no pay-for-play, reviews aggregated from 10+ sources, transparent affiliate disclosure."
         url="/about"
-        keywords={["about ReviewThenGo", "travel aggregator", "travel questions answered", "real traveler feedback"]}
+        keywords={["about ReviewThenGo", "travel aggregator", "Tom Laracy", "Canadian travel consultant", "editorial standards", "travel review methodology"]}
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "About", url: "/about" },
+        ]}
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "Person",
+            name: "Tom Laracy",
+            jobTitle: "Travel Consultant & Founder",
+            worksFor: { "@type": "Organization", name: "ReviewThenGo" },
+            url: "https://www.reviewthengo.com/about",
+            sameAs: ["https://x.com/TomLaracyTravel", "https://tom.travelonly.com"],
+            knowsAbout: [
+              "Travel Planning",
+              "Hotel Reviews",
+              "All-Inclusive Resorts",
+              "Canadian Travel",
+              "Caribbean Travel",
+              "Cruise Travel",
+            ],
+            address: {
+              "@type": "PostalAddress",
+              addressRegion: "Ontario",
+              addressCountry: "CA",
+            },
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            name: "ReviewThenGo",
+            url: "https://www.reviewthengo.com",
+            logo: "https://www.reviewthengo.com/favicon.png",
+            founder: { "@type": "Person", name: "Tom Laracy" },
+            foundingLocation: { "@type": "Place", name: "Ontario, Canada" },
+            description:
+              "Free all-in-one travel planning platform aggregating hotel reviews from 10+ sources, with itineraries, best-time-to-visit guides, flight deals, packing lists, currency rates, safety scores, and visa requirements.",
+            knowsAbout: [
+              "Hotel Reviews",
+              "Resort Reviews",
+              "Travel Itineraries",
+              "Flight Deals",
+              "Travel Safety",
+            ],
+            sameAs: ["https://x.com/TomLaracyTravel", "https://www.instagram.com/reviewthengo/"],
+          },
+        ]}
       />
       <Header />
       <AffiliateDisclosureBanner />
