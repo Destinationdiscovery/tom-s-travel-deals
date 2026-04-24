@@ -24,7 +24,8 @@ const NotFound = () => {
   const handleSearch = () => {
     const trimmed = query.trim();
     if (trimmed.length < 2) return;
-    navigate(`/destinations?q=${encodeURIComponent(trimmed)}`);
+    const slug = trimmed.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    navigate(`/reviews/${slug}`);
   };
 
   return (
