@@ -53,6 +53,7 @@ const Install = () => {
       <SEOHead
         title="Install ReviewThenGo App"
         description="Install ReviewThenGo on your device for fast access to travel reviews, gear guides, and expert insights, even offline."
+        noindex
       />
       <Header />
       <main className="min-h-screen bg-background pt-20 pb-16">

@@ -63,6 +63,7 @@ const Reviews = () => {
         title={`${displayTitle}: Real Reviews 2026`}
         description={`Honest ratings from Google, TripAdvisor + more. Top ${displayTitle.toLowerCase()} ranked with pros, cons, and verdicts.`}
         url={`/reviews/${slug}`}
+        noindex
         faq={faqItems}
         breadcrumbs={[
           { name: "Home", url: "/" },
