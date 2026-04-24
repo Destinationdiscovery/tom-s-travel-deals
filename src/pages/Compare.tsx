@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, Star, Trash2, Sparkles, Trophy, Loader2 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEOHead from "@/components/SEOHead";
 import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import { Button } from "@/components/ui/button";
 import AffiliateLinks from "@/components/AffiliateLinks";
@@ -181,6 +182,7 @@ const Compare = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="My Saved Properties" description="Your saved hotels and resorts, side-by-side comparison." noindex />
       {itemListJsonLd && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
       )}
