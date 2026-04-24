@@ -19,9 +19,6 @@ const STATIC_URLS = [
   { loc: "/travel-intel", changefreq: "monthly", priority: "0.8" },
   { loc: "/about", changefreq: "monthly", priority: "0.5" },
   { loc: "/contact", changefreq: "monthly", priority: "0.5" },
-  { loc: "/compare", changefreq: "monthly", priority: "0.6" },
-  { loc: "/search", changefreq: "monthly", priority: "0.6" },
-  { loc: "/install", changefreq: "monthly", priority: "0.5" },
   { loc: "/privacy-policy", changefreq: "yearly", priority: "0.3" },
   { loc: "/affiliate-disclosure", changefreq: "yearly", priority: "0.3" },
   // Destination reviews
