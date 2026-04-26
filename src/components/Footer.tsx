@@ -21,7 +21,7 @@ const Footer = () => {
                 <span className="text-emerald-400">Go</span>
               </h3>
               <p className="text-primary-foreground/70 text-base mb-4">
-                The all-in-one travel planning tool. Reviews, packing lists, itineraries, flights, safety, and more — all in one place.
+                The all-in-one travel planning tool. Reviews, packing lists, itineraries, flights, safety, and more, all in one place.
               </p>
               <a
                 href="https://tom.travelonly.com"
