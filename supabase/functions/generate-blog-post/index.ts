@@ -264,6 +264,9 @@ serve(async (req) => {
       }),
     });
 
+    const [topic, perplexityRes] = await Promise.all([topicPromise, perplexityPromise]);
+    console.log("Topic detected:", topic.topicType, "| entity:", topic.primaryEntity, "| tool:", topic.primaryTool?.name || "none");
+
     if (!perplexityRes.ok) {
       const errText = await perplexityRes.text();
       console.error("Perplexity error:", perplexityRes.status, errText);
@@ -274,6 +277,14 @@ serve(async (req) => {
     const research = perplexityData.choices?.[0]?.message?.content || "";
     const citations = perplexityData.citations || [];
     console.log("Research complete, citations:", citations.length);
+
+    // Step 1b: Tool-based research (uses our own AI tools as authoritative source when applicable)
+    const toolResearch = await runToolResearch(topic);
+    if (toolResearch) {
+      console.log("Tool research succeeded:", toolResearch.toolName);
+    } else if (topic.primaryTool) {
+      console.log("Tool research unavailable, falling back to web research only");
+    }
 
     // Step 2: Generate article with Lovable AI (Gemini) using tool calling
     console.log("Generating article with Lovable AI...");
