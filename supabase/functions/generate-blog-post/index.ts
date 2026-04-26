@@ -47,6 +47,158 @@ async function searchStockPhoto(
   }
 }
 
+// ─── Topic detection + internal tool research ──────────────────────────────
+
+type TopicType =
+  | "hotel_review"
+  | "gear_packing"
+  | "best_time"
+  | "safety"
+  | "entry_requirements"
+  | "currency"
+  | "itinerary"
+  | "destination_general"
+  | "other";
+
+interface ToolMeta { name: string; path: string; label: string; benefit: string }
+
+const TOOL_MAP: Record<TopicType, ToolMeta | null> = {
+  hotel_review:        { name: "generate-review",    path: "/destinations",  label: "Hotel Review tool",       benefit: "see real ratings and a personalized verdict" },
+  gear_packing:        { name: "travel-gear-intel",  path: "/gear",          label: "Trip Packing Toolkit",    benefit: "build a weather-aware packing list" },
+  best_time:           { name: "best-time-intel",    path: "/best-time",     label: "Best Time to Visit tool", benefit: "see month-by-month weather, crowds, and pricing" },
+  safety:              { name: "safety-intel",       path: "/safety",        label: "Safety Scores tool",      benefit: "get the latest safety score and scam alerts" },
+  entry_requirements:  { name: "travel-intel",       path: "/travel-intel",  label: "Know Before You Go tool", benefit: "check current visa, entry, and health requirements" },
+  currency:            { name: "currency-tracker",   path: "/currency",      label: "Currency Tracker",        benefit: "see live rates and the trend" },
+  itinerary:           { name: "generate-itinerary", path: "/itinerary",     label: "Itinerary Builder",       benefit: "generate a day-by-day plan" },
+  destination_general: null,
+  other:               null,
+};
+
+interface TopicResult {
+  topicType: TopicType;
+  primaryEntity: string;
+  secondaryEntity?: string;
+  coreQuestion: string;
+  primaryTool: ToolMeta | null;
+}
+
+async function detectTopic(prompt: string, lovableKey: string): Promise<TopicResult> {
+  const fallback: TopicResult = {
+    topicType: "other",
+    primaryEntity: prompt.slice(0, 80),
+    coreQuestion: prompt,
+    primaryTool: null,
+  };
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 8000);
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      signal: ctrl.signal,
+      headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash-lite",
+        messages: [
+          { role: "system", content: "Classify a travel blog topic into one tool category. Return strictly via the function call." },
+          { role: "user", content: `Topic: ${prompt}` },
+        ],
+        tools: [{
+          type: "function",
+          function: {
+            name: "classify_topic",
+            description: "Classify the article topic and identify the core question + entities.",
+            parameters: {
+              type: "object",
+              properties: {
+                topicType: {
+                  type: "string",
+                  enum: ["hotel_review","gear_packing","best_time","safety","entry_requirements","currency","itinerary","destination_general","other"],
+                },
+                primaryEntity:   { type: "string", description: "Main subject: hotel name, destination, or product category" },
+                secondaryEntity: { type: "string", description: "Optional: trip type for gear, currency pair, etc." },
+                coreQuestion:    { type: "string", description: "The single question this article answers, phrased naturally" },
+              },
+              required: ["topicType","primaryEntity","coreQuestion"],
+              additionalProperties: false,
+            },
+          },
+        }],
+        tool_choice: { type: "function", function: { name: "classify_topic" } },
+      }),
+    });
+    clearTimeout(timer);
+    if (!res.ok) return fallback;
+    const data = await res.json();
+    const args = data.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+    if (!args) return fallback;
+    const parsed = JSON.parse(args);
+    const topicType: TopicType = parsed.topicType || "other";
+    return {
+      topicType,
+      primaryEntity: parsed.primaryEntity || fallback.primaryEntity,
+      secondaryEntity: parsed.secondaryEntity || undefined,
+      coreQuestion: parsed.coreQuestion || prompt,
+      primaryTool: TOOL_MAP[topicType] || null,
+    };
+  } catch (e) {
+    console.warn("Topic detection failed, using fallback:", (e as Error).message);
+    return fallback;
+  }
+}
+
+async function callInternalTool(name: string, body: Record<string, unknown>, timeoutMs = 25000): Promise<any | null> {
+  const url = Deno.env.get("SUPABASE_URL");
+  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !key) {
+    console.warn("Missing SUPABASE_URL/SERVICE_ROLE_KEY for internal tool call");
+    return null;
+  }
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${url}/functions/v1/${name}`, {
+      method: "POST",
+      signal: ctrl.signal,
+      headers: {
+        Authorization: `Bearer ${key}`,
+        apikey: key,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+    clearTimeout(timer);
+    if (!res.ok) {
+      console.warn(`Internal tool ${name} returned ${res.status}`);
+      return null;
+    }
+    return await res.json();
+  } catch (e) {
+    clearTimeout(timer);
+    console.warn(`Internal tool ${name} failed:`, (e as Error).message);
+    return null;
+  }
+}
+
+async function runToolResearch(topic: TopicResult): Promise<{ toolName: string; data: any } | null> {
+  const tool = topic.primaryTool;
+  if (!tool) return null;
+  const entity = topic.primaryEntity;
+  let payload: Record<string, unknown> = {};
+  switch (topic.topicType) {
+    case "hotel_review":         payload = { propertyName: entity }; break;
+    case "gear_packing":         payload = { destination: entity, vacationType: topic.secondaryEntity || "general" }; break;
+    case "best_time":            payload = { destination: entity }; break;
+    case "safety":               payload = { destination: entity }; break;
+    case "entry_requirements":   payload = { type: "requirements", destination: entity, citizenship: "Canadian" }; break;
+    case "currency":             payload = { from: "CAD", to: topic.secondaryEntity || "USD", destination: entity }; break;
+    case "itinerary":            payload = { destination: entity, days: 7 }; break;
+    default: return null;
+  }
+  const data = await callInternalTool(tool.name, payload);
+  if (!data) return null;
+  return { toolName: tool.name, data };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
