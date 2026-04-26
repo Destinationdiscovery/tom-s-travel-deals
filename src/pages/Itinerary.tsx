@@ -89,6 +89,11 @@ const Itinerary = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
+        title="Free AI Travel Itinerary Builder | Day-by-Day Trip Planner"
+        description="Build a complete day-by-day travel itinerary in seconds. Free AI itinerary builder with activities, meals, costs, and tips for any destination worldwide."
+        url="/itinerary"
+        keywords={["travel itinerary builder", "AI itinerary", "trip planner", "day by day itinerary", "free travel planner"]}
+      />
         title="Travel Itinerary Builder: Day-by-Day Trip Plans"
         description="Build a personalized day-by-day travel itinerary with activities, restaurants, costs, and insider tips for any destination."
         url="/itinerary"

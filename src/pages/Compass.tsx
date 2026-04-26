@@ -70,9 +70,10 @@ const Compass = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="Travel Blog | Trip Planning Tips & Guides"
-        description="Insider tips and travel wisdom from over a decade of experience. Practical advice to help you travel smarter."
+        title="The Compass | Travel Blog, Destination Guides & Industry Insights"
+        description="Honest travel guides, destination journalism, and travel industry insights from a working travel consultant. New articles weekly. No fluff."
         url="/compass"
+        keywords={["travel blog", "travel guides", "destination guides", "travel tips", "trip planning"]}
         jsonLd={blogListJsonLd}
         breadcrumbs={[
           { name: "Home", url: "/" },
