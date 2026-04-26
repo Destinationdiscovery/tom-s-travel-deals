@@ -10,12 +10,6 @@ import HowItWorks from "@/components/HowItWorks";
 import TravelersAskSection from "@/components/TravelersAskSection";
 import RecentReviewsHomepage from "@/components/RecentReviewsHomepage";
 import TravelDealsSection from "@/components/TravelDealsSection";
-import GearPreviewSection from "@/components/GearPreviewSection";
-import BestTimePreviewSection from "@/components/BestTimePreviewSection";
-import ItineraryPreviewSection from "@/components/ItineraryPreviewSection";
-import CurrencyPreviewSection from "@/components/CurrencyPreviewSection";
-import FlightsPreviewSection from "@/components/FlightsPreviewSection";
-import IntelPreviewSection from "@/components/IntelPreviewSection";
 import BlogPreviewSection from "@/components/BlogPreviewSection";
 import TrendingQueriesSection from "@/components/TrendingQueriesSection";
 import HomepageFAQ from "@/components/HomepageFAQ";
@@ -29,7 +23,7 @@ import { useGenerateReview } from "@/hooks/useGenerateReview";
 import PopularSavesSection from "@/components/PopularSavesSection";
 import ToolsDirectorySection from "@/components/ToolsDirectorySection";
 import AboutPreviewSection from "@/components/AboutPreviewSection";
-import TestimonialsSection from "@/components/TestimonialsSection";
+import AggregateStatsSection from "@/components/AggregateStatsSection";
 import { classifySearchIntent, toSlug } from "@/lib/searchIntent";
 
 
@@ -108,13 +102,6 @@ const Index = () => {
             applicationCategory: "TravelApplication",
             operatingSystem: "Web",
             offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-            aggregateRating: {
-              "@type": "AggregateRating",
-              ratingValue: 4.8,
-              reviewCount: 2450,
-              bestRating: 5,
-              worstRating: 1,
-            },
             featureList: [
               "Aggregated hotel and resort reviews from 10+ sources",
               "Best time to visit any destination with weather, crowds, and prices",
@@ -147,14 +134,7 @@ const Index = () => {
 
         <HowItWorks />
         <TravelersAskSection />
-
         <TrendingQueriesSection />
-        <BestTimePreviewSection />
-        <ItineraryPreviewSection />
-        <CurrencyPreviewSection />
-        <FlightsPreviewSection />
-        <IntelPreviewSection />
-        <GearPreviewSection />
 
         <RecentReviewsHomepage />
         <PopularSavesSection />
@@ -176,7 +156,7 @@ const Index = () => {
         <ToolsDirectorySection />
         <BlogPreviewSection />
         <TravelDealsSection />
-        <TestimonialsSection />
+        <AggregateStatsSection />
         <AboutPreviewSection />
         <HomepageFAQ />
       </main>
