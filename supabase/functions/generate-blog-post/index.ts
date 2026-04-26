@@ -552,6 +552,30 @@ IMPORTANT: For the image_search_queries field, provide short, descriptive search
       }));
     }
 
+    // AEO CTA dedupe: keep only the first occurrence of the in-content tool CTA pattern
+    const ctaRegex = /Use ReviewThenGo's \[[^\]]+\]\([^)]+\)\s+to\s+[^.]+?in seconds\./i;
+    let ctaSeen = false;
+    article.blocks = article.blocks.map((b: any) => {
+      if (b.type !== "text" || typeof b.value !== "string") return b;
+      const matches = b.value.match(new RegExp(ctaRegex.source, "gi"));
+      if (!matches) return b;
+      let value = b.value;
+      for (const m of matches) {
+        if (!ctaSeen) { ctaSeen = true; continue; }
+        value = value.replace(m, "").replace(/\s{2,}/g, " ").trim();
+      }
+      return { ...b, value };
+    }).filter((b: any) => !(b.type === "text" && (!b.value || !b.value.trim())));
+
+    // AEO shape soft-validation (warn only, never fail)
+    const firstBlock = article.blocks[0];
+    if (!firstBlock || firstBlock.type !== "heading" || !/\?\s*$/.test(firstBlock.value || "")) {
+      console.warn("AEO warning: first block is not a question heading");
+    }
+    if (topic.primaryTool && !ctaSeen) {
+      console.warn("AEO warning: in-content tool CTA was not present in generated article");
+    }
+
     // Affiliate fallback: for each affiliate product, ensure at least one markdown link exists.
     if (hasAffiliate) {
       const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
