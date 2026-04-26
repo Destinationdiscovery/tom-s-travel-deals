@@ -345,6 +345,20 @@ CONTENT DEPTH & EEAT RULES:
 - Include a FAQ section at the end with 3-5 questions and direct answers related to the topic
 - Add internal links to related ReviewThenGo tools where relevant: /reviews (hotel reviews), /best-time (best time to visit), /itinerary (itinerary builder), /flights (flight deals), /gear (packing toolkit), /currency (currency tracker), /safety (safety scores), /travel-intel (travel advisories)
 
+AEO STRUCTURE (NON-NEGOTIABLE, applied to every article):
+1. The FIRST content block must be a "heading" phrased as the user's core question (must end with "?"). Use the CORE_QUESTION provided in the user message verbatim or near-verbatim.
+2. The blocks immediately after that heading must be plain "text" blocks (no bullet headings, no sub-headings) totalling roughly 350 to 450 words that fully answer the core question in plain prose. This block is what AI search engines will quote, so it must be self-contained and direct, not a teaser.
+3. After that answer block, insert exactly ONE "text" block that is a single short paragraph in this exact pattern (substituting the values from the user message):
+   "Want a personalized answer? Use ReviewThenGo's [TOOL_LABEL](TOOL_PATH) to TOOL_BENEFIT in seconds."
+   Use markdown link syntax. This CTA must appear EXACTLY ONCE in the entire article.
+4. Then continue the article: deeper sections, comparisons, practical tips, FAQ, and a closing CTA paragraph.
+5. If no tool is provided (TOOL_LABEL is "none"), skip step 3 entirely and continue with deeper sections directly.
+
+DATA SOURCING RULES:
+- When TOOL RESEARCH is provided in the user message, treat it as the AUTHORITATIVE primary source. Quote specific numbers (ratings, scores, prices, temperatures, months) directly from it.
+- Use SUPPLEMENTARY WEB RESEARCH only to add color, context, or recent news. Never let it contradict TOOL RESEARCH.
+- If TOOL RESEARCH includes specific ratings, season tables, packing items, scam alerts, or visa rules, weave them into the article body, not just the AEO answer.
+
 You must generate a complete blog article using the research provided. Structure it with clear headings and well-organized paragraphs.`;
             })(),
           },
