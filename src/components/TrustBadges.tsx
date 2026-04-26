@@ -1,12 +1,10 @@
-import { Shield, Globe, Award, Users, Database, CalendarCheck } from "lucide-react";
+import { Database, Users, Sparkles, CalendarCheck } from "lucide-react";
 
 const badges = [
-  { icon: CalendarCheck, label: "Updated April 2026" },
-  { icon: Shield, label: "100% Real Reviews" },
-  { icon: Globe, label: "10+ Years Travel Expertise" },
-  { icon: Award, label: "Expedia Partner" },
-  { icon: Database, label: "50,000+ Reviews Analyzed" },
   { icon: Users, label: "10+ Review Sources Aggregated" },
+  { icon: Database, label: "10M+ Reviews Indexed" },
+  { icon: Sparkles, label: "100% Free, No Account Required" },
+  { icon: CalendarCheck, label: "Updated Monthly" },
 ];
 
 const TrustBadges = () => (
