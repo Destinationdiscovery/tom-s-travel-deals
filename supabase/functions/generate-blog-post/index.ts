@@ -240,9 +240,10 @@ serve(async (req) => {
     const PEXELS_API_KEY = Deno.env.get("PEXELS_API_KEY");
     if (!PEXELS_API_KEY) throw new Error("PEXELS_API_KEY is not configured");
 
-    // Step 1: Research with Perplexity
-    console.log("Researching topic with Perplexity...");
-    const perplexityRes = await fetch("https://api.perplexity.ai/chat/completions", {
+    // Step 1a: Detect topic + research in parallel (topic detection drives internal-tool research)
+    console.log("Detecting topic and researching in parallel...");
+    const topicPromise = detectTopic(prompt, LOVABLE_API_KEY);
+    const perplexityPromise = fetch("https://api.perplexity.ai/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${PERPLEXITY_API_KEY}`,
