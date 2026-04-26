@@ -368,7 +368,21 @@ You must generate a complete blog article using the research provided. Structure
 
 TOPIC/PROMPT: ${prompt}
 
-RESEARCH DATA:
+CORE_QUESTION: ${topic.coreQuestion}
+TOOL_LABEL: ${topic.primaryTool?.label || "none"}
+TOOL_PATH: ${topic.primaryTool?.path || ""}
+TOOL_BENEFIT: ${topic.primaryTool?.benefit || ""}
+
+${toolResearch ? `============================================
+TOOL RESEARCH (AUTHORITATIVE PRIMARY SOURCE)
+Source: ReviewThenGo internal "${toolResearch.toolName}" tool
+============================================
+${JSON.stringify(toolResearch.data, null, 2).slice(0, 8000)}
+
+Use these facts directly in the AEO answer block and throughout the article. Quote specific numbers (ratings, scores, prices, temperatures, months, scam names, etc.) verbatim where useful.
+============================================
+` : ""}
+SUPPLEMENTARY WEB RESEARCH (use only to add color, never to contradict TOOL RESEARCH if present):
 ${research}
 
 ${citations.length > 0 ? `\nSOURCES:\n${citations.map((c: string, i: number) => `[${i + 1}] ${c}`).join("\n")}` : ""}
