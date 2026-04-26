@@ -21,6 +21,11 @@ const navLinks = [
   { to: "/#travel-deals", label: "Deals" },
 ];
 
+const mobileExtraLinks = [
+  { to: "/about", label: "About" },
+  { to: "/contact", label: "Contact" },
+];
+
 const toolLinks = [
   { to: "/gear", label: "Trip Packing", icon: Luggage },
   { to: "/best-time", label: "Best Time", icon: Calendar },
@@ -144,20 +149,15 @@ const Header = () => {
                 </button>
               </SheetTrigger>
               <SheetContent side="right" className="w-72 bg-primary border-primary/20 p-6">
-                <nav className="flex flex-col gap-4 mt-8">
-                  {navLinks.map((link) => (
-                    <Link
-                      key={link.to}
-                      to={link.to}
-                      onClick={(e) => {
-                        if (link.label === "Deals") handleDealsClick(e);
-                        setMobileOpen(false);
-                      }}
-                      className="text-lg font-medium text-primary-foreground/80 hover:text-primary-foreground transition-colors py-2"
-                    >
-                      {link.label}
-                    </Link>
-                  ))}
+                <nav className="flex flex-col gap-3 mt-8" aria-label="Mobile navigation">
+                  {/* Home */}
+                  <Link
+                    to="/"
+                    onClick={() => setMobileOpen(false)}
+                    className="text-lg font-medium text-primary-foreground/80 hover:text-primary-foreground transition-colors py-2"
+                  >
+                    Home
+                  </Link>
 
                   {/* Mobile tools sub-group */}
                   <button
@@ -168,7 +168,7 @@ const Header = () => {
                     <ChevronDown className={`h-4 w-4 transition-transform ${toolsExpanded ? "rotate-180" : ""}`} />
                   </button>
                   {toolsExpanded && (
-                    <div className="flex flex-col gap-2 pl-4">
+                    <div className="flex flex-col gap-2 pl-4 -mt-1 mb-1">
                       {toolLinks.map((tool) => {
                         const Icon = tool.icon;
                         return (
@@ -185,6 +185,43 @@ const Header = () => {
                       })}
                     </div>
                   )}
+
+                  {/* Blog, Guides */}
+                  <Link
+                    to="/compass"
+                    onClick={() => setMobileOpen(false)}
+                    className="text-lg font-medium text-primary-foreground/80 hover:text-primary-foreground transition-colors py-2"
+                  >
+                    Blog
+                  </Link>
+                  <Link
+                    to="/guides"
+                    onClick={() => setMobileOpen(false)}
+                    className="text-lg font-medium text-primary-foreground/80 hover:text-primary-foreground transition-colors py-2"
+                  >
+                    Guides
+                  </Link>
+
+                  {/* About + Contact */}
+                  {mobileExtraLinks.map((link) => (
+                    <Link
+                      key={link.to}
+                      to={link.to}
+                      onClick={() => setMobileOpen(false)}
+                      className="text-lg font-medium text-primary-foreground/80 hover:text-primary-foreground transition-colors py-2"
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+
+                  {/* Deals */}
+                  <Link
+                    to="/#travel-deals"
+                    onClick={(e) => { handleDealsClick(e); setMobileOpen(false); }}
+                    className="text-lg font-medium text-primary-foreground/80 hover:text-primary-foreground transition-colors py-2"
+                  >
+                    Deals
+                  </Link>
 
                   <Link
                     to="/install"
