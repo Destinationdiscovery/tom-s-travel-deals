@@ -47,6 +47,158 @@ async function searchStockPhoto(
   }
 }
 
+// ─── Topic detection + internal tool research ──────────────────────────────
+
+type TopicType =
+  | "hotel_review"
+  | "gear_packing"
+  | "best_time"
+  | "safety"
+  | "entry_requirements"
+  | "currency"
+  | "itinerary"
+  | "destination_general"
+  | "other";
+
+interface ToolMeta { name: string; path: string; label: string; benefit: string }
+
+const TOOL_MAP: Record<TopicType, ToolMeta | null> = {
+  hotel_review:        { name: "generate-review",    path: "/destinations",  label: "Hotel Review tool",       benefit: "see real ratings and a personalized verdict" },
+  gear_packing:        { name: "travel-gear-intel",  path: "/gear",          label: "Trip Packing Toolkit",    benefit: "build a weather-aware packing list" },
+  best_time:           { name: "best-time-intel",    path: "/best-time",     label: "Best Time to Visit tool", benefit: "see month-by-month weather, crowds, and pricing" },
+  safety:              { name: "safety-intel",       path: "/safety",        label: "Safety Scores tool",      benefit: "get the latest safety score and scam alerts" },
+  entry_requirements:  { name: "travel-intel",       path: "/travel-intel",  label: "Know Before You Go tool", benefit: "check current visa, entry, and health requirements" },
+  currency:            { name: "currency-tracker",   path: "/currency",      label: "Currency Tracker",        benefit: "see live rates and the trend" },
+  itinerary:           { name: "generate-itinerary", path: "/itinerary",     label: "Itinerary Builder",       benefit: "generate a day-by-day plan" },
+  destination_general: null,
+  other:               null,
+};
+
+interface TopicResult {
+  topicType: TopicType;
+  primaryEntity: string;
+  secondaryEntity?: string;
+  coreQuestion: string;
+  primaryTool: ToolMeta | null;
+}
+
+async function detectTopic(prompt: string, lovableKey: string): Promise<TopicResult> {
+  const fallback: TopicResult = {
+    topicType: "other",
+    primaryEntity: prompt.slice(0, 80),
+    coreQuestion: prompt,
+    primaryTool: null,
+  };
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 8000);
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      signal: ctrl.signal,
+      headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash-lite",
+        messages: [
+          { role: "system", content: "Classify a travel blog topic into one tool category. Return strictly via the function call." },
+          { role: "user", content: `Topic: ${prompt}` },
+        ],
+        tools: [{
+          type: "function",
+          function: {
+            name: "classify_topic",
+            description: "Classify the article topic and identify the core question + entities.",
+            parameters: {
+              type: "object",
+              properties: {
+                topicType: {
+                  type: "string",
+                  enum: ["hotel_review","gear_packing","best_time","safety","entry_requirements","currency","itinerary","destination_general","other"],
+                },
+                primaryEntity:   { type: "string", description: "Main subject: hotel name, destination, or product category" },
+                secondaryEntity: { type: "string", description: "Optional: trip type for gear, currency pair, etc." },
+                coreQuestion:    { type: "string", description: "The single question this article answers, phrased naturally" },
+              },
+              required: ["topicType","primaryEntity","coreQuestion"],
+              additionalProperties: false,
+            },
+          },
+        }],
+        tool_choice: { type: "function", function: { name: "classify_topic" } },
+      }),
+    });
+    clearTimeout(timer);
+    if (!res.ok) return fallback;
+    const data = await res.json();
+    const args = data.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+    if (!args) return fallback;
+    const parsed = JSON.parse(args);
+    const topicType: TopicType = parsed.topicType || "other";
+    return {
+      topicType,
+      primaryEntity: parsed.primaryEntity || fallback.primaryEntity,
+      secondaryEntity: parsed.secondaryEntity || undefined,
+      coreQuestion: parsed.coreQuestion || prompt,
+      primaryTool: TOOL_MAP[topicType] || null,
+    };
+  } catch (e) {
+    console.warn("Topic detection failed, using fallback:", (e as Error).message);
+    return fallback;
+  }
+}
+
+async function callInternalTool(name: string, body: Record<string, unknown>, timeoutMs = 25000): Promise<any | null> {
+  const url = Deno.env.get("SUPABASE_URL");
+  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !key) {
+    console.warn("Missing SUPABASE_URL/SERVICE_ROLE_KEY for internal tool call");
+    return null;
+  }
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${url}/functions/v1/${name}`, {
+      method: "POST",
+      signal: ctrl.signal,
+      headers: {
+        Authorization: `Bearer ${key}`,
+        apikey: key,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+    clearTimeout(timer);
+    if (!res.ok) {
+      console.warn(`Internal tool ${name} returned ${res.status}`);
+      return null;
+    }
+    return await res.json();
+  } catch (e) {
+    clearTimeout(timer);
+    console.warn(`Internal tool ${name} failed:`, (e as Error).message);
+    return null;
+  }
+}
+
+async function runToolResearch(topic: TopicResult): Promise<{ toolName: string; data: any } | null> {
+  const tool = topic.primaryTool;
+  if (!tool) return null;
+  const entity = topic.primaryEntity;
+  let payload: Record<string, unknown> = {};
+  switch (topic.topicType) {
+    case "hotel_review":         payload = { propertyName: entity }; break;
+    case "gear_packing":         payload = { destination: entity, vacationType: topic.secondaryEntity || "general" }; break;
+    case "best_time":            payload = { destination: entity }; break;
+    case "safety":               payload = { destination: entity }; break;
+    case "entry_requirements":   payload = { type: "requirements", destination: entity, citizenship: "Canadian" }; break;
+    case "currency":             payload = { from: "CAD", to: topic.secondaryEntity || "USD", destination: entity }; break;
+    case "itinerary":            payload = { destination: entity, days: 7 }; break;
+    default: return null;
+  }
+  const data = await callInternalTool(tool.name, payload);
+  if (!data) return null;
+  return { toolName: tool.name, data };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -88,9 +240,10 @@ serve(async (req) => {
     const PEXELS_API_KEY = Deno.env.get("PEXELS_API_KEY");
     if (!PEXELS_API_KEY) throw new Error("PEXELS_API_KEY is not configured");
 
-    // Step 1: Research with Perplexity
-    console.log("Researching topic with Perplexity...");
-    const perplexityRes = await fetch("https://api.perplexity.ai/chat/completions", {
+    // Step 1a: Detect topic + research in parallel (topic detection drives internal-tool research)
+    console.log("Detecting topic and researching in parallel...");
+    const topicPromise = detectTopic(prompt, LOVABLE_API_KEY);
+    const perplexityPromise = fetch("https://api.perplexity.ai/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${PERPLEXITY_API_KEY}`,
@@ -111,6 +264,9 @@ serve(async (req) => {
       }),
     });
 
+    const [topic, perplexityRes] = await Promise.all([topicPromise, perplexityPromise]);
+    console.log("Topic detected:", topic.topicType, "| entity:", topic.primaryEntity, "| tool:", topic.primaryTool?.name || "none");
+
     if (!perplexityRes.ok) {
       const errText = await perplexityRes.text();
       console.error("Perplexity error:", perplexityRes.status, errText);
@@ -121,6 +277,14 @@ serve(async (req) => {
     const research = perplexityData.choices?.[0]?.message?.content || "";
     const citations = perplexityData.citations || [];
     console.log("Research complete, citations:", citations.length);
+
+    // Step 1b: Tool-based research (uses our own AI tools as authoritative source when applicable)
+    const toolResearch = await runToolResearch(topic);
+    if (toolResearch) {
+      console.log("Tool research succeeded:", toolResearch.toolName);
+    } else if (topic.primaryTool) {
+      console.log("Tool research unavailable, falling back to web research only");
+    }
 
     // Step 2: Generate article with Lovable AI (Gemini) using tool calling
     console.log("Generating article with Lovable AI...");
@@ -181,6 +345,20 @@ CONTENT DEPTH & EEAT RULES:
 - Include a FAQ section at the end with 3-5 questions and direct answers related to the topic
 - Add internal links to related ReviewThenGo tools where relevant: /reviews (hotel reviews), /best-time (best time to visit), /itinerary (itinerary builder), /flights (flight deals), /gear (packing toolkit), /currency (currency tracker), /safety (safety scores), /travel-intel (travel advisories)
 
+AEO STRUCTURE (NON-NEGOTIABLE, applied to every article):
+1. The FIRST content block must be a "heading" phrased as the user's core question (must end with "?"). Use the CORE_QUESTION provided in the user message verbatim or near-verbatim.
+2. The blocks immediately after that heading must be plain "text" blocks (no bullet headings, no sub-headings) totalling roughly 350 to 450 words that fully answer the core question in plain prose. This block is what AI search engines will quote, so it must be self-contained and direct, not a teaser.
+3. After that answer block, insert exactly ONE "text" block that is a single short paragraph in this exact pattern (substituting the values from the user message):
+   "Want a personalized answer? Use ReviewThenGo's [TOOL_LABEL](TOOL_PATH) to TOOL_BENEFIT in seconds."
+   Use markdown link syntax. This CTA must appear EXACTLY ONCE in the entire article.
+4. Then continue the article: deeper sections, comparisons, practical tips, FAQ, and a closing CTA paragraph.
+5. If no tool is provided (TOOL_LABEL is "none"), skip step 3 entirely and continue with deeper sections directly.
+
+DATA SOURCING RULES:
+- When TOOL RESEARCH is provided in the user message, treat it as the AUTHORITATIVE primary source. Quote specific numbers (ratings, scores, prices, temperatures, months) directly from it.
+- Use SUPPLEMENTARY WEB RESEARCH only to add color, context, or recent news. Never let it contradict TOOL RESEARCH.
+- If TOOL RESEARCH includes specific ratings, season tables, packing items, scam alerts, or visa rules, weave them into the article body, not just the AEO answer.
+
 You must generate a complete blog article using the research provided. Structure it with clear headings and well-organized paragraphs.`;
             })(),
           },
@@ -190,7 +368,21 @@ You must generate a complete blog article using the research provided. Structure
 
 TOPIC/PROMPT: ${prompt}
 
-RESEARCH DATA:
+CORE_QUESTION: ${topic.coreQuestion}
+TOOL_LABEL: ${topic.primaryTool?.label || "none"}
+TOOL_PATH: ${topic.primaryTool?.path || ""}
+TOOL_BENEFIT: ${topic.primaryTool?.benefit || ""}
+
+${toolResearch ? `============================================
+TOOL RESEARCH (AUTHORITATIVE PRIMARY SOURCE)
+Source: ReviewThenGo internal "${toolResearch.toolName}" tool
+============================================
+${JSON.stringify(toolResearch.data, null, 2).slice(0, 8000)}
+
+Use these facts directly in the AEO answer block and throughout the article. Quote specific numbers (ratings, scores, prices, temperatures, months, scam names, etc.) verbatim where useful.
+============================================
+` : ""}
+SUPPLEMENTARY WEB RESEARCH (use only to add color, never to contradict TOOL RESEARCH if present):
 ${research}
 
 ${citations.length > 0 ? `\nSOURCES:\n${citations.map((c: string, i: number) => `[${i + 1}] ${c}`).join("\n")}` : ""}
@@ -358,6 +550,30 @@ IMPORTANT: For the image_search_queries field, provide short, descriptive search
         question: cleanEmDashes(faq.question || ""),
         answer: cleanEmDashes(faq.answer || ""),
       }));
+    }
+
+    // AEO CTA dedupe: keep only the first occurrence of the in-content tool CTA pattern
+    const ctaRegex = /Use ReviewThenGo's \[[^\]]+\]\([^)]+\)\s+to\s+[^.]+?in seconds\./i;
+    let ctaSeen = false;
+    article.blocks = article.blocks.map((b: any) => {
+      if (b.type !== "text" || typeof b.value !== "string") return b;
+      const matches = b.value.match(new RegExp(ctaRegex.source, "gi"));
+      if (!matches) return b;
+      let value = b.value;
+      for (const m of matches) {
+        if (!ctaSeen) { ctaSeen = true; continue; }
+        value = value.replace(m, "").replace(/\s{2,}/g, " ").trim();
+      }
+      return { ...b, value };
+    }).filter((b: any) => !(b.type === "text" && (!b.value || !b.value.trim())));
+
+    // AEO shape soft-validation (warn only, never fail)
+    const firstBlock = article.blocks[0];
+    if (!firstBlock || firstBlock.type !== "heading" || !/\?\s*$/.test(firstBlock.value || "")) {
+      console.warn("AEO warning: first block is not a question heading");
+    }
+    if (topic.primaryTool && !ctaSeen) {
+      console.warn("AEO warning: in-content tool CTA was not present in generated article");
     }
 
     // Affiliate fallback: for each affiliate product, ensure at least one markdown link exists.
