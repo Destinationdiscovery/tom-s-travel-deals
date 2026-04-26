@@ -9,6 +9,7 @@ import CommentsSection from "@/components/comments/CommentsSection";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import SEOHead from "@/components/SEOHead";
 import AuthorBio from "@/components/AuthorBio";
+import CompassArticleToolsCTA from "@/components/CompassArticleToolsCTA";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -102,6 +103,19 @@ const CompassArticle = () => {
     },
     ...(article.tags?.length ? { "keywords": article.tags.join(", ") } : {}),
   } : null;
+
+  // BreadcrumbList JSON-LD for richer SERP display
+  const breadcrumbJsonLd = article ? {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.reviewthengo.com/" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://www.reviewthengo.com/compass" },
+      { "@type": "ListItem", "position": 3, "name": article.title, "item": `https://www.reviewthengo.com/compass/${slug}` },
+    ],
+  } : null;
+
+  const combinedJsonLd = [blogPostingJsonLd, breadcrumbJsonLd].filter(Boolean);
 
   // Show "Updated" line when meaningfully different from publish date
   const showUpdated = (() => {
