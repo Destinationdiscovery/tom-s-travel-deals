@@ -394,7 +394,7 @@ const CompassArticle = () => {
               </div>
             )}
 
-            {/* Programmatic tools CTA — auto-picks 3 relevant tools by article keywords */}
+            {/* Programmatic tools CTA: auto-picks 3 relevant tools by article keywords */}
             <CompassArticleToolsCTA
               title={article.title}
               category={article.category}

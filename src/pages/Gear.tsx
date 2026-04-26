@@ -103,10 +103,6 @@ const Gear = () => {
         description="Generate a personalized, weather-aware packing list for any destination. Plus expert travel gear reviews. Free, no signup required."
         url="/gear"
         keywords={["packing list", "trip packing", "travel gear", "what to pack", "travel essentials", "packing list generator"]}
-      />
-        title="Trip Packing Lists and Travel Gear Recommendations"
-        description="Get a personalized packing list for any trip. AI-powered recommendations for what to pack based on your destination, weather, and activities."
-        url="/gear"
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "WebPage",

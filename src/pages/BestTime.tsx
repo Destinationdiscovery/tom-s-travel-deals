@@ -104,10 +104,6 @@ const BestTime = () => {
         url="/best-time"
         keywords={["best time to visit", "when to travel", "best month to travel", "travel weather", "off season travel"]}
       />
-        title="Best Time to Visit Any Destination | Weather & Crowds"
-        description="Find the best month to visit any country or city. Get weather forecasts, crowd levels, flight price trends, and local events to plan your perfect trip."
-        url="/best-time"
-      />
       <Header />
       <main className="pt-20">
         {/* Hero */}

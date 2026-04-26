@@ -94,10 +94,6 @@ const Itinerary = () => {
         url="/itinerary"
         keywords={["travel itinerary builder", "AI itinerary", "trip planner", "day by day itinerary", "free travel planner"]}
       />
-        title="Travel Itinerary Builder: Day-by-Day Trip Plans"
-        description="Build a personalized day-by-day travel itinerary with activities, restaurants, costs, and insider tips for any destination."
-        url="/itinerary"
-      />
       <Header />
       <main className="pt-20">
         {/* Hero */}

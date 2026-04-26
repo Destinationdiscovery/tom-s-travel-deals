@@ -73,7 +73,7 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
           Review. Plan. Go.
         </h1>
         <p className="text-white/80 text-base md:text-lg font-light mb-2">
-          The only travel planning tool you need — free, honest, and powered by 10+ trusted review sources.
+          The only travel planning tool you need. Free, honest, and powered by 10+ trusted review sources.
         </p>
         <p className="text-white/60 text-xs mb-6">
           By Travel Experts at ReviewThenGo | Aggregating 10M+ reviews from TripAdvisor, Booking.com, Google &amp; more

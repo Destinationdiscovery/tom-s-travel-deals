@@ -20,7 +20,7 @@ const features = [
   {
     icon: Camera,
     title: "Real Experiences Shared",
-    description: "No stock photos here — our reviews feature real photos, videos, and real opinions from verified travelers.",
+    description: "No stock photos here. Our reviews feature real photos, videos, and real opinions from verified travelers.",
   },
 ];
 
@@ -37,7 +37,7 @@ const About = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="About ReviewThenGo — Built by Tom, Travel Consultant in Ontario"
+        title="About ReviewThenGo: Built by Tom, Travel Consultant in Ontario"
         description="ReviewThenGo is built by Tom, a travel consultant with 10+ years in the industry. Our editorial standards: no pay-for-play, reviews aggregated from 10+ sources, transparent affiliate disclosure."
         url="/about"
         keywords={["about ReviewThenGo", "travel aggregator", "Tom Laracy", "Canadian travel consultant", "editorial standards", "travel review methodology"]}
@@ -121,7 +121,7 @@ const About = () => {
                     honestly, with no agenda.
                   </p>
                   <p className="text-muted-foreground text-lg leading-relaxed mb-4">
-                    I'm Tom — a travel consultant with 10+ years in the industry, based in Ontario, Canada. I've
+                    I'm Tom, a travel consultant with 10+ years in the industry, based in Ontario, Canada. I've
                     booked thousands of trips for real clients, walked the halls of resorts most travelers only
                     see in brochures, and learned which review sources actually predict whether you'll have a great
                     stay. ReviewThenGo is what I wish I'd had when I started planning my own trips.

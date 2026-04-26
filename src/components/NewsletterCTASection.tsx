@@ -45,7 +45,7 @@ const NewsletterCTASection = () => {
             The Compass Weekly
           </h2>
           <p className="text-muted-foreground text-base mb-6">
-            Get hand-picked travel deals, packing tips, and travel news — every week, free.
+            Get hand-picked travel deals, packing tips, and travel news. Every week, free.
           </p>
           <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
             <Input
