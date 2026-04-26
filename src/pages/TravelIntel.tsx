@@ -56,9 +56,10 @@ const TravelIntel = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="Know Before You Go"
-        description="Visa requirements, safety advisories, and destination news, powered by real-time data."
+        title="Visa Requirements, Travel Advisories & Destination News | Know Before You Go"
+        description="Free travel intelligence tool: check visa and entry requirements, government safety advisories, and destination news for any country before your trip."
         url="/travel-intel"
+        keywords={["visa requirements", "entry requirements", "travel advisory", "destination news", "know before you go"]}
       />
       <Header />
       <AffiliateDisclosureBanner />

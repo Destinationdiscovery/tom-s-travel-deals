@@ -9,6 +9,7 @@ import CommentsSection from "@/components/comments/CommentsSection";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import SEOHead from "@/components/SEOHead";
 import AuthorBio from "@/components/AuthorBio";
+import CompassArticleToolsCTA from "@/components/CompassArticleToolsCTA";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -102,6 +103,19 @@ const CompassArticle = () => {
     },
     ...(article.tags?.length ? { "keywords": article.tags.join(", ") } : {}),
   } : null;
+
+  // BreadcrumbList JSON-LD for richer SERP display
+  const breadcrumbJsonLd = article ? {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.reviewthengo.com/" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://www.reviewthengo.com/compass" },
+      { "@type": "ListItem", "position": 3, "name": article.title, "item": `https://www.reviewthengo.com/compass/${slug}` },
+    ],
+  } : null;
+
+  const combinedJsonLd = [blogPostingJsonLd, breadcrumbJsonLd].filter(Boolean);
 
   // Show "Updated" line when meaningfully different from publish date
   const showUpdated = (() => {
@@ -241,7 +255,7 @@ const CompassArticle = () => {
           { name: "Blog", url: "/compass" },
           { name: article.title, url: `/compass/${slug}` },
         ]}
-        jsonLd={blogPostingJsonLd || undefined}
+        jsonLd={combinedJsonLd.length > 0 ? combinedJsonLd : undefined}
         keywords={article.tags}
         faq={article.faq_items && article.faq_items.length > 0 ? article.faq_items : undefined}
       />
@@ -380,22 +394,12 @@ const CompassArticle = () => {
               </div>
             )}
 
-            {/* Homepage tools CTA */}
-            <div className="mt-8">
-              <div className="rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div>
-                  <p className="font-display font-bold text-foreground text-lg">Planning a trip?</p>
-                  <p className="text-sm text-muted-foreground">Check out the 8 planning tools on our main page — reviews, flights, gear, and more.</p>
-                </div>
-                <Link
-                  to="/"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity whitespace-nowrap"
-                >
-                  Explore Our Tools
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </div>
-            </div>
+            {/* Programmatic tools CTA — auto-picks 3 relevant tools by article keywords */}
+            <CompassArticleToolsCTA
+              title={article.title}
+              category={article.category}
+              tags={article.tags}
+            />
 
             <AuthorBio />
 

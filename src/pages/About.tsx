@@ -100,7 +100,7 @@ const About = () => {
             <h1 className="font-display text-4xl md:text-6xl font-bold text-white mb-3">
               About <span className="text-primary-foreground">ReviewThenGo</span>
             </h1>
-            <p className="text-white/80 text-lg">Real insights for real travelers, worldwide.</p>
+            <p className="text-white/80 text-lg">Built by a real traveler, for real travelers.</p>
           </div>
         </section>
 
@@ -114,16 +114,22 @@ const About = () => {
                     Why <span className="text-gradient">ReviewThenGo</span> Exists
                   </h2>
                   <p className="text-muted-foreground text-lg leading-relaxed mb-4">
-                    Planning a trip shouldn't mean drowning in thousands of reviews across a dozen websites.
-                    ReviewThenGo was built to solve that, we aggregate real traveler feedback from 10+ trusted
-                    sources and distill it into clear, honest verdicts.
+                    ReviewThenGo started because I was planning a trip to Italy and spent three nights drowning in
+                    contradictory reviews across TripAdvisor, Booking.com, Reddit, Google, and a dozen blogs. The
+                    "best resort" on one site was a "tourist trap" on another. Sponsored top-10 lists were ranking
+                    properties I'd personally never recommend. I wanted one place that pulled it all together,
+                    honestly, with no agenda.
                   </p>
                   <p className="text-muted-foreground text-lg leading-relaxed mb-4">
-                    Whether you're checking a beach resort in Bali, a boutique hotel in Paris, or a golf club
-                    in Dubai, you'll get the pros, cons, and a straight "worth it?" answer in seconds.
+                    I'm Tom — a travel consultant with 10+ years in the industry, based in Ontario, Canada. I've
+                    booked thousands of trips for real clients, walked the halls of resorts most travelers only
+                    see in brochures, and learned which review sources actually predict whether you'll have a great
+                    stay. ReviewThenGo is what I wish I'd had when I started planning my own trips.
                   </p>
                   <p className="text-muted-foreground text-lg leading-relaxed">
-                    No pay-for-play. No sponsored rankings. Just real insights so you can book with confidence.
+                    No pay-for-play. No sponsored rankings. No fake reviews. Properties cannot pay to influence a
+                    verdict on this site, period. The tools are free because the goal is simple: help you book with
+                    confidence the first time.
                   </p>
                 </div>
 

@@ -58,9 +58,10 @@ const Currency = () => {
   return (
     <>
       <SEOHead
-        title="Travel Currency Exchange Rates and Converter"
-        description="Check live exchange rates, conversion tables, and money-saving tips for any travel destination."
+        title="Live Currency Exchange Rates & Travel Money Converter"
+        description="Check live travel exchange rates, currency conversion tables, and money-saving tips for any country. Free travel currency tool, updated continuously."
         url="/currency"
+        keywords={["currency converter", "exchange rates", "travel money", "currency tracker", "foreign exchange"]}
       />
       <Header />
       <main id="main-content" className="min-h-screen bg-background pt-20">
