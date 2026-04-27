@@ -268,6 +268,7 @@ const CompassArticle = () => {
         jsonLd={combinedJsonLd.length > 0 ? combinedJsonLd : undefined}
         keywords={article.tags}
         faq={article.faq_items && article.faq_items.length > 0 ? article.faq_items : undefined}
+        alternateUrls={crawlerFeedUrl ? [{ href: crawlerFeedUrl, type: "text/html" }] : undefined}
       />
       <Header />
       <ReadingProgress />
