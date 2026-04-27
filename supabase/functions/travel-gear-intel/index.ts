@@ -214,7 +214,7 @@ async function attachSingleProductImage(
     if (!imageRows || imageRows.length === 0) return;
 
     const productName = normalize((resultData.productName as string) || "");
-    const match = imageRows.find((row) =>
+    const match = (imageRows as any[]).find((row: any) =>
       productName.includes(normalize(row.product_keyword))
     );
     if (match) {
