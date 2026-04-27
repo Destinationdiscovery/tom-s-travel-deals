@@ -178,7 +178,7 @@ const normalize = (s: string) => s.toLowerCase().replace(/-/g, " ").replace(/\s+
 
 /* ─── Image Lookup Helper ─── */
 async function attachProductImages(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   items: Record<string, unknown>[],
 ): Promise<void> {
   try {
@@ -203,7 +203,7 @@ async function attachProductImages(
 }
 
 async function attachSingleProductImage(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   resultData: Record<string, unknown>,
 ): Promise<void> {
   try {
