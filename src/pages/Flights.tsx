@@ -11,6 +11,8 @@ import { trackAffiliateClick } from "@/lib/analytics";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEOHead from "@/components/SEOHead";
+import ToolAEOContent from "@/components/tools/ToolAEOContent";
+import { flightsAEO } from "@/components/tools/toolAEOContent";
 
 interface FlightDeal {
   airline: string;
@@ -201,6 +203,13 @@ const Flights = () => {
             </div>
           )}
         </div>
+        <ToolAEOContent
+          hookQuestion={flightsAEO.hookQuestion}
+          intro={flightsAEO.intro}
+          examples={flightsAEO.examples}
+          faqs={flightsAEO.faqs}
+          toolPath="/flights"
+        />
       </main>
       <Footer />
     </>

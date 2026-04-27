@@ -1,6 +1,8 @@
 import { useState, useRef } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ToolAEOContent from "@/components/tools/ToolAEOContent";
+import { destinationsAEO } from "@/components/tools/toolAEOContent";
 import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import { Star, ArrowRight, Play, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -333,6 +335,14 @@ const Destinations = () => {
             )}
           </div>
         </section>
+        <ToolAEOContent
+          hookQuestion={destinationsAEO.hookQuestion}
+          intro={destinationsAEO.intro}
+          examples={destinationsAEO.examples}
+          faqs={destinationsAEO.faqs}
+          toolPath="/reviews"
+          queryParam=""
+        />
       </main>
       <Footer />
     </div>

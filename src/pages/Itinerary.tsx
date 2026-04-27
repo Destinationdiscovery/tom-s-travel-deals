@@ -3,6 +3,8 @@ import { Search, Loader2, ArrowLeft, MapPin, Clock, DollarSign, Utensils, Lightb
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEOHead from "@/components/SEOHead";
+import ToolAEOContent from "@/components/tools/ToolAEOContent";
+import { itineraryAEO } from "@/components/tools/toolAEOContent";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -292,6 +294,13 @@ const Itinerary = () => {
             </div>
           )}
         </div>
+        <ToolAEOContent
+          hookQuestion={itineraryAEO.hookQuestion}
+          intro={itineraryAEO.intro}
+          examples={itineraryAEO.examples}
+          faqs={itineraryAEO.faqs}
+          toolPath="/itinerary"
+        />
       </main>
       <Footer />
     </div>

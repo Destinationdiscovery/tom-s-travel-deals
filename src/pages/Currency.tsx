@@ -8,6 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEOHead from "@/components/SEOHead";
+import ToolAEOContent from "@/components/tools/ToolAEOContent";
+import { currencyAEO } from "@/components/tools/toolAEOContent";
 
 interface CurrencyResult {
   currencyCode: string;
@@ -175,6 +177,13 @@ const Currency = () => {
             </div>
           )}
         </div>
+        <ToolAEOContent
+          hookQuestion={currencyAEO.hookQuestion}
+          intro={currencyAEO.intro}
+          examples={currencyAEO.examples}
+          faqs={currencyAEO.faqs}
+          toolPath="/currency"
+        />
       </main>
       <Footer />
     </>
