@@ -92,12 +92,17 @@ Deno.serve(async (req) => {
       .select("slug, updated_at")
       .order("created_at", { ascending: false });
 
-    // Collect DB slugs (skip any that duplicate static entries)
+    // Collect DB slugs (skip any that duplicate static entries OR contain
+    // characters that would break the XML sitemap). Slugs must be lowercase
+    // alphanumeric + hyphens only — anything else (spaces, uppercase, punctuation,
+    // already-encoded sequences) is rejected so it can't poison the feed.
+    const SAFE_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
     const staticSlugs = new Set(STATIC_URLS.map((u) => u.loc));
     const dbEntries = (posts || [])
+      .filter((p: any) => typeof p.slug === "string" && SAFE_SLUG.test(p.slug))
       .filter((p: any) => !staticSlugs.has(`/compass/${p.slug}`))
       .map((p: any) => ({
-        loc: `/compass/${p.slug}`,
+        loc: `/compass/${encodeURIComponent(p.slug)}`,
         changefreq: "weekly",
         priority: "0.8",
         lastmod: p.updated_at ? new Date(p.updated_at).toISOString().split("T")[0] : undefined,
