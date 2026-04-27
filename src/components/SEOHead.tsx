@@ -25,6 +25,13 @@ interface AggregateRatingData {
   };
 }
 
+interface AlternateLink {
+  href: string;
+  type?: string;
+  hreflang?: string;
+  rel?: string;
+}
+
 interface SEOHeadProps {
   title: string;
   description: string;
@@ -40,6 +47,7 @@ interface SEOHeadProps {
   publishedTime?: string;
   modifiedTime?: string;
   author?: string;
+  alternateUrls?: AlternateLink[];
 }
 
 const SITE_NAME = "ReviewThenGo";
