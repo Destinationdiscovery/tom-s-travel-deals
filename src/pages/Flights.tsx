@@ -221,6 +221,7 @@ const Flights = () => {
           examples={flightsAEO.examples}
           faqs={flightsAEO.faqs}
           toolPath="/flights"
+          onCardClick={(q) => { setQuery(q); handleSearch(q); window.scrollTo({ top: 0, behavior: "smooth" }); }}
         />
       </main>
       <Footer />
