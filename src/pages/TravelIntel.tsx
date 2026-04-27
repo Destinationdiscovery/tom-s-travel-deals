@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { useTravelIntel, type IntelType } from "@/hooks/useTravelIntel";
 import { Shield, FileText, Newspaper, Loader2, Globe } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
+import ToolAEOContent from "@/components/tools/ToolAEOContent";
+import { travelIntelAEO } from "@/components/tools/toolAEOContent";
 import { supabase } from "@/integrations/supabase/client";
 import heroImg from "@/assets/snowbird-beach-sunset.jpg";
 import { IntelLoading, RequirementsResult, AdvisoriesResult, NewsResult } from "@/components/intel/IntelResults";
@@ -125,6 +127,13 @@ const TravelIntel = () => {
           <div className="mt-6 p-4 rounded-xl bg-destructive/10 text-destructive text-sm">{error}</div>
         )}
       </div>
+      <ToolAEOContent
+        hookQuestion={travelIntelAEO.hookQuestion}
+        intro={travelIntelAEO.intro}
+        examples={travelIntelAEO.examples}
+        faqs={travelIntelAEO.faqs}
+        toolPath="/travel-intel"
+      />
       <Footer />
     </div>
   );

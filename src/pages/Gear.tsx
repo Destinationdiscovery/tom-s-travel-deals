@@ -3,6 +3,8 @@ import { Search, Loader2, ArrowLeft, ExternalLink, Home } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ToolAEOContent from "@/components/tools/ToolAEOContent";
+import { gearAEO } from "@/components/tools/toolAEOContent";
 import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -220,6 +222,13 @@ const Gear = () => {
             <div className="mt-6 p-4 rounded-xl bg-destructive/10 text-destructive text-sm max-w-2xl mx-auto">{error}</div>
           )}
         </div>
+        <ToolAEOContent
+          hookQuestion={gearAEO.hookQuestion}
+          intro={gearAEO.intro}
+          examples={gearAEO.examples}
+          faqs={gearAEO.faqs}
+          toolPath="/gear"
+        />
       </main>
       <Footer />
     </div>
