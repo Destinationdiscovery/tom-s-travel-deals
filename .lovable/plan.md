@@ -1,59 +1,49 @@
-## Goal
+## Sitemap Fix Plan
 
-Close out Claude's two final asks so AI crawlers (Googlebot, Perplexity, GPTBot) can reliably discover and read full article bodies for every Compass post.
+Three connected problems, fixed in one pass.
 
-## What's already confirmed working
+### Problem summary
 
-I just tested the edge function directly for `why-canadians-skipping-us-2026`:
+1. **`public/sitemap.xml` line 75** has an unencoded title-as-slug with spaces, capitals, colons, ampersands, and commas. Google sees a parse error and abandons the entire sitemap → 0 of 110 pages discovered via XML sitemap.
+2. **The same bad slug exists in the `blog_posts` database table** (`Edinburgh Scotland Travel Guide 2026: Itinerary, Hidden Gems & Haunted History`). This means the article's actual URL is unreachable, the React route can't render it cleanly, and any future regenerated sitemap would re-introduce the error.
+3. **GSC submission used the wrong domain** (`reviewthengo.com` instead of `www.reviewthengo.com`).
 
-- Returns `200` with full plain HTML
-- Includes the complete article body (679 words) inside the JSON-LD `articleBody` field
-- Includes the full body again as visible `<p>` and `<h2>` HTML in `<article>`
-- Title, description, canonical, OG tags, and `BlogPosting` schema all present
+### Fix steps
 
-So Claude's first ask ("confirm `?slug=` returns full body text") is already satisfied. No code changes needed for that.
+**Step 1: Repair the database row**
+- Run a one-off SQL update on `blog_posts` to change the bad slug to a clean one: `edinburgh-scotland-travel-guide-2026`.
+- This unblocks the article URL itself: `https://www.reviewthengo.com/compass/edinburgh-scotland-travel-guide-2026` will now actually load.
 
-## Change needed: alternate link to the crawler feed
+**Step 2: Repair `public/sitemap.xml` line 75**
+- Replace the broken `<loc>` value with the corrected slug.
+- No other lines in the file have malformed slugs (verified by scan — only line 75 contains spaces/percent encoding/uppercase).
 
-Add a `<link rel="alternate" type="text/html" href="...articles-feed?slug=<slug>">` tag in the `<head>` of every Compass article page. This tells crawlers exactly where the JS-free version lives, so bots that hit `/compass/<slug>` cold can follow the link to the fully-rendered body without needing to discover the edge function on their own.
+**Step 3: Harden the dynamic sitemap generator (`supabase/functions/generate-sitemap`)**
+- Add a slug-sanity filter: skip any `blog_posts` row whose slug contains characters outside `[a-z0-9-]` so a future bad slug can never poison the XML again.
+- Also URL-encode each slug as a defense-in-depth measure when writing `<loc>`.
 
-### Implementation
+**Step 4: Add a slug normalizer to the blog generator (`supabase/functions/generate-blog-post`)**
+- Even though the AI is instructed to return a lowercase-hyphen slug, it clearly drifted at least once. Add a deterministic `slugify()` post-processing step that runs on the returned `slug` field before insert: lowercase, replace non-alphanumeric runs with `-`, strip leading/trailing `-`, cap at 80 chars.
+- This means the AI's slug is treated as a hint, never raw input.
 
-1. Extend `SEOHead` (`src/components/SEOHead.tsx`) with a new optional prop:
-   - `alternateUrls?: { href: string; type?: string; hreflang?: string; rel?: string }[]`
-   - Render each as `<link rel={rel || "alternate"} type={type} hreflang={hreflang} href={href} />` inside the existing `<Helmet>`.
+**Step 5: Tell you the right thing to submit in GSC**
+- After deploy, you'll resubmit `https://www.reviewthengo.com/sitemap.xml` (with `www`) and remove the broken non-www entry. I'll give you the exact click path.
 
-2. In `src/pages/CompassArticle.tsx`, where `<SEOHead ... />` is rendered for an article, pass:
-   ```ts
-   alternateUrls={[{
-     href: `https://iomrjljlydboniioohkv.supabase.co/functions/v1/articles-feed?slug=${encodeURIComponent(slug)}`,
-     type: "text/html",
-   }]}
-   ```
+### Files changed
 
-3. Mirror the same alternate link inside the JSON-LD `BlogPosting` object that `CompassArticle` already builds, by adding:
-   ```ts
-   "sameAs": [crawlerUrl]
-   ```
-   so the crawler URL is also reachable from the structured data.
+| File | Change |
+|---|---|
+| Database `blog_posts` table | UPDATE one row's slug |
+| `public/sitemap.xml` | Fix line 75 |
+| `supabase/functions/generate-sitemap/index.ts` | Filter + encode slugs |
+| `supabase/functions/generate-blog-post/index.ts` | Slugify post-processing |
 
-### Why this is the right shape
+### Out of scope (we'll come back to it)
 
-- `rel="alternate"` is the standard signal Googlebot, Bingbot, and most AI crawlers honor for "same content, different representation."
-- It does not change canonicalization (the `<link rel="canonical">` still points to `https://www.reviewthengo.com/compass/<slug>`), so the SPA URL remains the indexable one in search results.
-- It just gives non-JS bots a documented path to the static body.
+The bot-redirect work for `/compass/[slug]` URLs is paused until the sitemap is healthy and Google starts discovering articles again.
 
-## Files touched
+### What I'll verify before handing back
 
-- `src/components/SEOHead.tsx` — add `alternateUrls` prop + render
-- `src/pages/CompassArticle.tsx` — pass the alternate URL for the current slug + add `sameAs` to JSON-LD
-
-## Verification after deploy
-
-1. View source on `https://www.reviewthengo.com/compass/why-canadians-skipping-us-2026` and confirm `<link rel="alternate" type="text/html" href="https://iomrjljlydboniioohkv.supabase.co/functions/v1/articles-feed?slug=why-canadians-skipping-us-2026" />` is present in `<head>`.
-2. Confirm the same URL is also present inside the `BlogPosting` JSON-LD `sameAs` array.
-3. In Google Search Console URL Inspection → "Test live URL" → "View tested page" → "More info" → "HTTP response", the alternate link should be discoverable.
-
-## What this does not do
-
-This will not force Google to index the article instantly. The "URL is unknown to Google" message in Search Console resolves on Google's own crawl schedule. What this change does is make sure that when a crawler does arrive, it has an explicit, documented path to the full body — which is what was missing.
+- `xmllint` (or equivalent) parses the new `public/sitemap.xml` cleanly.
+- A `curl` to the live `generate-sitemap` edge function returns valid XML containing the corrected slug.
+- The Edinburgh article loads at the new clean URL on the React side.
