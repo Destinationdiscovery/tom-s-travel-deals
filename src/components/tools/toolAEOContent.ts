@@ -261,18 +261,21 @@ export const travelIntelAEO: ToolAEOConfig = {
       answer:
         "Canadians do not need a visa but must have a Cuba Tourist Card, often included with flight bookings. Stays up to 90 days are allowed. Bring proof of medical insurance, which is mandatory on arrival.",
       ctaQuery: "Cuba",
+      extraParams: { type: "requirements", citizenship: "Canada" },
     },
     {
       question: "Thailand travel advisory 2026?",
       answer:
         "Thailand is generally rated 'Exercise Normal Precautions' with elevated caution near the southern border provinces. Visa-free entry for 60 days is now standard for most Western passports. Carry copies of your passport at all times.",
       ctaQuery: "Thailand",
+      extraParams: { type: "advisories" },
     },
     {
       question: "Japan entry rules for tourists?",
       answer:
         "Most Western passports get 90-day visa-free entry. No COVID restrictions remain. The Visit Japan Web app speeds up customs. A return ticket and proof of accommodation may be requested at immigration.",
       ctaQuery: "Japan",
+      extraParams: { type: "requirements", citizenship: "United States" },
     },
   ],
   faqs: [

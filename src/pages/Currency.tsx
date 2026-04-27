@@ -60,7 +60,7 @@ const Currency = () => {
   };
 
   // Auto-search if query param present
-  useState(() => { if (initialQuery) handleSearch(initialQuery); });
+  useEffect(() => { if (initialQuery) handleSearch(initialQuery); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
 
   return (
     <>
@@ -198,6 +198,7 @@ const Currency = () => {
           examples={currencyAEO.examples}
           faqs={currencyAEO.faqs}
           toolPath="/currency"
+          onCardClick={(q) => { setQuery(q); handleSearch(q); window.scrollTo({ top: 0, behavior: "smooth" }); }}
         />
       </main>
       <Footer />

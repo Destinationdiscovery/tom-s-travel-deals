@@ -8,6 +8,8 @@ export interface ToolExample {
   answer: string;
   ctaQuery: string;
   ctaLabel?: string;
+  /** Optional extra query params (e.g. { type: "advisories", citizenship: "Canada" }). */
+  extraParams?: Record<string, string>;
 }
 
 export interface ToolFAQ {
@@ -21,8 +23,13 @@ interface ToolAEOContentProps {
   examples: ToolExample[];
   faqs: ToolFAQ[];
   toolPath: string;
-  /** Query param name for prefill. Defaults to "q". */
+  /** Query param name for prefill. Defaults to "q". Pass "" to use a path segment. */
   queryParam?: string;
+  /**
+   * Optional handler. When provided, cards become buttons that run the tool in place
+   * instead of navigating. Receives the example query and any extra params.
+   */
+  onCardClick?: (query: string, extraParams?: Record<string, string>) => void;
 }
 
 const ToolAEOContent = ({
@@ -32,6 +39,7 @@ const ToolAEOContent = ({
   faqs,
   toolPath,
   queryParam = "q",
+  onCardClick,
 }: ToolAEOContentProps) => {
   const faqJsonLd = {
     "@context": "https://schema.org",
@@ -42,6 +50,21 @@ const ToolAEOContent = ({
       acceptedAnswer: { "@type": "Answer", text: f.a },
     })),
   };
+
+  const buildHref = (ex: ToolExample) => {
+    const base = queryParam
+      ? `${toolPath}?${queryParam}=${encodeURIComponent(ex.ctaQuery)}`
+      : `${toolPath.replace(/\/$/, "")}/${encodeURIComponent(ex.ctaQuery)}`;
+    if (!ex.extraParams) return base;
+    const sep = base.includes("?") ? "&" : "?";
+    const extra = Object.entries(ex.extraParams)
+      .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+      .join("&");
+    return `${base}${sep}${extra}`;
+  };
+
+  const cardClasses =
+    "group rounded-xl border border-border bg-card p-5 flex flex-col text-left hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer w-full";
 
   return (
     <section className="container mx-auto px-4 py-12 max-w-5xl">
@@ -64,24 +87,41 @@ const ToolAEOContent = ({
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {examples.map((ex) => {
-            const href = queryParam
-              ? `${toolPath}?${queryParam}=${encodeURIComponent(ex.ctaQuery)}`
-              : `${toolPath.replace(/\/$/, "")}/${encodeURIComponent(ex.ctaQuery)}`;
+            const inner = (
+              <>
+                <h4 className="font-display font-semibold text-foreground text-base mb-2 leading-snug group-hover:text-primary transition-colors">
+                  {ex.question}
+                </h4>
+                <p className="text-sm text-muted-foreground leading-relaxed flex-1 mb-4">{ex.answer}</p>
+                <span className="inline-flex items-center gap-1 text-sm font-medium text-primary group-hover:gap-2 transition-all mt-auto">
+                  {ex.ctaLabel ?? "Run this in the tool"} <ArrowRight className="h-3.5 w-3.5" />
+                </span>
+              </>
+            );
+
+            if (onCardClick) {
+              return (
+                <button
+                  key={ex.question}
+                  type="button"
+                  onClick={() => onCardClick(ex.ctaQuery, ex.extraParams)}
+                  aria-label={`Run in tool: ${ex.question}`}
+                  className={cardClasses}
+                >
+                  {inner}
+                </button>
+              );
+            }
+
             return (
-            <Link
-              key={ex.question}
-              to={href}
-              aria-label={`Open answer: ${ex.question}`}
-              className="group rounded-xl border border-border bg-card p-5 flex flex-col hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer"
-            >
-              <h4 className="font-display font-semibold text-foreground text-base mb-2 leading-snug group-hover:text-primary transition-colors">
-                {ex.question}
-              </h4>
-              <p className="text-sm text-muted-foreground leading-relaxed flex-1 mb-4">{ex.answer}</p>
-              <span className="inline-flex items-center gap-1 text-sm font-medium text-primary group-hover:gap-2 transition-all mt-auto">
-                {ex.ctaLabel ?? "Get the full answer"} <ArrowRight className="h-3.5 w-3.5" />
-              </span>
-            </Link>
+              <Link
+                key={ex.question}
+                to={buildHref(ex)}
+                aria-label={`Open answer: ${ex.question}`}
+                className={cardClasses}
+              >
+                {inner}
+              </Link>
             );
           })}
         </div>

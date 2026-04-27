@@ -31,23 +31,37 @@ const TravelIntel = () => {
     const params = new URLSearchParams(window.location.search);
     const q = params.get("q");
     const type = params.get("type") as IntelType | null;
+    const citizenship = params.get("citizenship") || "";
     if (q && q.trim().length >= 2 && type) {
-      if (type === "advisories") {
-        setActiveTab("advisories");
-        setAdvDestination(q);
-        fetchIntel("advisories", q.trim());
-      } else if (type === "news") {
-        setActiveTab("news");
-        setNewsDestination(q);
-        fetchIntel("news", q.trim());
-      } else if (type === "requirements") {
-        setActiveTab("requirements");
-        setReqDestination(q);
-      }
+      runFromParams(type, q.trim(), citizenship);
       window.history.replaceState({}, "", window.location.pathname);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const runFromParams = (type: IntelType, q: string, citizenship?: string) => {
+    if (type === "advisories") {
+      setActiveTab("advisories");
+      setAdvDestination(q);
+      fetchIntel("advisories", q);
+    } else if (type === "news") {
+      setActiveTab("news");
+      setNewsDestination(q);
+      fetchIntel("news", q);
+    } else {
+      setActiveTab("requirements");
+      setReqDestination(q);
+      const c = (citizenship && citizenship.trim()) || "United States";
+      setReqCitizenship(c);
+      fetchIntel("requirements", q, c);
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleCardRun = (q: string, extra?: Record<string, string>) => {
+    const type = (extra?.type as IntelType) || "requirements";
+    runFromParams(type, q, extra?.citizenship);
+  };
 
   const handleSubmit = (type: IntelType) => {
     if (type === "requirements") fetchIntel("requirements", reqDestination, reqCitizenship);
@@ -133,6 +147,7 @@ const TravelIntel = () => {
         examples={travelIntelAEO.examples}
         faqs={travelIntelAEO.faqs}
         toolPath="/travel-intel"
+        onCardClick={handleCardRun}
       />
       <Footer />
     </div>

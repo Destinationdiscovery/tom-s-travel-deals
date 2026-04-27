@@ -1,51 +1,35 @@
-## Plan to fix the currency converter
+Plan to make the example cards actually run each tool
 
-The bug is confirmed: `cad to euro` is being interpreted as `CAD` because the backend currently only returns a USD-based target currency. It does not properly model a source currency and destination currency pair.
+1. Make every "Real answers from this tool" card act like a tool starter
+- Keep the existing card layout, but make the destination query reliable.
+- When clicked, each card will route to the relevant tool page with the card's example query in the URL.
+- The target tool page will immediately populate the input and run the backend function.
 
-### What I will change
+2. Fix tools that do not currently auto-run from card clicks
+- Safety Scores: add support for `?q=` so cards like "Common scams in Paris?" start the Safety tool automatically.
+- Know Before You Go: add better card routing by including the correct tab/type in the URL, then auto-run the right tab where possible.
+- Best Time, Itinerary, Gear, Flights, and Currency already have partial `?q=` handling, but I will normalize it so clicks consistently launch the tool and display results.
 
-1. **Update the currency backend function**
-   - Parse both currencies from user input, including:
-     - `cad to euro`
-     - `CAD to EUR`
-     - `100 euros in yen`
-     - `GBP in CAD`
-     - country phrases like `Canada to Europe`
-   - Treat the first detected currency as the source and the last detected currency as the target.
-   - Default to `USD -> target` only when the user provides one currency or country.
+3. Improve the shared card component behavior
+- Update `ToolAEOContent` so it can optionally add extra query parameters, such as `type=advisories` for Know Before You Go.
+- Preserve the current SEO-friendly links and card styling.
+- Ensure cards are accessible keyboard-clickable links, not dead visual cards.
 
-2. **Return true conversion data**
-   - Instead of always fetching `latest/USD` and showing `USD -> target`, calculate the cross-rate correctly:
+4. Map Know Before You Go examples to the right tool mode
+- "Do Canadians need a visa for Cuba?" should open the Requirements tab, prefill destination Cuba, and use Canada as citizenship so it can run immediately.
+- "Thailand travel advisory 2026?" should open the Advisories tab and run Thailand.
+- "Japan entry rules for tourists?" should open Requirements or destination-focused entry rules with a default citizenship so it can produce an answer instead of just filling one field.
 
-```text
-source -> target = target_rate_against_USD / source_rate_against_USD
-```
+5. Validation after implementation
+- Test each visible card set: Gear, Best Time, Itinerary, Currency, Flights, Safety, Know Before You Go, and destination review cards.
+- Confirm each card click either starts the tool and shows loading/results, or navigates to the appropriate review answer page.
+- Check browser console and edge function responses for errors.
 
-   - For `cad to euro`, the result will show `CAD -> EUR`, not `USD -> CAD`.
-
-3. **Update the Currency page UI**
-   - Display the actual source and target codes in the main card title.
-   - Show `1 CAD = X EUR` and `1 EUR = X CAD` when the query is `cad to euro`.
-   - Update the conversion table so amounts are labeled in the source currency, not always USD.
-
-4. **Improve examples and compatibility**
-   - Keep existing single-destination behavior working for searches like `Mexico`, `Japan`, `EUR`, and `THB`.
-   - Keep AEO example cards working.
-   - Preserve existing travel money tips using the target currency.
-
-5. **Test after implementation**
-   - Test the backend function with:
-     - `cad to euro`
-     - `CAD to EUR`
-     - `USD to MXN`
-     - `100 euros in yen`
-     - `Mexico`
-   - Verify the page displays the correct direction and labels.
-
-### Technical notes
-
-- Files to update:
-  - `supabase/functions/currency-tracker/index.ts`
-  - `src/pages/Currency.tsx`
-- No database changes are needed.
-- No new secrets are needed.
+Technical details
+- Files likely to change:
+  - `src/components/tools/ToolAEOContent.tsx`
+  - `src/components/tools/toolAEOContent.ts`
+  - `src/pages/Safety.tsx`
+  - `src/pages/TravelIntel.tsx`
+  - Possibly small cleanup in `src/pages/Currency.tsx` and `src/pages/Flights.tsx` to replace the current `useState(() => ...)` auto-run pattern with `useEffect`.
+- No database changes are required.
