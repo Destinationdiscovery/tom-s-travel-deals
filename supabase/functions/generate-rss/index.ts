@@ -6,7 +6,19 @@
 // Aliased on the canonical domain at: /rss.xml (static snapshot in public/)
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import staticArticlesData from "../articles-feed/static-articles.json" with { type: "json" };
+// Inlined snapshot of supabase/functions/articles-feed/static-articles.json
+// (cross-function imports aren't supported by the edge bundler).
+const staticArticlesData = [
+  { slug: "2026-travel-trends-whycations-glowcations-microvacations", title: "2026 Travel Trends: Purpose-Driven Whycations, Glowcations & Microvacations - How Canadians Can Jump In", excerpt: "Hilton, Conde Nast, and Expedia highlight the rise of intentional travel. Here's what Whycations, Glowcations, and Microvacations mean for Canadian travelers.", author: "Tom", datePublished: "January 27, 2026", category: "Guides" },
+  { slug: "japan-top-destination-canadians-2026", title: "Why Japan Is the #1 Destination Canadians Are Booking for 2026 (And How to Go on a Budget)", excerpt: "Japan is exploding as the number one trending international destination for Canadians heading into 2026. Here's why and how to make it affordable.", author: "Tom", datePublished: "January 26, 2026", category: "Destinations" },
+  { slug: "domestic-canada-boom-banff-lake-louise-2026", title: "Domestic Canada Boom: Banff, Lake Louise, and Why More Canadians Are Staying Home in 2026", excerpt: "With shifting attitudes toward U.S. travel and a desire for meaningful escapes, destinations like Banff and Lake Louise are seeing renewed interest across all seasons.", author: "Tom", datePublished: "January 27, 2026", category: "Guides" },
+  { slug: "travel-insurance-what-you-need", title: "Travel Insurance: What You Really Need", excerpt: "Understanding coverage options and why the right policy can save your trip.", author: "Tom", datePublished: "November 15, 2024", category: "Insurance" },
+  { slug: "why-canadians-skipping-us-2026", title: "Why Snowbirds and Canadians Are Skipping the US More in 2026 (And Where They're Going Instead)", excerpt: "Data shows Canadian travel to the US is down sharply. Here's why snowbirds are rethinking their winter escapes and the destinations offering better value.", author: "Tom", datePublished: "January 27, 2026", category: "Guides" },
+  { slug: "canadian-at-par-deal-las-vegas", title: "The Canadian At-Par Deal in Las Vegas: What It Is, Who It's For, and Why I'm Not Sure It Changes Much", excerpt: "A few downtown Las Vegas casinos are accepting Canadian dollars at par, but is it really worth changing your travel plans for?", author: "Tom", datePublished: "January 26, 2026", category: "Deals" },
+  { slug: "group-travel-2026-who-uses-it-why-booming", title: "Group Travel in 2026: Who Uses It, Why It's Booming, and How It Fits Canadian Travelers", excerpt: "Group travel is making a strong comeback in 2026. From friends reunions to destination weddings, here's who's booking and why it works for Ontario travelers.", author: "Tom", datePublished: "January 28, 2026", category: "Guides" },
+  { slug: "westjet-seat-squeeze-passengers-said-no", title: "WestJet Tried to Squeeze in More Seats for Cheaper Fares... But Passengers Said No Way!", excerpt: "WestJet's experiment with tighter seats grabbed headlines in early 2026. Here's what happened, why passengers pushed back, and tips for your next booking.", author: "Tom", datePublished: "January 29, 2026", category: "News" },
+  { slug: "rome-trevi-fountain-fee-genius-or-ripoff", title: "Rome Just Charged 2 Euros to See the Trevi Fountain: Is This Genius or a Total Rip-Off?", excerpt: "Rome rolled out a 2-euro fee for close-up Trevi Fountain access. Here's how it works, why they did it, and tips for your Italy trip from Ontario.", author: "Tom", datePublished: "February 2, 2026", category: "News" },
+];
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
