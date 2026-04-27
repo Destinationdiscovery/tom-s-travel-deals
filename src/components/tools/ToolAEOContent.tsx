@@ -77,13 +77,14 @@ const ToolAEOContent = ({
               </h4>
               <p className="text-sm text-muted-foreground leading-relaxed flex-1 mb-4">{ex.answer}</p>
               <Link
-                to={`${toolPath}?${queryParam}=${encodeURIComponent(ex.ctaQuery)}`}
+                to={href}
                 className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:gap-2 transition-all"
               >
                 {ex.ctaLabel ?? "Get the full answer"} <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </article>
-          ))}
+            );
+          })}
         </div>
       </div>
 
