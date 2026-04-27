@@ -52,9 +52,10 @@ const Safety = () => {
     supabase.functions.invoke("track-review-view", { body: { slug: "safety" } }).catch(() => {});
   }, []);
 
-  const handleSearch = async () => {
-    const trimmed = query.trim();
+  const runSearch = async (raw: string) => {
+    const trimmed = raw.trim();
     if (trimmed.length < 2) return;
+    setQuery(trimmed);
     setLoading(true);
     setError(null);
     setData(null);
@@ -71,6 +72,23 @@ const Safety = () => {
       setLoading(false);
     }
   };
+
+  const handleSearch = () => runSearch(query);
+
+  const handleCardRun = (q: string) => {
+    runSearch(q);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get("q");
+    if (q && q.trim().length >= 2) {
+      runSearch(q.trim());
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
