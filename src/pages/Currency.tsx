@@ -189,7 +189,8 @@ const Currency = () => {
                 </Card>
               )}
             </div>
-          )}
+            );
+          })()}
         </div>
         <ToolAEOContent
           hookQuestion={currencyAEO.hookQuestion}
