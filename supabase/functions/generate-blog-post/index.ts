@@ -528,6 +528,24 @@ IMPORTANT: For the image_search_queries field, provide short, descriptive search
       throw new Error("Failed to parse AI response");
     }
 
+    // Defensive slug normalization — never trust the AI's slug as-is.
+    // Treat it as a hint and force it through a deterministic slugifier so a
+    // stray title-as-slug (with spaces, capitals, colons, ampersands, etc.)
+    // can never reach the database again.
+    const slugify = (input: string): string => {
+      const base = String(input || "")
+        .toLowerCase()
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "") // strip accents
+        .replace(/&/g, " and ")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 80)
+        .replace(/-+$/g, "");
+      return base || "untitled-post";
+    };
+    article.slug = slugify(article.slug || article.title || "");
+
     // Post-process: remove any em-dashes that slipped through
     const cleanEmDashes = (s: string) => s.replace(/[—–]/g, ", ");
     // Fix markdown links with empty anchor text: [](url) -> [learn more](url)
