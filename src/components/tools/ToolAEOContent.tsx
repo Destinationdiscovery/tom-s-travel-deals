@@ -68,21 +68,20 @@ const ToolAEOContent = ({
               ? `${toolPath}?${queryParam}=${encodeURIComponent(ex.ctaQuery)}`
               : `${toolPath.replace(/\/$/, "")}/${encodeURIComponent(ex.ctaQuery)}`;
             return (
-            <article
+            <Link
               key={ex.question}
-              className="rounded-xl border border-border bg-card p-5 flex flex-col hover:border-primary/40 hover:shadow-md transition-all"
+              to={href}
+              aria-label={`Open answer: ${ex.question}`}
+              className="group rounded-xl border border-border bg-card p-5 flex flex-col hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer"
             >
-              <h4 className="font-display font-semibold text-foreground text-base mb-2 leading-snug">
+              <h4 className="font-display font-semibold text-foreground text-base mb-2 leading-snug group-hover:text-primary transition-colors">
                 {ex.question}
               </h4>
               <p className="text-sm text-muted-foreground leading-relaxed flex-1 mb-4">{ex.answer}</p>
-              <Link
-                to={href}
-                className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:gap-2 transition-all"
-              >
+              <span className="inline-flex items-center gap-1 text-sm font-medium text-primary group-hover:gap-2 transition-all mt-auto">
                 {ex.ctaLabel ?? "Get the full answer"} <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </article>
+              </span>
+            </Link>
             );
           })}
         </div>
