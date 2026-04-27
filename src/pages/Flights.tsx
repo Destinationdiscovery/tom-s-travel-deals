@@ -142,25 +142,37 @@ const Flights = () => {
                   <TrendingDown className="h-5 w-5 text-primary" /> Top Deals Found
                 </h3>
                 {result.deals?.map((deal, i) => (
-                  <Card key={i} className="hover:border-primary/30 transition-colors">
-                    <CardContent className="pt-5 pb-4">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-semibold text-foreground">{deal.airline}</span>
-                            <Badge variant="outline" className="text-xs">{deal.class}</Badge>
-                            <Badge variant="secondary" className="text-xs">{deal.stops}</Badge>
+                  <a
+                    key={i}
+                    href={buildExpediaFlightUrl(result.route)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => trackAffiliateClick("Expedia", "/flights", "flight_deal_card")}
+                    aria-label={`Book ${deal.airline} ${deal.price} on Expedia`}
+                    className="block group"
+                  >
+                    <Card className="hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer">
+                      <CardContent className="pt-5 pb-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-semibold text-foreground group-hover:text-primary transition-colors">{deal.airline}</span>
+                              <Badge variant="outline" className="text-xs">{deal.class}</Badge>
+                              <Badge variant="secondary" className="text-xs">{deal.stops}</Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground">{deal.dates}</p>
+                            {deal.notes && <p className="text-xs text-muted-foreground mt-1">{deal.notes}</p>}
                           </div>
-                          <p className="text-sm text-muted-foreground">{deal.dates}</p>
-                          {deal.notes && <p className="text-xs text-muted-foreground mt-1">{deal.notes}</p>}
+                          <div className="text-right">
+                            <p className="text-2xl font-bold text-primary">{deal.price}</p>
+                            <p className="text-xs text-muted-foreground inline-flex items-center gap-1 justify-end">
+                              Book on Expedia <ExternalLink className="h-3 w-3" />
+                            </p>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-2xl font-bold text-primary">{deal.price}</p>
-                          <p className="text-xs text-muted-foreground">round-trip</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      </CardContent>
+                    </Card>
+                  </a>
                 ))}
               </div>
 

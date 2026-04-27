@@ -51,8 +51,51 @@ serve(async (req) => {
     const { query } = await req.json();
     if (!query) throw new Error("Missing query");
 
-    const normalized = query.toLowerCase().trim();
-    const currencyCode = COUNTRY_CURRENCY[normalized] || query.toUpperCase().trim();
+    const raw = String(query).trim();
+    const lower = raw.toLowerCase();
+
+    // 1) Try direct country/region match (e.g. "Mexico", "Bali")
+    let currencyCode: string | undefined = COUNTRY_CURRENCY[lower];
+
+    // 2) If not, look for a 3-letter currency code anywhere in the query.
+    //    For "USD to MXN" or "100 USD to MXN" pick the LAST code (target),
+    //    falling back to the first if only one is present and it isn't USD.
+    if (!currencyCode) {
+      const codeMatches = raw.toUpperCase().match(/\b[A-Z]{3}\b/g) || [];
+      const knownCodes = codeMatches.filter((c) => CURRENCY_NAMES[c]);
+      if (knownCodes.length >= 2) {
+        // last one is typically the target ("USD to MXN" -> MXN)
+        currencyCode = knownCodes[knownCodes.length - 1];
+      } else if (knownCodes.length === 1) {
+        currencyCode = knownCodes[0];
+      }
+    }
+
+    // 3) Last resort: scan tokens against the country/currency map
+    //    (handles "convert to mexico", "100 euros in yen", etc.)
+    if (!currencyCode) {
+      const cleaned = lower.replace(/[^a-z\s]/g, " ");
+      const tokens = cleaned.split(/\s+/).filter(Boolean);
+      const yenMap: Record<string, string> = { yen: "JPY", euros: "EUR", euro: "EUR", pounds: "GBP", pound: "GBP", dollars: "USD", dollar: "USD", peso: "MXN", pesos: "MXN", baht: "THB", rupee: "INR", rupees: "INR", lira: "TRY", real: "BRL", reais: "BRL", won: "KRW", yuan: "CNY", dirham: "AED", shekel: "ILS" };
+      for (const t of tokens) {
+        if (yenMap[t]) { currencyCode = yenMap[t]; break; }
+        if (COUNTRY_CURRENCY[t]) { currencyCode = COUNTRY_CURRENCY[t]; break; }
+      }
+      // try multi-word country names
+      if (!currencyCode) {
+        for (const country of Object.keys(COUNTRY_CURRENCY)) {
+          if (country.includes(" ") && lower.includes(country)) {
+            currencyCode = COUNTRY_CURRENCY[country];
+            break;
+          }
+        }
+      }
+    }
+
+    if (!currencyCode) {
+      currencyCode = raw.toUpperCase().replace(/[^A-Z]/g, "");
+    }
+
     const currencyName = CURRENCY_NAMES[currencyCode] || currencyCode;
 
     // Fetch from open exchange rates API (free, no key needed)
