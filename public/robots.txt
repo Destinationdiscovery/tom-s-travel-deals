@@ -46,6 +46,10 @@ Allow: /
 Sitemap: https://www.reviewthengo.com/sitemap.xml
 Sitemap: https://www.reviewthengo.com/article-urls.txt
 
+# RSS feed (The Compass blog)
+# Static snapshot: https://www.reviewthengo.com/rss.xml
+# Always-live:     https://iomrjljlydboniioohkv.supabase.co/functions/v1/generate-rss
+
 # Crawler-friendly article feed (plain HTML, no JavaScript required)
 # Index: https://iomrjljlydboniioohkv.supabase.co/functions/v1/articles-feed
 # Single article: https://iomrjljlydboniioohkv.supabase.co/functions/v1/articles-feed?slug=<slug>

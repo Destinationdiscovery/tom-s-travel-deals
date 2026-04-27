@@ -1,4 +1,4 @@
-import { Heart, ExternalLink, Twitter, Instagram } from "lucide-react";
+import { Heart, ExternalLink, Twitter, Instagram, Rss } from "lucide-react";
 import { Link } from "react-router-dom";
 import expediaLogo from "@/assets/expedia-logo.png";
 import { trackAffiliateClick } from "@/lib/analytics";
@@ -98,6 +98,9 @@ const Footer = () => {
                 </a>
                 <a href="https://www.instagram.com/reviewthengo/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-primary-foreground/60 hover:text-secondary transition-colors">
                   <Instagram className="h-5 w-5" />
+                </a>
+                <a href="/rss.xml" target="_blank" rel="noopener noreferrer" aria-label="RSS feed for The Compass blog" title="RSS feed" className="text-primary-foreground/60 hover:text-secondary transition-colors">
+                  <Rss className="h-5 w-5" />
                 </a>
               </div>
 
