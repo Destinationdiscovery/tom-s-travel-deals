@@ -142,24 +142,29 @@ export const AdvisoriesResult = ({ data }: { data: AdvisoriesData }) => (
 
 export const NewsResult = ({ data }: { data: NewsData }) => (
   <div className="space-y-4 animate-fade-in">
-    {data.articles?.map((article, i) => (
-      <div key={i} className="bg-card rounded-2xl p-6 shadow-soft">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <span className="inline-block text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary mb-2">{article.category}</span>
-            {article.url ? (
-              <a href={article.url} target="_blank" rel="noopener noreferrer" className="font-display font-bold text-lg leading-snug text-primary hover:underline inline-flex items-center gap-1.5">
-                {article.title} <ExternalLink className="h-4 w-4 shrink-0" />
-              </a>
-            ) : (
-              <h3 className="font-display font-bold text-lg leading-snug">{article.title}</h3>
-            )}
-            <p className="text-sm text-muted-foreground mt-2">{article.summary}</p>
-            <p className="text-xs text-muted-foreground mt-3">{article.source} · {article.date}</p>
+    {data.articles?.map((article, i) => {
+      const Wrapper: any = article.url
+        ? (props: any) => <a href={article.url} target="_blank" rel="noopener noreferrer" aria-label={`Read: ${article.title}`} {...props} />
+        : (props: any) => <div {...props} />;
+      return (
+        <Wrapper
+          key={i}
+          className={`block bg-card rounded-2xl p-6 shadow-soft ${article.url ? "group hover:shadow-md hover:-translate-y-0.5 hover:border-primary/40 border border-transparent transition-all cursor-pointer" : ""}`}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <span className="inline-block text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary mb-2">{article.category}</span>
+              <h3 className={`font-display font-bold text-lg leading-snug inline-flex items-center gap-1.5 ${article.url ? "text-primary group-hover:underline" : ""}`}>
+                {article.title}
+                {article.url && <ExternalLink className="h-4 w-4 shrink-0" />}
+              </h3>
+              <p className="text-sm text-muted-foreground mt-2">{article.summary}</p>
+              <p className="text-xs text-muted-foreground mt-3">{article.source} · {article.date}</p>
+            </div>
           </div>
-        </div>
-      </div>
-    ))}
+        </Wrapper>
+      );
+    })}
     <Citations citations={data.citations} />
   </div>
 );
