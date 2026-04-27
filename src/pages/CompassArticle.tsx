@@ -69,28 +69,31 @@ const CompassArticle = () => {
   const publishedIso = toIso(article?.datePublished);
   const modifiedIso = toIso(article?.updatedAt) || publishedIso;
 
-  // Compute word count from rich content for JSON-LD
-  const wordCount = article ? (() => {
-    const blocks = article.richContent || [];
-    const text = blocks
-      .map((b: any) => b.value || b.content || "")
-      .join(" ");
-    const fallback = article.content?.join(" ") || "";
-    return (text + " " + fallback).trim().split(/\s+/).filter(Boolean).length;
-  })() : 0;
+  // Compute plain-text article body + word count for JSON-LD (critical for AI crawlers)
+  const articleBodyText = article ? (() => {
+    const blocks: any[] = article.richContent || [];
+    const parts = blocks
+      .filter((b: any) => b.type !== "image")
+      .map((b: any) => stripMarkdown(b.value || b.content || ""))
+      .filter(Boolean);
+    const fallback = (article.content || []).map((c: any) => stripMarkdown(typeof c === "string" ? c : "")).filter(Boolean);
+    return [...parts, ...fallback].join("\n\n").trim();
+  })() : "";
+  const wordCount = articleBodyText ? articleBodyText.split(/\s+/).filter(Boolean).length : 0;
 
-  // Build BlogPosting JSON-LD (passed to SEOHead below)
+  // Build BlogPosting JSON-LD (passed to SEOHead below) — includes full articleBody so AI engines can index even on a SPA
   const blogPostingJsonLd = article ? {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     "headline": article.title,
-    "author": { "@type": "Person", "name": article.author },
+    "author": { "@type": "Person", "name": article.author, "url": "https://www.reviewthengo.com/about" },
     "datePublished": publishedIso || article.datePublished,
     "dateModified": modifiedIso || publishedIso || article.datePublished,
     "image": article.image,
     "description": jsonLdDescription,
     "inLanguage": "en-US",
     ...(wordCount > 0 ? { "wordCount": wordCount } : {}),
+    ...(articleBodyText ? { "articleBody": articleBodyText } : {}),
     "publisher": {
       "@type": "Organization",
       "name": "ReviewThenGo",

@@ -122,8 +122,8 @@ ${allUrls
         "Cache-Control": "public, max-age=3600",
       },
     });
-  } catch (e) {
-    return new Response(`Error generating sitemap: ${e.message}`, {
+  } catch (e: any) {
+    return new Response(`Error generating sitemap: ${e?.message || String(e)}`, {
       status: 500,
       headers: corsHeaders,
     });

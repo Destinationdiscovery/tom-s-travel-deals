@@ -178,7 +178,7 @@ const normalize = (s: string) => s.toLowerCase().replace(/-/g, " ").replace(/\s+
 
 /* ─── Image Lookup Helper ─── */
 async function attachProductImages(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   items: Record<string, unknown>[],
 ): Promise<void> {
   try {
@@ -190,7 +190,7 @@ async function attachProductImages(
 
     for (const item of items) {
       const itemName = normalize((item.name as string) || "");
-      const match = imageRows.find((row) =>
+      const match = (imageRows as any[]).find((row: any) =>
         itemName.includes(normalize(row.product_keyword))
       );
       if (match) {
@@ -203,7 +203,7 @@ async function attachProductImages(
 }
 
 async function attachSingleProductImage(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   resultData: Record<string, unknown>,
 ): Promise<void> {
   try {
@@ -214,7 +214,7 @@ async function attachSingleProductImage(
     if (!imageRows || imageRows.length === 0) return;
 
     const productName = normalize((resultData.productName as string) || "");
-    const match = imageRows.find((row) =>
+    const match = (imageRows as any[]).find((row: any) =>
       productName.includes(normalize(row.product_keyword))
     );
     if (match) {
