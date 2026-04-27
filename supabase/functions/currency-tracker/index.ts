@@ -8,11 +8,13 @@ const corsHeaders = {
 
 // Country/region to currency code mapping
 const COUNTRY_CURRENCY: Record<string, string> = {
-  mexico: "MXN", japan: "JPY", uk: "GBP", "united kingdom": "GBP", europe: "EUR",
+  mexico: "MXN", japan: "JPY", uk: "GBP", "united kingdom": "GBP", britain: "GBP",
+  england: "GBP", europe: "EUR", eurozone: "EUR",
   france: "EUR", germany: "EUR", italy: "EUR", spain: "EUR", portugal: "EUR",
-  greece: "EUR", netherlands: "EUR", canada: "CAD", australia: "AUD",
+  greece: "EUR", netherlands: "EUR", ireland: "EUR", austria: "EUR", belgium: "EUR",
+  canada: "CAD", australia: "AUD", usa: "USD", "united states": "USD", america: "USD",
   thailand: "THB", india: "INR", turkey: "TRY", brazil: "BRL", colombia: "COP",
-  "costa rica": "CRC", "south korea": "KRW", china: "CNY", "hong kong": "HKD",
+  "costa rica": "CRC", "south korea": "KRW", korea: "KRW", china: "CNY", "hong kong": "HKD",
   singapore: "SGD", malaysia: "MYR", indonesia: "IDR", philippines: "PHP",
   vietnam: "VND", egypt: "EGP", "south africa": "ZAR", morocco: "MAD",
   switzerland: "CHF", sweden: "SEK", norway: "NOK", denmark: "DKK",
@@ -25,7 +27,7 @@ const COUNTRY_CURRENCY: Record<string, string> = {
 };
 
 const CURRENCY_NAMES: Record<string, string> = {
-  MXN: "Mexican Peso", JPY: "Japanese Yen", GBP: "British Pound", EUR: "Euro",
+  USD: "US Dollar", MXN: "Mexican Peso", JPY: "Japanese Yen", GBP: "British Pound", EUR: "Euro",
   CAD: "Canadian Dollar", AUD: "Australian Dollar", THB: "Thai Baht",
   INR: "Indian Rupee", TRY: "Turkish Lira", BRL: "Brazilian Real",
   COP: "Colombian Peso", CRC: "Costa Rican Colón", KRW: "South Korean Won",
@@ -42,6 +44,57 @@ const CURRENCY_NAMES: Record<string, string> = {
   TWD: "Taiwan Dollar", FJD: "Fijian Dollar", MVR: "Maldivian Rufiyaa",
 };
 
+// Common natural-language currency words → ISO code
+const WORD_TO_CODE: Record<string, string> = {
+  yen: "JPY", euros: "EUR", euro: "EUR", pounds: "GBP", pound: "GBP",
+  sterling: "GBP", dollars: "USD", dollar: "USD", usd: "USD", buck: "USD", bucks: "USD",
+  peso: "MXN", pesos: "MXN", baht: "THB", rupee: "INR", rupees: "INR",
+  lira: "TRY", real: "BRL", reais: "BRL", won: "KRW", yuan: "CNY", rmb: "CNY",
+  dirham: "AED", shekel: "ILS", franc: "CHF", francs: "CHF", krona: "SEK",
+  krone: "NOK", rand: "ZAR", ringgit: "MYR", rupiah: "IDR", dong: "VND",
+  loonie: "CAD", loonies: "CAD", quid: "GBP",
+};
+
+/** Extract an ordered list of currency codes from a query string. */
+function extractCurrencies(raw: string): string[] {
+  const upper = raw.toUpperCase();
+  const lower = raw.toLowerCase();
+  const found: { idx: number; code: string }[] = [];
+
+  // 1) ISO codes
+  const codeRe = /\b[A-Z]{3}\b/g;
+  let m: RegExpExecArray | null;
+  while ((m = codeRe.exec(upper)) !== null) {
+    if (CURRENCY_NAMES[m[0]]) found.push({ idx: m.index, code: m[0] });
+  }
+
+  // 2) Currency words (yen, euros, pesos...)
+  const wordRe = /\b([a-z]+)\b/g;
+  while ((m = wordRe.exec(lower)) !== null) {
+    const code = WORD_TO_CODE[m[1]];
+    if (code) found.push({ idx: m.index, code });
+  }
+
+  // 3) Multi-word countries first (longer match wins), then single-word
+  const multi = Object.keys(COUNTRY_CURRENCY).filter((k) => k.includes(" "));
+  for (const country of multi) {
+    const i = lower.indexOf(country);
+    if (i !== -1) found.push({ idx: i, code: COUNTRY_CURRENCY[country] });
+  }
+  while ((m = wordRe.exec(lower)) !== null) {
+    const c = COUNTRY_CURRENCY[m[1]];
+    if (c) found.push({ idx: m.index, code: c });
+  }
+
+  // Sort by position, then de-dupe consecutive duplicates
+  found.sort((a, b) => a.idx - b.idx);
+  const out: string[] = [];
+  for (const { code } of found) {
+    if (out[out.length - 1] !== code) out.push(code);
+  }
+  return out;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -52,66 +105,59 @@ serve(async (req) => {
     if (!query) throw new Error("Missing query");
 
     const raw = String(query).trim();
-    const lower = raw.toLowerCase();
+    const codes = extractCurrencies(raw);
 
-    // 1) Try direct country/region match (e.g. "Mexico", "Bali")
-    let currencyCode: string | undefined = COUNTRY_CURRENCY[lower];
+    let sourceCode = "USD";
+    let targetCode: string | undefined;
 
-    // 2) If not, look for a 3-letter currency code anywhere in the query.
-    //    For "USD to MXN" or "100 USD to MXN" pick the LAST code (target),
-    //    falling back to the first if only one is present and it isn't USD.
-    if (!currencyCode) {
-      const codeMatches = raw.toUpperCase().match(/\b[A-Z]{3}\b/g) || [];
-      const knownCodes = codeMatches.filter((c) => CURRENCY_NAMES[c]);
-      if (knownCodes.length >= 2) {
-        // last one is typically the target ("USD to MXN" -> MXN)
-        currencyCode = knownCodes[knownCodes.length - 1];
-      } else if (knownCodes.length === 1) {
-        currencyCode = knownCodes[0];
-      }
+    if (codes.length >= 2) {
+      sourceCode = codes[0];
+      targetCode = codes[codes.length - 1];
+      // If source == target (e.g. user typed only one currency twice), default source to USD
+      if (sourceCode === targetCode) sourceCode = "USD";
+    } else if (codes.length === 1) {
+      targetCode = codes[0];
+      sourceCode = targetCode === "USD" ? "EUR" : "USD";
+    } else {
+      // Last resort: strip non-letters and try as a code
+      targetCode = raw.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 3);
     }
 
-    // 3) Last resort: scan tokens against the country/currency map
-    //    (handles "convert to mexico", "100 euros in yen", etc.)
-    if (!currencyCode) {
-      const cleaned = lower.replace(/[^a-z\s]/g, " ");
-      const tokens = cleaned.split(/\s+/).filter(Boolean);
-      const yenMap: Record<string, string> = { yen: "JPY", euros: "EUR", euro: "EUR", pounds: "GBP", pound: "GBP", dollars: "USD", dollar: "USD", peso: "MXN", pesos: "MXN", baht: "THB", rupee: "INR", rupees: "INR", lira: "TRY", real: "BRL", reais: "BRL", won: "KRW", yuan: "CNY", dirham: "AED", shekel: "ILS" };
-      for (const t of tokens) {
-        if (yenMap[t]) { currencyCode = yenMap[t]; break; }
-        if (COUNTRY_CURRENCY[t]) { currencyCode = COUNTRY_CURRENCY[t]; break; }
-      }
-      // try multi-word country names
-      if (!currencyCode) {
-        for (const country of Object.keys(COUNTRY_CURRENCY)) {
-          if (country.includes(" ") && lower.includes(country)) {
-            currencyCode = COUNTRY_CURRENCY[country];
-            break;
-          }
-        }
-      }
+    if (!targetCode || !CURRENCY_NAMES[targetCode]) {
+      return new Response(
+        JSON.stringify({
+          error: `Could not detect a currency in "${raw}". Try "CAD to EUR" or a country like "Mexico".`,
+        }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
-    if (!currencyCode) {
-      currencyCode = raw.toUpperCase().replace(/[^A-Z]/g, "");
-    }
-
-    const currencyName = CURRENCY_NAMES[currencyCode] || currencyCode;
-
-    // Fetch from open exchange rates API (free, no key needed)
+    // Always fetch USD-based rates and compute cross-rates from them.
     const rateRes = await fetch(`https://open.er-api.com/v6/latest/USD`);
     if (!rateRes.ok) throw new Error("Exchange rate API unavailable");
     const rateData = await rateRes.json();
 
-    const rate = rateData.rates?.[currencyCode];
-    if (!rate) {
+    const rates = rateData.rates || {};
+    const sourceUsd = sourceCode === "USD" ? 1 : rates[sourceCode];
+    const targetUsd = targetCode === "USD" ? 1 : rates[targetCode];
+
+    if (!sourceUsd || !targetUsd) {
       return new Response(
-        JSON.stringify({ error: `Currency "${currencyCode}" not found. Try a country name like "Mexico" or currency code like "MXN".` }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({
+          error: `Currency "${!sourceUsd ? sourceCode : targetCode}" not supported.`,
+        }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
-    // Generate travel tips via Perplexity
+    // Cross rate: 1 source = (targetUsd / sourceUsd) target
+    const rate = targetUsd / sourceUsd;
+    const inverseRate = sourceUsd / targetUsd;
+
+    const sourceName = CURRENCY_NAMES[sourceCode] || sourceCode;
+    const targetName = CURRENCY_NAMES[targetCode] || targetCode;
+
+    // Travel money tips for the TARGET currency
     const PERPLEXITY_API_KEY = Deno.env.get("PERPLEXITY_API_KEY");
     let tips: string[] = [];
     if (PERPLEXITY_API_KEY) {
@@ -127,29 +173,38 @@ serve(async (req) => {
             messages: [
               {
                 role: "user",
-                content: `Give me 5 short practical travel money tips for someone visiting a country that uses ${currencyName} (${currencyCode}). Include ATM advice, tipping norms, card acceptance, and bargaining tips. Return as a JSON array of strings. Only the JSON array, no other text.`,
+                content: `Give 5 short practical travel money tips for someone visiting a country that uses ${targetName} (${targetCode}). Cover ATM advice, tipping norms, card acceptance, and bargaining. Return only a JSON array of strings, no other text.`,
               },
             ],
           }),
         });
         const tipData = await tipRes.json();
-        const raw = tipData.choices?.[0]?.message?.content || "[]";
-        const match = raw.match(/\[[\s\S]*\]/);
+        const rawTips = tipData.choices?.[0]?.message?.content || "[]";
+        const match = rawTips.match(/\[[\s\S]*\]/);
         if (match) tips = JSON.parse(match[0]);
       } catch { /* tips are optional */ }
     }
 
+    const baseAmounts = [1, 5, 10, 20, 50, 100, 500];
+
     const result = {
-      currencyCode,
-      currencyName,
+      // New, accurate fields
+      sourceCode,
+      sourceName,
+      targetCode,
+      targetName,
       rate: parseFloat(rate.toFixed(4)),
-      inverseRate: parseFloat((1 / rate).toFixed(6)),
+      inverseRate: parseFloat(inverseRate.toFixed(6)),
       lastUpdated: rateData.time_last_update_utc || new Date().toISOString(),
       tips,
-      conversions: [1, 5, 10, 20, 50, 100, 500].map((usd) => ({
-        usd,
-        local: parseFloat((usd * rate).toFixed(2)),
+      conversions: baseAmounts.map((amount) => ({
+        source: amount,
+        target: parseFloat((amount * rate).toFixed(2)),
       })),
+
+      // Backwards compatibility (older UI fields)
+      currencyCode: targetCode,
+      currencyName: targetName,
     };
 
     return new Response(JSON.stringify(result), {

@@ -12,13 +12,18 @@ import ToolAEOContent from "@/components/tools/ToolAEOContent";
 import { currencyAEO } from "@/components/tools/toolAEOContent";
 
 interface CurrencyResult {
+  sourceCode?: string;
+  sourceName?: string;
+  targetCode?: string;
+  targetName?: string;
+  // Legacy fields
   currencyCode: string;
   currencyName: string;
   rate: number;
   inverseRate: number;
   lastUpdated: string;
   tips: string[];
-  conversions: { usd: number; local: number }[];
+  conversions: Array<{ source?: number; target?: number; usd?: number; local?: number }>;
 }
 
 const Currency = () => {
@@ -106,28 +111,33 @@ const Currency = () => {
             </div>
           )}
 
-          {result && (
+          {result && (() => {
+            const sourceCode = result.sourceCode || "USD";
+            const sourceName = result.sourceName || "US Dollar";
+            const targetCode = result.targetCode || result.currencyCode;
+            const targetName = result.targetName || result.currencyName;
+            return (
             <div className="space-y-6">
               {/* Main Rate Card */}
               <Card className="border-primary/30">
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2 text-xl">
                     <ArrowRightLeft className="h-5 w-5 text-primary" />
-                    USD → {result.currencyCode}
+                    {sourceCode} → {targetCode}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-col sm:flex-row sm:items-end gap-4">
                     <div>
                       <p className="text-4xl font-bold text-foreground">
-                        1 USD = {result.rate} {result.currencyCode}
+                        1 {sourceCode} = {result.rate} {targetCode}
                       </p>
                       <p className="text-muted-foreground text-sm mt-1">
-                        {result.currencyName} · Updated {new Date(result.lastUpdated).toLocaleDateString()}
+                        {sourceName} to {targetName} · Updated {new Date(result.lastUpdated).toLocaleDateString()}
                       </p>
                     </div>
                     <div className="text-muted-foreground text-sm">
-                      1 {result.currencyCode} = {result.inverseRate} USD
+                      1 {targetCode} = {result.inverseRate} {sourceCode}
                     </div>
                   </div>
                 </CardContent>
@@ -140,14 +150,18 @@ const Currency = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    {result.conversions.map((c) => (
-                      <div key={c.usd} className="bg-muted/50 rounded-lg p-3 text-center">
-                        <p className="text-sm text-muted-foreground">${c.usd} USD</p>
-                        <p className="text-lg font-semibold text-foreground">
-                          {c.local.toLocaleString()} {result.currencyCode}
-                        </p>
-                      </div>
-                    ))}
+                    {result.conversions.map((c, i) => {
+                      const src = c.source ?? c.usd ?? 0;
+                      const tgt = c.target ?? c.local ?? 0;
+                      return (
+                        <div key={i} className="bg-muted/50 rounded-lg p-3 text-center">
+                          <p className="text-sm text-muted-foreground">{src.toLocaleString()} {sourceCode}</p>
+                          <p className="text-lg font-semibold text-foreground">
+                            {tgt.toLocaleString()} {targetCode}
+                          </p>
+                        </div>
+                      );
+                    })}
                   </div>
                 </CardContent>
               </Card>
