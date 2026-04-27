@@ -198,6 +198,7 @@ const Currency = () => {
           examples={currencyAEO.examples}
           faqs={currencyAEO.faqs}
           toolPath="/currency"
+          onCardClick={(q) => { setQuery(q); handleSearch(q); window.scrollTo({ top: 0, behavior: "smooth" }); }}
         />
       </main>
       <Footer />
