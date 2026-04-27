@@ -99,7 +99,7 @@ const Footer = () => {
                 <a href="https://www.instagram.com/reviewthengo/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-primary-foreground/60 hover:text-secondary transition-colors">
                   <Instagram className="h-5 w-5" />
                 </a>
-                <a href="/rss.xml" target="_blank" rel="noopener noreferrer" aria-label="RSS feed for The Compass blog" title="RSS feed" className="text-primary-foreground/60 hover:text-secondary transition-colors">
+                <a href="https://iomrjljlydboniioohkv.supabase.co/functions/v1/generate-rss" target="_blank" rel="noopener noreferrer" aria-label="RSS feed for The Compass blog" title="RSS feed" className="text-primary-foreground/60 hover:text-secondary transition-colors">
                   <Rss className="h-5 w-5" />
                 </a>
               </div>
