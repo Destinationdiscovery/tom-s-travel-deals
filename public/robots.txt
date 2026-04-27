@@ -16,16 +16,35 @@ Allow: /
 User-agent: OAI-SearchBot
 Allow: /
 
+User-agent: ChatGPT-User
+Allow: /
+
 User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
 Allow: /
 
 User-agent: PerplexityBot
 Allow: /
 
+User-agent: Perplexity-User
+Allow: /
+
 User-agent: AppleBot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: Amazonbot
 Allow: /
 
 User-agent: *
 Allow: /
 
 Sitemap: https://www.reviewthengo.com/sitemap.xml
+
+# Crawler-friendly article feed (plain HTML, no JavaScript required)
+# Index: https://iomrjljlydboniioohkv.supabase.co/functions/v1/articles-feed
+# Single article: https://iomrjljlydboniioohkv.supabase.co/functions/v1/articles-feed?slug=<slug>
