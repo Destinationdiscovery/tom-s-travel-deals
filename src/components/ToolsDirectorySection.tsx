@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Search, Sun, Map, Plane, Backpack, DollarSign, Shield, Globe } from "lucide-react";
+import { Search, Sun, Map, Plane, Backpack, DollarSign, Shield, Globe, ArrowRight } from "lucide-react";
 
 const tools = [
   {
@@ -104,7 +104,12 @@ const ToolsDirectorySection = () => {
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {tools.map((tool) => (
-            <article key={tool.href} className="bg-card rounded-xl border border-border p-5 shadow-soft hover:shadow-md transition-shadow flex flex-col">
+            <Link
+              key={tool.href}
+              to={tool.href}
+              className="group bg-card rounded-xl border border-border p-5 shadow-soft hover:shadow-md hover:-translate-y-0.5 hover:border-primary/40 transition-all flex flex-col cursor-pointer"
+              aria-label={`Open ${tool.title} tool`}
+            >
               <div className="flex items-center gap-2 mb-3">
                 <tool.icon className="h-5 w-5 text-primary flex-shrink-0" />
                 <h3 className="font-display font-semibold text-foreground text-sm">{tool.title}</h3>
@@ -115,10 +120,10 @@ const ToolsDirectorySection = () => {
                   <li key={q} className="text-xs text-muted-foreground/80 italic">"{q}"</li>
                 ))}
               </ul>
-              <Link to={tool.href} className="text-xs font-medium text-primary hover:underline mt-auto">
-                Try this tool →
-              </Link>
-            </article>
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-primary mt-auto group-hover:gap-2 transition-all">
+                Try this tool <ArrowRight className="h-3 w-3" />
+              </span>
+            </Link>
           ))}
         </div>
       </div>
