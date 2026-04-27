@@ -54,7 +54,7 @@ const SITE_NAME = "ReviewThenGo";
 const DEFAULT_IMAGE = "https://www.reviewthengo.com/og-image.jpg";
 const BASE_URL = "https://www.reviewthengo.com";
 
-const SEOHead = ({ title, description, image, url, type = "website", noindex, breadcrumbs, jsonLd, keywords, faq, aggregateRating, publishedTime, modifiedTime, author }: SEOHeadProps) => {
+const SEOHead = ({ title, description, image, url, type = "website", noindex, breadcrumbs, jsonLd, keywords, faq, aggregateRating, publishedTime, modifiedTime, author, alternateUrls }: SEOHeadProps) => {
   const fullTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
   const fullUrl = url ? `${BASE_URL}${url}` : BASE_URL;
   const ogImage = image || DEFAULT_IMAGE;
