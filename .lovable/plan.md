@@ -1,28 +1,50 @@
-## Goal
+No, you should not have to do this every day.
 
-Make the RSS feed always reflect newly published articles automatically, with zero manual snapshot work.
+What happened is that yesterday fixed the direction, but not every live entry point is actually serving the fresh version yet:
 
-## Changes
+1. The **live backend RSS feed is updating correctly**. Your new articles are in the dynamic feed.
+2. The public **`https://www.reviewthengo.com/rss.xml` path is still serving an old cached/static version** on the live domain. That is likely what Claude, Perplexity, Grok, and feed directories are checking.
+3. The AI crawler HTML feed also needs one backend config fix so anonymous AI bots can reliably access it without a login token.
 
-1. **`index.html`** — Update the `<link rel="alternate" type="application/rss+xml">` href to point at the always-live edge function:
-   `https://iomrjljlydboniioohkv.supabase.co/functions/v1/generate-rss`
+## Permanent fix
 
-2. **`src/components/Footer.tsx`** — Update the RSS icon link (currently `/rss.xml`) to the same live edge function URL.
+### 1. Make the AI crawler feed explicitly public
+Add the missing backend function config for `articles-feed` so bots can access it anonymously:
 
-3. **`public/robots.txt`** — Replace the two-line "static snapshot + always-live" comment with a single always-live reference.
+```text
+[functions.articles-feed]
+verify_jwt = false
+```
 
-4. **`public/rss.xml`** — Delete the stale static snapshot file so it can't be served outdated to anyone who has bookmarked it.
+### 2. Redeploy the RSS + crawler feed functions
+Redeploy:
+- `generate-rss`
+- `articles-feed`
 
-5. **Memory** — Update `mem://features/seo/rss-feed.md` to note the canonical RSS URL is now the live edge function (no snapshot maintenance needed).
+This makes the dynamic RSS and AI crawler HTML feed live immediately.
 
-## Aggregator submission URL
+### 3. Remove the stale `/rss.xml` dependency
+Keep the dynamic feed as the source of truth and make sure all discovery links point to it.
 
-Going forward, submit this URL to Alltop, Feedspot, and Blogarama:
-`https://iomrjljlydboniioohkv.supabase.co/functions/v1/generate-rss`
+For feed directory submissions, use the dynamic RSS feed URL, not `/rss.xml`.
 
-If you've already submitted `https://www.reviewthengo.com/rss.xml` somewhere, that URL will start returning 404 once `public/rss.xml` is deleted. Two options:
+### 4. Publish the frontend update
+The custom domain can keep serving old static files until the frontend is published/updated. After the code changes, you should click **Publish / Update** so `index.html`, `robots.txt`, and the removal of stale `rss.xml` are reflected on `www.reviewthengo.com`.
 
-- **Re-submit** the new live URL on those aggregators (recommended, takes 30 seconds each).
-- **Or** keep `public/rss.xml` and just re-snapshot it manually whenever you want it fresh (current behavior).
+### 5. Verify the final live result
+After implementation and publish, check:
 
-I recommend deleting and resubmitting since you only just submitted to a few places. Confirm you want me to delete `public/rss.xml` as part of this, or say "keep the snapshot" and I'll only update the auto-discovery links.
+- Dynamic RSS feed includes the newest articles.
+- AI crawler feed returns article links and full article pages.
+- `robots.txt` points crawlers to the correct live feeds.
+- `/rss.xml` no longer misleads bots with stale content.
+
+## Expected maintenance
+
+No daily task. Once this is fixed and the frontend is published, new Compass articles should automatically appear in:
+
+- the RSS feed
+- the AI crawler feed
+- the dynamic sitemap feed if needed
+
+There may still be a normal delay before Claude, Perplexity, or Grok re-crawl the site. That delay is on their side, not something you need to manually fix every day.
