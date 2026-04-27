@@ -300,6 +300,7 @@ const Itinerary = () => {
           examples={itineraryAEO.examples}
           faqs={itineraryAEO.faqs}
           toolPath="/itinerary"
+          onCardClick={(q) => { setQuery(q); doSearch(q); window.scrollTo({ top: 0, behavior: "smooth" }); }}
         />
       </main>
       <Footer />
