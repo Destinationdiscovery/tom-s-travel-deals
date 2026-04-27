@@ -182,6 +182,18 @@ const Compass = () => {
             </div>
           )}
         </div>
+
+        {/* Crawlable plain-text link list (visually hidden, helps Google discover every article URL) */}
+        <nav aria-label="All articles" className="sr-only">
+          <h2>All articles</h2>
+          <ul>
+            {allArticles.map((a) => (
+              <li key={`crawl-${a.slug}`}>
+                <a href={`/compass/${a.slug}`}>{a.title}</a>
+              </li>
+            ))}
+          </ul>
+        </nav>
       </section>
 
       <Footer />

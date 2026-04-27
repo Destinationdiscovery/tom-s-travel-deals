@@ -44,6 +44,7 @@ User-agent: *
 Allow: /
 
 Sitemap: https://www.reviewthengo.com/sitemap.xml
+Sitemap: https://www.reviewthengo.com/article-urls.txt
 
 # Crawler-friendly article feed (plain HTML, no JavaScript required)
 # Index: https://iomrjljlydboniioohkv.supabase.co/functions/v1/articles-feed
