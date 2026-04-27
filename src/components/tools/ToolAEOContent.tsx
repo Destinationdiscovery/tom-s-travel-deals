@@ -63,7 +63,11 @@ const ToolAEOContent = ({
           <Sparkles className="h-4 w-4 text-primary" /> Real answers from this tool
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {examples.map((ex) => (
+          {examples.map((ex) => {
+            const href = queryParam
+              ? `${toolPath}?${queryParam}=${encodeURIComponent(ex.ctaQuery)}`
+              : `${toolPath.replace(/\/$/, "")}/${encodeURIComponent(ex.ctaQuery)}`;
+            return (
             <article
               key={ex.question}
               className="rounded-xl border border-border bg-card p-5 flex flex-col hover:border-primary/40 hover:shadow-md transition-all"
