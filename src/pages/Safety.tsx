@@ -276,6 +276,7 @@ const Safety = () => {
           examples={safetyAEO.examples}
           faqs={safetyAEO.faqs}
           toolPath="/safety"
+          onCardClick={handleCardRun}
         />
       </main>
       <Footer />
