@@ -290,26 +290,39 @@ Deno.serve(async (req) => {
         .eq("slug", slug)
         .maybeSingle();
       if (error) throw error;
-      if (!data) {
+      // Fall back to hardcoded compass articles when the slug is not in the DB
+      const post = data || (STATIC_BY_SLUG.has(slug) ? staticToPost(STATIC_BY_SLUG.get(slug)!) : null);
+      if (!post) {
         return new Response("Not found", { status: 404, headers: corsHeaders });
       }
       if (format === "json") {
-        return new Response(JSON.stringify(data), {
+        return new Response(JSON.stringify(post), {
           headers: { ...corsHeaders, "Content-Type": "application/json", "Cache-Control": "public, max-age=3600" },
         });
       }
-      return new Response(renderArticleHtml(data), {
+      return new Response(renderArticleHtml(post), {
         headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, max-age=3600" },
       });
     }
 
-    // List all posts
+    // List all posts (DB + hardcoded static articles, de-duped by slug)
     const { data: posts } = await supabase
       .from("blog_posts")
       .select("slug, title, excerpt, date_published, hero_image_url, author, updated_at")
       .order("date_published", { ascending: false })
       .limit(500);
-    const list = posts || [];
+    const dbList = posts || [];
+    const dbSlugs = new Set(dbList.map((p: any) => p.slug));
+    const staticList = STATIC_ARTICLES
+      .filter((a) => !dbSlugs.has(a.slug))
+      .map((a) => ({
+        slug: a.slug,
+        title: a.title,
+        excerpt: a.excerpt || "",
+        date_published: a.datePublished || "",
+        author: a.author || "Tom",
+      }));
+    const list = [...dbList, ...staticList];
 
     if (format === "json") {
       return new Response(JSON.stringify({ count: list.length, items: list }), {
