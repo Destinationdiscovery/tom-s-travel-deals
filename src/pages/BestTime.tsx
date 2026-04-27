@@ -3,6 +3,8 @@ import { Search, Loader2, Sun, Cloud, Snowflake, Leaf, Calendar, TrendingDown, T
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEOHead from "@/components/SEOHead";
+import ToolAEOContent from "@/components/tools/ToolAEOContent";
+import { bestTimeAEO } from "@/components/tools/toolAEOContent";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -265,17 +267,17 @@ const BestTime = () => {
             </div>
           )}
 
-          {/* Empty state */}
-          {!data && !loading && !error && (
-            <div className="text-center py-20">
-              <Calendar className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
-              <h2 className="font-display text-2xl font-bold text-foreground mb-2">Find the Perfect Time to Travel</h2>
-              <p className="text-muted-foreground max-w-md mx-auto">
-                Enter any destination above and we'll tell you the best months to visit based on weather, crowds, prices, and local events.
-              </p>
-            </div>
-          )}
         </div>
+
+        {!data && !loading && (
+          <ToolAEOContent
+            hookQuestion={bestTimeAEO.hookQuestion}
+            intro={bestTimeAEO.intro}
+            examples={bestTimeAEO.examples}
+            faqs={bestTimeAEO.faqs}
+            toolPath="/best-time"
+          />
+        )}
       </main>
       <Footer />
     </div>
