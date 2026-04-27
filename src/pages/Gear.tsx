@@ -228,6 +228,7 @@ const Gear = () => {
           examples={gearAEO.examples}
           faqs={gearAEO.faqs}
           toolPath="/gear"
+          onCardClick={(q) => { setSearchQuery(q); clearReview(); fetchPackingList(q); window.scrollTo({ top: 0, behavior: "smooth" }); }}
         />
       </main>
       <Footer />
