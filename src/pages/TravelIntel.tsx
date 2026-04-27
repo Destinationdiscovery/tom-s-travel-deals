@@ -147,6 +147,7 @@ const TravelIntel = () => {
         examples={travelIntelAEO.examples}
         faqs={travelIntelAEO.faqs}
         toolPath="/travel-intel"
+        onCardClick={handleCardRun}
       />
       <Footer />
     </div>
