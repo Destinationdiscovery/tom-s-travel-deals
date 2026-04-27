@@ -107,6 +107,15 @@ const SEOHead = ({ title, description, image, url, type = "website", noindex, br
       <title>{fullTitle}</title>
       <meta name="description" content={description} />
       <link rel="canonical" href={fullUrl.split("?")[0]} />
+      {alternateUrls?.map((alt) => (
+        <link
+          key={`${alt.rel || "alternate"}-${alt.href}`}
+          rel={alt.rel || "alternate"}
+          href={alt.href}
+          {...(alt.type ? { type: alt.type } : {})}
+          {...(alt.hreflang ? { hrefLang: alt.hreflang } : {})}
+        />
+      ))}
       {noindex && <meta name="robots" content="noindex, nofollow" />}
       {keywords && keywords.length > 0 && <meta name="keywords" content={keywords.join(", ")} />}
 
