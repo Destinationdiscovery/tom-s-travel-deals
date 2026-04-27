@@ -81,6 +81,12 @@ const CompassArticle = () => {
   })() : "";
   const wordCount = articleBodyText ? articleBodyText.split(/\s+/).filter(Boolean).length : 0;
 
+  // Crawler-friendly static HTML URL for this article (served by the articles-feed edge function).
+  // Linked from <head> as rel="alternate" and from JSON-LD sameAs so non-JS bots have an explicit path.
+  const crawlerFeedUrl = slug
+    ? `https://iomrjljlydboniioohkv.supabase.co/functions/v1/articles-feed?slug=${encodeURIComponent(slug)}`
+    : "";
+
   // Build BlogPosting JSON-LD (passed to SEOHead below) — includes full articleBody so AI engines can index even on a SPA
   const blogPostingJsonLd = article ? {
     "@context": "https://schema.org",
@@ -100,6 +106,7 @@ const CompassArticle = () => {
       "logo": { "@type": "ImageObject", "url": "https://www.reviewthengo.com/favicon.png" }
     },
     "mainEntityOfPage": { "@type": "WebPage", "@id": `https://www.reviewthengo.com/compass/${slug}` },
+    ...(crawlerFeedUrl ? { "sameAs": [crawlerFeedUrl] } : {}),
     "speakable": {
       "@type": "SpeakableSpecification",
       "cssSelector": ["h1", ".prose p"]
@@ -261,6 +268,7 @@ const CompassArticle = () => {
         jsonLd={combinedJsonLd.length > 0 ? combinedJsonLd : undefined}
         keywords={article.tags}
         faq={article.faq_items && article.faq_items.length > 0 ? article.faq_items : undefined}
+        alternateUrls={crawlerFeedUrl ? [{ href: crawlerFeedUrl, type: "text/html" }] : undefined}
       />
       <Header />
       <ReadingProgress />

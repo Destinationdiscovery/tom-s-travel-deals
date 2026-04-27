@@ -25,6 +25,13 @@ interface AggregateRatingData {
   };
 }
 
+interface AlternateLink {
+  href: string;
+  type?: string;
+  hreflang?: string;
+  rel?: string;
+}
+
 interface SEOHeadProps {
   title: string;
   description: string;
@@ -40,13 +47,14 @@ interface SEOHeadProps {
   publishedTime?: string;
   modifiedTime?: string;
   author?: string;
+  alternateUrls?: AlternateLink[];
 }
 
 const SITE_NAME = "ReviewThenGo";
 const DEFAULT_IMAGE = "https://www.reviewthengo.com/og-image.jpg";
 const BASE_URL = "https://www.reviewthengo.com";
 
-const SEOHead = ({ title, description, image, url, type = "website", noindex, breadcrumbs, jsonLd, keywords, faq, aggregateRating, publishedTime, modifiedTime, author }: SEOHeadProps) => {
+const SEOHead = ({ title, description, image, url, type = "website", noindex, breadcrumbs, jsonLd, keywords, faq, aggregateRating, publishedTime, modifiedTime, author, alternateUrls }: SEOHeadProps) => {
   const fullTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
   const fullUrl = url ? `${BASE_URL}${url}` : BASE_URL;
   const ogImage = image || DEFAULT_IMAGE;
@@ -99,6 +107,15 @@ const SEOHead = ({ title, description, image, url, type = "website", noindex, br
       <title>{fullTitle}</title>
       <meta name="description" content={description} />
       <link rel="canonical" href={fullUrl.split("?")[0]} />
+      {alternateUrls?.map((alt) => (
+        <link
+          key={`${alt.rel || "alternate"}-${alt.href}`}
+          rel={alt.rel || "alternate"}
+          href={alt.href}
+          {...(alt.type ? { type: alt.type } : {})}
+          {...(alt.hreflang ? { hrefLang: alt.hreflang } : {})}
+        />
+      ))}
       {noindex && <meta name="robots" content="noindex, nofollow" />}
       {keywords && keywords.length > 0 && <meta name="keywords" content={keywords.join(", ")} />}
 

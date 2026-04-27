@@ -1,71 +1,59 @@
-Here is what is happening and what I recommend fixing next.
+## Goal
 
-Your screenshot says: **“Page is not indexed: URL is unknown to Google”** and **“No referring sitemaps detected.”** That does not mean the article URL is broken. I checked the live site and confirmed:
+Close out Claude's two final asks so AI crawlers (Googlebot, Perplexity, GPTBot) can reliably discover and read full article bodies for every Compass post.
 
-- `https://www.reviewthengo.com/sitemap.xml` returns `200`
-- The sitemap is valid XML
-- It has **110 URLs**
-- The article URL **is already in the live sitemap**:
-  `https://www.reviewthengo.com/compass/cheapest-month-to-fly-europe-canada`
-- The article page itself returns `200`
-- The crawler-friendly article feed also returns `200` with full article HTML and `BlogPosting` JSON-LD
+## What's already confirmed working
 
-The issue is likely that Google has not reprocessed the new sitemap/article URL yet, or Search Console is showing stale discovery data. Google’s own docs say “URL is unknown to Google” means Google has not seen that URL before, and the live URL test does not check sitemap presence.
+I just tested the edge function directly for `why-canadians-skipping-us-2026`:
 
-Plan to improve discovery and make Google connect article URLs faster:
+- Returns `200` with full plain HTML
+- Includes the complete article body (679 words) inside the JSON-LD `articleBody` field
+- Includes the full body again as visible `<p>` and `<h2>` HTML in `<article>`
+- Title, description, canonical, OG tags, and `BlogPosting` schema all present
 
-1. Strengthen the normal `/compass` blog page as a crawlable discovery hub
-   - Add a plain HTML fallback link list inside the Compass page markup for all article URLs.
-   - This gives Google a stronger internal-link path from `/compass` to every article, even before React finishes loading DB posts.
-   - Keep the visible design unchanged.
+So Claude's first ask ("confirm `?slug=` returns full body text") is already satisfied. No code changes needed for that.
 
-2. Add a public static article URL list
-   - Add a simple `/article-urls.txt` file containing one canonical article URL per line.
-   - This creates a second clean discovery source that can be submitted in Search Console if XML sitemap reporting lags.
-   - Keep it aligned with the current 110 sitemap URLs where possible.
+## Change needed: alternate link to the crawler feed
 
-3. Make robots.txt point to both sitemap formats
-   - Keep the existing XML sitemap:
-     `Sitemap: https://www.reviewthengo.com/sitemap.xml`
-   - Add the text sitemap:
-     `Sitemap: https://www.reviewthengo.com/article-urls.txt`
-   - Keep all bot allow rules and crawler-feed comments.
+Add a `<link rel="alternate" type="text/html" href="...articles-feed?slug=<slug>">` tag in the `<head>` of every Compass article page. This tells crawlers exactly where the JS-free version lives, so bots that hit `/compass/<slug>` cold can follow the link to the fully-rendered body without needing to discover the edge function on their own.
 
-4. Improve sitemap freshness signals
-   - Ensure article entries consistently include `<lastmod>` values.
-   - Ensure XML escaping remains valid for all generated URLs.
-   - Keep canonical URLs standardized on `https://www.reviewthengo.com/...`.
+### Implementation
 
-5. Verify after implementation
-   - Confirm the live sitemap is still valid XML.
-   - Confirm the target article exists in both `sitemap.xml` and `article-urls.txt`.
-   - Confirm `/compass` contains normal anchor links to article URLs in the server-delivered HTML bundle markup path where possible.
-   - Confirm the direct crawler feed for the article still returns full content.
+1. Extend `SEOHead` (`src/components/SEOHead.tsx`) with a new optional prop:
+   - `alternateUrls?: { href: string; type?: string; hreflang?: string; rel?: string }[]`
+   - Render each as `<link rel={rel || "alternate"} type={type} hreflang={hreflang} href={href} />` inside the existing `<Helmet>`.
 
-Technical details:
+2. In `src/pages/CompassArticle.tsx`, where `<SEOHead ... />` is rendered for an article, pass:
+   ```ts
+   alternateUrls={[{
+     href: `https://iomrjljlydboniioohkv.supabase.co/functions/v1/articles-feed?slug=${encodeURIComponent(slug)}`,
+     type: "text/html",
+   }]}
+   ```
 
-- No database changes are needed.
-- No auth or secrets are needed.
-- This will not make Google index instantly. After publishing, the correct next step is:
-  1. Resubmit `https://www.reviewthengo.com/sitemap.xml` in Search Console.
-  2. Optionally submit `https://www.reviewthengo.com/article-urls.txt` as another sitemap.
-  3. Use URL Inspection → **Test live URL** for the article.
-  4. If it says the live URL is available, click **Request Indexing**.
+3. Mirror the same alternate link inside the JSON-LD `BlogPosting` object that `CompassArticle` already builds, by adding:
+   ```ts
+   "sameAs": [crawlerUrl]
+   ```
+   so the crawler URL is also reachable from the structured data.
 
-Expected result:
+### Why this is the right shape
 
-Google should have multiple clean ways to discover individual article URLs:
+- `rel="alternate"` is the standard signal Googlebot, Bingbot, and most AI crawlers honor for "same content, different representation."
+- It does not change canonicalization (the `<link rel="canonical">` still points to `https://www.reviewthengo.com/compass/<slug>`), so the SPA URL remains the indexable one in search results.
+- It just gives non-JS bots a documented path to the static body.
 
-```text
-robots.txt
-  -> sitemap.xml
-      -> /compass/article-slug
-  -> article-urls.txt
-      -> /compass/article-slug
+## Files touched
 
-/compass page
-  -> internal article links
-      -> /compass/article-slug
-```
+- `src/components/SEOHead.tsx` — add `alternateUrls` prop + render
+- `src/pages/CompassArticle.tsx` — pass the alternate URL for the current slug + add `sameAs` to JSON-LD
 
-This addresses the specific “URL is unknown to Google / No referring sitemaps detected” problem without changing the site design or migrating hosting.
+## Verification after deploy
+
+1. View source on `https://www.reviewthengo.com/compass/why-canadians-skipping-us-2026` and confirm `<link rel="alternate" type="text/html" href="https://iomrjljlydboniioohkv.supabase.co/functions/v1/articles-feed?slug=why-canadians-skipping-us-2026" />` is present in `<head>`.
+2. Confirm the same URL is also present inside the `BlogPosting` JSON-LD `sameAs` array.
+3. In Google Search Console URL Inspection → "Test live URL" → "View tested page" → "More info" → "HTTP response", the alternate link should be discoverable.
+
+## What this does not do
+
+This will not force Google to index the article instantly. The "URL is unknown to Google" message in Search Console resolves on Google's own crawl schedule. What this change does is make sure that when a crawler does arrive, it has an explicit, documented path to the full body — which is what was missing.
