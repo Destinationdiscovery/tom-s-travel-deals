@@ -60,7 +60,7 @@ const Currency = () => {
   };
 
   // Auto-search if query param present
-  useState(() => { if (initialQuery) handleSearch(initialQuery); });
+  useEffect(() => { if (initialQuery) handleSearch(initialQuery); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
 
   return (
     <>
