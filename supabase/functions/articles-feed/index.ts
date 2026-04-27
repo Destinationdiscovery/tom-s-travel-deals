@@ -11,6 +11,55 @@
 //   GET /articles-feed?type=destinations&slug=<slug> -> HTML for one destination
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import staticArticlesData from "./static-articles.json" with { type: "json" };
+
+// Hardcoded blog articles that live in src/data/compassArticles.ts (not in the DB).
+// They get the same plain-HTML treatment as DB-backed articles so AI crawlers
+// can index every published Compass post.
+type StaticArticle = {
+  slug: string;
+  title: string;
+  excerpt?: string;
+  author?: string;
+  datePublished?: string;
+  readTime?: string;
+  category?: string;
+  richContent?: any[];
+  content?: string[];
+};
+const STATIC_ARTICLES: StaticArticle[] = staticArticlesData as StaticArticle[];
+const STATIC_BY_SLUG = new Map(STATIC_ARTICLES.map((a) => [a.slug, a]));
+
+// Convert a hardcoded article into the same shape used for DB blog_posts so
+// renderArticleHtml(...) can format it without changes.
+const staticToPost = (a: StaticArticle) => {
+  // Strip "__IMG__xxxImg" placeholders left over from the build extraction
+  // so the crawler HTML doesn't show broken image src values.
+  const blocks = (a.richContent || []).filter((b: any) => {
+    if (b?.type === "image") {
+      const v = String(b.value ?? b.content ?? "");
+      return v && !v.startsWith("__IMG__");
+    }
+    return true;
+  });
+  // If richContent is empty but content[] exists (older articles), turn each
+  // string into a text block.
+  const enrichedBlocks = blocks.length
+    ? blocks
+    : (a.content || []).map((t) => ({ type: "text", value: t }));
+  return {
+    slug: a.slug,
+    title: a.title,
+    excerpt: a.excerpt || "",
+    author: a.author || "Tom",
+    date_published: a.datePublished || "",
+    updated_at: a.datePublished || "",
+    hero_image_url: "",
+    rich_content: enrichedBlocks,
+    faq_items: [],
+    tags: a.category ? [a.category] : [],
+  };
+};
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -241,26 +290,39 @@ Deno.serve(async (req) => {
         .eq("slug", slug)
         .maybeSingle();
       if (error) throw error;
-      if (!data) {
+      // Fall back to hardcoded compass articles when the slug is not in the DB
+      const post = data || (STATIC_BY_SLUG.has(slug) ? staticToPost(STATIC_BY_SLUG.get(slug)!) : null);
+      if (!post) {
         return new Response("Not found", { status: 404, headers: corsHeaders });
       }
       if (format === "json") {
-        return new Response(JSON.stringify(data), {
+        return new Response(JSON.stringify(post), {
           headers: { ...corsHeaders, "Content-Type": "application/json", "Cache-Control": "public, max-age=3600" },
         });
       }
-      return new Response(renderArticleHtml(data), {
+      return new Response(renderArticleHtml(post), {
         headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, max-age=3600" },
       });
     }
 
-    // List all posts
+    // List all posts (DB + hardcoded static articles, de-duped by slug)
     const { data: posts } = await supabase
       .from("blog_posts")
       .select("slug, title, excerpt, date_published, hero_image_url, author, updated_at")
       .order("date_published", { ascending: false })
       .limit(500);
-    const list = posts || [];
+    const dbList = posts || [];
+    const dbSlugs = new Set(dbList.map((p: any) => p.slug));
+    const staticList = STATIC_ARTICLES
+      .filter((a) => !dbSlugs.has(a.slug))
+      .map((a) => ({
+        slug: a.slug,
+        title: a.title,
+        excerpt: a.excerpt || "",
+        date_published: a.datePublished || "",
+        author: a.author || "Tom",
+      }));
+    const list = [...dbList, ...staticList];
 
     if (format === "json") {
       return new Response(JSON.stringify({ count: list.length, items: list }), {
