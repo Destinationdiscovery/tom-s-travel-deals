@@ -70,7 +70,7 @@ serve(async (req) => {
       JSON.stringify({ suggestions }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error("places-autocomplete error:", error);
     return new Response(
       JSON.stringify({ suggestions: [], error: error.message }),
