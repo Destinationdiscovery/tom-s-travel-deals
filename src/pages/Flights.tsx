@@ -65,7 +65,7 @@ const Flights = () => {
     }
   };
 
-  useState(() => { if (initialQuery) handleSearch(initialQuery); });
+  useEffect(() => { if (initialQuery) handleSearch(initialQuery); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
 
   const buildExpediaFlightUrl = (route: string) => {
     const country = detectCountry();
