@@ -276,6 +276,7 @@ const BestTime = () => {
             examples={bestTimeAEO.examples}
             faqs={bestTimeAEO.faqs}
             toolPath="/best-time"
+            onCardClick={(q) => { setQuery(q); doSearch(q); window.scrollTo({ top: 0, behavior: "smooth" }); }}
           />
         )}
       </main>
