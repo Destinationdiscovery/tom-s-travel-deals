@@ -70,10 +70,10 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
 
       <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
         <h1 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold mb-3 leading-tight text-white">
-          Review. Plan. Go.
+          Every Travel Question, Answered Before You Book
         </h1>
         <p className="text-white/80 text-base md:text-lg font-light mb-2">
-          The only travel planning tool you need. Free, honest, and powered by 10+ trusted review sources.
+          Get instant answers about hotels, destinations, packing, and the best time to visit. Free AI travel planner powered by 10+ trusted review sources.
         </p>
         <p className="text-white/60 text-xs mb-6">
           By Travel Experts at ReviewThenGo | Aggregating 10M+ reviews from TripAdvisor, Booking.com, Google &amp; more
