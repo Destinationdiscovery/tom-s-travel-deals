@@ -2,112 +2,20 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://www.reviewthengo.com/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
   <url><loc>https://www.reviewthengo.com/destinations</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://www.reviewthengo.com/compass</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
+  <url><loc>https://www.reviewthengo.com/guides</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://www.reviewthengo.com/gear</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url><loc>https://www.reviewthengo.com/best-time</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url><loc>https://www.reviewthengo.com/itinerary</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url><loc>https://www.reviewthengo.com/currency</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url><loc>https://www.reviewthengo.com/flights</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url><loc>https://www.reviewthengo.com/safety</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://www.reviewthengo.com/guides</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://www.reviewthengo.com/travel-intel</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://www.reviewthengo.com/about</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
   <url><loc>https://www.reviewthengo.com/contact</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://www.reviewthengo.com/compare</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://www.reviewthengo.com/search</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://www.reviewthengo.com/promo</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>
   <url><loc>https://www.reviewthengo.com/privacy-policy</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
   <url><loc>https://www.reviewthengo.com/affiliate-disclosure</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
-  <url><loc>https://www.reviewthengo.com/destinations/mexico-barcelo-riviera</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/destinations/cuba-vila-gale</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/destinations/curacao-blue-bay</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/destinations/vegas-bellagio</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/destinations/cruise-experience</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/gear/travel-converter-cuba-europe</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://www.reviewthengo.com/gear/packing-cubes</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://www.reviewthengo.com/gear/airplane-phone-holder-mount</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://www.reviewthengo.com/gear/inflatable-water-hammock</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://www.reviewthengo.com/gear/thermacell-patio-shield-mosquito-repellent</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://www.reviewthengo.com/gear/cruise-cabin-shoe-organizer</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://www.reviewthengo.com/gear/liquid-iv-sugar-free-electrolyte</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/2026-travel-trends-whycations-glowcations-microvacations</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/japan-top-destination-canadians-2026</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/domestic-canada-boom-banff-lake-louise-2026</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/travel-insurance-what-you-need</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/why-canadians-skipping-us-2026</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/canadian-at-par-deal-las-vegas</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/group-travel-2026-who-uses-it-why-booming</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/westjet-seat-squeeze-passengers-said-no</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/rome-trevi-fountain-fee-genius-or-ripoff</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://www.reviewthengo.com/destinations/city/cancun</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/destinations/city/bali</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/destinations/city/tokyo</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/destinations/city/paris</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/destinations/city/london</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/destinations/city/new-york</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/destinations/city/bangkok</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/destinations/city/rome</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/destinations/city/punta-cana</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/destinations/city/miami</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/destinations/city/las-vegas</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/destinations/city/barcelona</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/destinations/city/amsterdam</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/destinations/city/maldives</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/destinations/city/santorini</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/destinations/city/costa-rica</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/destinations/city/hawaii</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/destinations/city/lisbon</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/destinations/city/prague</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/destinations/city/dubai</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/destinations/city/jamaica</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/destinations/city/mexico-city</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/destinations/city/vancouver</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/destinations/city/montreal</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/destinations/city/banff</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/cheapest-month-to-fly-europe-canada</loc><lastmod>2026-04-26</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/best-time-visit-italy-avoid-crowds-heat</loc><lastmod>2026-04-26</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/atlantis-royal-vs-paradise-island</loc><lastmod>2026-04-26</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/best-all-inclusive-resorts-cancun-families-2026</loc><lastmod>2026-04-26</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/majestic-elegance-costa-mujeres-worth-it-review</loc><lastmod>2026-04-26</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/travel-insurance-canadians-europe-worth-it</loc><lastmod>2026-04-26</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/best-travel-destinations-canadians-avoiding-us</loc><lastmod>2026-04-26</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/best-caribbean-cruises-2026-reviews</loc><lastmod>2026-04-26</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/how-to-pack-light-2-week-trip-carry-on</loc><lastmod>2026-04-23</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/best-time-to-visit-iceland-canadian-guide-2026</loc><lastmod>2026-04-23</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/tomtoc-travel-backpack-review-carry-on</loc><lastmod>2026-04-22</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/edinburgh-scotland-travel-guide-2026</loc><lastmod>2026-04-20</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/2026-guide-mountain-cabin-escapes-quiet-retreat</loc><lastmod>2026-04-20</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/places-in-the-world-that-don-t-seem-real</loc><lastmod>2026-04-20</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/worlds-best-golf-resorts-real-reviews-2026</loc><lastmod>2026-04-19</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/europe-summer-travel-chaos-2026-biometric-borders-jet-fuel</loc><lastmod>2026-04-19</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/best-time-to-visit-japan</loc><lastmod>2026-04-19</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/paris-weekend-itinerary-5-day-guide</loc><lastmod>2026-04-19</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/mastering-money-europe-canadian-travellers-2026</loc><lastmod>2026-04-19</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/top-all-inclusive-resorts-mexico-2026</loc><lastmod>2026-04-19</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/global-fuel-shortages-2026-travel-impact</loc><lastmod>2026-04-18</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/etias-europe-authorization-guide-canadians</loc><lastmod>2026-04-18</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/coolife-luggage-carry-on-review-2026</loc><lastmod>2026-04-18</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/airplane-cell-phone-holder-game-changer-2026</loc><lastmod>2026-04-17</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/universal-travel-adapters-why-every-traveller-needs-one-in-2026</loc><lastmod>2026-04-17</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/why-travelers-bring-thermacell-on-vacation</loc><lastmod>2026-04-17</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/why-packing-cubes-are-your-new-best-travel-friend</loc><lastmod>2026-04-17</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/travelling-amazon-fire-tv-stick-canada</loc><lastmod>2026-04-17</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/how-to-save-money-for-travel-affordable-adventures</loc><lastmod>2026-04-16</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/trending-travel-destinations-2026</loc><lastmod>2026-03-28</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/multi-generational-vacations-2026-destinations</loc><lastmod>2026-03-27</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/blue-health-travel-2026-water-wellness-vacations</loc><lastmod>2026-03-27</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/event-driven-travel-2026-festivals-blooms-experiences</loc><lastmod>2026-03-27</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/digital-nomad-destinations-2026</loc><lastmod>2026-03-27</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/sustainable-travel-2026-eco-friendly-destinations</loc><lastmod>2026-03-27</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/off-the-beaten-path-destinations-2026</loc><lastmod>2026-03-27</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/coolcations-2026-escape-summer-heat</loc><lastmod>2026-03-27</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/astro-tourism-dark-sky-destinations-2026</loc><lastmod>2026-03-27</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/set-jetting-destinations-2026</loc><lastmod>2026-03-27</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/epic-golf-getaways</loc><lastmod>2026-03-27</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/top-travel-trends-2026</loc><lastmod>2026-03-27</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/future-proof-your-adventures-canadian-travel-trends-2026</loc><lastmod>2026-03-27</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/airbnb-vs-hotel-real-reviews-compared</loc><lastmod>2026-03-27</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/top-golf-resorts-worldwide-honest-reviews</loc><lastmod>2026-03-27</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/travel-review-mistakes-to-avoid</loc><lastmod>2026-03-27</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/how-to-spot-fake-hotel-reviews</loc><lastmod>2026-03-27</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/st-maarten-ed-card-europe-travel-pass-scam</loc><lastmod>2026-02-27</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/puerto-vallarta-unrest-update-canadian-travellers-stranded-but-stabilization-und</loc><lastmod>2026-02-25</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.reviewthengo.com/compass/northeast-blizzard-chaos-flight-cancellations-travel-bans-and-what-canadians-nee</loc><lastmod>2026-02-25</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
 </urlset>

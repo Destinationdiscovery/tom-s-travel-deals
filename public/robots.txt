@@ -43,12 +43,7 @@ Allow: /
 User-agent: *
 Allow: /
 
+# Static fallback (submit this one in Google Search Console)
 Sitemap: https://www.reviewthengo.com/sitemap.xml
-Sitemap: https://www.reviewthengo.com/article-urls.txt
-
-# RSS feed (The Compass blog, always live)
-# https://iomrjljlydboniioohkv.supabase.co/functions/v1/generate-rss
-
-# Crawler-friendly article feed (plain HTML, no JavaScript required)
-# Index: https://iomrjljlydboniioohkv.supabase.co/functions/v1/articles-feed
-# Single article: https://iomrjljlydboniioohkv.supabase.co/functions/v1/articles-feed?slug=<slug>
+# Dynamic sitemap (auto-includes all DB content, zero maintenance)
+Sitemap: https://iomrjljlydboniioohkv.supabase.co/functions/v1/generate-sitemap
