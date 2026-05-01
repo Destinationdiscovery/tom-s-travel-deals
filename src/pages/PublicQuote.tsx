@@ -143,11 +143,7 @@ const PublicQuote = () => {
                       )}
 
                       <div className="border-t border-border pt-4 space-y-2">
-                        {quote.valid_until && (
-                          <p className="text-xs text-muted-foreground text-center">
-                            Quote valid until <span className="font-medium text-foreground">{format(new Date(quote.valid_until + "T00:00:00"), "MMM d, yyyy")}</span>
-                          </p>
-                        )}
+
                         <div className="text-center text-xs text-muted-foreground">
                           <p className="font-medium text-foreground">{AGENT_INFO.name}</p>
                           <p>{AGENT_INFO.agency} · {AGENT_INFO.email}</p>
