@@ -1058,7 +1058,6 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
               <div><Label>Check-Out</Label><Input type="date" value={quote.checkOut} onChange={(e) => setQuote({ ...quote, checkOut: e.target.value })} /></div>
               <div><Label>Travellers</Label><Input type="number" min={1} value={quote.numTravellers} onChange={(e) => setQuote({ ...quote, numTravellers: parseInt(e.target.value) || 1 })} /></div>
               <div><Label>Room Type</Label><Input value={quote.roomType} onChange={(e) => setQuote({ ...quote, roomType: e.target.value })} placeholder="e.g. Ocean View Suite" /></div>
-              <div><Label>Valid Until</Label><Input type="date" value={quote.validUntil} onChange={(e) => setQuote({ ...quote, validUntil: e.target.value })} /></div>
             </div>
 
             <div>
