@@ -1271,7 +1271,7 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
 
       {/* Step 4: Preview */}
       {step === 4 && (
-        <QuotePreview quote={quote} totalPrice={totalPrice} onBack={() => setStep(3)} onSave={handleSave} saving={saving} editingId={editingId} onNewQuote={resetQuote} onDashboardHome={() => { resetQuote(); onPreviewMode?.(false); }} />
+        <QuotePreview quote={quote} totalPrice={totalPrice} onBack={() => setStep(3)} onSave={handleSave} saving={saving} editingId={editingId} onNewQuote={resetQuote} onDashboardHome={() => { resetQuote(); onPreviewMode?.(false); }} onUpdate={(updates) => { setQuote((prev) => ({ ...prev, ...updates })); setTimeout(() => handleSave(), 0); }} />
       )}
 
       {/* Booking from Quote Dialog */}
