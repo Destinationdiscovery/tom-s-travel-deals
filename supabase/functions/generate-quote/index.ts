@@ -8,10 +8,7 @@ const corsHeaders = {
 
 async function fetchPlacePhotos(placeName: string, maxPhotos = 4): Promise<string[]> {
   const apiKey = Deno.env.get("GOOGLE_PLACES_API_KEY");
-  if (!apiKey) {
-    console.log("No Google Places API key configured, skipping photos");
-    return [];
-  }
+  if (!apiKey) return [];
   try {
     const response = await fetch("https://places.googleapis.com/v1/places:searchText", {
       method: "POST",
@@ -22,10 +19,7 @@ async function fetchPlacePhotos(placeName: string, maxPhotos = 4): Promise<strin
       },
       body: JSON.stringify({ textQuery: placeName, maxResultCount: 1 }),
     });
-    if (!response.ok) {
-      console.error("Google Places search error:", response.status);
-      return [];
-    }
+    if (!response.ok) return [];
     const data = await response.json();
     const place = data.places?.[0];
     if (!place?.photos?.length) return [];
@@ -42,6 +36,19 @@ const AGENT_BRANDING = {
   agency: "TravelOnly",
 };
 
+// Strip any expiry/valid-until language the model may sneak in.
+function stripExpiryLanguage(md: string): string {
+  if (!md) return md;
+  const patterns = [
+    /^.*\b(quote\s+valid\s+until|valid\s+until|expires?\s+on|expiration\s+date|offer\s+expires?)\b.*$/gim,
+    /^.*\bthis\s+(price|quote|offer)\s+(is\s+valid\s+until|expires?)\b.*$/gim,
+  ];
+  let out = md;
+  for (const p of patterns) out = out.replace(p, "");
+  // collapse leftover triple blank lines
+  return out.replace(/\n{3,}/g, "\n\n");
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -52,8 +59,6 @@ serve(async (req) => {
     if (!prompt?.trim() && !hasAttachments) throw new Error("Provide a prompt or attach documents");
 
     const PERPLEXITY_API_KEY = Deno.env.get("PERPLEXITY_API_KEY");
-    if (!PERPLEXITY_API_KEY) throw new Error("PERPLEXITY_API_KEY is not configured");
-
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -67,13 +72,8 @@ serve(async (req) => {
     if (hasAttachments) {
       for (const path of attachmentPaths) {
         try {
-          const { data, error } = await supabaseClient.storage
-            .from("booking-documents")
-            .download(path);
-          if (error || !data) {
-            console.error("Failed to download attachment:", path, error);
-            continue;
-          }
+          const { data, error } = await supabaseClient.storage.from("booking-documents").download(path);
+          if (error || !data) { console.error("Failed to download attachment:", path, error); continue; }
           const buffer = await data.arrayBuffer();
           const bytes = new Uint8Array(buffer);
           let binary = "";
@@ -89,42 +89,37 @@ serve(async (req) => {
 
     const effectivePrompt = prompt?.trim() || `Build a vacation quote for ${clientName || "the client"} using the attached documents. Extract all pricing, dates, flight details, resort info, and traveller information.`;
 
-    // Step 2: Research resort with Perplexity
-    console.log("Researching resort with Perplexity...");
-    const perplexityRes = await fetch("https://api.perplexity.ai/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${PERPLEXITY_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "sonar",
-        messages: [
-          {
-            role: "system",
-            content: "You are a travel research assistant. Provide detailed resort/hotel information including amenities, room types, location details, highlights, dining options, nearby attractions, and what's included. Focus on practical details that would help sell the trip to a client.",
-          },
-          {
-            role: "user",
-            content: `Research this resort/hotel for a client vacation quote: ${effectivePrompt}. Include: amenities, room categories, what's included, location highlights, dining, nearby activities, and any current pricing or package info.`,
-          },
-        ],
-      }),
-    });
-
+    // Step 2: Research resort with Perplexity (best-effort)
     let research = "";
-    if (perplexityRes.ok) {
-      const perplexityData = await perplexityRes.json();
-      research = perplexityData.choices?.[0]?.message?.content || "";
-      console.log("Research complete");
-    } else {
-      console.error("Perplexity error:", perplexityRes.status);
+    if (PERPLEXITY_API_KEY) {
+      try {
+        console.log("Researching resort with Perplexity...");
+        const perplexityRes = await fetch("https://api.perplexity.ai/chat/completions", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${PERPLEXITY_API_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "sonar",
+            messages: [
+              { role: "system", content: "You are a travel research assistant. Provide detailed resort/hotel information including amenities, room types, location, dining, nearby attractions, and what's included." },
+              { role: "user", content: `Research this resort/hotel for a client vacation quote: ${effectivePrompt}. Include amenities, room categories, what's included, location highlights, dining, nearby activities, and current pricing or package info.` },
+            ],
+          }),
+        });
+        if (perplexityRes.ok) {
+          const perplexityData = await perplexityRes.json();
+          research = perplexityData.choices?.[0]?.message?.content || "";
+          console.log("Research complete");
+        } else {
+          console.error("Perplexity error:", perplexityRes.status);
+        }
+      } catch (e) {
+        console.error("Perplexity request failed:", e);
+      }
     }
 
-    // Step 3: Build vision content for Gemini
+    // Step 3: Generate quote as PLAIN MARKDOWN (no JSON wrapping)
     const clientNameStr = clientName || "the client";
     const today = new Date().toISOString().split("T")[0];
-    const validUntilDate = new Date(Date.now() + 14 * 86400000).toISOString().split("T")[0];
 
     const userContent: any[] = [];
     userContent.push({
@@ -138,86 +133,50 @@ CLIENT REQUEST: ${effectivePrompt}
 RESORT RESEARCH:
 ${research || "No research available - use details from the prompt and attachments."}
 
-${attachmentContents.length > 0 ? `\nATTACHED DOCUMENTS: ${attachmentContents.length} file(s) attached below. Extract ALL relevant details: pricing, dates, flight info, passenger names, booking numbers, room types, inclusions, etc.` : ""}
+${attachmentContents.length > 0 ? `\nATTACHED DOCUMENTS: ${attachmentContents.length} file(s) attached. Extract ALL relevant details: pricing, dates, flight info, passenger names, booking numbers, room types, inclusions.` : ""}
 
 INSTRUCTIONS:
-Write the quote as a flowing, narrative blog-style document in MARKDOWN format. Think of it like writing a travel article that also serves as a quote. You have FULL creative freedom over the layout - use headings, bold text, bullet points, tables, blockquotes, whatever makes the document beautiful and informative.
+Write the quote as a flowing, narrative blog-style document in MARKDOWN. Use headings, bold text, bullet points, tables, and blockquotes to make the document beautiful and informative.
 
-The document should feel personal and professional, like a travel consultant wrote it specifically for the client. Include:
+Include:
 - A warm, personal greeting addressing the client by name
-- An engaging overview of the destination and resort (use the research to paint a picture)
+- An engaging overview of the destination and resort
 - Accommodation details and room description
-- What's included (all-inclusive features, amenities, etc.)
+- What's included
 - Travel dates, duration, and check-in/check-out details
-- Flight information if available (airline, flight numbers, times)
-- A clear cost breakdown section with itemized pricing
+- Flight information if available
+- A clear cost breakdown with itemized pricing
 - Total cost prominently displayed
-- A "Travel Tips" section with 5 numbered practical insider tips specific to this property/destination (booking tips, local customs, what to pack, best time to visit, money-saving tips, etc.)
-${includeThingsToDo ? `- A "Things to Do Nearby" section with 3-5 top-rated activities, attractions, restaurants, or experiences near the property, each with a brief description` : "- Do NOT include a Things to Do or activities section"}
-${advisory ? `- A prominent "Travel Advisory" banner section with a warning icon, containing this advisory: "${advisory}". Style it as a highlighted callout block (use a blockquote with ⚠️ emoji). Place it near the top of the document, after the greeting.` : ""}
+- A "Travel Tips" section with 5 numbered insider tips
+${includeThingsToDo ? `- A "Things to Do Nearby" section with 3-5 top activities` : "- Do NOT include a Things to Do section"}
+${advisory ? `- A prominent "Travel Advisory" callout near the top using a blockquote with ⚠️ emoji containing: "${advisory}"` : ""}
 - Next steps for booking
-- A professional sign-off from ${AGENT_BRANDING.name}, ${AGENT_BRANDING.agency}
+- A professional sign-off from ${AGENT_BRANDING.name}, ${AGENT_BRANDING.agency} (${AGENT_BRANDING.email})
 
-IMPORTANT RULES:
+CRITICAL RULES:
 - Default currency is CAD unless specified otherwise
-- Do NOT use em-dashes or en-dashes anywhere, use regular hyphens instead
-- Make the document feel like a premium travel consultation, not a boring form
-- Include the agent's email (${AGENT_BRANDING.email}) in the sign-off
-- Be thorough with pricing - if per-person pricing is given, show both per-person and total
+- Do NOT use em-dashes or en-dashes, use regular hyphens
 - Today's date is ${today}
-- Do NOT include any "quote valid until", expiry date, or "this price expires on" language anywhere in the document. You may state that prices and availability are subject to change until booked, but never give a specific expiry date.
-
-After writing the markdown, also return a small metadata object for database storage.
-
-Return your response as a JSON object with exactly two fields:
-{
-  "markdown": "the full markdown document...",
-  "metadata": {
-    "client_name": "...",
-    "client_email": "..." or null,
-    "resort_name": "...",
-    "destination": "...",
-    "total_price": number or null,
-    "currency": "CAD",
-    "valid_until": "${validUntilDate}",
-    "check_in": "YYYY-MM-DD" or null,
-    "check_out": "YYYY-MM-DD" or null,
-    "num_travellers": number or null
-  }
-}
-
-Return ONLY valid JSON. No markdown fencing around the JSON itself.`,
+- Do NOT include any "quote valid until", "valid until", expiry date, or "this price expires" language anywhere. You may state that prices and availability are subject to change until booked, but never give an expiry date.
+- Output ONLY the markdown document. No preamble, no JSON, no code fences. Start directly with the greeting or first heading.`,
     });
 
-    // Add attachment images for vision
     for (const att of attachmentContents) {
       if (att.mimeType.startsWith("image/") || att.mimeType === "application/pdf") {
-        userContent.push({
-          type: "image_url",
-          image_url: {
-            url: `data:${att.mimeType};base64,${att.base64}`,
-          },
-        });
+        userContent.push({ type: "image_url", image_url: { url: `data:${att.mimeType};base64,${att.base64}` } });
       }
     }
 
-    console.log("Generating blog-style quote with Gemini...");
+    console.log("Generating markdown quote with Gemini...");
     const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
+      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          {
-            role: "system",
-            content: `You are ${AGENT_BRANDING.name}, a professional Canadian travel consultant at ${AGENT_BRANDING.agency}. You write beautiful, engaging vacation quotes that read like premium travel blog articles. Your tone is warm, knowledgeable, and personal. Never use em-dashes or en-dashes. Always return valid JSON with two top-level keys: "markdown" (string) and "metadata" (object). Inside the "markdown" string, escape every double quote as \\" and every newline as \\n so the JSON stays valid.`,
-          },
+          { role: "system", content: `You are ${AGENT_BRANDING.name}, a professional Canadian travel consultant at ${AGENT_BRANDING.agency}. You write beautiful, engaging vacation quotes that read like premium travel blog articles. Your tone is warm, knowledgeable, and personal. Never use em-dashes or en-dashes. Output plain markdown only, never JSON or code fences.` },
           { role: "user", content: userContent },
         ],
-        response_format: { type: "json_object" },
       }),
     });
 
@@ -226,124 +185,142 @@ Return ONLY valid JSON. No markdown fencing around the JSON itself.`,
       const errText = await aiRes.text();
       console.error("AI gateway error:", status, errText);
       if (status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limit exceeded. Please wait a moment and try again." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return new Response(JSON.stringify({ error: "Rate limit exceeded. Please wait a moment and try again." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
       if (status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add credits to continue." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add credits to continue." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
-      throw new Error(`AI generation failed: ${status}`);
+      return new Response(JSON.stringify({ error: `AI generation failed (${status}). Please try again.` }), { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const aiData = await aiRes.json();
-    const rawContent = aiData.choices?.[0]?.message?.content;
-    if (!rawContent) throw new Error("AI did not return content");
-
-    // Parse JSON - handle potential markdown fencing + repair common issues
-    let cleaned = rawContent.trim();
-    if (cleaned.startsWith("```json")) cleaned = cleaned.slice(7);
-    else if (cleaned.startsWith("```")) cleaned = cleaned.slice(3);
-    if (cleaned.endsWith("```")) cleaned = cleaned.slice(0, -3);
-    cleaned = cleaned.trim();
-
-    // Trim to outermost JSON object boundaries to drop any prose preamble/suffix
-    const firstBrace = cleaned.indexOf("{");
-    const lastBrace = cleaned.lastIndexOf("}");
-    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-      cleaned = cleaned.slice(firstBrace, lastBrace + 1);
+    let markdown: string = aiData.choices?.[0]?.message?.content || "";
+    if (!markdown.trim()) {
+      return new Response(JSON.stringify({ error: "AI returned an empty quote. Please try again." }), { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const tryParse = (s: string) => {
-      try { return JSON.parse(s); } catch { return null; }
+    // Strip accidental code fences
+    markdown = markdown.trim();
+    if (markdown.startsWith("```")) {
+      markdown = markdown.replace(/^```[a-zA-Z]*\n?/, "").replace(/```$/, "").trim();
+    }
+    markdown = stripExpiryLanguage(markdown);
+
+    // Step 4: Extract metadata via tool calling (small, reliable JSON)
+    let metadata: any = {
+      client_name: clientName || null,
+      client_email: clientEmail || null,
+      resort_name: null,
+      destination: null,
+      total_price: null,
+      currency: "CAD",
+      check_in: null,
+      check_out: null,
+      num_travellers: null,
     };
 
-    let result: any = tryParse(cleaned);
-    if (!result) {
-      // Light repairs: remove trailing commas before } or ]
-      let repaired = cleaned.replace(/,(\s*[}\]])/g, "$1");
-      result = tryParse(repaired);
-      if (!result) {
-        // Heavier repair: escape raw control chars inside string values
-        repaired = repaired.replace(/[\u0000-\u001F]/g, (c) => {
-          if (c === "\n") return "\\n";
-          if (c === "\r") return "\\r";
-          if (c === "\t") return "\\t";
-          return "";
-        });
-        result = tryParse(repaired);
+    try {
+      const metaRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash-lite",
+          messages: [
+            { role: "system", content: "Extract structured metadata from a vacation quote. Use null for any field you cannot determine confidently." },
+            { role: "user", content: `Extract metadata from this vacation quote markdown:\n\n${markdown.slice(0, 8000)}` },
+          ],
+          tools: [{
+            type: "function",
+            function: {
+              name: "save_quote_metadata",
+              description: "Save extracted vacation quote metadata.",
+              parameters: {
+                type: "object",
+                properties: {
+                  client_name: { type: ["string", "null"] },
+                  client_email: { type: ["string", "null"] },
+                  resort_name: { type: ["string", "null"] },
+                  destination: { type: ["string", "null"] },
+                  total_price: { type: ["number", "null"] },
+                  currency: { type: ["string", "null"] },
+                  check_in: { type: ["string", "null"], description: "YYYY-MM-DD or null" },
+                  check_out: { type: ["string", "null"], description: "YYYY-MM-DD or null" },
+                  num_travellers: { type: ["integer", "null"] },
+                },
+                required: ["resort_name", "destination", "currency"],
+                additionalProperties: false,
+              },
+            },
+          }],
+          tool_choice: { type: "function", function: { name: "save_quote_metadata" } },
+        }),
+      });
+      if (metaRes.ok) {
+        const metaData = await metaRes.json();
+        const toolCall = metaData.choices?.[0]?.message?.tool_calls?.[0];
+        if (toolCall?.function?.arguments) {
+          try {
+            const parsed = JSON.parse(toolCall.function.arguments);
+            metadata = { ...metadata, ...parsed };
+          } catch (e) {
+            console.error("Metadata tool args not JSON:", e);
+          }
+        }
+      } else {
+        console.error("Metadata extraction failed:", metaRes.status);
       }
-      if (!result) {
-        console.error("generate-quote: unrecoverable JSON. First 500 chars:", cleaned.slice(0, 500));
-        return new Response(
-          JSON.stringify({ error: "The AI returned an invalid response. Please try generating the quote again." }),
-          { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
+    } catch (e) {
+      console.error("Metadata extraction error:", e);
     }
 
-    if (!result.markdown || !result.metadata) {
-      throw new Error("AI response missing markdown or metadata");
-    }
+    // Defaults if extraction couldn't determine resort
+    if (!metadata.resort_name) metadata.resort_name = "Vacation Package";
+    if (!metadata.currency) metadata.currency = "CAD";
+    if (!metadata.client_name) metadata.client_name = clientName || "Client";
 
-    console.log("Blog-style quote generated for:", result.metadata.resort_name);
+    console.log("Quote generated for:", metadata.resort_name);
 
-    // Fetch real resort photos from Google Places
-    const resortName = result.metadata.resort_name || "";
-    if (resortName) {
-      console.log("Fetching resort photos for:", resortName);
-      const photoRefs = await fetchPlacePhotos(resortName, 4);
-      if (photoRefs.length > 0) {
-        const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-        const photoUrls = photoRefs.map(
-          (ref) => `${supabaseUrl}/functions/v1/place-photos?name=${encodeURIComponent(ref)}`
-        );
+    // Step 5: Inject Google Places photos
+    const resortName = metadata.resort_name || "";
+    if (resortName && resortName !== "Vacation Package") {
+      try {
+        console.log("Fetching resort photos for:", resortName);
+        const photoRefs = await fetchPlacePhotos(resortName, 4);
+        if (photoRefs.length > 0) {
+          const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+          const photoUrls = photoRefs.map((ref) => `${supabaseUrl}/functions/v1/place-photos?name=${encodeURIComponent(ref)}`);
 
-        // Inject photos at natural breakpoints in the markdown
-        const lines = result.markdown.split("\n");
-        const insertPoints: number[] = [];
-        let h2Count = 0;
-        for (let i = 0; i < lines.length; i++) {
-          if (lines[i].startsWith("## ")) {
-            h2Count++;
-            // Insert after the first paragraph following the 1st, 2nd, and 3rd h2
-            if (h2Count <= 3) {
-              // Find the next blank line after this heading (end of first paragraph)
-              for (let j = i + 2; j < lines.length; j++) {
-                if (lines[j].trim() === "") {
-                  insertPoints.push(j);
-                  break;
+          const lines = markdown.split("\n");
+          const insertPoints: number[] = [];
+          let h2Count = 0;
+          for (let i = 0; i < lines.length; i++) {
+            if (lines[i].startsWith("## ")) {
+              h2Count++;
+              if (h2Count <= 3) {
+                for (let j = i + 2; j < lines.length; j++) {
+                  if (lines[j].trim() === "") { insertPoints.push(j); break; }
                 }
               }
             }
           }
-        }
-
-        // Also add one photo at the very top (after first blank line)
-        for (let i = 0; i < lines.length; i++) {
-          if (lines[i].trim() === "" && i > 0) {
-            insertPoints.unshift(i);
-            break;
+          for (let i = 0; i < lines.length; i++) {
+            if (lines[i].trim() === "" && i > 0) { insertPoints.unshift(i); break; }
           }
+          const uniquePoints = [...new Set(insertPoints)].sort((a, b) => b - a);
+          const photosToInsert = photoUrls.slice(0, uniquePoints.length);
+          for (let idx = 0; idx < photosToInsert.length && idx < uniquePoints.length; idx++) {
+            const insertAt = uniquePoints[idx];
+            lines.splice(insertAt + 1, 0, "", `![${resortName}](${photosToInsert[idx]})`, "");
+          }
+          markdown = lines.join("\n");
+          console.log(`Injected ${Math.min(photosToInsert.length, uniquePoints.length)} resort photos`);
         }
-
-        // Dedupe and sort descending so inserts don't shift indices
-        const uniquePoints = [...new Set(insertPoints)].sort((a, b) => b - a);
-        const photosToInsert = photoUrls.slice(0, uniquePoints.length);
-
-        for (let idx = 0; idx < photosToInsert.length && idx < uniquePoints.length; idx++) {
-          const insertAt = uniquePoints[idx];
-          lines.splice(insertAt + 1, 0, "", `![${resortName}](${photosToInsert[idx]})`, "");
-        }
-
-        result.markdown = lines.join("\n");
-        console.log(`Injected ${Math.min(photosToInsert.length, uniquePoints.length)} resort photos`);
+      } catch (e) {
+        console.error("Photo injection failed:", e);
       }
     }
 
-    return new Response(JSON.stringify(result), {
+    return new Response(JSON.stringify({ markdown, metadata }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e: any) {
