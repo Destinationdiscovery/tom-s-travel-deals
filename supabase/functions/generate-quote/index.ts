@@ -212,10 +212,11 @@ Return ONLY valid JSON. No markdown fencing around the JSON itself.`,
         messages: [
           {
             role: "system",
-            content: `You are ${AGENT_BRANDING.name}, a professional Canadian travel consultant at ${AGENT_BRANDING.agency}. You write beautiful, engaging vacation quotes that read like premium travel blog articles. Your tone is warm, knowledgeable, and personal. Never use em-dashes or en-dashes. Always return valid JSON.`,
+            content: `You are ${AGENT_BRANDING.name}, a professional Canadian travel consultant at ${AGENT_BRANDING.agency}. You write beautiful, engaging vacation quotes that read like premium travel blog articles. Your tone is warm, knowledgeable, and personal. Never use em-dashes or en-dashes. Always return valid JSON with two top-level keys: "markdown" (string) and "metadata" (object). Inside the "markdown" string, escape every double quote as \\" and every newline as \\n so the JSON stays valid.`,
           },
           { role: "user", content: userContent },
         ],
+        response_format: { type: "json_object" },
       }),
     });
 
