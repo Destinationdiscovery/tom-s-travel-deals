@@ -1270,7 +1270,21 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
 
       {/* Step 4: Preview */}
       {step === 4 && (
-        <QuotePreview quote={quote} totalPrice={totalPrice} onBack={() => setStep(3)} onSave={handleSave} saving={saving} editingId={editingId} onNewQuote={resetQuote} onDashboardHome={() => { resetQuote(); onPreviewMode?.(false); }} onUpdate={(updates) => { setQuote((prev) => ({ ...prev, ...updates })); setTimeout(() => handleSave(), 0); }} />
+        <QuotePreview quote={quote} totalPrice={totalPrice} onBack={() => setStep(3)} onSave={handleSave} saving={saving} editingId={editingId} onNewQuote={resetQuote} onDashboardHome={() => { resetQuote(); onPreviewMode?.(false); }} onUpdate={async (updates) => {
+          setQuote((prev) => ({ ...prev, ...updates }));
+          if (editingId) {
+            const dbUpdates: Record<string, any> = {};
+            if ("quoteMarkdown" in updates) dbUpdates.quote_markdown = updates.quoteMarkdown || null;
+            if ("summary" in updates) dbUpdates.summary = updates.summary || null;
+            if ("notes" in updates) dbUpdates.notes = updates.notes || null;
+            if (Object.keys(dbUpdates).length > 0) {
+              setSaving(true);
+              const { error } = await supabase.from("client_quotes").update(dbUpdates as any).eq("id", editingId);
+              setSaving(false);
+              if (error) toast({ title: "Save failed", description: error.message, variant: "destructive" });
+            }
+          }
+        }} />
       )}
 
       {/* Booking from Quote Dialog */}

@@ -6,28 +6,56 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-async function fetchPlacePhotos(placeName: string, maxPhotos = 4): Promise<string[]> {
+interface PlaceMatch {
+  photoRefs: string[];
+  matchedName: string;
+  types: string[];
+}
+
+async function searchPlace(query: string, maxPhotos = 4): Promise<PlaceMatch | null> {
   const apiKey = Deno.env.get("GOOGLE_PLACES_API_KEY");
-  if (!apiKey) return [];
+  if (!apiKey) return null;
   try {
     const response = await fetch("https://places.googleapis.com/v1/places:searchText", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "X-Goog-Api-Key": apiKey,
-        "X-Goog-FieldMask": "places.photos",
+        "X-Goog-FieldMask": "places.photos,places.displayName,places.types",
       },
-      body: JSON.stringify({ textQuery: placeName, maxResultCount: 1 }),
+      body: JSON.stringify({ textQuery: query, maxResultCount: 1 }),
     });
-    if (!response.ok) return [];
+    if (!response.ok) return null;
     const data = await response.json();
     const place = data.places?.[0];
-    if (!place?.photos?.length) return [];
-    return place.photos.slice(0, maxPhotos).map((p: { name: string }) => p.name);
+    if (!place?.photos?.length) return null;
+    return {
+      photoRefs: place.photos.slice(0, maxPhotos).map((p: { name: string }) => p.name),
+      matchedName: place.displayName?.text || "",
+      types: place.types || [],
+    };
   } catch (e) {
-    console.error("Failed to fetch place photos:", e);
-    return [];
+    console.error("Place search failed:", query, e);
+    return null;
   }
+}
+
+const LODGING_TYPES = new Set(["lodging", "hotel", "resort_hotel", "motel", "bed_and_breakfast", "guest_house"]);
+
+function looksLikeLodging(types: string[]): boolean {
+  return types.some((t) => LODGING_TYPES.has(t));
+}
+
+function nameOverlap(a: string, b: string): boolean {
+  if (!a || !b) return false;
+  const stop = new Set(["the", "a", "of", "and", "at", "by", "in", "on", "&"]);
+  const tokens = (s: string) => new Set(
+    s.toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter((w) => w.length > 2 && !stop.has(w))
+  );
+  const ta = tokens(a);
+  const tb = tokens(b);
+  for (const t of ta) if (tb.has(t)) return true;
+  return false;
 }
 
 const AGENT_BRANDING = {
@@ -36,7 +64,6 @@ const AGENT_BRANDING = {
   agency: "TravelOnly",
 };
 
-// Strip any expiry/valid-until language the model may sneak in.
 function stripExpiryLanguage(md: string): string {
   if (!md) return md;
   const patterns = [
@@ -45,7 +72,6 @@ function stripExpiryLanguage(md: string): string {
   ];
   let out = md;
   for (const p of patterns) out = out.replace(p, "");
-  // collapse leftover triple blank lines
   return out.replace(/\n{3,}/g, "\n\n");
 }
 
@@ -67,7 +93,6 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Step 1: Download attachments and convert to base64 for vision
     const attachmentContents: { mimeType: string; base64: string; fileName: string }[] = [];
     if (hasAttachments) {
       for (const path of attachmentPaths) {
@@ -89,19 +114,18 @@ serve(async (req) => {
 
     const effectivePrompt = prompt?.trim() || `Build a vacation quote for ${clientName || "the client"} using the attached documents. Extract all pricing, dates, flight details, resort info, and traveller information.`;
 
-    // Step 2: Research resort with Perplexity (best-effort)
     let research = "";
     if (PERPLEXITY_API_KEY) {
       try {
-        console.log("Researching resort with Perplexity...");
+        console.log("Researching with Perplexity...");
         const perplexityRes = await fetch("https://api.perplexity.ai/chat/completions", {
           method: "POST",
           headers: { Authorization: `Bearer ${PERPLEXITY_API_KEY}`, "Content-Type": "application/json" },
           body: JSON.stringify({
             model: "sonar",
             messages: [
-              { role: "system", content: "You are a travel research assistant. Provide detailed resort/hotel information including amenities, room types, location, dining, nearby attractions, and what's included." },
-              { role: "user", content: `Research this resort/hotel for a client vacation quote: ${effectivePrompt}. Include amenities, room categories, what's included, location highlights, dining, nearby activities, and current pricing or package info.` },
+              { role: "system", content: "You are a travel research assistant. If the trip is a cruise, research the ship, cruise line, itinerary, ports, and shore excursions. If it is a resort, research amenities, room types, dining, and nearby activities. Be explicit about whether this is a cruise or a resort stay." },
+              { role: "user", content: `Research this travel package for a client vacation quote. First identify whether this is a cruise (and which ship and cruise line) or a resort stay. Then provide relevant details. Trip details: ${effectivePrompt}` },
             ],
           }),
         });
@@ -117,7 +141,6 @@ serve(async (req) => {
       }
     }
 
-    // Step 3: Generate quote as PLAIN MARKDOWN (no JSON wrapping)
     const clientNameStr = clientName || "the client";
     const today = new Date().toISOString().split("T")[0];
 
@@ -130,34 +153,39 @@ Write a professional, blog-style vacation quote document for your client "${clie
 
 CLIENT REQUEST: ${effectivePrompt}
 
-RESORT RESEARCH:
+RESEARCH:
 ${research || "No research available - use details from the prompt and attachments."}
 
 ${attachmentContents.length > 0 ? `\nATTACHED DOCUMENTS: ${attachmentContents.length} file(s) attached. Extract ALL relevant details: pricing, dates, flight info, passenger names, booking numbers, room types, inclusions.` : ""}
 
 INSTRUCTIONS:
-Write the quote as a flowing, narrative blog-style document in MARKDOWN. Use headings, bold text, bullet points, tables, and blockquotes to make the document beautiful and informative.
+Write the quote as a flowing, narrative blog-style document in MARKDOWN. Use headings, bold text, bullet points, tables, and blockquotes.
+
+CRITICAL: Identify the trip type correctly.
+- If this is a CRUISE, describe it as a cruise, name the SHIP and CRUISE LINE, list the itinerary or ports of call, and never call it a resort stay.
+- If this is a RESORT or HOTEL stay, describe the resort, room, and grounds.
+- If this is a tour, describe the itinerary day by day.
 
 Include:
 - A warm, personal greeting addressing the client by name
-- An engaging overview of the destination and resort
-- Accommodation details and room description
+- An engaging overview of the destination and the ship or resort
+- Accommodation details (cabin category for cruises, room type for resorts)
 - What's included
-- Travel dates, duration, and check-in/check-out details
+- Travel dates, duration, and check-in/check-out (or embarkation/disembarkation for cruises)
 - Flight information if available
 - A clear cost breakdown with itemized pricing
 - Total cost prominently displayed
 - A "Travel Tips" section with 5 numbered insider tips
-${includeThingsToDo ? `- A "Things to Do Nearby" section with 3-5 top activities` : "- Do NOT include a Things to Do section"}
+${includeThingsToDo ? `- A "Things to Do" section. For cruises list shore excursions per port. For resorts list nearby activities.` : "- Do NOT include a Things to Do section"}
 ${advisory ? `- A prominent "Travel Advisory" callout near the top using a blockquote with ⚠️ emoji containing: "${advisory}"` : ""}
 - Next steps for booking
 - A professional sign-off from ${AGENT_BRANDING.name}, ${AGENT_BRANDING.agency} (${AGENT_BRANDING.email})
 
 CRITICAL RULES:
-- Default currency is CAD unless specified otherwise
-- Do NOT use em-dashes or en-dashes, use regular hyphens
-- Today's date is ${today}
-- Do NOT include any "quote valid until", "valid until", expiry date, or "this price expires" language anywhere. You may state that prices and availability are subject to change until booked, but never give an expiry date.
+- Default currency is CAD unless specified otherwise.
+- Do NOT use em-dashes or en-dashes, use regular hyphens.
+- Today's date is ${today}.
+- Do NOT include any "quote valid until", "valid until", expiry date, or "this price expires" language. You may state that prices and availability are subject to change until booked, but never give an expiry date.
 - Output ONLY the markdown document. No preamble, no JSON, no code fences. Start directly with the greeting or first heading.`,
     });
 
@@ -174,7 +202,7 @@ CRITICAL RULES:
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: `You are ${AGENT_BRANDING.name}, a professional Canadian travel consultant at ${AGENT_BRANDING.agency}. You write beautiful, engaging vacation quotes that read like premium travel blog articles. Your tone is warm, knowledgeable, and personal. Never use em-dashes or en-dashes. Output plain markdown only, never JSON or code fences.` },
+          { role: "system", content: `You are ${AGENT_BRANDING.name}, a professional Canadian travel consultant at ${AGENT_BRANDING.agency}. You write beautiful, engaging vacation quotes that read like premium travel blog articles. Your tone is warm, knowledgeable, and personal. Never use em-dashes or en-dashes. Output plain markdown only, never JSON or code fences. Always identify cruises as cruises (with ship and cruise line) and never confuse them with resorts.` },
           { role: "user", content: userContent },
         ],
       }),
@@ -199,14 +227,13 @@ CRITICAL RULES:
       return new Response(JSON.stringify({ error: "AI returned an empty quote. Please try again." }), { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Strip accidental code fences
     markdown = markdown.trim();
     if (markdown.startsWith("```")) {
       markdown = markdown.replace(/^```[a-zA-Z]*\n?/, "").replace(/```$/, "").trim();
     }
     markdown = stripExpiryLanguage(markdown);
 
-    // Step 4: Extract metadata via tool calling (small, reliable JSON)
+    // Metadata extraction (now includes trip_type, ship_name, cruise_line, destination_query)
     let metadata: any = {
       client_name: clientName || null,
       client_email: clientEmail || null,
@@ -217,6 +244,10 @@ CRITICAL RULES:
       check_in: null,
       check_out: null,
       num_travellers: null,
+      trip_type: "other",
+      ship_name: null,
+      cruise_line: null,
+      destination_query: null,
     };
 
     try {
@@ -226,7 +257,7 @@ CRITICAL RULES:
         body: JSON.stringify({
           model: "google/gemini-2.5-flash-lite",
           messages: [
-            { role: "system", content: "Extract structured metadata from a vacation quote. Use null for any field you cannot determine confidently." },
+            { role: "system", content: "Extract structured metadata from a vacation quote. Use null for any field you cannot determine confidently. Be precise about whether this is a cruise or resort." },
             { role: "user", content: `Extract metadata from this vacation quote markdown:\n\n${markdown.slice(0, 8000)}` },
           ],
           tools: [{
@@ -239,15 +270,19 @@ CRITICAL RULES:
                 properties: {
                   client_name: { type: ["string", "null"] },
                   client_email: { type: ["string", "null"] },
-                  resort_name: { type: ["string", "null"] },
-                  destination: { type: ["string", "null"] },
+                  resort_name: { type: ["string", "null"], description: "For cruises this is the ship name. For resorts the resort/hotel name." },
+                  destination: { type: ["string", "null"], description: "Primary destination, e.g. 'Alaska', 'Cancun, Mexico'." },
                   total_price: { type: ["number", "null"] },
                   currency: { type: ["string", "null"] },
                   check_in: { type: ["string", "null"], description: "YYYY-MM-DD or null" },
                   check_out: { type: ["string", "null"], description: "YYYY-MM-DD or null" },
                   num_travellers: { type: ["integer", "null"] },
+                  trip_type: { type: "string", enum: ["cruise", "resort", "tour", "other"], description: "Identify whether this is a cruise, a resort/hotel stay, a tour, or other." },
+                  ship_name: { type: ["string", "null"], description: "Cruise ship name if trip_type is cruise, otherwise null." },
+                  cruise_line: { type: ["string", "null"], description: "Cruise line if trip_type is cruise, otherwise null." },
+                  destination_query: { type: ["string", "null"], description: "A short Google search phrase that would return scenic destination photos, e.g. 'Alaska cruise scenery Glacier Bay' or 'Cancun beach Mexico'." },
                 },
-                required: ["resort_name", "destination", "currency"],
+                required: ["resort_name", "destination", "currency", "trip_type"],
                 additionalProperties: false,
               },
             },
@@ -273,51 +308,106 @@ CRITICAL RULES:
       console.error("Metadata extraction error:", e);
     }
 
-    // Defaults if extraction couldn't determine resort
     if (!metadata.resort_name) metadata.resort_name = "Vacation Package";
     if (!metadata.currency) metadata.currency = "CAD";
     if (!metadata.client_name) metadata.client_name = clientName || "Client";
 
-    console.log("Quote generated for:", metadata.resort_name);
+    console.log("Quote generated. Trip type:", metadata.trip_type, "| Name:", metadata.resort_name, "| Destination:", metadata.destination);
 
-    // Step 5: Inject Google Places photos
-    const resortName = metadata.resort_name || "";
-    if (resortName && resortName !== "Vacation Package") {
-      try {
-        console.log("Fetching resort photos for:", resortName);
-        const photoRefs = await fetchPlacePhotos(resortName, 4);
-        if (photoRefs.length > 0) {
-          const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-          const photoUrls = photoRefs.map((ref) => `${supabaseUrl}/functions/v1/place-photos?name=${encodeURIComponent(ref)}`);
+    // Smart photo selection
+    try {
+      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+      const photoUrls: string[] = [];
 
-          const lines = markdown.split("\n");
-          const insertPoints: number[] = [];
-          let h2Count = 0;
-          for (let i = 0; i < lines.length; i++) {
-            if (lines[i].startsWith("## ")) {
-              h2Count++;
-              if (h2Count <= 3) {
-                for (let j = i + 2; j < lines.length; j++) {
-                  if (lines[j].trim() === "") { insertPoints.push(j); break; }
-                }
+      const tripType = metadata.trip_type || "other";
+      const destination = metadata.destination || "";
+      const destinationQuery = metadata.destination_query || destination;
+
+      if (tripType === "cruise") {
+        // Try ship photo first (1 only), validate
+        if (metadata.ship_name) {
+          const shipQuery = `${metadata.ship_name} cruise ship ${metadata.cruise_line || ""}`.trim();
+          const shipMatch = await searchPlace(shipQuery, 1);
+          if (shipMatch && !looksLikeLodging(shipMatch.types) && nameOverlap(shipMatch.matchedName, metadata.ship_name)) {
+            photoUrls.push(`${supabaseUrl}/functions/v1/place-photos?name=${encodeURIComponent(shipMatch.photoRefs[0])}`);
+            console.log("Ship photo accepted:", shipMatch.matchedName);
+          } else if (shipMatch) {
+            console.log("Ship photo rejected (looked like lodging or name mismatch):", shipMatch.matchedName, shipMatch.types);
+          }
+        }
+        // Destination scenery (3 photos)
+        if (destinationQuery) {
+          const destMatch = await searchPlace(destinationQuery, 3);
+          if (destMatch) {
+            for (const ref of destMatch.photoRefs) {
+              photoUrls.push(`${supabaseUrl}/functions/v1/place-photos?name=${encodeURIComponent(ref)}`);
+            }
+            console.log("Destination photos:", destMatch.matchedName, destMatch.photoRefs.length);
+          }
+        }
+      } else if (tripType === "resort") {
+        // Resort: search resort + destination, validate it's lodging and name overlaps
+        const resortQuery = destination ? `${metadata.resort_name} ${destination}` : metadata.resort_name;
+        const resortMatch = await searchPlace(resortQuery, 4);
+        if (resortMatch && looksLikeLodging(resortMatch.types) && nameOverlap(resortMatch.matchedName, metadata.resort_name)) {
+          for (const ref of resortMatch.photoRefs) {
+            photoUrls.push(`${supabaseUrl}/functions/v1/place-photos?name=${encodeURIComponent(ref)}`);
+          }
+          console.log("Resort photos accepted:", resortMatch.matchedName);
+        } else {
+          console.log("Resort photo rejected, falling back to destination:", resortMatch?.matchedName, resortMatch?.types);
+          if (destinationQuery) {
+            const destMatch = await searchPlace(destinationQuery, 4);
+            if (destMatch) {
+              for (const ref of destMatch.photoRefs) {
+                photoUrls.push(`${supabaseUrl}/functions/v1/place-photos?name=${encodeURIComponent(ref)}`);
               }
             }
           }
-          for (let i = 0; i < lines.length; i++) {
-            if (lines[i].trim() === "" && i > 0) { insertPoints.unshift(i); break; }
-          }
-          const uniquePoints = [...new Set(insertPoints)].sort((a, b) => b - a);
-          const photosToInsert = photoUrls.slice(0, uniquePoints.length);
-          for (let idx = 0; idx < photosToInsert.length && idx < uniquePoints.length; idx++) {
-            const insertAt = uniquePoints[idx];
-            lines.splice(insertAt + 1, 0, "", `![${resortName}](${photosToInsert[idx]})`, "");
-          }
-          markdown = lines.join("\n");
-          console.log(`Injected ${Math.min(photosToInsert.length, uniquePoints.length)} resort photos`);
         }
-      } catch (e) {
-        console.error("Photo injection failed:", e);
+      } else {
+        // tour / other - destination only
+        if (destinationQuery) {
+          const destMatch = await searchPlace(destinationQuery, 4);
+          if (destMatch) {
+            for (const ref of destMatch.photoRefs) {
+              photoUrls.push(`${supabaseUrl}/functions/v1/place-photos?name=${encodeURIComponent(ref)}`);
+            }
+          }
+        }
       }
+
+      if (photoUrls.length > 0) {
+        const lines = markdown.split("\n");
+        const insertPoints: number[] = [];
+        let h2Count = 0;
+        for (let i = 0; i < lines.length; i++) {
+          if (lines[i].startsWith("## ")) {
+            h2Count++;
+            if (h2Count <= 3) {
+              for (let j = i + 2; j < lines.length; j++) {
+                if (lines[j].trim() === "") { insertPoints.push(j); break; }
+              }
+            }
+          }
+        }
+        for (let i = 0; i < lines.length; i++) {
+          if (lines[i].trim() === "" && i > 0) { insertPoints.unshift(i); break; }
+        }
+        const uniquePoints = [...new Set(insertPoints)].sort((a, b) => b - a);
+        const photosToInsert = photoUrls.slice(0, uniquePoints.length);
+        const altText = tripType === "cruise" ? (metadata.ship_name || destination || "Trip photo") : metadata.resort_name;
+        for (let idx = 0; idx < photosToInsert.length && idx < uniquePoints.length; idx++) {
+          const insertAt = uniquePoints[idx];
+          lines.splice(insertAt + 1, 0, "", `![${altText}](${photosToInsert[idx]})`, "");
+        }
+        markdown = lines.join("\n");
+        console.log(`Injected ${Math.min(photosToInsert.length, uniquePoints.length)} photos (trip_type=${tripType})`);
+      } else {
+        console.log("No photos to inject for trip_type:", tripType);
+      }
+    } catch (e) {
+      console.error("Photo injection failed:", e);
     }
 
     return new Response(JSON.stringify({ markdown, metadata }), {
