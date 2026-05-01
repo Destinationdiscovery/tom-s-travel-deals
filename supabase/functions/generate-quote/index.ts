@@ -212,10 +212,11 @@ Return ONLY valid JSON. No markdown fencing around the JSON itself.`,
         messages: [
           {
             role: "system",
-            content: `You are ${AGENT_BRANDING.name}, a professional Canadian travel consultant at ${AGENT_BRANDING.agency}. You write beautiful, engaging vacation quotes that read like premium travel blog articles. Your tone is warm, knowledgeable, and personal. Never use em-dashes or en-dashes. Always return valid JSON.`,
+            content: `You are ${AGENT_BRANDING.name}, a professional Canadian travel consultant at ${AGENT_BRANDING.agency}. You write beautiful, engaging vacation quotes that read like premium travel blog articles. Your tone is warm, knowledgeable, and personal. Never use em-dashes or en-dashes. Always return valid JSON with two top-level keys: "markdown" (string) and "metadata" (object). Inside the "markdown" string, escape every double quote as \\" and every newline as \\n so the JSON stays valid.`,
           },
           { role: "user", content: userContent },
         ],
+        response_format: { type: "json_object" },
       }),
     });
 
@@ -240,14 +241,48 @@ Return ONLY valid JSON. No markdown fencing around the JSON itself.`,
     const rawContent = aiData.choices?.[0]?.message?.content;
     if (!rawContent) throw new Error("AI did not return content");
 
-    // Parse JSON - handle potential markdown fencing
+    // Parse JSON - handle potential markdown fencing + repair common issues
     let cleaned = rawContent.trim();
     if (cleaned.startsWith("```json")) cleaned = cleaned.slice(7);
     else if (cleaned.startsWith("```")) cleaned = cleaned.slice(3);
     if (cleaned.endsWith("```")) cleaned = cleaned.slice(0, -3);
     cleaned = cleaned.trim();
 
-    const result = JSON.parse(cleaned);
+    // Trim to outermost JSON object boundaries to drop any prose preamble/suffix
+    const firstBrace = cleaned.indexOf("{");
+    const lastBrace = cleaned.lastIndexOf("}");
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+      cleaned = cleaned.slice(firstBrace, lastBrace + 1);
+    }
+
+    const tryParse = (s: string) => {
+      try { return JSON.parse(s); } catch { return null; }
+    };
+
+    let result: any = tryParse(cleaned);
+    if (!result) {
+      // Light repairs: remove trailing commas before } or ]
+      let repaired = cleaned.replace(/,(\s*[}\]])/g, "$1");
+      result = tryParse(repaired);
+      if (!result) {
+        // Heavier repair: escape raw control chars inside string values
+        repaired = repaired.replace(/[\u0000-\u001F]/g, (c) => {
+          if (c === "\n") return "\\n";
+          if (c === "\r") return "\\r";
+          if (c === "\t") return "\\t";
+          return "";
+        });
+        result = tryParse(repaired);
+      }
+      if (!result) {
+        console.error("generate-quote: unrecoverable JSON. First 500 chars:", cleaned.slice(0, 500));
+        return new Response(
+          JSON.stringify({ error: "The AI returned an invalid response. Please try generating the quote again." }),
+          { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
     if (!result.markdown || !result.metadata) {
       throw new Error("AI response missing markdown or metadata");
     }
