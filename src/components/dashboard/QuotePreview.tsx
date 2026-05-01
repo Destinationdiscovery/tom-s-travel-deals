@@ -345,3 +345,93 @@ const QuotePreview = ({ quote, totalPrice, onBack, onSave, saving, editingId, on
 };
 
 export default QuotePreview;
+
+// --- Picture Manager: extract image lines from markdown, allow remove/add ---
+interface PictureManagerProps {
+  markdown: string;
+  onChange: (md: string) => void;
+}
+
+const IMG_RE = /!\[([^\]]*)\]\(([^)]+)\)/g;
+
+const PictureManager = ({ markdown, onChange }: PictureManagerProps) => {
+  const [newUrl, setNewUrl] = useState("");
+
+  const images = useMemo(() => {
+    const out: { alt: string; url: string; match: string }[] = [];
+    const re = new RegExp(IMG_RE.source, "g");
+    let m;
+    while ((m = re.exec(markdown)) !== null) {
+      out.push({ alt: m[1], url: m[2], match: m[0] });
+    }
+    return out;
+  }, [markdown]);
+
+  const removeImage = (match: string) => {
+    // Remove the image line and any blank lines immediately surrounding it
+    const escaped = match.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const re = new RegExp(`\\n*${escaped}\\n*`, "g");
+    onChange(markdown.replace(re, "\n\n"));
+  };
+
+  const addImage = () => {
+    const url = newUrl.trim();
+    if (!url) return;
+    // Insert near the top, after first heading
+    const lines = markdown.split("\n");
+    let insertAt = 0;
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].startsWith("# ") || lines[i].startsWith("## ")) {
+        // find next blank line after heading
+        for (let j = i + 1; j < lines.length; j++) {
+          if (lines[j].trim() === "") { insertAt = j; break; }
+        }
+        break;
+      }
+    }
+    lines.splice(insertAt + 1, 0, "", `![Trip photo](${url})`, "");
+    onChange(lines.join("\n"));
+    setNewUrl("");
+  };
+
+  return (
+    <div className="border border-border rounded-lg p-3 bg-muted/20 space-y-3">
+      <div className="flex items-center justify-between">
+        <Label className="text-sm font-semibold">Pictures in this quote ({images.length})</Label>
+        <p className="text-xs text-muted-foreground">Remove any photo that does not match the trip.</p>
+      </div>
+      {images.length > 0 ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+          {images.map((img, idx) => (
+            <div key={idx} className="relative group rounded-md overflow-hidden border border-border bg-background">
+              <img src={img.url} alt={img.alt} className="w-full h-24 object-cover" />
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                onClick={() => removeImage(img.match)}
+                className="absolute top-1 right-1 h-7 w-7 p-0"
+                aria-label="Remove image"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-xs text-muted-foreground italic">No pictures in this quote yet.</p>
+      )}
+      <div className="flex gap-2">
+        <Input
+          value={newUrl}
+          onChange={(e) => setNewUrl(e.target.value)}
+          placeholder="Paste image URL to add..."
+          className="text-xs"
+        />
+        <Button type="button" variant="outline" size="sm" onClick={addImage} disabled={!newUrl.trim()} className="gap-1">
+          <ImagePlus className="h-3.5 w-3.5" /> Add
+        </Button>
+      </div>
+    </div>
+  );
+};
