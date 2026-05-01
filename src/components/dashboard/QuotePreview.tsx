@@ -162,17 +162,21 @@ const QuotePreview = ({ quote, totalPrice, onBack, onSave, saving, editingId, on
           {isEditing && hasMarkdown ? (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <Label className="text-base font-semibold">Edit quote (Markdown)</Label>
+                <Label className="text-base font-semibold">Edit quote</Label>
                 <Button variant="outline" size="sm" onClick={() => setShowLivePreview((v) => !v)}>
                   {showLivePreview ? "Hide preview" : "Show preview"}
                 </Button>
               </div>
-              <Textarea
-                value={draftMarkdown}
-                onChange={(e) => setDraftMarkdown(e.target.value)}
-                className="font-mono text-xs min-h-[600px] leading-relaxed"
-                placeholder="Edit the quote markdown..."
-              />
+              <PictureManager markdown={draftMarkdown} onChange={setDraftMarkdown} />
+              <div>
+                <Label className="text-xs text-muted-foreground">Markdown content (edit any text below)</Label>
+                <Textarea
+                  value={draftMarkdown}
+                  onChange={(e) => setDraftMarkdown(e.target.value)}
+                  className="font-mono text-xs min-h-[600px] leading-relaxed mt-1"
+                  placeholder="Edit the quote markdown..."
+                />
+              </div>
               {showLivePreview && (
                 <div className="border border-border rounded-lg p-4 bg-muted/30">
                   <p className="text-xs font-semibold text-muted-foreground mb-2">Live preview</p>
