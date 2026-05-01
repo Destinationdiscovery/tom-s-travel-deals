@@ -1,43 +1,37 @@
-## Goals
+## Problem
 
-1. Remove the misleading "Quote valid until [date]" line from every place it shows to clients, while keeping the existing "prices subject to change" language intact.
-2. Add an Edit button on the preview screen so the agent can revise the AI-generated quote content before sending or printing.
+The Quote Builder is still failing inside the `generate-quote` backend function. The recent logs show the same root cause: the AI is returning a long markdown quote inside JSON, but the JSON is sometimes malformed. The current repair logic still gives up and returns the edge function error.
 
-## Changes
+## Plan
 
-### 1. Strip "valid until" from the AI-generated quote
+1. Make quote generation resilient by removing the fragile AI JSON wrapper for the long document.
+   - Update `supabase/functions/generate-quote/index.ts` so the AI returns the quote as plain markdown instead of embedding the entire quote inside a JSON string.
+   - This avoids the exact failure shown in the logs, where apostrophes, quotes, newlines, tables, and long markdown content break JSON parsing.
 
-`supabase/functions/generate-quote/index.ts`
-- Remove the `quote valid until ${validUntilDate}` instruction from the system prompt (line 167) so the AI never writes a "valid until" line into the markdown.
-- Add a new explicit rule: "Do NOT include any 'quote valid until' or expiry date language. You may still mention that prices are subject to change and availability."
-- Keep `validUntilDate` in the metadata block for now (used internally for sorting / DB), but it will no longer be rendered to the client.
+2. Generate metadata separately and safely.
+   - After the markdown is created, run a second small AI call that extracts only structured metadata: client name, email, resort name, destination, price, currency, dates, and traveller count.
+   - Keep this JSON small so parsing is much more reliable.
+   - Add fallback metadata from the prompt and client fields if the extraction fails, so the quote still opens in preview instead of failing completely.
 
-### 2. Strip "valid until" from the structured (legacy) preview and public quote
+3. Add final content cleanup before returning the quote.
+   - Strip any accidental `quote valid until`, `valid until`, `expires on`, or similar expiry-date lines from generated markdown.
+   - Keep warnings such as prices and availability are subject to change until booked.
+   - Keep the existing Google Places photo injection, but apply it after the markdown is safely generated.
 
-`src/components/dashboard/QuotePreview.tsx`
-- Remove the `{quote.validUntil && ...Quote valid until...}` block (lines 198-202).
-- Leave the agent sign-off block intact.
+4. Improve error handling shown to the Quote Builder.
+   - If research or metadata extraction fails, continue with the quote wherever possible.
+   - Only fail when the main markdown generation itself cannot return content.
+   - Return clearer error messages with CORS headers so the UI displays the real issue instead of a generic edge code error.
 
-`src/pages/PublicQuote.tsx`
-- Remove the equivalent `{quote.valid_until && ...}` block in the legacy structured layout (around lines 142-146).
+5. Clean up the misleading manual field.
+   - Remove the `Valid Until` input from the manual quote builder form so it does not confuse you while building quotes.
+   - Keep the database column untouched for compatibility, but do not show it or use it in generated quote content.
 
-### 3. Add Edit functionality to the preview
+## Files to update
 
-`src/components/dashboard/QuotePreview.tsx`
-- Add local state: `isEditing`, `draftMarkdown` (initialised from `quote.quoteMarkdown`), and `draftSummary` / `draftNotes` for the legacy structured fallback.
-- Add an "Edit" button to the actions row (next to Back / Print / Copy Link). Clicking it toggles edit mode.
-- In edit mode for AI quotes (`hasMarkdown` true): render a full-width `<Textarea>` (min-height ~600px, monospace font) bound to `draftMarkdown` so the agent can freely edit the markdown. Show a live "Preview" toggle or render the markdown below the textarea so they can see formatting as they go.
-- In edit mode for legacy structured quotes: allow editing the `summary` and `notes` text fields inline (the rest is structured form data already editable in earlier steps).
-- Add "Save Changes" and "Cancel" buttons in edit mode.
-  - Save: call a new `onUpdate(updates: Partial<QuoteData>)` callback passed in from `QuoteBuilder`, which updates the `quote` state and persists via the existing `handleSave()` flow (so the change is written to `client_quotes` and reflected in the public share link).
-  - Cancel: discard `draftMarkdown` and exit edit mode.
-- After Save, re-render the preview with the updated content. Show a toast "Quote updated".
+- `supabase/functions/generate-quote/index.ts`
+- `src/components/dashboard/QuoteBuilder.tsx`
 
-`src/components/dashboard/QuoteBuilder.tsx`
-- Add an `onUpdate` prop wiring: `(updates) => { setQuote(prev => ({ ...prev, ...updates })); setTimeout(handleSave, 0); }`.
-- Pass it into `<QuotePreview>`.
+## Expected result
 
-## Out of scope
-
-- No DB schema changes (the `valid_until` column stays, just hidden from output).
-- No edit support for the public client view (`PublicQuote.tsx`); editing is agent-only inside the dashboard preview.
+Quote generation should stop failing with malformed JSON errors, AI-generated quotes should open in preview, expiry-date language should stay out of the quote, and you will still be able to edit the quote before sending it.
