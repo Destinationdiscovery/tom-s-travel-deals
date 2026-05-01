@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { openWorkOutlook } from "@/lib/openWorkOutlook";
-import { ChevronLeft, Download, Link2, Mail, Loader2, ChevronDown, Send, PlusCircle, Home, Pencil, X, Check } from "lucide-react";
+import { ChevronLeft, Download, Link2, Mail, Loader2, ChevronDown, Send, PlusCircle, Home, Pencil, X, Check, Trash2, ImagePlus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "@/hooks/use-toast";
