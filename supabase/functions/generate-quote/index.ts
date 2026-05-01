@@ -164,7 +164,8 @@ IMPORTANT RULES:
 - Make the document feel like a premium travel consultation, not a boring form
 - Include the agent's email (${AGENT_BRANDING.email}) in the sign-off
 - Be thorough with pricing - if per-person pricing is given, show both per-person and total
-- Today's date is ${today}, quote valid until ${validUntilDate}
+- Today's date is ${today}
+- Do NOT include any "quote valid until", expiry date, or "this price expires on" language anywhere in the document. You may state that prices and availability are subject to change until booked, but never give a specific expiry date.
 
 After writing the markdown, also return a small metadata object for database storage.
 

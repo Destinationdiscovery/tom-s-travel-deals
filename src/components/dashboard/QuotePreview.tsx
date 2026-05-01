@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { openWorkOutlook } from "@/lib/openWorkOutlook";
-import { ChevronLeft, Download, Link2, Mail, Loader2, ChevronDown, Send, PlusCircle, Home } from "lucide-react";
+import { ChevronLeft, Download, Link2, Mail, Loader2, ChevronDown, Send, PlusCircle, Home, Pencil, X, Check } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { QuoteData } from "./QuoteBuilder";
-import { format } from "date-fns";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import QuoteReviewSection from "./QuoteReviewSection";
@@ -28,13 +29,49 @@ interface QuotePreviewProps {
   editingId: string | null;
   onNewQuote?: () => void;
   onDashboardHome?: () => void;
+  onUpdate?: (updates: Partial<QuoteData>) => void;
 }
 
-const QuotePreview = ({ quote, totalPrice, onBack, onSave, saving, editingId, onNewQuote, onDashboardHome }: QuotePreviewProps) => {
+const QuotePreview = ({ quote, totalPrice, onBack, onSave, saving, editingId, onNewQuote, onDashboardHome, onUpdate }: QuotePreviewProps) => {
   const [sendingDirect, setSendingDirect] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [draftMarkdown, setDraftMarkdown] = useState(quote.quoteMarkdown || "");
+  const [draftSummary, setDraftSummary] = useState(quote.summary || "");
+  const [draftNotes, setDraftNotes] = useState(quote.notes || "");
+  const [showLivePreview, setShowLivePreview] = useState(true);
+
+  // Sync drafts when quote changes (e.g. after save reload)
+  useEffect(() => {
+    setDraftMarkdown(quote.quoteMarkdown || "");
+    setDraftSummary(quote.summary || "");
+    setDraftNotes(quote.notes || "");
+  }, [quote.quoteMarkdown, quote.summary, quote.notes]);
+
   const handlePrint = () => window.print();
 
   const shareUrl = quote.shareToken ? `https://reviewthengo.lovable.app/quote/${quote.shareToken}` : null;
+  const hasMarkdown = !!quote.quoteMarkdown;
+
+  const startEdit = () => setIsEditing(true);
+  const cancelEdit = () => {
+    setDraftMarkdown(quote.quoteMarkdown || "");
+    setDraftSummary(quote.summary || "");
+    setDraftNotes(quote.notes || "");
+    setIsEditing(false);
+  };
+  const saveEdit = () => {
+    if (!onUpdate) {
+      toast({ title: "Cannot save", description: "Editing is not wired up.", variant: "destructive" });
+      return;
+    }
+    if (hasMarkdown) {
+      onUpdate({ quoteMarkdown: draftMarkdown });
+    } else {
+      onUpdate({ summary: draftSummary, notes: draftNotes });
+    }
+    setIsEditing(false);
+    toast({ title: "Quote updated", description: "Your changes have been saved." });
+  };
 
   const copyShareLink = () => {
     if (shareUrl) {
@@ -117,13 +154,46 @@ const QuotePreview = ({ quote, totalPrice, onBack, onSave, saving, editingId, on
     }
   };
 
-  const hasMarkdown = !!quote.quoteMarkdown;
-
   return (
     <div className="space-y-4">
       <Card className="print:shadow-none print:border-none" id="quote-preview">
         <CardContent className="p-8">
-          {hasMarkdown ? (
+          {isEditing && hasMarkdown ? (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Label className="text-base font-semibold">Edit quote (Markdown)</Label>
+                <Button variant="outline" size="sm" onClick={() => setShowLivePreview((v) => !v)}>
+                  {showLivePreview ? "Hide preview" : "Show preview"}
+                </Button>
+              </div>
+              <Textarea
+                value={draftMarkdown}
+                onChange={(e) => setDraftMarkdown(e.target.value)}
+                className="font-mono text-xs min-h-[600px] leading-relaxed"
+                placeholder="Edit the quote markdown..."
+              />
+              {showLivePreview && (
+                <div className="border border-border rounded-lg p-4 bg-muted/30">
+                  <p className="text-xs font-semibold text-muted-foreground mb-2">Live preview</p>
+                  <article className="prose prose-sm sm:prose dark:prose-invert max-w-none prose-headings:font-display prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{draftMarkdown}</ReactMarkdown>
+                  </article>
+                </div>
+              )}
+            </div>
+          ) : isEditing && !hasMarkdown ? (
+            <div className="space-y-4">
+              <div>
+                <Label>Summary</Label>
+                <Textarea value={draftSummary} onChange={(e) => setDraftSummary(e.target.value)} className="min-h-[120px]" placeholder="Quote summary..." />
+              </div>
+              <div>
+                <Label>Notes</Label>
+                <Textarea value={draftNotes} onChange={(e) => setDraftNotes(e.target.value)} className="min-h-[120px]" placeholder="Additional notes..." />
+              </div>
+              <p className="text-xs text-muted-foreground">For other fields (resort, dates, pricing, flights, inclusions), go back and edit them in the form.</p>
+            </div>
+          ) : hasMarkdown ? (
             <article className="prose prose-sm sm:prose dark:prose-invert max-w-none prose-headings:font-display prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-p:leading-relaxed prose-li:leading-relaxed prose-table:text-sm prose-th:bg-muted prose-th:px-3 prose-th:py-2 prose-td:px-3 prose-td:py-2 prose-blockquote:border-primary prose-blockquote:bg-muted/50 prose-blockquote:py-1 prose-blockquote:px-4 prose-blockquote:rounded-r-lg">
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
                 {quote.quoteMarkdown}
@@ -195,11 +265,6 @@ const QuotePreview = ({ quote, totalPrice, onBack, onSave, saving, editingId, on
               )}
 
               <div className="border-t border-border pt-4 space-y-2">
-                {quote.validUntil && (
-                  <p className="text-xs text-muted-foreground text-center">
-                    Quote valid until <span className="font-medium text-foreground">{format(new Date(quote.validUntil + "T00:00:00"), "MMM d, yyyy")}</span>
-                  </p>
-                )}
                 <div className="text-center text-xs text-muted-foreground">
                   <p className="font-medium text-foreground">{AGENT_INFO.name}</p>
                   <p>{AGENT_INFO.agency} · {AGENT_INFO.email}</p>
@@ -216,42 +281,60 @@ const QuotePreview = ({ quote, totalPrice, onBack, onSave, saving, editingId, on
         {saving && (
           <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground"><Loader2 className="h-3.5 w-3.5 animate-spin" /> Saving...</span>
         )}
-        {editingId && !saving && (
+        {editingId && !saving && !isEditing && (
           <span className="inline-flex items-center gap-1.5 text-sm text-emerald-400">✓ Saved</span>
         )}
-        <Button variant="outline" onClick={handlePrint} className="gap-2"><Download className="h-4 w-4" /> Print / PDF</Button>
-        <Button variant="outline" onClick={copyShareLink} className="gap-2"><Link2 className="h-4 w-4" /> Copy Link</Button>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button className="gap-2">
-              {sendingDirect ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
-              Send Email <ChevronDown className="h-3 w-3" />
+        {!isEditing ? (
+          <>
+            <Button variant="outline" onClick={startEdit} className="gap-2">
+              <Pencil className="h-4 w-4" /> Edit
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-popover">
-            <DropdownMenuItem onClick={openOutlook}><Mail className="h-4 w-4 mr-2" /> Outlook</DropdownMenuItem>
-            <DropdownMenuItem onClick={openGmail}><Mail className="h-4 w-4 mr-2" /> Gmail</DropdownMenuItem>
-            <DropdownMenuItem onClick={openYahoo}><Mail className="h-4 w-4 mr-2" /> Yahoo Mail</DropdownMenuItem>
-            <DropdownMenuItem onClick={sendDirect} disabled={sendingDirect}>
-              <Send className="h-4 w-4 mr-2" /> Send Direct {sendingDirect && <Loader2 className="h-3 w-3 ml-1 animate-spin" />}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+            <Button variant="outline" onClick={handlePrint} className="gap-2"><Download className="h-4 w-4" /> Print / PDF</Button>
+            <Button variant="outline" onClick={copyShareLink} className="gap-2"><Link2 className="h-4 w-4" /> Copy Link</Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className="gap-2">
+                  {sendingDirect ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
+                  Send Email <ChevronDown className="h-3 w-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-popover">
+                <DropdownMenuItem onClick={openOutlook}><Mail className="h-4 w-4 mr-2" /> Outlook</DropdownMenuItem>
+                <DropdownMenuItem onClick={openGmail}><Mail className="h-4 w-4 mr-2" /> Gmail</DropdownMenuItem>
+                <DropdownMenuItem onClick={openYahoo}><Mail className="h-4 w-4 mr-2" /> Yahoo Mail</DropdownMenuItem>
+                <DropdownMenuItem onClick={sendDirect} disabled={sendingDirect}>
+                  <Send className="h-4 w-4 mr-2" /> Send Direct {sendingDirect && <Loader2 className="h-3 w-3 ml-1 animate-spin" />}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </>
+        ) : (
+          <>
+            <Button onClick={saveEdit} className="gap-2">
+              <Check className="h-4 w-4" /> Save Changes
+            </Button>
+            <Button variant="outline" onClick={cancelEdit} className="gap-2">
+              <X className="h-4 w-4" /> Cancel
+            </Button>
+          </>
+        )}
       </div>
 
       {/* Navigation (hidden in print) */}
-      <div className="flex flex-wrap gap-2 print:hidden border-t border-border pt-3">
-        {onNewQuote && (
-          <Button variant="outline" onClick={onNewQuote} className="gap-2">
-            <PlusCircle className="h-4 w-4" /> Generate New Quote
-          </Button>
-        )}
-        {onDashboardHome && (
-          <Button variant="outline" onClick={onDashboardHome} className="gap-2">
-            <Home className="h-4 w-4" /> Return to Dashboard
-          </Button>
-        )}
-      </div>
+      {!isEditing && (
+        <div className="flex flex-wrap gap-2 print:hidden border-t border-border pt-3">
+          {onNewQuote && (
+            <Button variant="outline" onClick={onNewQuote} className="gap-2">
+              <PlusCircle className="h-4 w-4" /> Generate New Quote
+            </Button>
+          )}
+          {onDashboardHome && (
+            <Button variant="outline" onClick={onDashboardHome} className="gap-2">
+              <Home className="h-4 w-4" /> Return to Dashboard
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   );
 };
