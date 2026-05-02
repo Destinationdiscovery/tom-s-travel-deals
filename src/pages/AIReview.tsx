@@ -7,6 +7,8 @@ import AIReviewResult from "@/components/AIReviewResult";
 import ComparisonFloatingBadge from "@/components/ComparisonFloatingBadge";
 import Footer from "@/components/Footer";
 import ReviewEngagement from "@/components/ReviewEngagement";
+import RelatedReviews from "@/components/RelatedReviews";
+import AuthorBio from "@/components/AuthorBio";
 import type { CachedReview } from "@/hooks/useGenerateReview";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useReviewHistory } from "@/hooks/useReviewHistory";
@@ -19,6 +21,7 @@ const AIReview = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [affiliateUrl, setAffiliateUrl] = useState<string | null>(null);
+  const [fromCache, setFromCache] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
