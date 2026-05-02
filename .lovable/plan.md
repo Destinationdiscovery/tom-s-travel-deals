@@ -1,64 +1,60 @@
-## Problems
+I checked the live site the same way as before using AI crawler User-Agents. It is still returning the JavaScript shell:
 
-1. **Wrong photos.** The `generate-quote` function blindly searches Google Places using `metadata.resort_name`. When the trip is an Alaska cruise on the **Grand Princess** ship, Google returns a "Grand Princess" resort/property and that wrong photo gets injected into the quote. The function has no concept of "this is a cruise" and never falls back to destination photos (Alaska).
-2. **Edit does not actually let you change anything.** Edit mode opens a markdown textarea, but:
-   - Pictures are embedded as raw `![](url)` markdown lines, which is not obvious or easy to delete.
-   - There is no quick way to remove an unwanted photo.
-   - Saved edits do not always persist visibly because the auto-save runs again right after and can race with the change.
+```text
+<body>
+  <noscript>...</noscript>
+  <div id="root"></div>
+</body>
+```
 
-## Plan
+So I will not treat the current state as fixed. The implementation needs to produce real HTML for bots and then be verified against the published domain.
 
-### 1. Make photo selection cruise-aware in `supabase/functions/generate-quote/index.ts`
+Plan:
 
-- Extend the metadata extraction tool to also return:
-  - `trip_type`: `"cruise" | "resort" | "tour" | "other"`
-  - `ship_name`: cruise ship name if applicable (e.g. "Grand Princess")
-  - `cruise_line`: e.g. "Princess Cruises"
-  - `destination_query`: the best photo search phrase for the destination (e.g. "Alaska cruise scenery", "Glacier Bay Alaska")
-- New photo logic:
-  - If `trip_type === "cruise"`:
-    - First try Google Places with a ship-specific query like `"<ship_name> cruise ship <cruise_line>"`.
-    - Validate result: discard if the returned place `types` include `lodging`, `hotel`, `resort`, or `tourist_attraction` without `travel_agency`/`point_of_interest` matching cruise terms. If invalid, skip ship photos.
-    - Then fetch destination photos using `destination_query` (e.g. "Alaska cruise", "Glacier Bay", "Juneau Alaska").
-    - Combine: up to 1 ship photo + 3 destination photos.
-  - If `trip_type === "resort"` (current behavior):
-    - Search by `resort_name + destination` (more specific than resort_name alone) to reduce wrong matches.
-    - Validate that the returned place is `lodging` / `hotel` / `resort`. If not, fall back to destination photos only.
-  - Otherwise: destination photos only.
-- Update `fetchPlacePhotos` to accept an optional `requiredTypes` filter and return both photo refs and the matched place name, so we can log and reject mismatches.
-- Add a "negative" guard: never inject a photo whose matched place name does not contain at least one keyword from the resort/ship/destination. This stops "Grand Princess resort" from sneaking in when we asked for the ship.
+1. Add real static HTML snapshots for key public routes
+   - Generate crawlable HTML files in `public/` for:
+     - Home page
+     - Tool pages: `/safety`, `/gear`, `/best-time`, `/itinerary`, `/currency`, `/flights`, `/travel-intel`, `/search`, `/guides`, `/destinations`, `/compass`
+   - Each file will include actual headings, explanatory body text, internal links, canonical tags, and JSON-LD.
+   - This gives AI crawlers a non-JavaScript page they can read without relying on React hydration.
 
-### 2. Tell the model not to hallucinate the trip type
+2. Serve static snapshots to AI crawlers before React boots
+   - Add a tiny script in `index.html` that runs before the React app.
+   - It will detect AI and non-JS crawler User-Agents such as GPTBot, OAI-SearchBot, ChatGPT-User, ClaudeBot, PerplexityBot, AppleBot, Bingbot, and similar.
+   - If the visitor is a crawler and a matching static snapshot exists, it will redirect to the HTML snapshot.
+   - Normal users will continue seeing the regular React site.
 
-- Update the markdown prompt to clearly state: if the trip is a cruise, label it as a cruise, mention the ship and itinerary ports, and never describe it as a resort stay.
-- Update the metadata tool description to require `trip_type` and `destination_query`.
+3. Fix review pages specifically
+   - Current review pages are especially important because `/review/:slug` is what your sitemap lists.
+   - I will extend the existing `articles-feed` backend function so it can render `/review/:slug` content as clean static HTML from `cached_reviews`, including:
+     - Property name
+     - Location
+     - Summary
+     - Ratings
+     - Pros and cons if available
+     - Tips
+     - Full review text
+     - Canonical link back to the public review URL
+     - Review/Hotel JSON-LD with aggregate rating when available
+   - Then the crawler redirect will send AI bots from `/review/<slug>` to the static crawler version for that slug.
 
-### 3. Fix the edit experience in `src/components/dashboard/QuotePreview.tsx`
+4. Improve the fallback `<noscript>` content
+   - Replace the current one-paragraph fallback with a real crawlable homepage fallback:
+     - H1
+     - Travel tool descriptions
+     - Links to the sitemap, Compass, destination reviews, and major tool pages
+   - This is not the main fix, but it helps any crawler or browser that does not run scripts.
 
-- Keep the existing markdown textarea, but add a dedicated **Pictures** panel above it when in edit mode for AI-generated quotes:
-  - Parse the markdown for image lines (`![alt](url)`).
-  - Show each image as a small thumbnail with a **Remove** button.
-  - Add a **Replace with destination photo** button that swaps a picture for the next destination photo (using a small new helper or simply removes it for now if no replacement is available).
-  - Add an **Add image URL** input so the agent can paste a known-good photo URL.
-- When Save Changes is clicked:
-  - Apply edits to `quote.quoteMarkdown` immediately.
-  - Call `onUpdate` once with the final markdown.
-  - Prevent the auto-save loop on step 4 from racing the manual save by guarding the auto-save effect to skip while `isEditing` was true and only re-trigger if content actually changed.
-- Also fix a subtle bug: after `saveEdit`, the parent triggers `handleSave` via `setTimeout(0)`, which can overwrite local state if `quote` is read stale. Switch the `onUpdate` wiring in `QuoteBuilder.tsx` to use the functional `setQuote` form (already does) and only call `handleSave` when not already saving.
+5. Keep robots and sitemap aligned
+   - Confirm `public/robots.txt` points to `https://www.reviewthengo.com/sitemap.xml`.
+   - Keep the dynamic sitemap reference too, because it already includes database-backed review URLs.
+   - Do not add GitHub Actions prerendering, because this site is served by Lovable Cloud, so generated files in GitHub would not automatically be served by the live domain.
 
-### 4. Small UX touches
-
-- Show a clear note in edit mode: "Tip: remove or replace any photo that does not match the trip. You can also edit any text below."
-- If the function returns zero valid photos, do not inject anything (current behavior already handles this, but add a log line so we can confirm in edge function logs).
-
-## Files to update
-
-- `supabase/functions/generate-quote/index.ts` (cruise-aware photo logic, validation, prompt tweaks, metadata schema additions)
-- `src/components/dashboard/QuotePreview.tsx` (Pictures panel in edit mode, safer save flow)
-- `src/components/dashboard/QuoteBuilder.tsx` (guard auto-save while editing, pass current saving state)
-
-## Expected result
-
-- Cruise quotes use ship and destination photos, never a random resort with the same name.
-- Resort quotes only inject photos when the matched Google place is actually a hotel/resort, otherwise they fall back to destination photos.
-- Edit mode lets the agent remove or replace pictures with one click and edit any text, and the changes actually stick after save.
+6. Test like an AI crawler before reporting success
+   - After implementing, I will test the published/preview output with curl using AI User-Agents, not just trust the code.
+   - I will check at least:
+     - `GPTBot` against the homepage
+     - `PerplexityBot` against a review page
+     - `ClaudeBot` against a tool page
+   - I will specifically verify the response contains real HTML content such as `<h1>`, readable body sections, links, and JSON-LD, and does not just show `<div id="root"></div>`.
+   - I will only say it is fixed if those tests show static readable HTML.
