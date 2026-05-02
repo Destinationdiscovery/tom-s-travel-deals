@@ -48,6 +48,7 @@ const AIReview = () => {
       }
 
       let reviewData = data;
+      let cameFromCache = !!data;
 
       // 2. If not cached, auto-generate from slug
       if (!reviewData) {
@@ -64,7 +65,9 @@ const AIReview = () => {
           return;
         }
         reviewData = genData.review;
+        cameFromCache = false;
       }
+      setFromCache(cameFromCache);
 
       // 3. Set review state
       setReview({
