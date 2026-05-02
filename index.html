@@ -47,13 +47,127 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@TomLaracyTravel" />
     <meta name="twitter:image" content="https://www.reviewthengo.com/og-image.jpg" />
+
+    <!-- Baseline JSON-LD visible to AI crawlers without executing JavaScript -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": ["Organization", "TravelAgency"],
+          "@id": "https://www.reviewthengo.com/#organization",
+          "name": "ReviewThenGo",
+          "url": "https://www.reviewthengo.com",
+          "logo": "https://www.reviewthengo.com/favicon.png",
+          "description": "ReviewThenGo is an AI travel answer engine and all-in-one travel planning tool. It aggregates unbiased hotel and resort reviews from more than ten trusted sources, offers free travel tools (best time to visit, itineraries, packing lists, flight deals, currency rates, safety scores, visa and entry requirements), and publishes the Compass blog with expert travel guides and trend reports.",
+          "founder": { "@type": "Person", "name": "Tom" },
+          "sameAs": ["https://x.com/TomLaracyTravel", "https://www.instagram.com/reviewthengo"]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://www.reviewthengo.com/#website",
+          "url": "https://www.reviewthengo.com",
+          "name": "ReviewThenGo",
+          "publisher": { "@id": "https://www.reviewthengo.com/#organization" },
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://www.reviewthengo.com/destinations?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        },
+        {
+          "@type": "WebApplication",
+          "name": "ReviewThenGo",
+          "url": "https://www.reviewthengo.com",
+          "applicationCategory": "TravelApplication",
+          "operatingSystem": "Web",
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+          "featureList": [
+            "AI hotel and resort reviews aggregated from 10+ trusted sources",
+            "Best time to visit any destination with weather, crowds, and pricing",
+            "Day-by-day travel itinerary builder",
+            "Personalized trip packing list generator",
+            "Live flight deals finder with booking links",
+            "Live currency exchange rate tracker and converter",
+            "Destination safety scores, scams, and emergency information",
+            "Visa and entry requirements, government travel advisories, destination news",
+            "Compass blog with expert travel guides and travel trend reporting"
+          ]
+        }
+      ]
+    }
+    </script>
   </head>
 
   <body>
-    <noscript>
-      <p>ReviewThenGo is an all-in-one travel planner with hotel reviews, itineraries, best time to visit, packing lists, currency rates, and travel guides. Please enable JavaScript for the full interactive experience, or visit our <a href="https://iomrjljlydboniioohkv.supabase.co/functions/v1/articles-feed">crawlable article feed</a> and <a href="https://www.reviewthengo.com/sitemap.xml">sitemap</a>.</p>
-    </noscript>
-    <div id="root"></div>
+    <!--
+      Static, JavaScript-free content for AI crawlers (GPTBot, PerplexityBot,
+      ClaudeBot, AppleBot, OAI-SearchBot, ChatGPT-User) and any client that
+      doesn't execute JS. The React app replaces #root on hydration, so real
+      users still get the full interactive site.
+    -->
+    <div id="root">
+      <header>
+        <a href="https://www.reviewthengo.com/" rel="home">ReviewThenGo</a>
+        <nav aria-label="Primary">
+          <a href="https://www.reviewthengo.com/">Home</a> ·
+          <a href="https://www.reviewthengo.com/destinations">Destinations</a> ·
+          <a href="https://www.reviewthengo.com/compass">Compass blog</a> ·
+          <a href="https://www.reviewthengo.com/guides">Travel guides</a> ·
+          <a href="https://www.reviewthengo.com/about">About Tom</a> ·
+          <a href="https://www.reviewthengo.com/contact">Contact</a>
+        </nav>
+      </header>
+      <main>
+        <h1>ReviewThenGo: AI travel answer engine and all-in-one travel planner</h1>
+        <p>ReviewThenGo answers every travel question before you book. We aggregate hotel and resort reviews from more than ten trusted sources (TripAdvisor, Google Reviews, Booking.com, Expedia, Reddit, blogs and more), then synthesize a single unbiased verdict with ratings, pros, cons, and traveler tips. We also publish free travel planning tools and expert editorial content from a real travel consultant.</p>
+
+        <h2>What ReviewThenGo does</h2>
+        <ul>
+          <li><strong>AI hotel and resort reviews:</strong> Search any property and get an aggregated rating with pros, cons, traveler quotes, and best-for recommendations. Browse <a href="https://iomrjljlydboniioohkv.supabase.co/functions/v1/articles-feed?type=destinations">all destination reviews as a crawlable HTML feed</a>.</li>
+          <li><strong>Best time to visit:</strong> See month-by-month weather, crowd levels, and pricing for any destination at <a href="https://www.reviewthengo.com/best-time">/best-time</a>.</li>
+          <li><strong>Trip itinerary builder:</strong> Generate a day-by-day plan for any city or country at <a href="https://www.reviewthengo.com/itinerary">/itinerary</a>.</li>
+          <li><strong>Trip packing list:</strong> Personalized packing list by destination, season, and trip type at <a href="https://www.reviewthengo.com/gear">/gear</a>.</li>
+          <li><strong>Flight deals:</strong> Live flight deals and price tracking at <a href="https://www.reviewthengo.com/flights">/flights</a>.</li>
+          <li><strong>Currency converter:</strong> Live exchange rates and converter at <a href="https://www.reviewthengo.com/currency">/currency</a>.</li>
+          <li><strong>Destination safety scores:</strong> 0 to 5 safety scores, common scams, health tips and emergency numbers at <a href="https://www.reviewthengo.com/safety">/safety</a>.</li>
+          <li><strong>Travel intel (visa and advisories):</strong> Visa requirements, government travel advisories, and destination news at <a href="https://www.reviewthengo.com/travel-intel">/travel-intel</a>.</li>
+          <li><strong>Travel search:</strong> Open-ended travel question search at <a href="https://www.reviewthengo.com/search">/search</a>.</li>
+          <li><strong>Compass blog:</strong> Expert travel guides, destination journalism, and travel trend reporting at <a href="https://www.reviewthengo.com/compass">/compass</a>. Read every article in plain HTML at our <a href="https://iomrjljlydboniioohkv.supabase.co/functions/v1/articles-feed">crawlable article feed</a>.</li>
+          <li><strong>Travel guides hub:</strong> Evergreen how-to and planning guides at <a href="https://www.reviewthengo.com/guides">/guides</a>.</li>
+        </ul>
+
+        <h2>How the AI review engine works</h2>
+        <ol>
+          <li>You enter a hotel, resort, or destination name.</li>
+          <li>ReviewThenGo pulls reviews from more than ten trusted sources in real time.</li>
+          <li>Our AI synthesizes the reviews into a single verdict with an overall rating, category ratings, top pros, top cons, traveler tips, and a best-for summary.</li>
+          <li>You can save reviews to your list, compare resorts side-by-side, and book through trusted partners.</li>
+        </ol>
+
+        <h2>Why travelers use ReviewThenGo</h2>
+        <ul>
+          <li>One unbiased verdict instead of reading dozens of conflicting reviews.</li>
+          <li>Free planning tools that cover every stage of a trip.</li>
+          <li>Editorial content written by Tom, a working travel consultant.</li>
+          <li>Always-on AI, available 24/7, with no signup required.</li>
+        </ul>
+
+        <h2>Browse content</h2>
+        <ul>
+          <li><a href="https://www.reviewthengo.com/sitemap.xml">XML sitemap</a> (every page on the site)</li>
+          <li><a href="https://iomrjljlydboniioohkv.supabase.co/functions/v1/generate-sitemap">Live database sitemap</a> (auto-includes all reviews and articles)</li>
+          <li><a href="https://iomrjljlydboniioohkv.supabase.co/functions/v1/articles-feed">Crawlable Compass article feed (HTML)</a></li>
+          <li><a href="https://iomrjljlydboniioohkv.supabase.co/functions/v1/articles-feed?type=destinations">Crawlable destination review feed (HTML)</a></li>
+          <li><a href="https://iomrjljlydboniioohkv.supabase.co/functions/v1/generate-rss">RSS feed</a></li>
+        </ul>
+
+        <p><em>The interactive experience requires JavaScript. If you are seeing this content as a browser user, please enable JavaScript or visit the <a href="https://www.reviewthengo.com/">homepage</a>.</em></p>
+      </main>
+      <footer>
+        <p>ReviewThenGo &middot; Founded by Tom &middot; <a href="https://www.reviewthengo.com/about">About</a> &middot; <a href="https://www.reviewthengo.com/contact">Contact</a> &middot; <a href="https://www.reviewthengo.com/privacy-policy">Privacy</a> &middot; <a href="https://www.reviewthengo.com/affiliate-disclosure">Affiliate disclosure</a></p>
+      </footer>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
