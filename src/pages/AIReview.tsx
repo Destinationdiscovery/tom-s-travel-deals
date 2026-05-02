@@ -183,6 +183,12 @@ const AIReview = () => {
                 <ReviewEngagement slug={slug} pageType="ai-review" />
               </div>
             )}
+            {review && (
+              <RelatedReviews currentSlug={review.slug} currentLocation={review.location} />
+            )}
+            <div className="container mx-auto px-4 pb-12 max-w-6xl">
+              <AuthorBio />
+            </div>
           </>
         )}
       </main>
