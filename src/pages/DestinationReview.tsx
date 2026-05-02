@@ -7,6 +7,8 @@ import { useParams, Link } from "react-router-dom";
 import { Star, ArrowLeft, Calendar, MapPin, Heart, Share2, Twitter, Facebook, Copy, Check, Package, Plug, Waves, ChevronUp, ArrowRight, List } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import SEOHead from "@/components/SEOHead";
+import RelatedReviews from "@/components/RelatedReviews";
+import AuthorBio from "@/components/AuthorBio";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import {
