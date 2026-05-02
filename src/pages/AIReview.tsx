@@ -7,6 +7,8 @@ import AIReviewResult from "@/components/AIReviewResult";
 import ComparisonFloatingBadge from "@/components/ComparisonFloatingBadge";
 import Footer from "@/components/Footer";
 import ReviewEngagement from "@/components/ReviewEngagement";
+import RelatedReviews from "@/components/RelatedReviews";
+import AuthorBio from "@/components/AuthorBio";
 import type { CachedReview } from "@/hooks/useGenerateReview";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useReviewHistory } from "@/hooks/useReviewHistory";
@@ -19,6 +21,7 @@ const AIReview = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [affiliateUrl, setAffiliateUrl] = useState<string | null>(null);
+  const [fromCache, setFromCache] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
@@ -45,6 +48,7 @@ const AIReview = () => {
       }
 
       let reviewData = data;
+      let cameFromCache = !!data;
 
       // 2. If not cached, auto-generate from slug
       if (!reviewData) {
@@ -61,7 +65,9 @@ const AIReview = () => {
           return;
         }
         reviewData = genData.review;
+        cameFromCache = false;
       }
+      setFromCache(cameFromCache);
 
       // 3. Set review state
       setReview({
@@ -123,7 +129,7 @@ const AIReview = () => {
           description={(review.review_data as any)?.summary || `Aggregated review of ${review.property_name} with ratings, pros, cons, and booking links.`}
           url={`/review/${review.slug}`}
           type="article"
-          noindex
+          noindex={!fromCache}
           breadcrumbs={[
             { name: "Home", url: "/" },
             { name: "Destinations", url: "/destinations" },
@@ -177,6 +183,12 @@ const AIReview = () => {
                 <ReviewEngagement slug={slug} pageType="ai-review" />
               </div>
             )}
+            {review && (
+              <RelatedReviews currentSlug={review.slug} currentLocation={review.location} />
+            )}
+            <div className="container mx-auto px-4 pb-12 max-w-6xl">
+              <AuthorBio />
+            </div>
           </>
         )}
       </main>

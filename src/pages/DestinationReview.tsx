@@ -7,6 +7,8 @@ import { useParams, Link } from "react-router-dom";
 import { Star, ArrowLeft, Calendar, MapPin, Heart, Share2, Twitter, Facebook, Copy, Check, Package, Plug, Waves, ChevronUp, ArrowRight, List } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import SEOHead from "@/components/SEOHead";
+import RelatedReviews from "@/components/RelatedReviews";
+import AuthorBio from "@/components/AuthorBio";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import {
@@ -804,6 +806,11 @@ const DestinationReview = () => {
           </div>
         </div>
       </main>
+
+      <RelatedReviews currentSlug={slug || ""} currentLocation={review?.destination} />
+      <div className="container mx-auto px-4 pb-12 max-w-6xl">
+        <AuthorBio />
+      </div>
 
       {/* Sticky mobile CTA */}
       <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-card border-t border-border p-3 flex items-center gap-3 no-print">
