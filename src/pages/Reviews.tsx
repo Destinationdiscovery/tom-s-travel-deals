@@ -6,7 +6,6 @@ import Footer from "@/components/Footer";
 import SEOHead from "@/components/SEOHead";
 import StickySearchBar from "@/components/reviews/StickySearchBar";
 import HotelResultCard from "@/components/reviews/HotelResultCard";
-import BookingSidebar from "@/components/reviews/BookingSidebar";
 import SearchLoadingStages from "@/components/SearchLoadingStages";
 import { useTravelSearch, SearchResult, SearchActivity } from "@/hooks/useTravelSearch";
 import { useGenerateReview } from "@/hooks/useGenerateReview";
@@ -54,7 +53,7 @@ const Reviews = () => {
   const faqItems = useMemo(() => [
     { question: `What are the best ${displayTitle.toLowerCase()}?`, answer: `ReviewThenGo aggregates ratings from Google, TripAdvisor, Booking.com and more to rank the top options. Search "${searchQuery}" for the latest verified results.` },
     { question: `Are these reviews trustworthy?`, answer: `Yes. We pull data from 10+ verified sources and weight recent stays 2x for accuracy. No pay-for-play.` },
-    { question: `How do I book after reading reviews?`, answer: `Use the "Ready to Book?" sidebar to compare rates on Expedia, Hotels.com, and VRBO. Reviews and booking links are clearly separated.` },
+    { question: `How are these results ranked?`, answer: `We aggregate ratings from 10+ verified review sources and weight recent stays more heavily for accuracy.` },
   ], [displayTitle, searchQuery]);
 
   return (
@@ -135,9 +134,8 @@ const Reviews = () => {
                 })}
               </script>
             </Helmet>
-          <div className="flex flex-col lg:flex-row gap-8">
-            {/* Main column */}
-            <div className="flex-1 space-y-6">
+          <div>
+            <div className="space-y-6">
               {results.slice(0, 5).map((r) => (
                 <HotelResultCard
                   key={r.name}
@@ -231,11 +229,6 @@ const Reviews = () => {
                 <StickySearchBar placeholder="Search hotels, resorts, cities…" />
               </div>
             </div>
-
-            {/* Sidebar */}
-            <aside className="lg:w-80 shrink-0">
-              <BookingSidebar propertyName={topResult?.name} />
-            </aside>
           </div>
           </>
         )}

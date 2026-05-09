@@ -19,9 +19,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import CommentsSection from "@/components/comments/CommentsSection";
-import AffiliateLinks, { detectCountry, EXPEDIA_LINKS } from "@/components/AffiliateLinks";
-import InlineAffiliateCTA from "@/components/InlineAffiliateCTA";
-import { trackAffiliateClick } from "@/lib/analytics";
 import ReviewEngagement from "@/components/ReviewEngagement";
 
 import { Button } from "@/components/ui/button";
@@ -640,9 +637,6 @@ const DestinationReview = () => {
                 ))}
               </div>
 
-              {/* Inline affiliate after My Experience */}
-              <InlineAffiliateCTA propertyName={review.destination} variant="banner" />
-
               {/* Video */}
               {review.videoUrl && (
                 <div className="space-y-4">
@@ -673,9 +667,6 @@ const DestinationReview = () => {
                   ))}
                 </ul>
               </div>
-
-              {/* Inline affiliate after Tips */}
-              <InlineAffiliateCTA propertyName={review.destination} variant="banner" />
 
               {/* Gallery */}
               {review.gallery && review.gallery.length > 0 && (
@@ -781,8 +772,6 @@ const DestinationReview = () => {
                   </div>
                 </div>
 
-                <AffiliateLinks />
-
                 {/* Recommended Gear */}
                 <div className="mt-8 bg-secondary/10 rounded-xl p-5">
                   <h4 className="font-display font-semibold text-foreground mb-3">Recommended Gear</h4>
@@ -810,29 +799,6 @@ const DestinationReview = () => {
       <RelatedReviews currentSlug={slug || ""} currentLocation={review?.destination} />
       <div className="container mx-auto px-4 pb-12 max-w-6xl">
         <AuthorBio />
-      </div>
-
-      {/* Sticky mobile CTA */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-card border-t border-border p-3 flex items-center gap-3 no-print">
-        <a
-          href={EXPEDIA_LINKS[detectCountry()]}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex-1"
-          onClick={() => trackAffiliateClick("Expedia", window.location.pathname, "mobile_sticky_cta")}
-        >
-          <Button className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-bold">
-            Book on Expedia
-          </Button>
-        </a>
-        <Button
-          variant="outline"
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="px-3"
-          aria-label="Scroll to top"
-        >
-          <ChevronUp className="h-5 w-5" />
-        </Button>
       </div>
 
       {/* Scroll to top - desktop only */}

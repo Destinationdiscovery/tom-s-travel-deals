@@ -8,8 +8,7 @@ import SEOHead from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Star, MapPin, Plus, FolderOpen, Pencil, Trash2, ExternalLink } from "lucide-react";
-import { buildDeepLinks, detectCountry } from "@/components/AffiliateLinks";
+import { Star, MapPin, Plus, FolderOpen, Pencil, Trash2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 
@@ -106,8 +105,6 @@ const MyTrips = () => {
     toast({ title: "Trip removed", description: "Reviews moved to unsorted." });
   };
 
-  const country = detectCountry();
-
   if (authLoading) {
     return (
       <div className="min-h-screen bg-background">
@@ -164,21 +161,15 @@ const MyTrips = () => {
                   </div>
                 </div>
                 <div className="grid gap-3 md:grid-cols-2">
-                  {trip.reviews.map((r) => {
-                    const links = buildDeepLinks(country, r.property_name);
-                    return (
-                      <div key={r.id} className="flex items-center justify-between bg-background rounded-xl p-3">
-                        <Link to={`/review/${r.slug}`} className="flex-1 min-w-0">
-                          <p className="font-medium text-foreground truncate hover:text-primary transition-colors">{r.property_name}</p>
-                          {r.location && <p className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="h-3 w-3" /> {r.location}</p>}
-                        </Link>
-                        <div className="flex items-center gap-3 ml-3">
-                          <span className="text-sm font-medium">{r.overall_rating}<Star className="h-3 w-3 inline ml-0.5 text-accent fill-accent" /></span>
-                          <a href={links.expedia} target="_blank" rel="noopener noreferrer" className="text-primary"><ExternalLink className="h-3.5 w-3.5" /></a>
-                        </div>
-                      </div>
-                    );
-                  })}
+                  {trip.reviews.map((r) => (
+                    <div key={r.id} className="flex items-center justify-between bg-background rounded-xl p-3">
+                      <Link to={`/review/${r.slug}`} className="flex-1 min-w-0">
+                        <p className="font-medium text-foreground truncate hover:text-primary transition-colors">{r.property_name}</p>
+                        {r.location && <p className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="h-3 w-3" /> {r.location}</p>}
+                      </Link>
+                      <span className="text-sm font-medium ml-3">{r.overall_rating}<Star className="h-3 w-3 inline ml-0.5 text-accent fill-accent" /></span>
+                    </div>
+                  ))}
                 </div>
               </div>
             ))}

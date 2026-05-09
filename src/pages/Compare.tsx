@@ -6,7 +6,6 @@ import Footer from "@/components/Footer";
 import SEOHead from "@/components/SEOHead";
 import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import { Button } from "@/components/ui/button";
-import AffiliateLinks from "@/components/AffiliateLinks";
 import { useSavedReviews, type SavedReview } from "@/hooks/useSavedReviews";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -298,8 +297,6 @@ const Compare = () => {
                   </div>
                 )}
 
-                {/* Affiliate Links */}
-                <AffiliateLinks />
               </div>
             )}
           </>

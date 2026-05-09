@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
-import { ArrowLeft, Plane, Search, ExternalLink, Lightbulb, TrendingDown } from "lucide-react";
+import { ArrowLeft, Plane, Search, Lightbulb, TrendingDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { detectCountry, EXPEDIA_LINKS } from "@/components/AffiliateLinks";
-import { trackAffiliateClick } from "@/lib/analytics";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEOHead from "@/components/SEOHead";
@@ -67,17 +65,11 @@ const Flights = () => {
 
   useEffect(() => { if (initialQuery) handleSearch(initialQuery); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
 
-  const buildExpediaFlightUrl = (route: string) => {
-    const country = detectCountry();
-    const encoded = encodeURIComponent(route);
-    return `${EXPEDIA_LINKS[country]}?destination=${encoded}`;
-  };
-
   return (
     <>
       <SEOHead
-        title="Cheap Flight Deals Finder: Compare Prices and Book"
-        description="Search for the best upcoming flight deals on any route. Compare prices and book directly through Expedia."
+        title="Flight Price Insights: Find the Best Time to Fly"
+        description="See typical fares, best months, and route insights for any flight. Plan smarter with real pricing data and expert tips."
         url="/flights"
       />
       <Header />
@@ -89,13 +81,13 @@ const Flights = () => {
 
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-medium mb-4">
-              <Plane className="h-4 w-4" /> Flight Deals
+              <Plane className="h-4 w-4" /> Flight Insights
             </div>
             <h1 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-3">
-              Flight Deals Finder
+              Flight Price Insights
             </h1>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Type a route like "NYC to Paris" → get the best upcoming deals with real-time pricing.
+              Type a route like "NYC to Paris" → get typical fares, best months to fly, and booking tips.
             </p>
           </div>
 
@@ -107,7 +99,7 @@ const Flights = () => {
               className="text-base"
             />
             <Button type="submit" disabled={loading}>
-              <Search className="h-4 w-4 mr-1" /> {loading ? "Searching..." : "Find Deals"}
+              <Search className="h-4 w-4 mr-1" /> {loading ? "Searching..." : "Get Insights"}
             </Button>
           </form>
 
@@ -118,13 +110,12 @@ const Flights = () => {
           {loading && (
             <div className="flex flex-col items-center justify-center py-16 gap-3">
               <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-              <p className="text-muted-foreground text-sm">Searching for the best deals...</p>
+              <p className="text-muted-foreground text-sm">Analyzing route pricing...</p>
             </div>
           )}
 
           {result && (
             <div className="space-y-6">
-              {/* Route Summary */}
               <Card className="border-primary/30">
                 <CardContent className="pt-6">
                   <h2 className="text-2xl font-bold text-foreground mb-1">{result.route}</h2>
@@ -136,64 +127,32 @@ const Flights = () => {
                 </CardContent>
               </Card>
 
-              {/* Deals */}
               <div className="space-y-3">
                 <h3 className="font-semibold text-lg text-foreground flex items-center gap-2">
-                  <TrendingDown className="h-5 w-5 text-primary" /> Top Deals Found
+                  <TrendingDown className="h-5 w-5 text-primary" /> Typical Fares
                 </h3>
                 {result.deals?.map((deal, i) => (
-                  <a
-                    key={i}
-                    href={buildExpediaFlightUrl(result.route)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => trackAffiliateClick("Expedia", "/flights", "flight_deal_card")}
-                    aria-label={`Book ${deal.airline} ${deal.price} on Expedia`}
-                    className="block group"
-                  >
-                    <Card className="hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer">
-                      <CardContent className="pt-5 pb-4">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-semibold text-foreground group-hover:text-primary transition-colors">{deal.airline}</span>
-                              <Badge variant="outline" className="text-xs">{deal.class}</Badge>
-                              <Badge variant="secondary" className="text-xs">{deal.stops}</Badge>
-                            </div>
-                            <p className="text-sm text-muted-foreground">{deal.dates}</p>
-                            {deal.notes && <p className="text-xs text-muted-foreground mt-1">{deal.notes}</p>}
+                  <Card key={i}>
+                    <CardContent className="pt-5 pb-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-semibold text-foreground">{deal.airline}</span>
+                            <Badge variant="outline" className="text-xs">{deal.class}</Badge>
+                            <Badge variant="secondary" className="text-xs">{deal.stops}</Badge>
                           </div>
-                          <div className="text-right">
-                            <p className="text-2xl font-bold text-primary">{deal.price}</p>
-                            <p className="text-xs text-muted-foreground inline-flex items-center gap-1 justify-end">
-                              Book on Expedia <ExternalLink className="h-3 w-3" />
-                            </p>
-                          </div>
+                          <p className="text-sm text-muted-foreground">{deal.dates}</p>
+                          {deal.notes && <p className="text-xs text-muted-foreground mt-1">{deal.notes}</p>}
                         </div>
-                      </CardContent>
-                    </Card>
-                  </a>
+                        <div className="text-right">
+                          <p className="text-2xl font-bold text-primary">{deal.price}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
 
-              {/* Book CTA */}
-              <Card className="bg-primary/5 border-primary/20">
-                <CardContent className="pt-5 pb-4">
-                  <p className="text-sm font-medium text-foreground mb-3">Ready to book?</p>
-                  <a
-                    href={buildExpediaFlightUrl(result.route)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => trackAffiliateClick("Expedia", "/flights", "flight_book_cta")}
-                    className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
-                  >
-                    Book on Expedia <ExternalLink className="h-3 w-3" />
-                  </a>
-                  <p className="text-xs text-muted-foreground mt-2">Affiliate links help keep this tool free</p>
-                </CardContent>
-              </Card>
-
-              {/* Tips */}
               {result.tips?.length > 0 && (
                 <Card>
                   <CardHeader className="pb-2">

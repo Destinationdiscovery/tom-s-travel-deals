@@ -1,10 +1,9 @@
 import { useState, useCallback } from "react";
 import { useLocation } from "react-router-dom";
-import { Shield, Search, Menu, Download, ChevronDown, Luggage, Calendar, Map, DollarSign, Plane, Brain, ShieldCheck } from "lucide-react";
+import { Shield, Menu, Download, ChevronDown, Luggage, Calendar, Map, DollarSign, Plane, Brain, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import AdminLoginDialog from "@/components/auth/AdminLoginDialog";
-import ExpediaSearchWidget from "@/components/ExpediaSearchWidget";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
@@ -39,7 +38,6 @@ const toolLinks = [
 const Header = () => {
   const { isAdmin } = useAuth();
   const location = useLocation();
-  const [widgetOpen, setWidgetOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [toolsExpanded, setToolsExpanded] = useState(false);
 
@@ -112,13 +110,6 @@ const Header = () => {
           {/* Right actions */}
           <div className="flex items-center gap-1 md:gap-3 shrink-0">
             <ThemeToggle />
-            <button
-              onClick={() => setWidgetOpen((v) => !v)}
-              className="p-2 rounded-lg text-primary-foreground/70 hover:text-secondary hover:bg-primary-foreground/10 transition-colors"
-              aria-label="Toggle Expedia search"
-            >
-              <Search className="h-4 w-4" />
-            </button>
 
             <Link
               to="/install"
@@ -247,7 +238,6 @@ const Header = () => {
           </div>
         </div>
       </header>
-      <ExpediaSearchWidget isOpen={widgetOpen} onClose={() => setWidgetOpen(false)} />
     </>
   );
 };

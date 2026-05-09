@@ -5,8 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import SEOHead from "@/components/SEOHead";
 import Footer from "@/components/Footer";
-import TopDestinationCard from "@/components/TopDestinationCard";
-import AffiliateLinks from "@/components/AffiliateLinks";
+import { Star } from "lucide-react";
 import type { ReviewData } from "@/hooks/useGenerateReview";
 import { MapPin } from "lucide-react";
 
@@ -93,29 +92,44 @@ const TopDestinations = () => {
             </div>
           )}
 
-          <div className="grid gap-4 lg:grid-cols-[1fr_300px]">
-            <div className="flex flex-col gap-4">
-              {sortedReviews.map((review, index) => (
+          <div className="flex flex-col gap-4">
+            {sortedReviews.map((review, index) => {
+              const data = review.review_data as unknown as ReviewData;
+              return (
                 <div key={review.id} className="relative">
                   <span className="absolute -left-2 -top-2 w-7 h-7 rounded-full bg-primary text-primary-foreground text-sm flex items-center justify-center font-bold z-10">
                     {index + 1}
                   </span>
-                  <TopDestinationCard
-                    propertyName={review.property_name}
-                    slug={review.slug}
-                    reviewData={review.review_data as unknown as ReviewData}
-                  />
+                  <Link to={`/review/${review.slug}`} className="block bg-card rounded-2xl p-6 shadow-soft hover:shadow-elevated transition-shadow">
+                    <div className="flex items-start justify-between gap-4 mb-2">
+                      <div className="flex-1">
+                        <h3 className="font-display text-lg font-bold text-foreground">
+                          {review.property_name}
+                        </h3>
+                        {data.location && (
+                          <p className="text-sm text-muted-foreground">{data.location}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <Star className="h-4 w-4 text-accent fill-accent" />
+                        <span className="font-bold text-foreground">{data.overallRating}</span>
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground line-clamp-2">{data.summary}</p>
+                    {data.bestFor && data.bestFor.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mt-3">
+                        {data.bestFor.slice(0, 3).map((tag) => (
+                          <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    <span className="text-xs text-primary font-medium mt-3 inline-block">Read full review →</span>
+                  </Link>
                 </div>
-              ))}
-            </div>
-
-            {sortedReviews.length > 0 && (
-              <div className="hidden lg:block">
-                <div className="sticky top-24">
-                  <AffiliateLinks />
-                </div>
-              </div>
-            )}
+              );
+            })}
           </div>
         </div>
       </main>
