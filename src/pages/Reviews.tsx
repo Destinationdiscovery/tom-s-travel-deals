@@ -48,8 +48,6 @@ const Reviews = () => {
     }
   };
 
-  const topResult = results[0];
-
   const faqItems = useMemo(() => [
     { question: `What are the best ${displayTitle.toLowerCase()}?`, answer: `ReviewThenGo aggregates ratings from Google, TripAdvisor, Booking.com and more to rank the top options. Search "${searchQuery}" for the latest verified results.` },
     { question: `Are these reviews trustworthy?`, answer: `Yes. We pull data from 10+ verified sources and weight recent stays 2x for accuracy. No pay-for-play.` },

@@ -1,7 +1,5 @@
-import { ExternalLink, Star } from "lucide-react";
+import { Star } from "lucide-react";
 import type { ThingToDo } from "@/hooks/useGenerateReview";
-import { useMemo } from "react";
-import { buildDeepLinks, detectCountry } from "@/components/AffiliateLinks";
 
 interface ThingsToDoSectionProps {
   thingsToDo: ThingToDo[];
@@ -9,12 +7,7 @@ interface ThingsToDoSectionProps {
   propertyName?: string;
 }
 
-const ThingsToDoSection = ({ thingsToDo, functionUrl, propertyName }: ThingsToDoSectionProps) => {
-  const expediaLink = useMemo(() => {
-    const country = detectCountry();
-    return buildDeepLinks(country, propertyName).expedia;
-  }, [propertyName]);
-
+const ThingsToDoSection = ({ thingsToDo, functionUrl }: ThingsToDoSectionProps) => {
   if (!thingsToDo || thingsToDo.length === 0) return null;
 
   return (
@@ -33,7 +26,6 @@ const ThingsToDoSection = ({ thingsToDo, functionUrl, propertyName }: ThingsToDo
               key={index}
               className="bg-card rounded-2xl overflow-hidden shadow-soft flex flex-col"
             >
-              {/* Photo */}
               {photoUrl && (
                 <div className="aspect-[4/3] overflow-hidden">
                   <img
@@ -53,7 +45,6 @@ const ThingsToDoSection = ({ thingsToDo, functionUrl, propertyName }: ThingsToDo
                   {activity.name}
                 </h4>
 
-                {/* Star rating */}
                 {activity.rating && (
                   <div className="flex items-center gap-1 mb-3">
                     {[...Array(5)].map((_, i) => (
@@ -74,33 +65,13 @@ const ThingsToDoSection = ({ thingsToDo, functionUrl, propertyName }: ThingsToDo
                   </div>
                 )}
 
-                <p className="text-sm text-muted-foreground leading-relaxed mb-3">
+                <p className="text-sm text-muted-foreground leading-relaxed">
                   {activity.description}
                 </p>
-                <a
-                  href={expediaLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-                >
-                  Book this
-                  <ExternalLink className="h-3 w-3" />
-                </a>
               </div>
             </div>
           );
         })}
-      </div>
-      <div className="mt-4 text-center">
-        <a
-          href={expediaLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-sm text-primary hover:underline inline-flex items-center gap-1"
-        >
-          Explore more things to do
-          <ExternalLink className="h-3 w-3" />
-        </a>
       </div>
     </div>
   );
