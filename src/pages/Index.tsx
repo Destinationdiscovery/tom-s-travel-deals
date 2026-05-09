@@ -9,7 +9,7 @@ import TrustBadges from "@/components/TrustBadges";
 import HowItWorks from "@/components/HowItWorks";
 import TravelersAskSection from "@/components/TravelersAskSection";
 import RecentReviewsHomepage from "@/components/RecentReviewsHomepage";
-import TravelDealsSection from "@/components/TravelDealsSection";
+
 import BlogPreviewSection from "@/components/BlogPreviewSection";
 import TrendingQueriesSection from "@/components/TrendingQueriesSection";
 import HomepageFAQ from "@/components/HomepageFAQ";
@@ -155,7 +155,6 @@ const Index = () => {
 
         <ToolsDirectorySection />
         <BlogPreviewSection />
-        <TravelDealsSection />
         <AggregateStatsSection />
         <AboutPreviewSection />
         <HomepageFAQ />

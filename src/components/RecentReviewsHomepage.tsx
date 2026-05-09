@@ -1,8 +1,7 @@
-import { useEffect, useState, useMemo, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Star, ExternalLink, Search } from "lucide-react";
+import { Star, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { buildDeepLinks, detectCountry } from "@/components/AffiliateLinks";
 import { Button } from "@/components/ui/button";
 import { useSearchSuggestions } from "@/hooks/useSearchSuggestions";
 import { useGenerateReview } from "@/hooks/useGenerateReview";
@@ -31,7 +30,6 @@ interface CachedReview {
 const RecentReviewsHomepage = () => {
   const [featured, setFeatured] = useState<FeaturedReview[]>([]);
   const [fallbackReviews, setFallbackReviews] = useState<CachedReview[]>([]);
-  const country = useMemo(() => detectCountry(), []);
   const navigate = useNavigate();
 
   // Search bar state
@@ -115,79 +113,68 @@ const RecentReviewsHomepage = () => {
         <p className="text-muted-foreground mb-6 max-w-2xl">Aggregated hotel and resort reviews from 10+ trusted sources including Google, TripAdvisor, and Booking.com — all in one place.</p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          {cards.map((card) => {
-            const expediaLink = card.affiliateUrl || buildDeepLinks(country, card.name).expedia;
-            return (
-              <div
-                key={card.id}
-                className="rounded-2xl overflow-hidden bg-card shadow-sm hover:shadow-elevated transition-all duration-300 hover:-translate-y-1 border border-border/50 flex flex-col"
-              >
-                {/* Resort image */}
-                {card.imageUrl && (
-                  <div className="relative">
-                    <img src={card.imageUrl} alt={card.name} className="w-full h-40 object-cover" loading="lazy" />
-                    {card.saleLabel && (
-                      <span className="absolute top-2 left-2 bg-secondary text-secondary-foreground text-xs font-bold px-2.5 py-1 rounded-full shadow-md">
-                        {card.saleLabel}
-                      </span>
-                    )}
-                  </div>
-                )}
-
-                <Link
-                  to={`/review/${card.slug}`}
-                  className="group p-5 flex flex-col gap-3 flex-1"
-                >
-                  <h3 className="font-display font-bold text-foreground leading-tight line-clamp-2 group-hover:text-primary transition-colors">
-                    {card.name}
-                  </h3>
-                  {card.location && (
-                    <p className="text-xs text-muted-foreground">{card.location}</p>
-                  )}
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-3.5 w-3.5 ${
-                          i < Math.floor(card.rating)
-                            ? "fill-amber-400 text-amber-400"
-                            : "text-muted-foreground/30"
-                        }`}
-                      />
-                    ))}
-                    <span className="ml-1 text-sm font-semibold text-muted-foreground">
-                      {card.rating.toFixed(1)}
+          {cards.map((card) => (
+            <div
+              key={card.id}
+              className="rounded-2xl overflow-hidden bg-card shadow-sm hover:shadow-elevated transition-all duration-300 hover:-translate-y-1 border border-border/50 flex flex-col"
+            >
+              {/* Resort image */}
+              {card.imageUrl && (
+                <div className="relative">
+                  <img src={card.imageUrl} alt={card.name} className="w-full h-40 object-cover" loading="lazy" />
+                  {card.saleLabel && (
+                    <span className="absolute top-2 left-2 bg-secondary text-secondary-foreground text-xs font-bold px-2.5 py-1 rounded-full shadow-md">
+                      {card.saleLabel}
                     </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3 flex-1">
-                    {card.summary}
-                  </p>
-                  <span className="text-xs font-semibold text-primary group-hover:underline mt-auto">
-                    Read Review →
-                  </span>
-                </Link>
-                <div className="px-5 pb-4 space-y-2">
-                  <Link to={`/review/${card.slug}`}>
-                    <Button
-                      variant="default"
-                      size="sm"
-                      className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold"
-                    >
-                      Read Review
-                    </Button>
-                  </Link>
-                  <a
-                    href={expediaLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    Book on Expedia <ExternalLink className="h-3 w-3" />
-                  </a>
+                  )}
                 </div>
+              )}
+
+              <Link
+                to={`/review/${card.slug}`}
+                className="group p-5 flex flex-col gap-3 flex-1"
+              >
+                <h3 className="font-display font-bold text-foreground leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+                  {card.name}
+                </h3>
+                {card.location && (
+                  <p className="text-xs text-muted-foreground">{card.location}</p>
+                )}
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`h-3.5 w-3.5 ${
+                        i < Math.floor(card.rating)
+                          ? "fill-amber-400 text-amber-400"
+                          : "text-muted-foreground/30"
+                      }`}
+                    />
+                  ))}
+                  <span className="ml-1 text-sm font-semibold text-muted-foreground">
+                    {card.rating.toFixed(1)}
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3 flex-1">
+                  {card.summary}
+                </p>
+                <span className="text-xs font-semibold text-primary group-hover:underline mt-auto">
+                  Read Review →
+                </span>
+              </Link>
+              <div className="px-5 pb-4">
+                <Link to={`/review/${card.slug}`}>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold"
+                  >
+                    Read Review
+                  </Button>
+                </Link>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
 
         {/* Review search bar below cards */}

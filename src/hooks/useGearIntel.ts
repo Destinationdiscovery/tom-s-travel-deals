@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { detectCountry } from "@/components/AffiliateLinks";
+import { detectCountry } from "@/lib/geo";
 
 export type GearIntelType = "must-haves" | "review";
 

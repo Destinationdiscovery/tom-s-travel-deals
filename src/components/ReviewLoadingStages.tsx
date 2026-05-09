@@ -1,7 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { Search, Star, MapPin, Camera, Sparkles, Check, Loader2, Lightbulb } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import { EXPEDIA_LINKS, detectCountry } from "@/components/AffiliateLinks";
 
 const STAGES = [
   { label: "Searching traveler reviews...", icon: Search, duration: 3000 },
@@ -12,19 +11,17 @@ const STAGES = [
 ];
 
 const TRAVEL_TIPS = [
-  { text: "Booking mid-week flights can save you up to 20% compared to weekend departures.", hasLink: false },
-  { text: "Travel insurance typically costs 4 to 8% of your trip, worth it for international travel.", hasLink: false },
-  { text: "Packing cubes can reduce luggage volume by up to 30% and keep you organized.", hasLink: false },
-  { text: "Pro tip: Bundle your hotel and flight to save up to 30% on your trip.", hasLink: true },
-  { text: "Shoulder season (just before or after peak) offers better prices and fewer crowds.", hasLink: false },
-  { text: "Always notify your bank before international travel to avoid card freezes.", hasLink: false },
+  "Booking mid-week flights can save you up to 20% compared to weekend departures.",
+  "Travel insurance typically costs 4 to 8% of your trip, worth it for international travel.",
+  "Packing cubes can reduce luggage volume by up to 30% and keep you organized.",
+  "Shoulder season (just before or after peak) offers better prices and fewer crowds.",
+  "Always notify your bank before international travel to avoid card freezes.",
 ];
 
 const ReviewLoadingStages = () => {
   const [activeStage, setActiveStage] = useState(0);
   const [progress, setProgress] = useState(0);
   const tip = useMemo(() => TRAVEL_TIPS[Math.floor(Math.random() * TRAVEL_TIPS.length)], []);
-  const expediaLink = useMemo(() => EXPEDIA_LINKS[detectCountry()], []);
 
   useEffect(() => {
     const progressInterval = setInterval(() => {
@@ -111,20 +108,7 @@ const ReviewLoadingStages = () => {
             <div>
               <span className="text-xs font-semibold text-foreground">Did you know?</span>
               <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                {tip.text}
-                {tip.hasLink && (
-                  <>
-                    {" "}
-                    <a
-                      href={expediaLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline inline-flex items-center gap-0.5"
-                    >
-                      Compare deals →
-                    </a>
-                  </>
-                )}
+                {tip}
               </p>
             </div>
           </div>

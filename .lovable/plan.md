@@ -1,83 +1,46 @@
-## What this fixes
+## Goal
 
-Four targeted changes addressing the real gaps from Gemini's audit. Skipping items that were either wrong or already done.
+Strip every Expedia / Hotels.com / VRBO booking link, banner, sidebar, button, and CTA from the public site so reviews are pure reviews. Amazon-powered gear pages and links stay untouched.
 
----
+## What gets removed
 
-### 1. Remove `noindex` from AI review pages (highest impact)
+**Components (delete entirely):**
+- `src/components/AffiliateLinks.tsx`
+- `src/components/InlineAffiliateCTA.tsx`
+- `src/components/ExpediaSearchWidget.tsx`
+- `src/components/TravelDealsSection.tsx`
+- `src/components/reviews/BookingSidebar.tsx`
+- `src/components/TopDestinationCard.tsx` (Expedia "Check rates" link is core; card no longer needed)
 
-`src/pages/AIReview.tsx` currently passes `noindex` to `SEOHead`. That's telling Google and AI bots not to index any `/review/:slug` page, which silently nukes the entire AI-review surface area from search results. This is almost certainly the biggest single reason the audit perceived "thin/missing pages."
+**Removed usages / CTAs in pages and components:**
+- `src/pages/Index.tsx` — drop `<TravelDealsSection />`
+- `src/pages/AIReview.tsx` and `src/components/AIReviewResult.tsx` — remove `InlineAffiliateCTA` banners and `AffiliateLinks` sidebar; tighten layout (single column where sidebar was)
+- `src/pages/DestinationReview.tsx` — remove two `InlineAffiliateCTA` banners and the `AffiliateLinks` sidebar
+- `src/pages/Reviews.tsx` — remove `BookingSidebar`; convert layout to single column
+- `src/pages/Compare.tsx` — remove `AffiliateLinks`
+- `src/pages/TopDestinations.tsx` — remove `AffiliateLinks`
+- `src/pages/Flights.tsx` — strip Expedia deep-link buttons (page kept as informational tool)
+- `src/pages/MyTrips.tsx`, `src/pages/MyReviews.tsx` — remove "Book on Expedia" links from saved cards
+- `src/components/HeroSection.tsx` — remove Expedia CTA / link
+- `src/components/Header.tsx` — remove `ExpediaSearchWidget` trigger and dialog
+- `src/components/RecentReviewsHomepage.tsx`, `src/components/BlogPreviewSection.tsx`, `src/components/destinations/DestinationCard.tsx`, `src/components/review/ThingsToDoSection.tsx`, `src/components/reviews/HotelResultCard.tsx` — remove any Expedia/booking buttons or "Save Now / Book on" links
+- `src/components/ReviewLoadingStages.tsx`, `src/components/SearchLoadingStages.tsx` — remove Expedia links/sponsor lines
 
-**Change:** Remove the `noindex` prop. Cached reviews are real, unique, content-rich pages and should be indexed. Keep `noindex` only for the auto-generation fallback path (when a slug isn't in `cached_reviews` yet) so we don't index half-built pages.
+**Loose ends:**
+- `src/hooks/useGearIntel.ts` uses `detectCountry` for Amazon TLD logic. Move `detectCountry` into a small util `src/lib/geo.ts` so Amazon gear keeps working after `AffiliateLinks.tsx` is deleted.
+- Remove `trackAffiliateClick` calls tied to Expedia/Hotels/VRBO. Keep the analytics function itself for Amazon usage.
+- `src/components/AffiliateDisclosureBanner.tsx` and `src/pages/AffiliateDisclosure.tsx` stay (still relevant for Amazon).
 
-Implementation: only render `<SEOHead>` once the review has been confirmed loaded from cache (not generated), or pass `noindex` conditionally based on whether the review came from cache vs. live generation.
+## What stays
 
----
+- All Amazon gear pages (`/gear`, `GearAdmin`, `GearImageManager`) and Amazon affiliate links inside `useGearIntel` / `GearResults`.
+- `BookingSidebar`'s "Need travel gear?" link is preserved indirectly because the gear page itself is unchanged.
+- All review content, ratings, FAQs, related reviews, AuthorBio, internal linking.
 
-### 2. Meta descriptions on tool pages
+## Verification
 
-Audit was right that some tool pages may be missing descriptions. Audit each of these and ensure `<SEOHead>` has a real, unique `description` (~150 chars):
+1. `rg -i "expedia|hotels\.com|vrbo|bookingsidebar|affiliatelinks|inlineaffiliatecta|expediasearchwidget|traveldealssection" src` returns only Amazon-unrelated stragglers (ideally nothing).
+2. Build passes.
+3. Visit `/`, `/review/:slug`, `/reviews`, `/compare`, `/destinations`, `/top-destinations`, `/flights`, `/my-trips` — confirm zero "Book on …" buttons; gear pages unchanged.
 
-- `/safety` (Safety.tsx)
-- `/gear` (Gear.tsx)
-- `/itinerary` (Itinerary.tsx)
-- `/flights` (Flights.tsx)
-- `/currency` (Currency.tsx)
-- `/best-time` (BestTime.tsx)
-- `/compare` (Compare.tsx)
-- `/destinations` (Destinations.tsx)
-- `/guides` (Guides.tsx)
-
-For each missing or generic one, write a tool-specific 140 to 160 char description naming the tool, what it answers, and the brand.
-
----
-
-### 3. "More like this" related reviews module
-
-Add a `RelatedReviews` component that renders 4 to 6 cards at the bottom of every review page (`AIReview.tsx` and `DestinationReview.tsx`).
-
-**Selection logic** (cheap, no new tables):
-- Query `cached_reviews` for entries sharing the same `location` (or first word of location) excluding current slug.
-- Fall back to most recently created reviews if fewer than 4 matches.
-- Limit 6, render as compact cards linking to `/review/:slug`.
-
-This satisfies both the "internal linking web" recommendation and gives bots real anchor text between properties.
-
----
-
-### 4. AuthorBio coverage check
-
-Already on `/about` and `/compass/:slug`. **Add to:**
-- `AIReview.tsx` (above Footer)
-- `DestinationReview.tsx` (above Footer, after the related section)
-
-This adds the E-E-A-T signal Gemini called out, on the pages that matter most for travel queries.
-
----
-
-## Out of scope / explicitly skipping
-
-- Changing the homepage `<title>` ("ReviewThenGo" alone) — audit was wrong; current title is descriptive.
-- Re-adding generic "review schema" — already present via `aggregateRating` in `SEOHead`.
-- Server-side rendering / prerendering — not available on Lovable Cloud hosting and the static shell in `index.html` already covers the non-JS-bot case.
-
----
-
-## Files touched
-
-- `src/pages/AIReview.tsx` — remove/conditional `noindex`, add `<AuthorBio />` and `<RelatedReviews />`.
-- `src/pages/DestinationReview.tsx` — add `<AuthorBio />` and `<RelatedReviews />`.
-- `src/components/RelatedReviews.tsx` — new component.
-- `src/pages/{Safety,Gear,Itinerary,Flights,Currency,BestTime,Compare,Destinations,Guides}.tsx` — verify/add unique meta descriptions.
-
-No DB or edge-function changes. No design or layout overhaul.
-
----
-
-## Verification (after implementation)
-
-I'll re-curl with `User-Agent: GPTBot` and `PerplexityBot` against:
-- `https://www.reviewthengo.com/review/<a-real-slug>` — confirm no `noindex`, AuthorBio HTML present, related links present.
-- 2 to 3 tool pages — confirm `<meta name="description">` is unique and populated.
-
-Then report back with the curl evidence rather than just "done."
+Approve and I'll execute.

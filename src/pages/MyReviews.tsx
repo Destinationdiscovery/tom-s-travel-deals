@@ -7,8 +7,7 @@ import Footer from "@/components/Footer";
 import SEOHead from "@/components/SEOHead";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Star, MapPin, Clock, Bookmark, ExternalLink, Trash2 } from "lucide-react";
-import { buildDeepLinks, detectCountry } from "@/components/AffiliateLinks";
+import { Star, MapPin, Clock, Bookmark, Trash2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 
@@ -75,8 +74,6 @@ const MyReviews = () => {
     toast({ title: "Removed from saved reviews" });
   };
 
-  const country = detectCountry();
-
   if (authLoading) {
     return (
       <div className="min-h-screen bg-background">
@@ -121,48 +118,37 @@ const MyReviews = () => {
               </div>
             ) : (
               <div className="grid gap-4 md:grid-cols-2">
-                {saved.map((r) => {
-                  const links = buildDeepLinks(country, r.property_name);
-                  return (
-                    <div key={r.id} className="bg-card rounded-2xl p-6 shadow-soft group relative">
-                      <button
-                        onClick={() => removeSaved(r.id)}
-                        className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
-                        aria-label="Remove"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                      <Link to={`/review/${r.slug}`} className="block mb-3">
-                        <h3 className="font-display text-lg font-bold text-foreground hover:text-primary transition-colors">
-                          {r.property_name}
-                        </h3>
-                        {r.location && (
-                          <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-                            <MapPin className="h-3 w-3" /> {r.location}
-                          </p>
-                        )}
-                      </Link>
-                      <div className="flex items-center gap-2 mb-3">
-                        <Star className="h-4 w-4 text-accent fill-accent" />
-                        <span className="font-medium text-foreground">{r.overall_rating}</span>
-                        {r.trip_name && (
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary ml-auto">
-                            {r.trip_name}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{r.summary}</p>
-                      <div className="flex gap-3 text-xs">
-                        <a href={links.expedia} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">
-                          Expedia <ExternalLink className="h-3 w-3" />
-                        </a>
-                        <a href={links.hotels} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">
-                          Hotels.com <ExternalLink className="h-3 w-3" />
-                        </a>
-                      </div>
+                {saved.map((r) => (
+                  <div key={r.id} className="bg-card rounded-2xl p-6 shadow-soft group relative">
+                    <button
+                      onClick={() => removeSaved(r.id)}
+                      className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                      aria-label="Remove"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                    <Link to={`/review/${r.slug}`} className="block mb-3">
+                      <h3 className="font-display text-lg font-bold text-foreground hover:text-primary transition-colors">
+                        {r.property_name}
+                      </h3>
+                      {r.location && (
+                        <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                          <MapPin className="h-3 w-3" /> {r.location}
+                        </p>
+                      )}
+                    </Link>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Star className="h-4 w-4 text-accent fill-accent" />
+                      <span className="font-medium text-foreground">{r.overall_rating}</span>
+                      {r.trip_name && (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary ml-auto">
+                          {r.trip_name}
+                        </span>
+                      )}
                     </div>
-                  );
-                })}
+                    <p className="text-sm text-muted-foreground line-clamp-2">{r.summary}</p>
+                  </div>
+                ))}
               </div>
             )}
           </TabsContent>

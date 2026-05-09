@@ -1,7 +1,5 @@
 import { Heart, ExternalLink, Twitter, Instagram, Rss } from "lucide-react";
 import { Link } from "react-router-dom";
-import expediaLogo from "@/assets/expedia-logo.png";
-import { trackAffiliateClick } from "@/lib/analytics";
 import NewsletterCTASection from "@/components/NewsletterCTASection";
 
 const Footer = () => {
@@ -102,18 +100,6 @@ const Footer = () => {
                 <a href="https://iomrjljlydboniioohkv.supabase.co/functions/v1/generate-rss" target="_blank" rel="noopener noreferrer" aria-label="RSS feed for The Compass blog" title="RSS feed" className="text-primary-foreground/60 hover:text-secondary transition-colors">
                   <Rss className="h-5 w-5" />
                 </a>
-              </div>
-
-              <a
-                href="https://www.expedia.ca/?affcid=CA.DIRECT.PHG.0000.HOTEL.kwrd%3D.0000&ref_id=1101l5c5bMbAX&my_ad=ABA-14217255"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => trackAffiliateClick("Expedia", "footer", "footer_badge")}
-                className="inline-flex items-center gap-2 bg-primary-foreground/10 rounded-lg px-3 py-2 hover:bg-primary-foreground/20 transition-colors"
-              >
-                <img src={expediaLogo} alt="Expedia" className="h-5 object-contain" />
-                <span className="text-xs text-primary-foreground/70">Powered by Expedia</span>
-              </a>
             </div>
           </div>
 
