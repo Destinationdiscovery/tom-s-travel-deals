@@ -401,6 +401,27 @@ Deno.serve(async (req) => {
       }));
     const list = [...dbList, ...staticList];
 
+    // Expanded view: every Compass article's full body inline
+    if (expand) {
+      const { data: fullPosts } = await supabase
+        .from("blog_posts")
+        .select("*")
+        .order("date_published", { ascending: false })
+        .limit(500);
+      const dbFull = fullPosts || [];
+      const dbFullSlugs = new Set(dbFull.map((p: any) => p.slug));
+      const staticFull = STATIC_ARTICLES.filter((a) => !dbFullSlugs.has(a.slug)).map(staticToPost);
+      const allPosts = [...dbFull, ...staticFull];
+      const toc = allPosts
+        .map((p: any) => `<li><a href="#article-${escapeHtml(p.slug)}">${escapeHtml(p.title || "Untitled")}</a></li>`)
+        .join("\n");
+      const bodies = allPosts.map(renderArticleInline).join("\n");
+      const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Every ReviewThenGo Compass Article (Full Text)</title><meta name="description" content="Full text of every Compass article on ReviewThenGo, one page, plain HTML for AI crawlers."/><link rel="canonical" href="${BASE}/compass"/><meta name="robots" content="index, follow"/></head><body><h1>Every Compass Article (${allPosts.length})</h1><p>Full text of every Compass article on ReviewThenGo on a single page, optimized for AI crawlers (GPTBot, ClaudeBot, PerplexityBot, etc.). Real users should visit <a href="${BASE}/compass">${BASE}/compass</a>.</p><nav><h2>Contents</h2><ol>${toc}</ol></nav>${bodies}</body></html>`;
+      return new Response(html, {
+        headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, max-age=1800" },
+      });
+    }
+
     if (format === "json") {
       return new Response(JSON.stringify({ count: list.length, items: list }), {
         headers: { ...corsHeaders, "Content-Type": "application/json", "Cache-Control": "public, max-age=1800" },
@@ -419,6 +440,7 @@ Deno.serve(async (req) => {
 <body>
 <h1>All ReviewThenGo Articles</h1>
 <p>This is a static, JavaScript-free feed of every article on ReviewThenGo. Each link below leads to the full article rendered as plain HTML for crawlers. Real users should visit the canonical pages on <a href="${BASE}/compass">${BASE}/compass</a>.</p>
+<p><a href="?expand=1">View full text of every article on one page</a></p>
 <ul>
 ${list
   .map(
