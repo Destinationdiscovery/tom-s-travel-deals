@@ -222,6 +222,64 @@ ${tipsHtml}
 </html>`;
 };
 
+// Render a single article inline (for expanded view) - no full HTML doc wrapper
+const renderArticleInline = (post: any): string => {
+  const title = escapeHtml(post.title || "Untitled");
+  const author = escapeHtml(post.author || "ReviewThenGo");
+  const date = escapeHtml(post.date_published || "");
+  const excerpt = escapeHtml(post.excerpt || "");
+  const canonical = `${BASE}/compass/${encodeURIComponent(post.slug)}`;
+  const heroImg = post.hero_image_url
+    ? `<figure><img src="${escapeHtml(post.hero_image_url)}" alt="${title}" /></figure>`
+    : "";
+  const blocks: any[] = Array.isArray(post.rich_content) ? post.rich_content : [];
+  const body = blocks.map(renderBlock).join("\n");
+  const faqHtml = Array.isArray(post.faq_items) && post.faq_items.length > 0
+    ? `<section><h3>Frequently Asked Questions</h3>${post.faq_items
+        .map((f: any) => `<h4>${escapeHtml(f.question || "")}</h4><p>${escapeHtml(f.answer || "")}</p>`)
+        .join("")}</section>`
+    : "";
+  return `<article id="article-${escapeHtml(post.slug)}">
+<header>
+<h2><a href="${canonical}">${title}</a></h2>
+<p>By <span>${author}</span> &middot; <time>${date}</time></p>
+${excerpt ? `<p><em>${excerpt}</em></p>` : ""}
+</header>
+${heroImg}
+${body}
+${faqHtml}
+<p><a href="${canonical}">Read on ReviewThenGo</a></p>
+<hr/>
+</article>`;
+};
+
+const renderDestinationInline = (rev: any): string => {
+  const title = escapeHtml(rev.property_name || "Review");
+  const location = escapeHtml(rev.location || "");
+  const slug = encodeURIComponent(rev.slug);
+  const canonical = `${BASE}/destinations/${slug}`;
+  const review = Array.isArray(rev.full_review) ? rev.full_review : [];
+  const tips = Array.isArray(rev.tips) ? rev.tips : [];
+  const ratings = rev.ratings && typeof rev.ratings === "object" ? rev.ratings : {};
+  const ratingHtml = Object.keys(ratings).length
+    ? `<p><strong>Ratings:</strong> ${Object.entries(ratings)
+        .map(([k, v]) => `${escapeHtml(k)} ${escapeHtml(String(v))}/5`)
+        .join(", ")}</p>`
+    : "";
+  const body = review.map((p: string) => `<p>${escapeHtml(stripMarkdown(p))}</p>`).join("\n");
+  const tipsHtml = tips.length
+    ? `<h3>Tips</h3><ul>${tips.map((t: string) => `<li>${escapeHtml(stripMarkdown(t))}</li>`).join("")}</ul>`
+    : "";
+  return `<article id="review-${escapeHtml(rev.slug)}">
+<header><h2><a href="${canonical}">${title}${location ? ` - ${location}` : ""}</a></h2></header>
+${ratingHtml}
+${body}
+${tipsHtml}
+<p><a href="${canonical}">Read full review on ReviewThenGo</a></p>
+<hr/>
+</article>`;
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -232,6 +290,7 @@ Deno.serve(async (req) => {
     const slug = url.searchParams.get("slug");
     const format = url.searchParams.get("format") || "html";
     const type = url.searchParams.get("type") || "compass";
+    const expand = url.searchParams.get("expand") === "1";
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
