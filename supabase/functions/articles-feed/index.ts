@@ -319,6 +319,24 @@ Deno.serve(async (req) => {
         });
       }
 
+      // Expanded view: every destination review's full body inline
+      if (expand) {
+        const { data: full } = await supabase
+          .from("cached_reviews")
+          .select("slug, property_name, location, full_review, tips, ratings")
+          .order("created_at", { ascending: false })
+          .limit(500);
+        const reviews = full || [];
+        const toc = reviews
+          .map((r: any) => `<li><a href="#review-${escapeHtml(r.slug)}">${escapeHtml(r.property_name)}${r.location ? ` - ${escapeHtml(r.location)}` : ""}</a></li>`)
+          .join("\n");
+        const bodies = reviews.map(renderDestinationInline).join("\n");
+        const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Every Destination Review (Full Text) | ReviewThenGo</title><meta name="description" content="Full text of every destination and resort review on ReviewThenGo, one page, plain HTML for AI crawlers."/><link rel="canonical" href="${BASE}/destinations"/><meta name="robots" content="index, follow"/></head><body><h1>Every Destination Review (${reviews.length})</h1><p>Full text of every destination review on ReviewThenGo on a single page, optimized for AI crawlers. Real users should visit <a href="${BASE}/destinations">${BASE}/destinations</a>.</p><nav><h2>Contents</h2><ol>${toc}</ol></nav>${bodies}</body></html>`;
+        return new Response(html, {
+          headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, max-age=1800" },
+        });
+      }
+
       const { data: list } = await supabase
         .from("cached_reviews")
         .select("slug, property_name, location")
@@ -330,7 +348,7 @@ Deno.serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json", "Cache-Control": "public, max-age=3600" },
         });
       }
-      const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"/><title>All Destination Reviews | ReviewThenGo</title></head><body><h1>All Destination Reviews</h1><ul>${items
+      const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"/><title>All Destination Reviews | ReviewThenGo</title></head><body><h1>All Destination Reviews</h1><p><a href="?type=destinations&expand=1">View full text of every review on one page</a></p><ul>${items
         .map(
           (p: any) =>
             `<li><a href="${BASE}/destinations/${encodeURIComponent(p.slug)}">${escapeHtml(p.property_name)}${p.location ? ` - ${escapeHtml(p.location)}` : ""}</a> &middot; <a href="?type=destinations&slug=${encodeURIComponent(p.slug)}">crawler view</a></li>`
