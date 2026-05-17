@@ -47,3 +47,6 @@ Allow: /
 Sitemap: https://www.reviewthengo.com/sitemap.xml
 # Dynamic sitemap (auto-includes all DB content, zero maintenance)
 Sitemap: https://iomrjljlydboniioohkv.supabase.co/functions/v1/generate-sitemap
+# Full-text crawlable feeds for AI bots (every article body on a single page)
+# Compass articles:    https://iomrjljlydboniioohkv.supabase.co/functions/v1/articles-feed?expand=1
+# Destination reviews: https://iomrjljlydboniioohkv.supabase.co/functions/v1/articles-feed?type=destinations&expand=1
