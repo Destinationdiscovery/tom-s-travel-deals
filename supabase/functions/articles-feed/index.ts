@@ -222,6 +222,64 @@ ${tipsHtml}
 </html>`;
 };
 
+// Render a single article inline (for expanded view) - no full HTML doc wrapper
+const renderArticleInline = (post: any): string => {
+  const title = escapeHtml(post.title || "Untitled");
+  const author = escapeHtml(post.author || "ReviewThenGo");
+  const date = escapeHtml(post.date_published || "");
+  const excerpt = escapeHtml(post.excerpt || "");
+  const canonical = `${BASE}/compass/${encodeURIComponent(post.slug)}`;
+  const heroImg = post.hero_image_url
+    ? `<figure><img src="${escapeHtml(post.hero_image_url)}" alt="${title}" /></figure>`
+    : "";
+  const blocks: any[] = Array.isArray(post.rich_content) ? post.rich_content : [];
+  const body = blocks.map(renderBlock).join("\n");
+  const faqHtml = Array.isArray(post.faq_items) && post.faq_items.length > 0
+    ? `<section><h3>Frequently Asked Questions</h3>${post.faq_items
+        .map((f: any) => `<h4>${escapeHtml(f.question || "")}</h4><p>${escapeHtml(f.answer || "")}</p>`)
+        .join("")}</section>`
+    : "";
+  return `<article id="article-${escapeHtml(post.slug)}">
+<header>
+<h2><a href="${canonical}">${title}</a></h2>
+<p>By <span>${author}</span> &middot; <time>${date}</time></p>
+${excerpt ? `<p><em>${excerpt}</em></p>` : ""}
+</header>
+${heroImg}
+${body}
+${faqHtml}
+<p><a href="${canonical}">Read on ReviewThenGo</a></p>
+<hr/>
+</article>`;
+};
+
+const renderDestinationInline = (rev: any): string => {
+  const title = escapeHtml(rev.property_name || "Review");
+  const location = escapeHtml(rev.location || "");
+  const slug = encodeURIComponent(rev.slug);
+  const canonical = `${BASE}/destinations/${slug}`;
+  const review = Array.isArray(rev.full_review) ? rev.full_review : [];
+  const tips = Array.isArray(rev.tips) ? rev.tips : [];
+  const ratings = rev.ratings && typeof rev.ratings === "object" ? rev.ratings : {};
+  const ratingHtml = Object.keys(ratings).length
+    ? `<p><strong>Ratings:</strong> ${Object.entries(ratings)
+        .map(([k, v]) => `${escapeHtml(k)} ${escapeHtml(String(v))}/5`)
+        .join(", ")}</p>`
+    : "";
+  const body = review.map((p: string) => `<p>${escapeHtml(stripMarkdown(p))}</p>`).join("\n");
+  const tipsHtml = tips.length
+    ? `<h3>Tips</h3><ul>${tips.map((t: string) => `<li>${escapeHtml(stripMarkdown(t))}</li>`).join("")}</ul>`
+    : "";
+  return `<article id="review-${escapeHtml(rev.slug)}">
+<header><h2><a href="${canonical}">${title}${location ? ` - ${location}` : ""}</a></h2></header>
+${ratingHtml}
+${body}
+${tipsHtml}
+<p><a href="${canonical}">Read full review on ReviewThenGo</a></p>
+<hr/>
+</article>`;
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -232,6 +290,7 @@ Deno.serve(async (req) => {
     const slug = url.searchParams.get("slug");
     const format = url.searchParams.get("format") || "html";
     const type = url.searchParams.get("type") || "compass";
+    const expand = url.searchParams.get("expand") === "1";
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -260,6 +319,24 @@ Deno.serve(async (req) => {
         });
       }
 
+      // Expanded view: every destination review's full body inline
+      if (expand) {
+        const { data: full } = await supabase
+          .from("cached_reviews")
+          .select("slug, property_name, location, full_review, tips, ratings")
+          .order("created_at", { ascending: false })
+          .limit(500);
+        const reviews = full || [];
+        const toc = reviews
+          .map((r: any) => `<li><a href="#review-${escapeHtml(r.slug)}">${escapeHtml(r.property_name)}${r.location ? ` - ${escapeHtml(r.location)}` : ""}</a></li>`)
+          .join("\n");
+        const bodies = reviews.map(renderDestinationInline).join("\n");
+        const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Every Destination Review (Full Text) | ReviewThenGo</title><meta name="description" content="Full text of every destination and resort review on ReviewThenGo, one page, plain HTML for AI crawlers."/><link rel="canonical" href="${BASE}/destinations"/><meta name="robots" content="index, follow"/></head><body><h1>Every Destination Review (${reviews.length})</h1><p>Full text of every destination review on ReviewThenGo on a single page, optimized for AI crawlers. Real users should visit <a href="${BASE}/destinations">${BASE}/destinations</a>.</p><nav><h2>Contents</h2><ol>${toc}</ol></nav>${bodies}</body></html>`;
+        return new Response(html, {
+          headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, max-age=1800" },
+        });
+      }
+
       const { data: list } = await supabase
         .from("cached_reviews")
         .select("slug, property_name, location")
@@ -271,7 +348,7 @@ Deno.serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json", "Cache-Control": "public, max-age=3600" },
         });
       }
-      const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"/><title>All Destination Reviews | ReviewThenGo</title></head><body><h1>All Destination Reviews</h1><ul>${items
+      const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"/><title>All Destination Reviews | ReviewThenGo</title></head><body><h1>All Destination Reviews</h1><p><a href="?type=destinations&expand=1">View full text of every review on one page</a></p><ul>${items
         .map(
           (p: any) =>
             `<li><a href="${BASE}/destinations/${encodeURIComponent(p.slug)}">${escapeHtml(p.property_name)}${p.location ? ` - ${escapeHtml(p.location)}` : ""}</a> &middot; <a href="?type=destinations&slug=${encodeURIComponent(p.slug)}">crawler view</a></li>`
@@ -324,6 +401,27 @@ Deno.serve(async (req) => {
       }));
     const list = [...dbList, ...staticList];
 
+    // Expanded view: every Compass article's full body inline
+    if (expand) {
+      const { data: fullPosts } = await supabase
+        .from("blog_posts")
+        .select("*")
+        .order("date_published", { ascending: false })
+        .limit(500);
+      const dbFull = fullPosts || [];
+      const dbFullSlugs = new Set(dbFull.map((p: any) => p.slug));
+      const staticFull = STATIC_ARTICLES.filter((a) => !dbFullSlugs.has(a.slug)).map(staticToPost);
+      const allPosts = [...dbFull, ...staticFull];
+      const toc = allPosts
+        .map((p: any) => `<li><a href="#article-${escapeHtml(p.slug)}">${escapeHtml(p.title || "Untitled")}</a></li>`)
+        .join("\n");
+      const bodies = allPosts.map(renderArticleInline).join("\n");
+      const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Every ReviewThenGo Compass Article (Full Text)</title><meta name="description" content="Full text of every Compass article on ReviewThenGo, one page, plain HTML for AI crawlers."/><link rel="canonical" href="${BASE}/compass"/><meta name="robots" content="index, follow"/></head><body><h1>Every Compass Article (${allPosts.length})</h1><p>Full text of every Compass article on ReviewThenGo on a single page, optimized for AI crawlers (GPTBot, ClaudeBot, PerplexityBot, etc.). Real users should visit <a href="${BASE}/compass">${BASE}/compass</a>.</p><nav><h2>Contents</h2><ol>${toc}</ol></nav>${bodies}</body></html>`;
+      return new Response(html, {
+        headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, max-age=1800" },
+      });
+    }
+
     if (format === "json") {
       return new Response(JSON.stringify({ count: list.length, items: list }), {
         headers: { ...corsHeaders, "Content-Type": "application/json", "Cache-Control": "public, max-age=1800" },
@@ -342,6 +440,7 @@ Deno.serve(async (req) => {
 <body>
 <h1>All ReviewThenGo Articles</h1>
 <p>This is a static, JavaScript-free feed of every article on ReviewThenGo. Each link below leads to the full article rendered as plain HTML for crawlers. Real users should visit the canonical pages on <a href="${BASE}/compass">${BASE}/compass</a>.</p>
+<p><a href="?expand=1">View full text of every article on one page</a></p>
 <ul>
 ${list
   .map(
