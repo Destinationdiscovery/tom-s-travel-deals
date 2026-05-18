@@ -11,6 +11,7 @@ import { useGenerateReview } from "@/hooks/useGenerateReview";
 import { useSearchSuggestions } from "@/hooks/useSearchSuggestions";
 import AIReviewResult from "@/components/AIReviewResult";
 import SEOHead from "@/components/SEOHead";
+import ToolSaveBar from "@/components/tools/ToolSaveBar";
 import heroImg from "@/assets/snowbird-caribbean-aerial.jpg";
 import cubaImg from "@/assets/deal-cuba.jpg";
 import curacaoImg from "@/assets/curacao-hero.avif";
@@ -344,6 +345,18 @@ const Destinations = () => {
           queryParam=""
         />
       </main>
+      {review && !isLoading && (
+        <>
+          <div aria-hidden className="h-28 md:h-20" />
+          <ToolSaveBar
+            toolType="destinations"
+            label={`${(review as any).propertyName || (review as any).property_name || "Review"} generated`}
+            destination={(review as any).location}
+            payload={{ hotel: review }}
+            onCopy={() => `${(review as any).propertyName || ""}\n${(review as any).summary || ""}`}
+          />
+        </>
+      )}
       <Footer />
     </div>
   );

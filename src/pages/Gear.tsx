@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useGearIntel } from "@/hooks/useGearIntel";
 import { GearLoading, PackingResultCard, ProductReviewPanel, GearCitations, PackingNarrative } from "@/components/gear/GearResults";
+import PackingChecklist from "@/components/gear/PackingChecklist";
+import ToolSaveBar from "@/components/tools/ToolSaveBar";
 import SEOHead from "@/components/SEOHead";
 import { supabase } from "@/integrations/supabase/client";
 import heroImg from "@/assets/gear-water-hammock-main.jpg";
@@ -169,6 +171,7 @@ const Gear = () => {
                 <p className="text-muted-foreground">Click "Review This" on any item for a full product review based on real Amazon reviews.</p>
               </div>
               <PackingNarrative narrative={packingData.narrative} />
+              <PackingChecklist items={packingData.items} querySlug={searchQuery} />
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
                 {packingData.items.map((item, i) => (
                   <PackingResultCard key={i} item={item} onReview={handleReviewProduct} />
@@ -231,6 +234,22 @@ const Gear = () => {
           onCardClick={(q) => { setSearchQuery(q); clearReview(); fetchPackingList(q); window.scrollTo({ top: 0, behavior: "smooth" }); }}
         />
       </main>
+      {packingData && !reviewData && (
+        <>
+          <div aria-hidden className="h-28 md:h-20" />
+          <ToolSaveBar
+            toolType="gear"
+            label={`${searchQuery || "Packing list"} · ${packingData.items.length} packing items`}
+            destination={searchQuery}
+            payload={{ items: packingData.items, narrative: packingData.narrative, citations: packingData.citations, query: searchQuery }}
+            onCopy={() => {
+              const lines = [`Packing list for ${searchQuery}`, ""];
+              packingData.items.forEach((it) => lines.push(`- ${it.name} (${it.category}) - ${it.priceRange}`));
+              return lines.join("\n");
+            }}
+          />
+        </>
+      )}
       <Footer />
     </div>
   );

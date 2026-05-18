@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
+import ToolSaveBar from "@/components/tools/ToolSaveBar";
 
 interface Season {
   name: string;
@@ -291,6 +292,18 @@ const BestTime = () => {
           />
         )}
       </main>
+      {data && !loading && (
+        <>
+          <div aria-hidden className="h-28 md:h-20" />
+          <ToolSaveBar
+            toolType="best-time"
+            label={`${data.destination} best time guide · ${data.bestMonths?.length ?? 0} best months`}
+            destination={data.destination}
+            payload={data}
+            onCopy={() => `Best time to visit ${data.destination}\n${data.verdict}\nBest months: ${(data.bestMonths || []).join(", ")}`}
+          />
+        </>
+      )}
       <Footer />
     </div>
   );

@@ -1126,6 +1126,7 @@ export type Database = {
           best_time_confirmed: boolean
           currency: Json | null
           currency_checked: boolean
+          flights: Json | null
           safety: Json | null
           safety_checked: boolean
           trip_id: string
@@ -1138,6 +1139,7 @@ export type Database = {
           best_time_confirmed?: boolean
           currency?: Json | null
           currency_checked?: boolean
+          flights?: Json | null
           safety?: Json | null
           safety_checked?: boolean
           trip_id: string
@@ -1150,6 +1152,7 @@ export type Database = {
           best_time_confirmed?: boolean
           currency?: Json | null
           currency_checked?: boolean
+          flights?: Json | null
           safety?: Json | null
           safety_checked?: boolean
           trip_id?: string
