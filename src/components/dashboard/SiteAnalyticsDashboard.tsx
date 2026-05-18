@@ -433,6 +433,9 @@ const SiteAnalyticsDashboard = () => {
           <Tabs defaultValue="views">
             <TabsList className="w-full flex-wrap h-auto gap-1">
               <TabsTrigger value="views" className="text-xs gap-1"><Eye className="h-3 w-3" /> Views</TabsTrigger>
+              <TabsTrigger value="users" className="text-xs gap-1"><UserPlus className="h-3 w-3" /> Users</TabsTrigger>
+              <TabsTrigger value="tools" className="text-xs gap-1"><Wrench className="h-3 w-3" /> Tools</TabsTrigger>
+              <TabsTrigger value="reviews-gen" className="text-xs gap-1"><FileText className="h-3 w-3" /> Reviews</TabsTrigger>
               <TabsTrigger value="clicks" className="text-xs gap-1"><MousePointerClick className="h-3 w-3" /> Clicks</TabsTrigger>
               <TabsTrigger value="searches" className="text-xs gap-1"><Search className="h-3 w-3" /> Searches</TabsTrigger>
               <TabsTrigger value="platforms" className="text-xs gap-1"><TrendingUp className="h-3 w-3" /> Platforms</TabsTrigger>
