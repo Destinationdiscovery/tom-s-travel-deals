@@ -112,6 +112,21 @@ serve(async (req) => {
     if (!query) throw new Error("Missing query");
 
     const raw = String(query).trim();
+
+    const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    const cacheKey = normalizeKey(raw);
+    const { data: cached } = await supabase
+      .from("tool_search_cache")
+      .select("id, result_data, hit_count")
+      .eq("tool_name", TOOL_NAME).eq("cache_key", cacheKey)
+      .gt("expires_at", new Date().toISOString()).maybeSingle();
+    if (cached) {
+      supabase.from("tool_search_cache").update({ hit_count: (cached.hit_count || 0) + 1 }).eq("id", cached.id).then(() => {});
+      return new Response(JSON.stringify(cached.result_data), {
+        headers: { ...corsHeaders, "Content-Type": "application/json", "X-Cache": "HIT" },
+      });
+    }
+
     const codes = extractCurrencies(raw);
 
     let sourceCode = "USD";
