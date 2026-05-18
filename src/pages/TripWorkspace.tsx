@@ -326,6 +326,11 @@ const TripWorkspace = () => {
           </div>
         </Section>
       </main>
+      {/* Mobile sticky action bar */}
+      <div className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-card/95 backdrop-blur border-t border-border px-4 py-3 flex gap-2 print:hidden" style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))" }}>
+        <Button variant="outline" onClick={handleShare} className="flex-1 gap-1.5 h-12"><Share2 className="h-4 w-4" /> Share</Button>
+        <Button variant="outline" onClick={() => window.print()} className="flex-1 gap-1.5 h-12"><Printer className="h-4 w-4" /> PDF</Button>
+      </div>
       <Footer />
     </div>
   );
