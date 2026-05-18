@@ -73,7 +73,11 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
           key={i}
           src={slide.src}
           alt={slide.alt}
+          width={1920}
+          height={1080}
           loading={i === 0 ? "eager" : "lazy"}
+          fetchPriority={i === 0 ? "high" : "auto"}
+          decoding={i === 0 ? "sync" : "async"}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
             i === currentSlide ? "opacity-100" : "opacity-0"
           }`}
