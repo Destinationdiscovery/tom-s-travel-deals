@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { useLocation } from "react-router-dom";
-import { Shield, Menu, Download, ChevronDown, Luggage, Calendar, Map, DollarSign, Plane, Brain, ShieldCheck } from "lucide-react";
+import { Shield, Menu, Download, ChevronDown, Luggage, Calendar, Map, DollarSign, Plane, Brain, ShieldCheck, Briefcase } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import AdminLoginDialog from "@/components/auth/AdminLoginDialog";
@@ -36,7 +36,7 @@ const toolLinks = [
 ];
 
 const Header = () => {
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [toolsExpanded, setToolsExpanded] = useState(false);
@@ -129,6 +129,25 @@ const Header = () => {
               </Link>
             )}
 
+            {/* My Trips primary CTA */}
+            <Link
+              to="/my-trips"
+              className="hidden md:inline-flex items-center gap-1.5 bg-secondary text-secondary-foreground hover:bg-secondary/90 transition-colors text-sm font-semibold px-3.5 py-1.5 rounded-lg shadow-sm"
+            >
+              <Briefcase className="h-4 w-4" />
+              My Trips
+            </Link>
+
+            {user && (
+              <div
+                aria-hidden
+                className="hidden md:flex h-8 w-8 items-center justify-center rounded-full bg-primary-foreground/15 text-primary-foreground text-sm font-semibold border border-primary-foreground/20"
+                title={user.email ?? "Account"}
+              >
+                {(user.email ?? "U").charAt(0).toUpperCase()}
+              </div>
+            )}
+
             {/* Mobile hamburger */}
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
@@ -212,6 +231,15 @@ const Header = () => {
                     className="text-lg font-medium text-primary-foreground/80 hover:text-primary-foreground transition-colors py-2"
                   >
                     Deals
+                  </Link>
+
+                  <Link
+                    to="/my-trips"
+                    onClick={() => setMobileOpen(false)}
+                    className="text-lg font-semibold text-secondary hover:text-secondary/80 transition-colors flex items-center gap-2 py-2"
+                  >
+                    <Briefcase className="h-4 w-4" />
+                    My Trips
                   </Link>
 
                   <Link

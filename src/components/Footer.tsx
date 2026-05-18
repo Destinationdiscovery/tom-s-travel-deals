@@ -1,4 +1,4 @@
-import { Heart, ExternalLink, Twitter, Instagram, Rss } from "lucide-react";
+import { Heart, ExternalLink, Twitter, Instagram, Rss, Briefcase, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import NewsletterCTASection from "@/components/NewsletterCTASection";
 
@@ -7,6 +7,23 @@ const Footer = () => {
 
   return (
     <>
+      {/* Slim trip plan CTA */}
+      <section className="bg-secondary/10 border-y border-secondary/20 py-5 no-print">
+        <div className="container mx-auto px-4 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5 text-center sm:text-left">
+          <p className="text-sm md:text-base text-foreground/90 max-w-2xl">
+            <span className="font-semibold">Planning a specific trip?</span>{" "}
+            Save everything in one place, hotels, itinerary, packing list and more. Free.
+          </p>
+          <Link
+            to="/my-trips"
+            className="inline-flex items-center gap-1.5 bg-secondary text-secondary-foreground hover:bg-secondary/90 transition-colors text-sm font-semibold px-4 py-2 rounded-lg shadow-sm whitespace-nowrap"
+          >
+            <Briefcase className="h-4 w-4" />
+            Create my trip plan
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+      </section>
       <NewsletterCTASection />
       <footer className="bg-primary text-primary-foreground py-16" role="contentinfo" aria-label="Site footer">
         <div className="container mx-auto px-4">

@@ -1,4 +1,4 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,6 +8,8 @@ import { HelmetProvider } from "react-helmet-async";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import ScrollToTop from "@/components/ScrollToTop";
+import ReturningTripBanner from "@/components/trips/ReturningTripBanner";
+import { touchSession } from "@/lib/tripSession";
 
 const Index = lazy(() => import("./pages/Index"));
 const AIReview = lazy(() => import("./pages/AIReview"));
@@ -51,7 +53,12 @@ const PageLoader = () => (
   </div>
 );
 
-const App = () => (
+const App = () => {
+  useEffect(() => {
+    touchSession();
+  }, []);
+
+  return (
   <HelmetProvider>
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
     <QueryClientProvider client={queryClient}>
@@ -61,6 +68,7 @@ const App = () => (
         <AuthProvider>
           <BrowserRouter>
             <ScrollToTop />
+            <ReturningTripBanner />
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<Index />} />
@@ -106,6 +114,7 @@ const App = () => (
     </QueryClientProvider>
     </ThemeProvider>
   </HelmetProvider>
-);
+  );
+};
 
 export default App;

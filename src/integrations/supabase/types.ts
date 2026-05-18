@@ -994,6 +994,262 @@ export type Database = {
         }
         Relationships: []
       }
+      trip_gear_items: {
+        Row: {
+          created_at: string
+          id: string
+          product: Json
+          purchased: boolean
+          trip_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product?: Json
+          purchased?: boolean
+          trip_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product?: Json
+          purchased?: boolean
+          trip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_gear_items_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_hotels: {
+        Row: {
+          best_for: string[]
+          cons: string[]
+          created_at: string
+          id: string
+          location: string | null
+          overall_rating: number | null
+          property_name: string
+          pros: string[]
+          ratings: Json
+          slug: string | null
+          sort_order: number
+          source_url: string | null
+          summary: string | null
+          top_pick: boolean
+          trip_id: string
+        }
+        Insert: {
+          best_for?: string[]
+          cons?: string[]
+          created_at?: string
+          id?: string
+          location?: string | null
+          overall_rating?: number | null
+          property_name: string
+          pros?: string[]
+          ratings?: Json
+          slug?: string | null
+          sort_order?: number
+          source_url?: string | null
+          summary?: string | null
+          top_pick?: boolean
+          trip_id: string
+        }
+        Update: {
+          best_for?: string[]
+          cons?: string[]
+          created_at?: string
+          id?: string
+          location?: string | null
+          overall_rating?: number | null
+          property_name?: string
+          pros?: string[]
+          ratings?: Json
+          slug?: string | null
+          sort_order?: number
+          source_url?: string | null
+          summary?: string | null
+          top_pick?: boolean
+          trip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_hotels_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_itinerary_days: {
+        Row: {
+          content: Json
+          created_at: string
+          day_number: number
+          id: string
+          trip_id: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          day_number: number
+          id?: string
+          trip_id: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          day_number?: number
+          id?: string
+          trip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_itinerary_days_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_logistics: {
+        Row: {
+          best_time: Json | null
+          best_time_confirmed: boolean
+          currency: Json | null
+          currency_checked: boolean
+          safety: Json | null
+          safety_checked: boolean
+          trip_id: string
+          updated_at: string
+          visa: Json | null
+          visa_checked: boolean
+        }
+        Insert: {
+          best_time?: Json | null
+          best_time_confirmed?: boolean
+          currency?: Json | null
+          currency_checked?: boolean
+          safety?: Json | null
+          safety_checked?: boolean
+          trip_id: string
+          updated_at?: string
+          visa?: Json | null
+          visa_checked?: boolean
+        }
+        Update: {
+          best_time?: Json | null
+          best_time_confirmed?: boolean
+          currency?: Json | null
+          currency_checked?: boolean
+          safety?: Json | null
+          safety_checked?: boolean
+          trip_id?: string
+          updated_at?: string
+          visa?: Json | null
+          visa_checked?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_logistics_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: true
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_packing_items: {
+        Row: {
+          checked: boolean
+          created_at: string
+          id: string
+          label: string
+          sort_order: number
+          trip_id: string
+        }
+        Insert: {
+          checked?: boolean
+          created_at?: string
+          id?: string
+          label: string
+          sort_order?: number
+          trip_id: string
+        }
+        Update: {
+          checked?: boolean
+          created_at?: string
+          id?: string
+          label?: string
+          sort_order?: number
+          trip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_packing_items_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trips: {
+        Row: {
+          created_at: string
+          destination: string | null
+          end_date: string | null
+          id: string
+          notes: string | null
+          share_token: string
+          slug: string
+          start_date: string | null
+          status: string
+          trip_name: string
+          trip_type: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          destination?: string | null
+          end_date?: string | null
+          id?: string
+          notes?: string | null
+          share_token?: string
+          slug: string
+          start_date?: string | null
+          status?: string
+          trip_name: string
+          trip_type?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          destination?: string | null
+          end_date?: string | null
+          id?: string
+          notes?: string | null
+          share_token?: string
+          slug?: string
+          start_date?: string | null
+          status?: string
+          trip_name?: string
+          trip_type?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_review_history: {
         Row: {
           id: string
@@ -1110,6 +1366,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_shared_trip: { Args: { _token: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

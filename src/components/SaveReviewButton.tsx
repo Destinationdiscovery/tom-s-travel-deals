@@ -1,9 +1,17 @@
+import { useState } from "react";
 import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { useSavedReviews, type SavedReview } from "@/hooks/useSavedReviews";
+import { useAuth } from "@/components/auth/AuthProvider";
 import type { CachedReview } from "@/hooks/useGenerateReview";
+import SaveMomentPrompt from "@/components/trips/SaveMomentPrompt";
+import {
+  addSavedHotel,
+  hasSeenSavePrompt,
+  markPromptShown,
+} from "@/lib/tripSession";
 
 interface SaveReviewButtonProps {
   review: CachedReview;
@@ -11,7 +19,9 @@ interface SaveReviewButtonProps {
 
 const SaveReviewButton = ({ review }: SaveReviewButtonProps) => {
   const { addReview, removeReview, isSaved, canAddMore, count } = useSavedReviews();
+  const { user } = useAuth();
   const { toast } = useToast();
+  const [showPrompt, setShowPrompt] = useState(false);
 
   const saved = isSaved(review.slug);
   const atLimit = !canAddMore && !saved;
@@ -40,6 +50,19 @@ const SaveReviewButton = ({ review }: SaveReviewButtonProps) => {
         title: "Saved to My List!",
         description: `${count + 1} saved. View and compare at My Saves.`,
       });
+      // Anonymous trip session: mirror the save and fire the prompt on first save.
+      if (!user) {
+        addSavedHotel({
+          slug: review.slug,
+          property_name: review.review_data.propertyName,
+          location: review.review_data.location ?? undefined,
+          overall_rating: review.review_data.overallRating,
+        });
+        if (!hasSeenSavePrompt()) {
+          markPromptShown();
+          setShowPrompt(true);
+        }
+      }
     } else {
       toast({
         title: "Limit reached",
@@ -62,15 +85,26 @@ const SaveReviewButton = ({ review }: SaveReviewButtonProps) => {
     </Button>
   );
 
-  return atLimit ? (
-    <Tooltip>
-      <TooltipTrigger asChild>{button}</TooltipTrigger>
-      <TooltipContent>
-        <p>You've saved 5 reviews. Remove one to add another.</p>
-      </TooltipContent>
-    </Tooltip>
-  ) : (
-    button
+  return (
+    <div>
+      {atLimit ? (
+        <Tooltip>
+          <TooltipTrigger asChild>{button}</TooltipTrigger>
+          <TooltipContent>
+            <p>You've saved 5 reviews. Remove one to add another.</p>
+          </TooltipContent>
+        </Tooltip>
+      ) : (
+        button
+      )}
+      {showPrompt && !user && (
+        <SaveMomentPrompt
+          hotelName={review.review_data.propertyName}
+          destination={review.review_data.location ?? undefined}
+          onDismiss={() => setShowPrompt(false)}
+        />
+      )}
+    </div>
   );
 };
 
