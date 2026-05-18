@@ -88,6 +88,24 @@ const SiteAnalyticsDashboard = () => {
   const [avgDuration, setAvgDuration] = useState(0);
   const [bounceRate, setBounceRate] = useState(0);
 
+  // Registered users
+  const [signupCount, setSignupCount] = useState(0);
+  const [recentSignups, setRecentSignups] = useState(0);
+  const [dailySignups, setDailySignups] = useState<{ date: string; count: number }[]>([]);
+
+  // Tool searches
+  const [toolTotals, setToolTotals] = useState<{ tool: string; hits: number; misses: number; total: number }[]>([]);
+  const [totalToolSearches, setTotalToolSearches] = useState(0);
+  const [totalCacheHits, setTotalCacheHits] = useState(0);
+  const [toolDaily, setToolDaily] = useState<{ date: string; count: number }[]>([]);
+  const [topToolQueries, setTopToolQueries] = useState<{ query: string; tool: string; count: number }[]>([]);
+
+  // Review generations
+  const [reviewGenCount, setReviewGenCount] = useState(0);
+  const [recentReviewGens, setRecentReviewGens] = useState(0);
+  const [dailyReviewGens, setDailyReviewGens] = useState<{ date: string; count: number }[]>([]);
+  const [topGenerated, setTopGenerated] = useState<{ slug: string; property_name: string; created_at: string }[]>([]);
+
   const fetchAll = useCallback(async () => {
     setLoading(true);
     const startDate = getStartDate(timeRange);
