@@ -286,6 +286,17 @@ const AIReviewResult = ({ review, isLoading, error, onNewReview, onReviewReady, 
 
               {/* Save to Compare */}
               <SaveReviewButton review={review} />
+              <AddToTripButton hotel={{
+                slug: review.slug,
+                propertyName: review.review_data.propertyName,
+                location: review.review_data.location ?? null,
+                overallRating: review.review_data.overallRating,
+                ratings: review.review_data.ratings,
+                summary: review.review_data.summary,
+                bestFor: review.review_data.bestFor ?? [],
+                pros: (review.review_data as any).pros ?? [],
+                cons: (review.review_data as any).cons ?? [],
+              }} />
 
               {/* New Review Button */}
               {onNewReview && (
