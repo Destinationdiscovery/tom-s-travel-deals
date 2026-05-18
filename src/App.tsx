@@ -96,6 +96,8 @@ const App = () => {
                 <Route path="/top/:location" element={<TopDestinations />} />
                 <Route path="/my-reviews" element={<MyReviews />} />
                 <Route path="/my-trips" element={<MyTrips />} />
+                <Route path="/my-trips/:slug" element={<TripWorkspace />} />
+                <Route path="/trip/:token" element={<SharedTrip />} />
                 <Route path="/promo" element={<Promo />} />
                 <Route path="/search" element={<TravelSearch />} />
                 <Route path="/reviews/:query" element={<Reviews />} />
