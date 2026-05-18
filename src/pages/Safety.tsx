@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
+import ToolSaveBar from "@/components/tools/ToolSaveBar";
 
 interface SafetyCategory {
   name: string;
@@ -289,6 +290,18 @@ const Safety = () => {
           onCardClick={handleCardRun}
         />
       </main>
+      {data && !loading && (
+        <>
+          <div aria-hidden className="h-28 md:h-20" />
+          <ToolSaveBar
+            toolType="safety"
+            label={`${data.destination} safety score generated`}
+            destination={data.destination}
+            payload={data}
+            onCopy={() => `${data.destination} safety: ${data.safetyScore}/5\n${data.verdict}`}
+          />
+        </>
+      )}
       <Footer />
     </div>
   );

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
+import ToolSaveBar from "@/components/tools/ToolSaveBar";
 
 interface Activity {
   time: string;
@@ -314,6 +315,25 @@ const Itinerary = () => {
           onCardClick={(q) => { setQuery(q); doSearch(q); window.scrollTo({ top: 0, behavior: "smooth" }); }}
         />
       </main>
+      {data && !loading && (
+        <>
+          <div aria-hidden className="h-28 md:h-20" />
+          <ToolSaveBar
+            toolType="itinerary"
+            label={`${data.destination} itinerary · ${data.days?.length ?? 0} days planned`}
+            destination={data.destination}
+            payload={data}
+            onCopy={() => {
+              const lines = [`${data.destination} itinerary (${data.duration})`, data.summary, ""];
+              data.days?.forEach((d) => {
+                lines.push(`Day ${d.day}: ${d.title}`);
+                d.activities?.forEach((a) => lines.push(`  - ${a.time} ${a.activity}${a.cost ? ` (${a.cost})` : ""}`));
+              });
+              return lines.join("\n");
+            }}
+          />
+        </>
+      )}
       <Footer />
     </div>
   );

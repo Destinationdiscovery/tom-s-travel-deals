@@ -13,6 +13,7 @@ import { travelIntelAEO } from "@/components/tools/toolAEOContent";
 import { supabase } from "@/integrations/supabase/client";
 import heroImg from "@/assets/snowbird-beach-sunset.jpg";
 import { IntelLoading, RequirementsResult, AdvisoriesResult, NewsResult } from "@/components/intel/IntelResults";
+import ToolSaveBar from "@/components/tools/ToolSaveBar";
 
 const TravelIntel = () => {
   const { loading, error, requirementsData, advisoriesData, newsData, fetchIntel } = useTravelIntel();
