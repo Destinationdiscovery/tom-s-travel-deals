@@ -164,12 +164,12 @@ const TripWorkspace = () => {
     <div className="min-h-screen bg-background">
       <SEOHead title={trip.trip_name} description={`Trip plan for ${trip.destination ?? trip.trip_name}`} noindex />
       <Header />
-      <main className="pt-24 pb-16 container mx-auto px-4 max-w-5xl">
+      <main className="pt-24 pb-32 md:pb-16 container mx-auto px-4 max-w-5xl">
         <div className="flex items-center justify-between gap-3 mb-6 flex-wrap">
-          <Link to="/my-trips" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+          <Link to="/my-trips" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground min-h-[44px]">
             <ArrowLeft className="h-4 w-4" /> All trips
           </Link>
-          <div className="flex gap-2">
+          <div className="hidden md:flex gap-2">
             <Button variant="outline" size="sm" onClick={handleShare} className="gap-1.5"><Share2 className="h-4 w-4" /> Share</Button>
             <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-1.5"><Printer className="h-4 w-4" /> Print / PDF</Button>
           </div>
