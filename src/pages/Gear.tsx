@@ -234,7 +234,7 @@ const Gear = () => {
           onCardClick={(q) => { setSearchQuery(q); clearReview(); fetchPackingList(q); window.scrollTo({ top: 0, behavior: "smooth" }); }}
         />
       </main>
-      {packingData && !reviewData && (
+      {packingData && !reviewData && <div aria-hidden className="h-28 md:h-20" />}
         <ToolSaveBar
           toolType="gear"
           label={`${searchQuery || "Packing list"} · ${packingData.items.length} packing items`}
