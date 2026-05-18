@@ -16,7 +16,7 @@ import HomepageFAQ from "@/components/HomepageFAQ";
 import { homepageFaqData } from "@/components/HomepageFAQ";
 import ComparisonFloatingBadge from "@/components/ComparisonFloatingBadge";
 import Footer from "@/components/Footer";
-import EmailCapturePopup from "@/components/EmailCapturePopup";
+
 import AIReviewResult from "@/components/AIReviewResult";
 import SEOHead from "@/components/SEOHead";
 import { useGenerateReview } from "@/hooks/useGenerateReview";
@@ -160,7 +160,7 @@ const Index = () => {
         <HomepageFAQ />
       </main>
       <ComparisonFloatingBadge />
-      <EmailCapturePopup />
+      
       <Footer />
     </div>
   );
