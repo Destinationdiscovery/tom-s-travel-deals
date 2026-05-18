@@ -229,8 +229,13 @@ serve(async (req) => {
       currencyName: targetName,
     };
 
+    await supabase.from("tool_search_cache").upsert({
+      tool_name: TOOL_NAME, cache_key: cacheKey, query: raw, result_data: result,
+      expires_at: new Date(Date.now() + TTL_MS).toISOString(), hit_count: 0,
+    }, { onConflict: "tool_name,cache_key" });
+
     return new Response(JSON.stringify(result), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...corsHeaders, "Content-Type": "application/json", "X-Cache": "MISS" },
     });
   } catch (e: any) {
     return new Response(JSON.stringify({ error: e.message }), {
