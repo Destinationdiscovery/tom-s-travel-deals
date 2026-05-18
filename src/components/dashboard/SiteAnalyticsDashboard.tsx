@@ -696,6 +696,153 @@ const SiteAnalyticsDashboard = () => {
                 </>
               )}
             </TabsContent>
+
+            {/* Users Tab */}
+            <TabsContent value="users" className="mt-4 space-y-4">
+              <div className="flex gap-4">
+                <div className="text-sm"><span className="font-bold text-foreground">{signupCount}</span> <span className="text-muted-foreground">in period</span></div>
+                <div className="text-sm"><span className="font-bold text-emerald-400">{recentSignups}</span> <span className="text-muted-foreground">last 7 days</span></div>
+              </div>
+              {dailySignups.length > 1 ? (
+                <div>
+                  <p className="text-xs text-muted-foreground mb-2 font-medium">Daily Signup Trend</p>
+                  <div className="h-48">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={dailySignups}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                        <XAxis dataKey="date" tickFormatter={(d) => format(new Date(d), "MMM d")} tick={{ fontSize: 10 }} />
+                        <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
+                        <Tooltip labelFormatter={(d) => format(new Date(String(d)), "MMM d, yyyy")} />
+                        <Line type="monotone" dataKey="count" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 3 }} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              ) : signupCount === 0 ? (
+                <p className="text-sm text-muted-foreground">No signups in this period.</p>
+              ) : null}
+            </TabsContent>
+
+            {/* Tools Tab */}
+            <TabsContent value="tools" className="mt-4 space-y-4">
+              <div className="flex gap-4 flex-wrap">
+                <div className="text-sm"><span className="font-bold text-foreground">{totalToolSearches}</span> <span className="text-muted-foreground">total searches</span></div>
+                <div className="text-sm"><span className="font-bold text-emerald-400">{totalCacheHits}</span> <span className="text-muted-foreground">cache hits ({totalToolSearches > 0 ? Math.round((totalCacheHits / totalToolSearches) * 100) : 0}%)</span></div>
+              </div>
+              {toolTotals.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No tool searches in this period.</p>
+              ) : (
+                <>
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-2 font-medium">Searches per Tool (cache hits vs misses)</p>
+                    <div className="h-56">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={toolTotals}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                          <XAxis dataKey="tool" tick={{ fontSize: 11 }} />
+                          <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
+                          <Tooltip />
+                          <Bar dataKey="hits" stackId="a" fill="hsl(var(--primary))" name="Cache hits" />
+                          <Bar dataKey="misses" stackId="a" fill="hsl(var(--destructive))" name="API calls" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
+                  {toolDaily.length > 1 && (
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-2 font-medium">Daily Tool Search Trend</p>
+                      <div className="h-40">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={toolDaily}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                            <XAxis dataKey="date" tickFormatter={(d) => format(new Date(d), "MMM d")} tick={{ fontSize: 10 }} />
+                            <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
+                            <Tooltip labelFormatter={(d) => format(new Date(String(d)), "MMM d, yyyy")} />
+                            <Line type="monotone" dataKey="count" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-2 font-medium">Per-tool breakdown</p>
+                      <div className="space-y-1.5">
+                        {toolTotals.map((t) => (
+                          <div key={t.tool} className="flex items-center justify-between text-sm border-b border-border/40 py-1">
+                            <span className="text-foreground font-medium">{t.tool}</span>
+                            <span className="text-xs font-mono text-muted-foreground">
+                              <span className="text-emerald-400">{t.hits}</span> hits / <span className="text-rose-400">{t.misses}</span> calls
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-2 font-medium">Top queries</p>
+                      <div className="space-y-1.5">
+                        {topToolQueries.map((q, i) => (
+                          <div key={`${q.tool}-${q.query}-${i}`} className="flex items-center justify-between text-sm">
+                            <span className="text-foreground truncate flex-1">
+                              <span className="text-muted-foreground mr-2">{i + 1}.</span>
+                              <Badge variant="outline" className="mr-1 text-[10px]">{q.tool}</Badge>
+                              {q.query}
+                            </span>
+                            <span className="text-muted-foreground text-xs font-mono">{q.count}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+            </TabsContent>
+
+            {/* Reviews Generated Tab */}
+            <TabsContent value="reviews-gen" className="mt-4 space-y-4">
+              <div className="flex gap-4">
+                <div className="text-sm"><span className="font-bold text-foreground">{reviewGenCount}</span> <span className="text-muted-foreground">generated in period</span></div>
+                <div className="text-sm"><span className="font-bold text-emerald-400">{recentReviewGens}</span> <span className="text-muted-foreground">last 7 days</span></div>
+              </div>
+              {reviewGenCount === 0 ? (
+                <p className="text-sm text-muted-foreground">No reviews generated in this period.</p>
+              ) : (
+                <>
+                  {dailyReviewGens.length > 1 && (
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-2 font-medium">Daily Generation Trend</p>
+                      <div className="h-40">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={dailyReviewGens}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                            <XAxis dataKey="date" tickFormatter={(d) => format(new Date(d), "MMM d")} tick={{ fontSize: 10 }} />
+                            <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
+                            <Tooltip labelFormatter={(d) => format(new Date(String(d)), "MMM d, yyyy")} />
+                            <Line type="monotone" dataKey="count" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-2 font-medium">Most recent generations</p>
+                    <div className="space-y-1.5">
+                      {topGenerated.map((r, i) => (
+                        <div key={r.slug} className="flex items-center justify-between text-sm">
+                          <span className="text-foreground truncate flex-1">
+                            <span className="text-muted-foreground mr-2">{i + 1}.</span>
+                            {r.property_name || formatSlug(r.slug)}
+                          </span>
+                          <span className="text-muted-foreground text-xs">{format(new Date(r.created_at), "MMM d, h:mm a")}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+            </TabsContent>
           </Tabs>
         </CardContent>
       </Card>
