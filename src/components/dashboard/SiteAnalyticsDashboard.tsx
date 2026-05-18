@@ -134,7 +134,19 @@ const SiteAnalyticsDashboard = () => {
       sessionQuery = sessionQuery.gte("started_at", startDate);
     }
 
-    const [searchRes, clickRes, viewRes, reactionRes, subRes, vitalsRes, sessionRes] = await Promise.all([
+    // Profiles (registered users)
+    let profilesQuery = supabase.from("profiles").select("id, created_at");
+    if (startDate) profilesQuery = profilesQuery.gte("created_at", startDate);
+
+    // Tool search events
+    let toolEventsQuery = supabase.from("tool_search_events" as any).select("tool_name, query, cache_hit, created_at");
+    if (startDate) toolEventsQuery = toolEventsQuery.gte("created_at", startDate);
+
+    // Cached reviews (generations)
+    let reviewGenQuery = supabase.from("cached_reviews").select("slug, property_name, created_at").order("created_at", { ascending: false });
+    if (startDate) reviewGenQuery = reviewGenQuery.gte("created_at", startDate);
+
+    const [searchRes, clickRes, viewRes, reactionRes, subRes, vitalsRes, sessionRes, profilesRes, toolEventsRes, reviewGenRes] = await Promise.all([
       supabase.from("search_suggestions").select("name, search_count").order("search_count", { ascending: false }).limit(20),
       clickQuery,
       viewPromise,
@@ -142,7 +154,63 @@ const SiteAnalyticsDashboard = () => {
       subQuery,
       vitalsQuery,
       sessionQuery,
+      profilesQuery,
+      toolEventsQuery,
+      reviewGenQuery,
     ]);
+
+    // Profiles processing
+    const profileData = profilesRes.data || [];
+    setSignupCount(profileData.length);
+    const weekAgoForSignups = new Date(); weekAgoForSignups.setDate(weekAgoForSignups.getDate() - 7);
+    setRecentSignups(profileData.filter((p: any) => new Date(p.created_at) > weekAgoForSignups).length);
+    const signupDayMap: Record<string, number> = {};
+    profileData.forEach((p: any) => {
+      const day = p.created_at?.substring(0, 10);
+      if (day) signupDayMap[day] = (signupDayMap[day] || 0) + 1;
+    });
+    setDailySignups(Object.entries(signupDayMap).map(([date, count]) => ({ date, count })).sort((a, b) => a.date.localeCompare(b.date)));
+
+    // Tool events processing
+    const toolEventData = ((toolEventsRes as any).data || []) as Array<{ tool_name: string; query: string; cache_hit: boolean; created_at: string }>;
+    setTotalToolSearches(toolEventData.length);
+    setTotalCacheHits(toolEventData.filter((e) => e.cache_hit).length);
+
+    const toolMap: Record<string, { hits: number; misses: number }> = {};
+    const toolDayMap: Record<string, number> = {};
+    const queryMap: Record<string, { query: string; tool: string; count: number }> = {};
+    toolEventData.forEach((e) => {
+      if (!toolMap[e.tool_name]) toolMap[e.tool_name] = { hits: 0, misses: 0 };
+      if (e.cache_hit) toolMap[e.tool_name].hits += 1;
+      else toolMap[e.tool_name].misses += 1;
+      const day = e.created_at?.substring(0, 10);
+      if (day) toolDayMap[day] = (toolDayMap[day] || 0) + 1;
+      if (e.query) {
+        const k = `${e.tool_name}|${e.query.toLowerCase()}`;
+        if (!queryMap[k]) queryMap[k] = { query: e.query, tool: e.tool_name, count: 0 };
+        queryMap[k].count += 1;
+      }
+    });
+    setToolTotals(
+      Object.entries(toolMap)
+        .map(([tool, v]) => ({ tool, hits: v.hits, misses: v.misses, total: v.hits + v.misses }))
+        .sort((a, b) => b.total - a.total)
+    );
+    setToolDaily(Object.entries(toolDayMap).map(([date, count]) => ({ date, count })).sort((a, b) => a.date.localeCompare(b.date)));
+    setTopToolQueries(Object.values(queryMap).sort((a, b) => b.count - a.count).slice(0, 15));
+
+    // Review generations processing
+    const reviewGenData = (reviewGenRes.data || []) as Array<{ slug: string; property_name: string; created_at: string }>;
+    setReviewGenCount(reviewGenData.length);
+    const weekAgoForReviews = new Date(); weekAgoForReviews.setDate(weekAgoForReviews.getDate() - 7);
+    setRecentReviewGens(reviewGenData.filter((r) => new Date(r.created_at) > weekAgoForReviews).length);
+    const reviewDayMap: Record<string, number> = {};
+    reviewGenData.forEach((r) => {
+      const day = r.created_at?.substring(0, 10);
+      if (day) reviewDayMap[day] = (reviewDayMap[day] || 0) + 1;
+    });
+    setDailyReviewGens(Object.entries(reviewDayMap).map(([date, count]) => ({ date, count })).sort((a, b) => a.date.localeCompare(b.date)));
+    setTopGenerated(reviewGenData.slice(0, 15));
 
     // Sessions
     const sessionData = (sessionRes as any).data || [];
