@@ -1402,6 +1402,43 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_quote_by_share_token: {
+        Args: { _token: string }
+        Returns: {
+          attachment_urls: string[] | null
+          check_in: string | null
+          check_out: string | null
+          client_email: string | null
+          client_name: string
+          created_at: string
+          currency: string | null
+          destination: string | null
+          flight_details: Json | null
+          id: string
+          include_review: boolean | null
+          inclusions: string[] | null
+          line_items: Json | null
+          notes: string | null
+          num_travellers: number | null
+          quote_markdown: string | null
+          resort_name: string
+          resort_review_slug: string | null
+          review_data: Json | null
+          room_type: string | null
+          share_token: string | null
+          status: Database["public"]["Enums"]["quote_status"] | null
+          summary: string | null
+          total_price: number | null
+          updated_at: string
+          valid_until: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "client_quotes"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_shared_trip: { Args: { _token: string }; Returns: Json }
       has_role: {
         Args: {
