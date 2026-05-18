@@ -147,8 +147,14 @@ IMPORTANT:
       }
     }
 
-    return new Response(JSON.stringify({ results, activities, citations }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    const payload = { results, activities, citations };
+    await supabase.from("tool_search_cache").upsert({
+      tool_name: TOOL_NAME, cache_key: cacheKey, query, result_data: payload,
+      expires_at: new Date(Date.now() + TTL_MS).toISOString(), hit_count: 0,
+    }, { onConflict: "tool_name,cache_key" });
+
+    return new Response(JSON.stringify(payload), {
+      headers: { ...corsHeaders, "Content-Type": "application/json", "X-Cache": "MISS" },
     });
   } catch (error) {
     console.error("Travel search error:", error);
