@@ -1,10 +1,17 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+  "Access-Control-Expose-Headers": "x-cache",
 };
+
+const TOOL_NAME = "currency";
+const PROMPT_VERSION = "v1";
+const TTL_MS = 60 * 60 * 1000; // 1 hour
+const normalizeKey = (s: string) => `${PROMPT_VERSION}:${s.trim().toLowerCase().replace(/\s+/g, " ")}`;
 
 // Country/region to currency code mapping
 const COUNTRY_CURRENCY: Record<string, string> = {
