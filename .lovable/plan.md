@@ -1,46 +1,79 @@
+# Plan: Smart Hero Search + Newsletter Removal + Nav Polish
 
-## Execution sequence (approved plan from `.lovable/plan.md`)
+## 1. Universal hero search across all 8 tools
 
-Proceeding phase by phase. Each phase ends with a working, verifiable checkpoint before the next starts.
+Today the hero search only routes to two places: a listicle page (`/reviews/:query`) or single hotel review generation. A prompt like "packing list for Italy in July" or "entry requirements for Cuba" gets misrouted to the review flow.
 
-1. **Phase 0 — Homepage polish** (popup already removed)
-   Nav "My Trips" button + logged-in state, "Start Your Saves List" card copy swap, slim trip-plan banner above footer, rename tools section to "Plan every part of your trip".
+### Add an intent router
 
-2. **Phase 1 — Anonymous session foundation**
-   `src/lib/tripSession.ts` (localStorage + 7-day expiry), rehydrate on mount, dismissible "returning visitor" banner.
+Extend `src/lib/searchIntent.ts` with a second classifier `classifyToolIntent(query)` that returns one of:
 
-3. **Phase 2 — Save Moment trigger**
-   Inline prompt on first hotel save for logged-out users. Magic link via Supabase `signInWithOtp` + Google OAuth. Success state with 4 contextual tool cards. Bottom-sheet on mobile.
+- `gear` (keywords: pack, packing, what to bring, suitcase, luggage, gear)
+- `safety` (safe, safety, dangerous, crime, advisory, is it safe)
+- `visa` (visa, entry requirement, passport, customs, do I need)
+- `best-time` (best time, when to visit, weather in, season, monsoon)
+- `currency` (currency, exchange rate, how much is, tipping, cash)
+- `flights` (flight, fly to, cheap flights, airline, airfare)
+- `itinerary` (itinerary, days in, X day, plan a trip to, week in)
+- `intel` (know before you go, travel intel, customs etiquette, language tips)
+- `null` (no tool match, fall back to existing review/listicle flow)
 
-4. **Phase 3 — Data model (Lovable Cloud migration)**
-   `trips`, `trip_hotels`, `trip_itinerary_days`, `trip_packing_items`, `trip_gear_items`, `trip_logistics`. Owner-only RLS + `get_shared_trip(token)` SECURITY DEFINER for public share view.
+Order matters: visa/safety checked before generic question starters so "do I need a visa for Cuba" doesn't fall to listicle.
 
-5. **Phase 4 — `/my-trips` dashboard**
-   Greeting, 4 stat cards, trip cards with status pill / progress badges / Share / Export / Open, empty state, auth gate.
+### Update hero handler in `src/pages/Index.tsx`
 
-6. **Phase 5 — `/my-trips/:slug` workspace**
-   6 sections: Hotels, Itinerary, Logistics 2×2, Packing, Gear, Notes. Inline-editable header. "Add to this trip" context mode.
+```text
+handleHeroSearch(query):
+  tool = classifyToolIntent(query)
+  if tool: navigate(`/${toolRoute[tool]}?q=${encodeURIComponent(query)}`)
+  else: existing listicle vs review flow
+```
 
-7. **Phase 6 — Add-to-Trip on tool pages**
-   Single `AddToTripButton` wired into 8 tool result blocks. No other tool-page changes.
+`toolRoute` maps to: `gear`, `safety`, `safety` (visa folds into safety for now since there is no /visa page), `best-time`, `currency`, `flights`, `itinerary`, `travel-intel`.
 
-8. **Phase 7 — Share + Export**
-   `/trip/:token` public read-only view + conversion banner. PDF export via `jspdf` (added then).
+### Auto-run on each tool page
 
-9. **Phase 8 — Mobile polish**
-   Collapsible sections, 44px tap targets, sticky bottom action bar in workspace.
+For the 7 tool pages (`Gear`, `Safety`, `BestTime`, `Currency`, `Flights`, `Itinerary`, `TravelIntel`), on mount read `?q=` from URL. If present, prefill the page's primary input and trigger the same submit handler the user would. No new UI, just wired-up auto-run.
 
-## Guardrails for the whole run
+This makes the hero a true answer engine: one search bar, eight destinations.
 
-- `/gear-admin` (Agent HQ) and the compass-icon admin login: **do not touch**.
-- Homepage sections listed in "stays the same" in the original spec: **do not redesign** (Phase 0 only changes copy/headings/one banner).
-- All existing tool pages, blog, guides, sitemap, articles-feed SEO work: **untouched** except the single Add-to-Trip button in Phase 6.
-- Magic link auth uses Lovable's built-in email (no third-party email service added).
-- One clarification I'll need at Phase 3 only: confirming the migration before I run it (auto-prompted by the migration tool).
+## 2. Remove Compass Weekly newsletter sitewide
 
-## Question
+`NewsletterCTASection` (heading "The Compass Weekly", subtitle "Get hand-picked travel deals, packing tips, and travel news") is rendered inside `Footer.tsx` (line 27), so it shows on every page.
 
-Two small confirmations before I start so I don't pause later:
+- Remove the `<NewsletterCTASection />` mount and the import from `src/components/Footer.tsx`.
+- Leave the component file in place (no other consumers). Marked as unused, safe to delete in a later pass.
 
-1. **Profile data**: I'll lean on the existing `profiles` table (id, display_name, newsletter_opt_in already exists) and the existing `handle_new_user` trigger. No schema change to profiles. OK?
-2. **Magic-link email subject**: Phase 2 will use Supabase's default magic-link email template for v1 (works immediately, no DNS/domain setup needed). We can customize the template later in a dedicated pass. OK?
+Result: no Compass Weekly block anywhere on the site.
+
+## 3. Header refinements (logged-in only)
+
+Header today already has the structure you described except the active-trip quick link.
+
+- ✅ Public nav: Home, Blog, Guides, Deals, Tools dropdown, My Trips (primary button) — already in place.
+- ✅ Avatar circle with user initial — already in place.
+- ✅ Admin "Dashboard" link stays (visible only when `isAdmin`, kept per your earlier request to preserve admin dashboard).
+- ➕ **New**: active trip quick-return link.
+
+### Active trip link
+
+When `user` is logged in, the header fetches the most recently updated trip from the `trips` table (single row, `order by updated_at desc limit 1`). If a trip exists, render its name to the left of the avatar as a small muted link to `/my-trips/:slug`, truncated to about 18 characters with an ellipsis. Hidden on mobile, the mobile sheet already has a My Trips entry.
+
+Implementation notes:
+- Tiny `useActiveTrip()` hook in `src/hooks/useActiveTrip.ts` that queries once when the user changes and exposes `{ slug, name }`.
+- Cached client-side so it doesn't refetch on every route change.
+
+## Files touched
+
+- `src/lib/searchIntent.ts` — add `classifyToolIntent`.
+- `src/pages/Index.tsx` — update `handleHeroSearch` to consult the new classifier.
+- `src/pages/Gear.tsx`, `Safety.tsx`, `BestTime.tsx`, `Currency.tsx`, `Flights.tsx`, `Itinerary.tsx`, `TravelIntel.tsx` — read `?q=` and auto-run.
+- `src/components/Footer.tsx` — remove `NewsletterCTASection`.
+- `src/hooks/useActiveTrip.ts` — new.
+- `src/components/Header.tsx` — render active-trip link beside avatar.
+
+## Out of scope (call out)
+
+- No new `/visa` page. Visa-style queries route to `/safety` since safety already covers entry/advisory content. Say the word and I'll spin up a dedicated visa page next.
+- No tool-page UI redesign, just URL prefill and auto-run.
+- No changes to admin Dashboard link visibility.
