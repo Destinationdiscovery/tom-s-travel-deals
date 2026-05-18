@@ -5,6 +5,7 @@ import ReviewLoadingStages from "@/components/ReviewLoadingStages";
 import { Button } from "@/components/ui/button";
 import { toSlug } from "@/lib/searchIntent";
 import SaveReviewButton from "@/components/SaveReviewButton";
+import AddToTripButton from "@/components/trips/AddToTripButton";
 import PhotoGallery from "@/components/review/PhotoGallery";
 import ThingsToDoSection from "@/components/review/ThingsToDoSection";
 
