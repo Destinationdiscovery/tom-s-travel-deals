@@ -1,105 +1,91 @@
-# Plan
 
-## Task 1 — Packing checklist on /gear
+## Goal
 
-Add a new section that appears on the packing results page, slotted **between `PackingNarrative` (Your Trip Briefing) and the product card grid**. Product cards stay untouched.
+Stop paying Perplexity for repeat searches, and stop paying at all for queries that don't need live web data.
 
-### New component: `src/components/gear/PackingChecklist.tsx`
+## Part 1 — Cache every AI tool search (7-day TTL)
 
-Props: `items: GearItem[]` (existing type from `useGearIntel`).
+Today only 3 of 9 AI functions cache results. Add a shared cache pattern to the rest. Caches are global (any user benefits from any prior user's identical search), keyed by normalized query.
 
-Behavior:
-- Derives a checklist from the same `packingData.items` already rendered as cards. Each item becomes one checkbox row using `item.name`.
-- Groups rows by `item.category`, ordered as: **Packing, Clothing, Beach, Tech, Health**, then any other category last.
-- Checked state lives in local component state: `Record<string, boolean>` keyed by item name. Persisted to `localStorage` under `rtg:packing-checklist:<searchSlug>` so a refresh keeps state. (Slug derived from the same query that produced the list, passed in as a prop alongside items.)
-- Header: title "Your Packing Checklist", small counter underneath `"X of Y items packed"` that updates live.
-- Top-right controls: text buttons **Check all** / **Uncheck all**.
-- Row UI: shadcn `Checkbox` + label. When checked: label gets `line-through text-muted-foreground`.
-- Category subheaders use the existing `categoryColors` / `categoryIcons` maps already defined in `GearResults.tsx` (export them, or duplicate locally).
-- Wrapped in the same card shell used by `PackingNarrative` (`bg-card rounded-2xl p-6 md:p-8 shadow-soft border border-border/50`) for visual consistency.
+### New table: `tool_search_cache`
 
-### Wiring
-
-In `src/pages/Gear.tsx`, inside the `packingData && !reviewData && !reviewLoading` branch, render `<PackingChecklist items={packingData.items} querySlug={searchQuery} />` directly after `<PackingNarrative />` and before the product grid.
-
-No backend writes. (Logged-in persistence to `trip_packing_items` is out of scope here; Task 2's save bar covers the broader trip-save flow.)
-
----
-
-## Task 2 — Sticky save action bar across tool result pages
-
-Pages: `/gear`, `/itinerary`, `/best-time`, `/safety`, `/travel-intel`, `/currency`, `/flights`, `/destinations`.
-
-### New component: `src/components/tools/ToolSaveBar.tsx`
-
-Props:
 ```
-{
-  toolType: "gear" | "itinerary" | "best-time" | "safety" | "travel-intel" | "currency" | "flights" | "destinations";
-  label: string;                       // left-zone summary, e.g. "Cancun beach trip · 18 packing items"
-  destination?: string;                // used to seed trip name / SaveMomentPrompt
-  payload: Record<string, any>;        // tool result data, serialized for save + export
-  onExportPdf: () => void;             // page-supplied (uses window.print scoped or html2pdf if needed)
-  onCopy: () => Promise<string>;       // returns plain-text version for clipboard
-}
+- id           uuid
+- tool_name    text       (best_time | itinerary | safety | flights | currency | travel_search | gear_intel)
+- cache_key    text       (lowercased + trimmed query + tool_name)
+- query        text       (original)
+- result_data  jsonb
+- created_at   timestamptz
+- expires_at   timestamptz
+- hit_count    int        (for analytics, increments on read)
+
+Unique index on (tool_name, cache_key)
+Index on expires_at (for cleanup)
+RLS: public SELECT (read), no public writes — edge functions write via service role.
 ```
 
-Behavior — three states driven by `useAuth()` + `useActiveTrip()`:
+TTLs per tool:
+- Best Time, Itinerary, Safety, Travel Search, Gear Intel → **7 days**
+- Flights → **1 hour** (prices move)
+- Currency → **1 hour** (rates move)
 
-1. **Logged in + active trip exists** → primary button `Add to {trip.name}`. Click writes the payload into the matching child table for that trip:
-   - gear → `trip_gear_items` (one row per item; reuses existing schema)
-   - itinerary → `trip_itinerary_days`
-   - best-time / safety / travel-intel (visa) / currency → `trip_logistics` (jsonb columns + matching `*_checked` flag)
-   - flights → store under `trip_logistics` as new `flights` jsonb (small migration adding nullable column, see Technical notes)
-   - destinations → `trip_hotels` (reuse existing AddToTripButton pattern)
-   On success: toast "Added to {trip name}" with link to `/my-trips/{slug}`.
+### Edge function changes
 
-2. **Logged in, no active trip** → primary button `Save to a trip`. Click opens a popover/dropdown listing the user's trips (same query AddToTripButton uses) plus an inline "+ New trip" name field. Selecting one or creating a new one then runs the same insert as state 1.
+Each function gets a small `checkCache(toolName, key)` / `writeCache(...)` helper using the service role client. Flow:
+1. Normalize query → `cache_key`
+2. SELECT where `expires_at > now()`. Hit → return immediately, increment `hit_count`, set response header `X-Cache: HIT`.
+3. Miss → call AI, write result with `expires_at = now() + interval`.
 
-3. **Logged out** → primary button `Save this to a trip plan`. Click opens the existing `SaveMomentPrompt` in a `Dialog` (it already handles trip-name + email + magic link). After the magic-link is sent, the payload is stashed in `sessionStorage` under `rtg:pending-save` so it can be flushed into the new trip after the user lands on `/my-trips` post-auth (handled by a tiny `useEffect` in `MyTrips.tsx`).
+Functions to update: `best-time-intel`, `safety-intel`, `generate-itinerary`, `flight-deals`, `currency-tracker`, `travel-search`. (`travel-gear-intel`, `travel-intel`, `generate-review` already cache — leave them; optionally migrate to the unified table later.)
 
-### Layout
+`dashboard-search` (admin streaming chat) stays uncached — it's conversational and admin-only.
 
-- Fixed bar: `fixed inset-x-0 bottom-0 z-40 bg-card/95 backdrop-blur border-t shadow-[0_-4px_20px_rgba(0,0,0,0.06)]`.
-- Inner container: `container mx-auto px-4 py-3 flex items-center gap-4`.
-- Desktop zones: left label (flex-1, truncate), center primary button, right two text links `Export PDF` and `Copy to clipboard` (`text-sm text-muted-foreground hover:text-primary`).
-- Mobile (`< sm`): stacks. Label on top row, primary button full-width on next row, two text links centered below.
-- Visibility: bar only mounts once results exist on the page (each tool page passes `visible={hasResults}`). To avoid covering the footer, page main wrappers get `pb-28 md:pb-24` when the bar is shown.
+### Per-user search history (bonus)
 
-### Per-page integration
+Optional small table `user_tool_searches` (user_id, tool_name, query, created_at) so logged-in users can see "Recent searches" and re-open prior results without re-querying. Cheap, optional.
 
-Each page already has a `hasResults` style flag. Add at end of page (before `<Footer />`):
-```
-{hasResults && (
-  <ToolSaveBar toolType="…" label={summaryLabel} destination={…} payload={…}
-               onExportPdf={…} onCopy={…} />
-)}
-```
-- `summaryLabel` is computed per tool, e.g. gear: `${query} · ${items.length} packing items`; itinerary: `${destination} itinerary · ${days.length} days planned`; safety: `${destination} safety score generated`; etc.
-- `onExportPdf`: simplest path is `window.print()` with a print-only CSS rule that hides the save bar + chrome and shows the results section. (Site already has print optimization for #quote-preview; we'll add a `.tool-print-region` class wrapping each tool's results card and a matching print rule in `index.css`.)
-- `onCopy`: each page builds a markdown / plain-text summary from its result data and writes via `navigator.clipboard.writeText`. Show a toast on success.
+## Part 2 — Move evergreen tools off Perplexity
 
-### Technical notes
+Replace Perplexity with **Lovable AI Gateway → `google/gemini-2.5-flash`** for:
 
-- New util: `src/lib/pendingToolSave.ts` with `stash(payload)` / `consumeAndApply(tripId)` to flush logged-out saves after magic-link sign-in.
-- `MyTrips.tsx` gets a `useEffect` that, on auth land with a `pending-save`, looks up the newest trip and applies the payload, then clears storage.
-- Migration (small): add nullable `flights jsonb` column to `trip_logistics` so flights tool can save. No other schema changes needed (gear/itinerary/hotels/packing already exist; intel uses existing jsonb columns).
-- Reuse `useActiveTrip` hook for the "active trip" detection (already returns most-recently-updated trip).
-- Reuse `SaveMomentPrompt` verbatim — render it inside a `Dialog` from `ToolSaveBar` for the logged-out flow.
-- Punctuation rule respected (no em/en dashes; use `·` separator as shown in the examples).
+1. **Best Time to Visit** (`best-time-intel`) — Full swap. Climate, seasons, events are stable knowledge. Gemini has it.
+2. **Itinerary Generator** (`generate-itinerary`) — Full swap. Activity recommendations are evergreen.
+3. **Safety** (`safety-intel`) — **Hybrid**: Gemini Flash returns the baseline scores, scams, emergency numbers, areas (stable). Keep one Perplexity call for the `travelAdvisory` field only (this changes). Or simpler: Gemini-only, with a small "Advisory levels can change. Check your government's travel site." disclaimer card. Recommend the simpler version unless you want the live advisory text.
 
-### Files
+Stays on Perplexity (needs live data + citations):
+- Currency, Flights, Travel Search, Travel Intel (visa/news), Generate Review, Gear Intel, Compare Reviews, Dashboard Search.
 
-New:
-- `src/components/gear/PackingChecklist.tsx`
-- `src/components/tools/ToolSaveBar.tsx`
-- `src/lib/pendingToolSave.ts`
+### Implementation pattern
 
-Edited:
-- `src/pages/Gear.tsx` (insert checklist + save bar)
-- `src/pages/Itinerary.tsx`, `BestTime.tsx`, `Safety.tsx`, `TravelIntel.tsx`, `Currency.tsx`, `Flights.tsx`, `Destinations.tsx` (mount save bar + provide payload/label/handlers)
-- `src/pages/MyTrips.tsx` (consume pending save)
-- `src/index.css` (print rule for `.tool-print-region`)
-- Migration: add `flights jsonb` to `trip_logistics`.
+Each migrated function uses the Lovable AI Gateway via the OpenAI-compatible adapter (already documented in project knowledge). Same JSON schema response. No client changes needed — response shape stays identical. We just drop the `citations` field for Gemini-backed tools (or set empty array) and the UI already handles that.
 
-No changes to product card markup, no other UI shifts.
+## Expected impact
+
+Rough estimate, depends on traffic:
+- Caching alone: 60-80% reduction in Perplexity calls once cache warms up (travel queries are heavily power-law distributed — "Tokyo", "Paris" etc. dominate).
+- Model swap on Best Time + Itinerary + Safety: those three tools become essentially free (Gemini Flash is ~1/20th the cost and you have $1/month free balance).
+- Combined: likely 85%+ reduction in Perplexity spend.
+
+## File changes
+
+**Migration (new table + RLS):**
+- `tool_search_cache` table with policies
+
+**Edge functions edited:**
+- `supabase/functions/best-time-intel/index.ts` — Gemini Flash + cache
+- `supabase/functions/safety-intel/index.ts` — Gemini Flash + cache (with disclaimer)
+- `supabase/functions/generate-itinerary/index.ts` — Gemini Flash + cache
+- `supabase/functions/flight-deals/index.ts` — cache only (1h)
+- `supabase/functions/currency-tracker/index.ts` — cache only (1h)
+- `supabase/functions/travel-search/index.ts` — cache only (7d)
+- New shared helper inlined in each (no shared dir per Lovable convention)
+
+**No frontend changes required.** Response shapes stay the same. Optionally add a tiny "Cached result" badge on the UI later.
+
+## Risks
+
+- Gemini may be slightly less current on niche destinations than Perplexity. Mitigation: 7-day cache means rare destinations rarely re-query anyway; Best Time data is genuinely stable.
+- Safety scores without a live advisory could feel stale. Mitigation: add a small "Verify current advisory at [gov link]" line in the Safety result card.
+- Cache invalidation: if AI prompt is changed, old cached rows become stale. Mitigation: include a `prompt_version` in `cache_key` (e.g. `best_time:v2:tokyo`) so bumping a version naturally invalidates.
+
+Approve and I'll implement.
