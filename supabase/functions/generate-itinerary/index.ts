@@ -132,6 +132,8 @@ Return ONLY valid JSON, no markdown.`;
       { onConflict: "tool_name,cache_key" }
     );
 
+    supabase.from("tool_search_events").insert({ tool_name: TOOL_NAME, query, cache_hit: false }).then(() => {});
+
     return new Response(JSON.stringify(payload), {
       headers: { ...corsHeaders, "Content-Type": "application/json", "X-Cache": "MISS" },
     });
