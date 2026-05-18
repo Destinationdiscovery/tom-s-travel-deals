@@ -164,12 +164,12 @@ const TripWorkspace = () => {
     <div className="min-h-screen bg-background">
       <SEOHead title={trip.trip_name} description={`Trip plan for ${trip.destination ?? trip.trip_name}`} noindex />
       <Header />
-      <main className="pt-24 pb-16 container mx-auto px-4 max-w-5xl">
+      <main className="pt-24 pb-32 md:pb-16 container mx-auto px-4 max-w-5xl">
         <div className="flex items-center justify-between gap-3 mb-6 flex-wrap">
-          <Link to="/my-trips" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+          <Link to="/my-trips" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground min-h-[44px]">
             <ArrowLeft className="h-4 w-4" /> All trips
           </Link>
-          <div className="flex gap-2">
+          <div className="hidden md:flex gap-2">
             <Button variant="outline" size="sm" onClick={handleShare} className="gap-1.5"><Share2 className="h-4 w-4" /> Share</Button>
             <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-1.5"><Printer className="h-4 w-4" /> Print / PDF</Button>
           </div>
@@ -326,6 +326,11 @@ const TripWorkspace = () => {
           </div>
         </Section>
       </main>
+      {/* Mobile sticky action bar */}
+      <div className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-card/95 backdrop-blur border-t border-border px-4 py-3 flex gap-2 print:hidden" style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))" }}>
+        <Button variant="outline" onClick={handleShare} className="flex-1 gap-1.5 h-12"><Share2 className="h-4 w-4" /> Share</Button>
+        <Button variant="outline" onClick={() => window.print()} className="flex-1 gap-1.5 h-12"><Printer className="h-4 w-4" /> PDF</Button>
+      </div>
       <Footer />
     </div>
   );
