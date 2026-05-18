@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Plus, FolderOpen, MapPin, Calendar, Pencil, Trash2, ArrowRight, Hotel, ListChecks, Backpack } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { readPendingSave, clearPendingSave, applyPayloadToTrip } from "@/lib/pendingToolSave";
 
 interface TripRow {
   id: string;
@@ -81,6 +82,44 @@ const MyTrips = () => {
 
   useEffect(() => {
     void load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  // Flush any pending tool save that was stashed before sign-in
+  useEffect(() => {
+    if (!user) return;
+    const pending = readPendingSave();
+    if (!pending) return;
+    (async () => {
+      try {
+        const { data: existing } = await (supabase as any)
+          .from("trips")
+          .select("id, slug, trip_name")
+          .eq("user_id", user.id)
+          .order("updated_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        let trip = existing as { id: string; slug: string; trip_name: string } | null;
+        if (!trip) {
+          const name = pending.destination ? `${pending.destination} trip` : "My trip";
+          const slug = slugify(name) + "-" + Math.random().toString(36).slice(2, 6);
+          const { data: created } = await (supabase as any)
+            .from("trips")
+            .insert({ user_id: user.id, trip_name: name, slug, destination: pending.destination ?? null })
+            .select("id, slug, trip_name")
+            .single();
+          trip = created;
+        }
+        if (!trip) return;
+        await applyPayloadToTrip(trip.id, pending.toolType, pending.payload);
+        clearPendingSave();
+        toast({ title: `Added to "${trip.trip_name}"`, description: pending.label });
+        void load();
+      } catch (e: any) {
+        toast({ title: "Could not finish saving", description: e?.message, variant: "destructive" });
+        clearPendingSave();
+      }
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
