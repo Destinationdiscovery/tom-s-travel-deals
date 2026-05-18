@@ -997,6 +997,30 @@ export type Database = {
         }
         Relationships: []
       }
+      tool_search_events: {
+        Row: {
+          cache_hit: boolean
+          created_at: string
+          id: string
+          query: string | null
+          tool_name: string
+        }
+        Insert: {
+          cache_hit?: boolean
+          created_at?: string
+          id?: string
+          query?: string | null
+          tool_name: string
+        }
+        Update: {
+          cache_hit?: boolean
+          created_at?: string
+          id?: string
+          query?: string | null
+          tool_name?: string
+        }
+        Relationships: []
+      }
       travel_intel_cache: {
         Row: {
           cache_key: string
