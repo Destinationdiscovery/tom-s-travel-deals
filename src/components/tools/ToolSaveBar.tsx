@@ -144,7 +144,7 @@ const ToolSaveBar = ({ toolType, label, destination, payload, onExportPdf, onCop
   const primaryButton = (() => {
     if (!user) {
       return (
-        <Button onClick={handlePrimary} disabled={saving} className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold w-full sm:w-auto">
+        <Button onClick={openAuthDialog} disabled={saving} className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold w-full sm:w-auto">
           Save this to a trip plan
         </Button>
       );
