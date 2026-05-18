@@ -11,6 +11,7 @@ import Footer from "@/components/Footer";
 import SEOHead from "@/components/SEOHead";
 import ToolAEOContent from "@/components/tools/ToolAEOContent";
 import { flightsAEO } from "@/components/tools/toolAEOContent";
+import ToolSaveBar from "@/components/tools/ToolSaveBar";
 
 interface FlightDeal {
   airline: string;
@@ -183,6 +184,18 @@ const Flights = () => {
           onCardClick={(q) => { setQuery(q); handleSearch(q); window.scrollTo({ top: 0, behavior: "smooth" }); }}
         />
       </main>
+      {result && (
+        <>
+          <div aria-hidden className="h-28 md:h-20" />
+          <ToolSaveBar
+            toolType="flights"
+            label={`${result.route} flights · ${result.deals?.length ?? 0} fares`}
+            destination={result.route}
+            payload={result}
+            onCopy={() => `${result.route}\nAvg ${result.averagePrice}, best month ${result.bestMonth}\n${(result.deals || []).map((d) => `- ${d.airline} ${d.price} (${d.dates})`).join("\n")}`}
+          />
+        </>
+      )}
       <Footer />
     </>
   );

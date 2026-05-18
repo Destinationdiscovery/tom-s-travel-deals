@@ -150,6 +150,28 @@ const TravelIntel = () => {
         toolPath="/travel-intel"
         onCardClick={handleCardRun}
       />
+      {(() => {
+        const active = activeTab === "requirements" ? requirementsData : activeTab === "advisories" ? advisoriesData : newsData;
+        const dest = activeTab === "requirements" ? reqDestination : activeTab === "advisories" ? advDestination : newsDestination;
+        if (!active) return null;
+        const label = activeTab === "requirements"
+          ? `${dest} visa requirements generated`
+          : activeTab === "advisories"
+            ? `${dest} travel advisory generated`
+            : `${dest} destination news generated`;
+        return (
+          <>
+            <div aria-hidden className="h-28 md:h-20" />
+            <ToolSaveBar
+              toolType="travel-intel"
+              label={label}
+              destination={dest}
+              payload={{ kind: activeTab, data: active }}
+              onCopy={() => `${label}\n${JSON.stringify(active, null, 2).slice(0, 1500)}`}
+            />
+          </>
+        );
+      })()}
       <Footer />
     </div>
   );

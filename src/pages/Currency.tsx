@@ -10,6 +10,7 @@ import Footer from "@/components/Footer";
 import SEOHead from "@/components/SEOHead";
 import ToolAEOContent from "@/components/tools/ToolAEOContent";
 import { currencyAEO } from "@/components/tools/toolAEOContent";
+import ToolSaveBar from "@/components/tools/ToolSaveBar";
 
 interface CurrencyResult {
   sourceCode?: string;
@@ -201,6 +202,18 @@ const Currency = () => {
           onCardClick={(q) => { setQuery(q); handleSearch(q); window.scrollTo({ top: 0, behavior: "smooth" }); }}
         />
       </main>
+      {result && (
+        <>
+          <div aria-hidden className="h-28 md:h-20" />
+          <ToolSaveBar
+            toolType="currency"
+            label={`${result.sourceCode || "USD"} to ${result.targetCode || result.currencyCode} rate saved`}
+            destination={query}
+            payload={result}
+            onCopy={() => `1 ${result.sourceCode || "USD"} = ${result.rate} ${result.targetCode || result.currencyCode}`}
+          />
+        </>
+      )}
       <Footer />
     </>
   );
