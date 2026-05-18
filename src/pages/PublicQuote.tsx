@@ -25,10 +25,11 @@ const PublicQuote = () => {
   useEffect(() => {
     document.title = "Your Vacation Quote - ReviewThenGo";
     if (!token) { setError(true); setLoading(false); return; }
-    supabase.from("client_quotes").select("*").eq("share_token", token).single()
-      .then(({ data, error: err }) => {
-        if (err || !data) setError(true);
-        else setQuote(data);
+    (supabase.rpc as any)("get_quote_by_share_token", { _token: token })
+      .then(({ data, error: err }: { data: any; error: any }) => {
+        const row = Array.isArray(data) ? data[0] : data;
+        if (err || !row) setError(true);
+        else setQuote(row);
         setLoading(false);
       });
   }, [token]);
