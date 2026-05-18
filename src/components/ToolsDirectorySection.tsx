@@ -97,7 +97,7 @@ const ToolsDirectorySection = () => {
     <section className="py-16 bg-muted/30">
       <div className="container mx-auto px-4">
         <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground text-center mb-3">
-          Our 8 Free Travel Planning Tools
+          Plan every part of your trip
         </h2>
         <p className="text-muted-foreground text-center max-w-2xl mx-auto mb-10">
           Everything you need to plan a trip from start to finish, without visiting multiple websites. Each tool is free, fast, and powered by real-time data.

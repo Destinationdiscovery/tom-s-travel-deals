@@ -1,6 +1,6 @@
 import { useRef, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { Heart, ArrowRight } from "lucide-react";
 import Header from "@/components/Header";
 import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
@@ -139,16 +139,24 @@ const Index = () => {
         <RecentReviewsHomepage />
         <PopularSavesSection />
 
-        {/* Saves CTA */}
+        {/* Trip plan CTA */}
         <section className="py-10">
           <div className="container mx-auto px-4">
             <div className="max-w-2xl mx-auto text-center bg-card rounded-2xl border border-border p-8 shadow-soft">
               <Heart className="h-8 w-8 text-primary mx-auto mb-3 fill-primary/20" />
-              <h2 className="font-display text-xl font-bold text-foreground mb-2">Start Your Saves List</h2>
-              <p className="text-muted-foreground text-sm mb-4">Save hotels and resorts as you browse, then compare them side-by-side to find your perfect match.</p>
-              <a href="/my-saves" className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline">
-                View My Saves <ArrowRight className="h-4 w-4" />
-              </a>
+              <h2 className="font-display text-xl font-bold text-foreground mb-2">Start building your trip plan</h2>
+              <p className="text-muted-foreground text-sm mb-5 max-w-xl mx-auto">
+                Save hotels as you browse, build your itinerary, add packing lists, check visa requirements, and track gear, all in one place. Everything you do on ReviewThenGo can be saved to a named trip plan you can come back to from any device.
+              </p>
+              <Link
+                to="/my-trips"
+                className="inline-flex items-center gap-2 bg-secondary text-secondary-foreground hover:bg-secondary/90 transition-colors text-sm font-semibold px-5 py-2.5 rounded-lg shadow-sm"
+              >
+                Start my free trip plan <ArrowRight className="h-4 w-4" />
+              </Link>
+              <div className="mt-3 text-xs text-muted-foreground">
+                Already have a plan? <Link to="/my-trips" className="text-primary font-medium hover:underline">Sign in</Link>
+              </div>
             </div>
           </div>
         </section>

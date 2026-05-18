@@ -36,7 +36,7 @@ const toolLinks = [
 ];
 
 const Header = () => {
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [toolsExpanded, setToolsExpanded] = useState(false);
@@ -127,6 +127,25 @@ const Header = () => {
                 <Shield className="h-4 w-4" />
                 Dashboard
               </Link>
+            )}
+
+            {/* My Trips primary CTA */}
+            <Link
+              to="/my-trips"
+              className="hidden md:inline-flex items-center gap-1.5 bg-secondary text-secondary-foreground hover:bg-secondary/90 transition-colors text-sm font-semibold px-3.5 py-1.5 rounded-lg shadow-sm"
+            >
+              <Briefcase className="h-4 w-4" />
+              My Trips
+            </Link>
+
+            {user && (
+              <div
+                aria-hidden
+                className="hidden md:flex h-8 w-8 items-center justify-center rounded-full bg-primary-foreground/15 text-primary-foreground text-sm font-semibold border border-primary-foreground/20"
+                title={user.email ?? "Account"}
+              >
+                {(user.email ?? "U").charAt(0).toUpperCase()}
+              </div>
             )}
 
             {/* Mobile hamburger */}
