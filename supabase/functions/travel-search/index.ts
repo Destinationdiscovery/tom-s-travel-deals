@@ -36,6 +36,7 @@ serve(async (req) => {
       .gt("expires_at", new Date().toISOString()).maybeSingle();
     if (cached) {
       supabase.from("tool_search_cache").update({ hit_count: (cached.hit_count || 0) + 1 }).eq("id", cached.id).then(() => {});
+      supabase.from("tool_search_events").insert({ tool_name: TOOL_NAME, query, cache_hit: true }).then(() => {});
       return new Response(JSON.stringify(cached.result_data), {
         headers: { ...corsHeaders, "Content-Type": "application/json", "X-Cache": "HIT" },
       });
@@ -152,6 +153,8 @@ IMPORTANT:
       tool_name: TOOL_NAME, cache_key: cacheKey, query, result_data: payload,
       expires_at: new Date(Date.now() + TTL_MS).toISOString(), hit_count: 0,
     }, { onConflict: "tool_name,cache_key" });
+
+    supabase.from("tool_search_events").insert({ tool_name: TOOL_NAME, query, cache_hit: false }).then(() => {});
 
     return new Response(JSON.stringify(payload), {
       headers: { ...corsHeaders, "Content-Type": "application/json", "X-Cache": "MISS" },

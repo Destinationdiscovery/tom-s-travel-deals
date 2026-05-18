@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, MousePointerClick, Eye, Users, Heart, Gauge, BarChart3, TrendingUp, RefreshCw, Clock, ArrowLeftRight } from "lucide-react";
+import { Search, MousePointerClick, Eye, Users, Heart, Gauge, BarChart3, TrendingUp, RefreshCw, Clock, ArrowLeftRight, UserPlus, Wrench, FileText } from "lucide-react";
 import { format, subDays, startOfDay } from "date-fns";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid } from "recharts";
 
@@ -88,6 +88,24 @@ const SiteAnalyticsDashboard = () => {
   const [avgDuration, setAvgDuration] = useState(0);
   const [bounceRate, setBounceRate] = useState(0);
 
+  // Registered users
+  const [signupCount, setSignupCount] = useState(0);
+  const [recentSignups, setRecentSignups] = useState(0);
+  const [dailySignups, setDailySignups] = useState<{ date: string; count: number }[]>([]);
+
+  // Tool searches
+  const [toolTotals, setToolTotals] = useState<{ tool: string; hits: number; misses: number; total: number }[]>([]);
+  const [totalToolSearches, setTotalToolSearches] = useState(0);
+  const [totalCacheHits, setTotalCacheHits] = useState(0);
+  const [toolDaily, setToolDaily] = useState<{ date: string; count: number }[]>([]);
+  const [topToolQueries, setTopToolQueries] = useState<{ query: string; tool: string; count: number }[]>([]);
+
+  // Review generations
+  const [reviewGenCount, setReviewGenCount] = useState(0);
+  const [recentReviewGens, setRecentReviewGens] = useState(0);
+  const [dailyReviewGens, setDailyReviewGens] = useState<{ date: string; count: number }[]>([]);
+  const [topGenerated, setTopGenerated] = useState<{ slug: string; property_name: string; created_at: string }[]>([]);
+
   const fetchAll = useCallback(async () => {
     setLoading(true);
     const startDate = getStartDate(timeRange);
@@ -116,7 +134,19 @@ const SiteAnalyticsDashboard = () => {
       sessionQuery = sessionQuery.gte("started_at", startDate);
     }
 
-    const [searchRes, clickRes, viewRes, reactionRes, subRes, vitalsRes, sessionRes] = await Promise.all([
+    // Profiles (registered users)
+    let profilesQuery = supabase.from("profiles").select("id, created_at");
+    if (startDate) profilesQuery = profilesQuery.gte("created_at", startDate);
+
+    // Tool search events
+    let toolEventsQuery = supabase.from("tool_search_events" as any).select("tool_name, query, cache_hit, created_at");
+    if (startDate) toolEventsQuery = toolEventsQuery.gte("created_at", startDate);
+
+    // Cached reviews (generations)
+    let reviewGenQuery = supabase.from("cached_reviews").select("slug, property_name, created_at").order("created_at", { ascending: false });
+    if (startDate) reviewGenQuery = reviewGenQuery.gte("created_at", startDate);
+
+    const [searchRes, clickRes, viewRes, reactionRes, subRes, vitalsRes, sessionRes, profilesRes, toolEventsRes, reviewGenRes] = await Promise.all([
       supabase.from("search_suggestions").select("name, search_count").order("search_count", { ascending: false }).limit(20),
       clickQuery,
       viewPromise,
@@ -124,7 +154,63 @@ const SiteAnalyticsDashboard = () => {
       subQuery,
       vitalsQuery,
       sessionQuery,
+      profilesQuery,
+      toolEventsQuery,
+      reviewGenQuery,
     ]);
+
+    // Profiles processing
+    const profileData = profilesRes.data || [];
+    setSignupCount(profileData.length);
+    const weekAgoForSignups = new Date(); weekAgoForSignups.setDate(weekAgoForSignups.getDate() - 7);
+    setRecentSignups(profileData.filter((p: any) => new Date(p.created_at) > weekAgoForSignups).length);
+    const signupDayMap: Record<string, number> = {};
+    profileData.forEach((p: any) => {
+      const day = p.created_at?.substring(0, 10);
+      if (day) signupDayMap[day] = (signupDayMap[day] || 0) + 1;
+    });
+    setDailySignups(Object.entries(signupDayMap).map(([date, count]) => ({ date, count })).sort((a, b) => a.date.localeCompare(b.date)));
+
+    // Tool events processing
+    const toolEventData = ((toolEventsRes as any).data || []) as Array<{ tool_name: string; query: string; cache_hit: boolean; created_at: string }>;
+    setTotalToolSearches(toolEventData.length);
+    setTotalCacheHits(toolEventData.filter((e) => e.cache_hit).length);
+
+    const toolMap: Record<string, { hits: number; misses: number }> = {};
+    const toolDayMap: Record<string, number> = {};
+    const queryMap: Record<string, { query: string; tool: string; count: number }> = {};
+    toolEventData.forEach((e) => {
+      if (!toolMap[e.tool_name]) toolMap[e.tool_name] = { hits: 0, misses: 0 };
+      if (e.cache_hit) toolMap[e.tool_name].hits += 1;
+      else toolMap[e.tool_name].misses += 1;
+      const day = e.created_at?.substring(0, 10);
+      if (day) toolDayMap[day] = (toolDayMap[day] || 0) + 1;
+      if (e.query) {
+        const k = `${e.tool_name}|${e.query.toLowerCase()}`;
+        if (!queryMap[k]) queryMap[k] = { query: e.query, tool: e.tool_name, count: 0 };
+        queryMap[k].count += 1;
+      }
+    });
+    setToolTotals(
+      Object.entries(toolMap)
+        .map(([tool, v]) => ({ tool, hits: v.hits, misses: v.misses, total: v.hits + v.misses }))
+        .sort((a, b) => b.total - a.total)
+    );
+    setToolDaily(Object.entries(toolDayMap).map(([date, count]) => ({ date, count })).sort((a, b) => a.date.localeCompare(b.date)));
+    setTopToolQueries(Object.values(queryMap).sort((a, b) => b.count - a.count).slice(0, 15));
+
+    // Review generations processing
+    const reviewGenData = (reviewGenRes.data || []) as Array<{ slug: string; property_name: string; created_at: string }>;
+    setReviewGenCount(reviewGenData.length);
+    const weekAgoForReviews = new Date(); weekAgoForReviews.setDate(weekAgoForReviews.getDate() - 7);
+    setRecentReviewGens(reviewGenData.filter((r) => new Date(r.created_at) > weekAgoForReviews).length);
+    const reviewDayMap: Record<string, number> = {};
+    reviewGenData.forEach((r) => {
+      const day = r.created_at?.substring(0, 10);
+      if (day) reviewDayMap[day] = (reviewDayMap[day] || 0) + 1;
+    });
+    setDailyReviewGens(Object.entries(reviewDayMap).map(([date, count]) => ({ date, count })).sort((a, b) => a.date.localeCompare(b.date)));
+    setTopGenerated(reviewGenData.slice(0, 15));
 
     // Sessions
     const sessionData = (sessionRes as any).data || [];
@@ -273,6 +359,9 @@ const SiteAnalyticsDashboard = () => {
     { label: "Sessions", value: totalSessions.toLocaleString(), icon: Users, color: "text-cyan-400", bg: "bg-cyan-500/10" },
     { label: "Avg Duration", value: formatDuration(avgDuration), icon: Clock, color: "text-teal-400", bg: "bg-teal-500/10" },
     { label: "Bounce Rate", value: `${bounceRate}%`, icon: ArrowLeftRight, color: "text-orange-400", bg: "bg-orange-500/10" },
+    { label: "Registered Users", value: signupCount.toLocaleString(), icon: UserPlus, color: "text-indigo-400", bg: "bg-indigo-500/10" },
+    { label: "Tool Searches", value: totalToolSearches.toLocaleString(), icon: Wrench, color: "text-fuchsia-400", bg: "bg-fuchsia-500/10" },
+    { label: "Reviews Generated", value: reviewGenCount.toLocaleString(), icon: FileText, color: "text-lime-400", bg: "bg-lime-500/10" },
     { label: "Affiliate Clicks", value: totalClicks.toLocaleString(), icon: MousePointerClick, color: "text-emerald-400", bg: "bg-emerald-500/10" },
     { label: "Searches", value: totalSearches.toLocaleString(), icon: Search, color: "text-amber-400", bg: "bg-amber-500/10" },
     { label: "Subscribers", value: subscriberCount.toLocaleString(), icon: Users, color: "text-violet-400", bg: "bg-violet-500/10" },
@@ -344,6 +433,9 @@ const SiteAnalyticsDashboard = () => {
           <Tabs defaultValue="views">
             <TabsList className="w-full flex-wrap h-auto gap-1">
               <TabsTrigger value="views" className="text-xs gap-1"><Eye className="h-3 w-3" /> Views</TabsTrigger>
+              <TabsTrigger value="users" className="text-xs gap-1"><UserPlus className="h-3 w-3" /> Users</TabsTrigger>
+              <TabsTrigger value="tools" className="text-xs gap-1"><Wrench className="h-3 w-3" /> Tools</TabsTrigger>
+              <TabsTrigger value="reviews-gen" className="text-xs gap-1"><FileText className="h-3 w-3" /> Reviews</TabsTrigger>
               <TabsTrigger value="clicks" className="text-xs gap-1"><MousePointerClick className="h-3 w-3" /> Clicks</TabsTrigger>
               <TabsTrigger value="searches" className="text-xs gap-1"><Search className="h-3 w-3" /> Searches</TabsTrigger>
               <TabsTrigger value="platforms" className="text-xs gap-1"><TrendingUp className="h-3 w-3" /> Platforms</TabsTrigger>
@@ -599,6 +691,153 @@ const SiteAnalyticsDashboard = () => {
                           );
                         });
                       })()}
+                    </div>
+                  </div>
+                </>
+              )}
+            </TabsContent>
+
+            {/* Users Tab */}
+            <TabsContent value="users" className="mt-4 space-y-4">
+              <div className="flex gap-4">
+                <div className="text-sm"><span className="font-bold text-foreground">{signupCount}</span> <span className="text-muted-foreground">in period</span></div>
+                <div className="text-sm"><span className="font-bold text-emerald-400">{recentSignups}</span> <span className="text-muted-foreground">last 7 days</span></div>
+              </div>
+              {dailySignups.length > 1 ? (
+                <div>
+                  <p className="text-xs text-muted-foreground mb-2 font-medium">Daily Signup Trend</p>
+                  <div className="h-48">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={dailySignups}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                        <XAxis dataKey="date" tickFormatter={(d) => format(new Date(d), "MMM d")} tick={{ fontSize: 10 }} />
+                        <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
+                        <Tooltip labelFormatter={(d) => format(new Date(String(d)), "MMM d, yyyy")} />
+                        <Line type="monotone" dataKey="count" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 3 }} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              ) : signupCount === 0 ? (
+                <p className="text-sm text-muted-foreground">No signups in this period.</p>
+              ) : null}
+            </TabsContent>
+
+            {/* Tools Tab */}
+            <TabsContent value="tools" className="mt-4 space-y-4">
+              <div className="flex gap-4 flex-wrap">
+                <div className="text-sm"><span className="font-bold text-foreground">{totalToolSearches}</span> <span className="text-muted-foreground">total searches</span></div>
+                <div className="text-sm"><span className="font-bold text-emerald-400">{totalCacheHits}</span> <span className="text-muted-foreground">cache hits ({totalToolSearches > 0 ? Math.round((totalCacheHits / totalToolSearches) * 100) : 0}%)</span></div>
+              </div>
+              {toolTotals.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No tool searches in this period.</p>
+              ) : (
+                <>
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-2 font-medium">Searches per Tool (cache hits vs misses)</p>
+                    <div className="h-56">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={toolTotals}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                          <XAxis dataKey="tool" tick={{ fontSize: 11 }} />
+                          <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
+                          <Tooltip />
+                          <Bar dataKey="hits" stackId="a" fill="hsl(var(--primary))" name="Cache hits" />
+                          <Bar dataKey="misses" stackId="a" fill="hsl(var(--destructive))" name="API calls" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
+                  {toolDaily.length > 1 && (
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-2 font-medium">Daily Tool Search Trend</p>
+                      <div className="h-40">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={toolDaily}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                            <XAxis dataKey="date" tickFormatter={(d) => format(new Date(d), "MMM d")} tick={{ fontSize: 10 }} />
+                            <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
+                            <Tooltip labelFormatter={(d) => format(new Date(String(d)), "MMM d, yyyy")} />
+                            <Line type="monotone" dataKey="count" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-2 font-medium">Per-tool breakdown</p>
+                      <div className="space-y-1.5">
+                        {toolTotals.map((t) => (
+                          <div key={t.tool} className="flex items-center justify-between text-sm border-b border-border/40 py-1">
+                            <span className="text-foreground font-medium">{t.tool}</span>
+                            <span className="text-xs font-mono text-muted-foreground">
+                              <span className="text-emerald-400">{t.hits}</span> hits / <span className="text-rose-400">{t.misses}</span> calls
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-2 font-medium">Top queries</p>
+                      <div className="space-y-1.5">
+                        {topToolQueries.map((q, i) => (
+                          <div key={`${q.tool}-${q.query}-${i}`} className="flex items-center justify-between text-sm">
+                            <span className="text-foreground truncate flex-1">
+                              <span className="text-muted-foreground mr-2">{i + 1}.</span>
+                              <Badge variant="outline" className="mr-1 text-[10px]">{q.tool}</Badge>
+                              {q.query}
+                            </span>
+                            <span className="text-muted-foreground text-xs font-mono">{q.count}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+            </TabsContent>
+
+            {/* Reviews Generated Tab */}
+            <TabsContent value="reviews-gen" className="mt-4 space-y-4">
+              <div className="flex gap-4">
+                <div className="text-sm"><span className="font-bold text-foreground">{reviewGenCount}</span> <span className="text-muted-foreground">generated in period</span></div>
+                <div className="text-sm"><span className="font-bold text-emerald-400">{recentReviewGens}</span> <span className="text-muted-foreground">last 7 days</span></div>
+              </div>
+              {reviewGenCount === 0 ? (
+                <p className="text-sm text-muted-foreground">No reviews generated in this period.</p>
+              ) : (
+                <>
+                  {dailyReviewGens.length > 1 && (
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-2 font-medium">Daily Generation Trend</p>
+                      <div className="h-40">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={dailyReviewGens}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                            <XAxis dataKey="date" tickFormatter={(d) => format(new Date(d), "MMM d")} tick={{ fontSize: 10 }} />
+                            <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
+                            <Tooltip labelFormatter={(d) => format(new Date(String(d)), "MMM d, yyyy")} />
+                            <Line type="monotone" dataKey="count" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-2 font-medium">Most recent generations</p>
+                    <div className="space-y-1.5">
+                      {topGenerated.map((r, i) => (
+                        <div key={r.slug} className="flex items-center justify-between text-sm">
+                          <span className="text-foreground truncate flex-1">
+                            <span className="text-muted-foreground mr-2">{i + 1}.</span>
+                            {r.property_name || formatSlug(r.slug)}
+                          </span>
+                          <span className="text-muted-foreground text-xs">{format(new Date(r.created_at), "MMM d, h:mm a")}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </>
