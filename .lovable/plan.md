@@ -1,79 +1,51 @@
-# Plan: Smart Hero Search + Newsletter Removal + Nav Polish
+# Plan: Restyle Hero to match reference
 
-## 1. Universal hero search across all 8 tools
+Update `src/components/HeroSection.tsx` text + structure to match the reference layout. Keep the existing rotating-image background and current color theme (no green takeover, keep dark gradient overlay + secondary accent for the Go button and pills).
 
-Today the hero search only routes to two places: a listicle page (`/reviews/:query`) or single hotel review generation. A prompt like "packing list for Italy in July" or "entry requirements for Cuba" gets misrouted to the review flow.
+## Changes
 
-### Add an intent router
+1. **Eyebrow** — small uppercase tracked label above H1:
+   `PLAN SMARTER. TRAVEL BETTER.` in `text-secondary text-xs tracking-[0.2em] uppercase`.
 
-Extend `src/lib/searchIntent.ts` with a second classifier `classifyToolIntent(query)` that returns one of:
+2. **H1** — replace current headline with:
+   `What do you need to know before your next trip?`
+   Same display font, same size scale.
 
-- `gear` (keywords: pack, packing, what to bring, suitcase, luggage, gear)
-- `safety` (safe, safety, dangerous, crime, advisory, is it safe)
-- `visa` (visa, entry requirement, passport, customs, do I need)
-- `best-time` (best time, when to visit, weather in, season, monsoon)
-- `currency` (currency, exchange rate, how much is, tipping, cash)
-- `flights` (flight, fly to, cheap flights, airline, airfare)
-- `itinerary` (itinerary, days in, X day, plan a trip to, week in)
-- `intel` (know before you go, travel intel, customs etiquette, language tips)
-- `null` (no tool match, fall back to existing review/listicle flow)
+3. **Subcopy** — single line:
+   `Hotel reviews, itineraries, visa rules, packing lists, safety scores and more. Ask anything.`
+   Drop the second "By Travel Experts" microcopy line.
 
-Order matters: visa/safety checked before generic question starters so "do I need a visa for Cuba" doesn't fall to listicle.
+4. **Search bar**
+   - Placeholder: `Ask a travel question or search any hotel, destination or topic...`
+   - Button label: `Go` (instead of `Search`).
+   - Keep existing submit handler, suggestions dropdown, and disabled-when-too-short logic.
+   - Drop the "Search any hotel..." helper line below.
 
-### Update hero handler in `src/pages/Index.tsx`
+5. **"For example:" pills row** (new) — under the search:
+   - `For example:` label in muted white, then 5 clickable pills:
+     - Do I need a visa for Japan as a Canadian?
+     - What to pack for Bali in October
+     - Is travel insurance worth it for Mexico?
+     - Best time to visit Italy, honest answer
+     - Is Barcelo Maya worth the price?
+   - Each pill calls the same `onSearch(text)` so the intent router routes to the right tool (visa, gear, intel, best-time, review).
+   - Style: rounded-full, `bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs px-3 py-1.5`. Wraps to multiple lines on narrow viewports.
+   - Note: replacing the em-dash in the Italy example with a comma per project punctuation rule.
 
-```text
-handleHeroSearch(query):
-  tool = classifyToolIntent(query)
-  if tool: navigate(`/${toolRoute[tool]}?q=${encodeURIComponent(query)}`)
-  else: existing listicle vs review flow
-```
+6. **"Pulls from:" sources row** (new) — under the example pills:
+   - `Pulls from:` muted label + non-interactive pills: `TripAdvisor`, `Google Reviews`, `Booking.com`, `Reddit`, `Expedia + 6 more`.
+   - Same pill style but `cursor-default`, slightly smaller.
 
-`toolRoute` maps to: `gear`, `safety`, `safety` (visa folds into safety for now since there is no /visa page), `best-time`, `currency`, `flights`, `itinerary`, `travel-intel`.
+7. **Height bump** — increase the section min height slightly (`md:h-[560px]`) so the new pill rows do not crowd the search bar on desktop. Mobile keeps a comfortable scroll.
 
-### Auto-run on each tool page
-
-For the 7 tool pages (`Gear`, `Safety`, `BestTime`, `Currency`, `Flights`, `Itinerary`, `TravelIntel`), on mount read `?q=` from URL. If present, prefill the page's primary input and trigger the same submit handler the user would. No new UI, just wired-up auto-run.
-
-This makes the hero a true answer engine: one search bar, eight destinations.
-
-## 2. Remove Compass Weekly newsletter sitewide
-
-`NewsletterCTASection` (heading "The Compass Weekly", subtitle "Get hand-picked travel deals, packing tips, and travel news") is rendered inside `Footer.tsx` (line 27), so it shows on every page.
-
-- Remove the `<NewsletterCTASection />` mount and the import from `src/components/Footer.tsx`.
-- Leave the component file in place (no other consumers). Marked as unused, safe to delete in a later pass.
-
-Result: no Compass Weekly block anywhere on the site.
-
-## 3. Header refinements (logged-in only)
-
-Header today already has the structure you described except the active-trip quick link.
-
-- ✅ Public nav: Home, Blog, Guides, Deals, Tools dropdown, My Trips (primary button) — already in place.
-- ✅ Avatar circle with user initial — already in place.
-- ✅ Admin "Dashboard" link stays (visible only when `isAdmin`, kept per your earlier request to preserve admin dashboard).
-- ➕ **New**: active trip quick-return link.
-
-### Active trip link
-
-When `user` is logged in, the header fetches the most recently updated trip from the `trips` table (single row, `order by updated_at desc limit 1`). If a trip exists, render its name to the left of the avatar as a small muted link to `/my-trips/:slug`, truncated to about 18 characters with an ellipsis. Hidden on mobile, the mobile sheet already has a My Trips entry.
-
-Implementation notes:
-- Tiny `useActiveTrip()` hook in `src/hooks/useActiveTrip.ts` that queries once when the user changes and exposes `{ slug, name }`.
-- Cached client-side so it doesn't refetch on every route change.
+8. **Install App link** — keep as-is (mobile only).
 
 ## Files touched
 
-- `src/lib/searchIntent.ts` — add `classifyToolIntent`.
-- `src/pages/Index.tsx` — update `handleHeroSearch` to consult the new classifier.
-- `src/pages/Gear.tsx`, `Safety.tsx`, `BestTime.tsx`, `Currency.tsx`, `Flights.tsx`, `Itinerary.tsx`, `TravelIntel.tsx` — read `?q=` and auto-run.
-- `src/components/Footer.tsx` — remove `NewsletterCTASection`.
-- `src/hooks/useActiveTrip.ts` — new.
-- `src/components/Header.tsx` — render active-trip link beside avatar.
+- `src/components/HeroSection.tsx` only.
 
-## Out of scope (call out)
+## Out of scope
 
-- No new `/visa` page. Visa-style queries route to `/safety` since safety already covers entry/advisory content. Say the word and I'll spin up a dedicated visa page next.
-- No tool-page UI redesign, just URL prefill and auto-run.
-- No changes to admin Dashboard link visibility.
+- No color theme changes (reference is green; we keep current dark hero with secondary accent).
+- No changes to background slideshow images.
+- No changes to the search intent router (already shipped, pills will route through it).

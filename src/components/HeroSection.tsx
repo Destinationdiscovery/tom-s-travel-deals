@@ -49,8 +49,24 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
     onSearch?.(name);
   };
 
+  const examplePrompts = [
+    "Do I need a visa for Japan as a Canadian?",
+    "What to pack for Bali in October",
+    "Is travel insurance worth it for Mexico?",
+    "Best time to visit Italy, honest answer",
+    "Is Barcelo Maya worth the price?",
+  ];
+
+  const sources = ["TripAdvisor", "Google Reviews", "Booking.com", "Reddit", "Expedia + 6 more"];
+
+  const handlePillClick = (text: string) => {
+    setQuery(text);
+    setShowSuggestions(false);
+    onSearch?.(text);
+  };
+
   return (
-    <section className="relative h-[520px] md:h-[500px] flex items-center justify-center overflow-hidden" aria-label="Hero carousel">
+    <section className="relative min-h-[560px] md:min-h-[580px] flex items-center justify-center overflow-hidden py-12" aria-label="Hero carousel">
       {/* Rotating backgrounds */}
       {slides.map((slide, i) => (
         <img
@@ -66,14 +82,14 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
       <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
 
       <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
-        <h1 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold mb-3 leading-tight text-white">
-          Every Travel Question, Answered Before You Book
-        </h1>
-        <p className="text-white/80 text-base md:text-lg font-light mb-2">
-          Get instant answers about hotels, destinations, packing, and the best time to visit. Free AI travel planner powered by 10+ trusted review sources.
+        <p className="text-secondary text-[11px] md:text-xs tracking-[0.2em] uppercase font-semibold mb-3">
+          Plan smarter. Travel better.
         </p>
-        <p className="text-white/60 text-xs mb-6">
-          By Travel Experts at ReviewThenGo | Aggregating 10M+ reviews from TripAdvisor, Booking.com, Google &amp; more
+        <h1 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold mb-3 leading-tight text-white">
+          What do you need to know before your next trip?
+        </h1>
+        <p className="text-white/80 text-base md:text-lg font-light mb-6">
+          Hotel reviews, itineraries, visa rules, packing lists, safety scores and more. Ask anything.
         </p>
 
         {/* Integrated search bar */}
@@ -87,7 +103,7 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
                 onChange={(e) => { setQuery(e.target.value); setShowSuggestions(true); }}
                 onFocus={() => query.trim().length >= 2 && setShowSuggestions(true)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                placeholder="Ask anything: hotel reviews, packing lists, best time to visit..."
+                placeholder="Ask a travel question or search any hotel, destination or topic..."
                 className="w-full h-12 pl-10 pr-4 rounded-lg border-0 bg-white text-gray-900 placeholder:text-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-secondary/50 shadow-lg"
               />
               {showSuggestions && suggestions.length > 0 && (
@@ -112,15 +128,40 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
               variant="default"
               className="h-12 px-6 bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold"
             >
-              {isSearching ? "Searching..." : "Search"}
+              {isSearching ? "..." : "Go"}
             </Button>
           </div>
-          <p className="text-white/70 text-xs mt-2">
-            Search any hotel, resort, or destination worldwide and get AI-powered reviews instantly.
-          </p>
         </div>
 
-        <div className="flex flex-col items-center gap-3">
+        {/* Example prompt pills */}
+        <div className="max-w-2xl mx-auto mb-4 flex flex-wrap items-center justify-center gap-2">
+          <span className="text-white/70 text-xs font-medium mr-1">For example:</span>
+          {examplePrompts.map((p) => (
+            <button
+              key={p}
+              type="button"
+              onClick={() => handlePillClick(p)}
+              className="rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs px-3 py-1.5 transition-colors"
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+
+        {/* Source attribution row */}
+        <div className="max-w-2xl mx-auto flex flex-wrap items-center justify-center gap-2">
+          <span className="text-secondary/90 text-xs font-medium mr-1">Pulls from:</span>
+          {sources.map((s) => (
+            <span
+              key={s}
+              className="rounded-full bg-white/10 border border-white/15 text-white/90 text-[11px] px-2.5 py-1 cursor-default"
+            >
+              {s}
+            </span>
+          ))}
+        </div>
+
+        <div className="flex flex-col items-center gap-3 mt-5">
           <a
             href="/install"
             className="md:hidden inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/15 backdrop-blur-sm text-white text-sm font-medium hover:bg-white/25 transition-colors"
