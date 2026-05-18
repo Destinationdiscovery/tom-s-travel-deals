@@ -1,10 +1,17 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+  "Access-Control-Expose-Headers": "x-cache",
 };
+
+const TOOL_NAME = "flights";
+const PROMPT_VERSION = "v1";
+const TTL_MS = 60 * 60 * 1000; // 1 hour
+const normalizeKey = (s: string) => `${PROMPT_VERSION}:${s.trim().toLowerCase().replace(/\s+/g, " ")}`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -14,6 +21,20 @@ serve(async (req) => {
   try {
     const { query } = await req.json();
     if (!query) throw new Error("Missing query");
+
+    const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    const cacheKey = normalizeKey(query);
+    const { data: cached } = await supabase
+      .from("tool_search_cache")
+      .select("id, result_data, hit_count")
+      .eq("tool_name", TOOL_NAME).eq("cache_key", cacheKey)
+      .gt("expires_at", new Date().toISOString()).maybeSingle();
+    if (cached) {
+      supabase.from("tool_search_cache").update({ hit_count: (cached.hit_count || 0) + 1 }).eq("id", cached.id).then(() => {});
+      return new Response(JSON.stringify(cached.result_data), {
+        headers: { ...corsHeaders, "Content-Type": "application/json", "X-Cache": "HIT" },
+      });
+    }
 
     const PERPLEXITY_API_KEY = Deno.env.get("PERPLEXITY_API_KEY");
     if (!PERPLEXITY_API_KEY) throw new Error("PERPLEXITY_API_KEY not set");
