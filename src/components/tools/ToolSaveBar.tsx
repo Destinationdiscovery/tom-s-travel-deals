@@ -98,23 +98,11 @@ const ToolSaveBar = ({ toolType, label, destination, payload, onExportPdf, onCop
     }
   };
 
-  const handlePrimary = () => {
-    if (!user) {
-      stashPendingSave({ toolType, payload, destination, label });
-      setAuthDialogOpen(true);
-      return;
-    }
-    if (activeTrip) {
-      void saveToTrip({ id: "", slug: activeTrip.slug, trip_name: activeTrip.name }).then(async () => {
-        // useActiveTrip returns name/slug only. Look up id and write.
-      });
-      // The above does not have trip_id; do proper lookup instead.
-    } else {
-      setPickerOpen(true);
-    }
+  const openAuthDialog = () => {
+    stashPendingSave({ toolType, payload, destination, label });
+    setAuthDialogOpen(true);
   };
 
-  // Better implementation: when active trip exists, look up id then save.
   const handleSaveToActive = async () => {
     if (!user || !activeTrip) return;
     setSaving(true);
