@@ -234,6 +234,19 @@ const Gear = () => {
           onCardClick={(q) => { setSearchQuery(q); clearReview(); fetchPackingList(q); window.scrollTo({ top: 0, behavior: "smooth" }); }}
         />
       </main>
+      {packingData && !reviewData && (
+        <ToolSaveBar
+          toolType="gear"
+          label={`${searchQuery || "Packing list"} · ${packingData.items.length} packing items`}
+          destination={searchQuery}
+          payload={{ items: packingData.items, narrative: packingData.narrative, citations: packingData.citations, query: searchQuery }}
+          onCopy={() => {
+            const lines = [`Packing list for ${searchQuery}`, ""];
+            packingData.items.forEach((it) => lines.push(`- ${it.name} (${it.category}) - ${it.priceRange}`));
+            return lines.join("\n");
+          }}
+        />
+      )}
       <Footer />
     </div>
   );
