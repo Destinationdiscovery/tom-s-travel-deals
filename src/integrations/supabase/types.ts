@@ -1405,39 +1405,32 @@ export type Database = {
       get_quote_by_share_token: {
         Args: { _token: string }
         Returns: {
-          attachment_urls: string[] | null
-          check_in: string | null
-          check_out: string | null
-          client_email: string | null
+          attachment_urls: string[]
+          check_in: string
+          check_out: string
           client_name: string
           created_at: string
-          currency: string | null
-          destination: string | null
-          flight_details: Json | null
+          currency: string
+          destination: string
+          flight_details: Json
           id: string
-          include_review: boolean | null
-          inclusions: string[] | null
-          line_items: Json | null
-          notes: string | null
-          num_travellers: number | null
-          quote_markdown: string | null
+          include_review: boolean
+          inclusions: string[]
+          line_items: Json
+          notes: string
+          num_travellers: number
+          quote_markdown: string
           resort_name: string
-          resort_review_slug: string | null
-          review_data: Json | null
-          room_type: string | null
-          share_token: string | null
-          status: Database["public"]["Enums"]["quote_status"] | null
-          summary: string | null
-          total_price: number | null
+          resort_review_slug: string
+          review_data: Json
+          room_type: string
+          share_token: string
+          status: Database["public"]["Enums"]["quote_status"]
+          summary: string
+          total_price: number
           updated_at: string
-          valid_until: string | null
+          valid_until: string
         }[]
-        SetofOptions: {
-          from: "*"
-          to: "client_quotes"
-          isOneToOne: false
-          isSetofReturn: true
-        }
       }
       get_shared_trip: { Args: { _token: string }; Returns: Json }
       has_role: {
