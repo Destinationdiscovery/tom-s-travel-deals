@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { Shield, Menu, Download, ChevronDown, Luggage, Calendar, Map, DollarSign, Plane, Brain, ShieldCheck, Briefcase } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { useActiveTrip } from "@/hooks/useActiveTrip";
 import AdminLoginDialog from "@/components/auth/AdminLoginDialog";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -37,6 +38,7 @@ const toolLinks = [
 
 const Header = () => {
   const { isAdmin, user } = useAuth();
+  const activeTrip = useActiveTrip();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [toolsExpanded, setToolsExpanded] = useState(false);
@@ -137,6 +139,16 @@ const Header = () => {
               <Briefcase className="h-4 w-4" />
               My Trips
             </Link>
+
+            {user && activeTrip && (
+              <Link
+                to={`/my-trips/${activeTrip.slug}`}
+                className="hidden lg:inline-flex items-center max-w-[14ch] truncate text-xs font-medium text-primary-foreground/60 hover:text-primary-foreground transition-colors"
+                title={`Resume: ${activeTrip.name}`}
+              >
+                {activeTrip.name}
+              </Link>
+            )}
 
             {user && (
               <div

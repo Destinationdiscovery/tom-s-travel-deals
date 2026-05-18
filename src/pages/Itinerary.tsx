@@ -55,6 +55,17 @@ const Itinerary = () => {
     supabase.functions.invoke("track-review-view", { body: { slug: "itinerary" } }).catch(() => {});
   }, []);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get("q");
+    if (q && q.trim().length >= 3) {
+      setQuery(q.trim());
+      doSearch(q.trim());
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const doSearch = useCallback(async (q: string) => {
     setLoading(true);
     setError("");

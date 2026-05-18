@@ -64,6 +64,17 @@ const BestTime = () => {
     supabase.functions.invoke("track-review-view", { body: { slug: "best-time" } }).catch(() => {});
   }, []);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get("q");
+    if (q && q.trim().length >= 2) {
+      setQuery(q.trim());
+      doSearch(q.trim());
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const doSearch = useCallback(async (dest: string) => {
     setLoading(true);
     setError("");

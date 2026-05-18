@@ -52,6 +52,16 @@ const Safety = () => {
     supabase.functions.invoke("track-review-view", { body: { slug: "safety" } }).catch(() => {});
   }, []);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get("q");
+    if (q && q.trim().length >= 2) {
+      runSearch(q.trim());
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const runSearch = async (raw: string) => {
     const trimmed = raw.trim();
     if (trimmed.length < 2) return;
