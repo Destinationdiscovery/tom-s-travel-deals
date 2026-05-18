@@ -160,7 +160,7 @@ const Index = () => {
         <HomepageFAQ />
       </main>
       <ComparisonFloatingBadge />
-      <EmailCapturePopup />
+      
       <Footer />
     </div>
   );
