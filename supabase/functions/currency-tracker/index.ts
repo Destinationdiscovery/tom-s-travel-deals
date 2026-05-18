@@ -235,6 +235,8 @@ serve(async (req) => {
       expires_at: new Date(Date.now() + TTL_MS).toISOString(), hit_count: 0,
     }, { onConflict: "tool_name,cache_key" });
 
+    supabase.from("tool_search_events").insert({ tool_name: TOOL_NAME, query: raw, cache_hit: false }).then(() => {});
+
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json", "X-Cache": "MISS" },
     });
