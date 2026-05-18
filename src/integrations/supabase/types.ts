@@ -964,6 +964,39 @@ export type Database = {
         }
         Relationships: []
       }
+      tool_search_cache: {
+        Row: {
+          cache_key: string
+          created_at: string
+          expires_at: string
+          hit_count: number
+          id: string
+          query: string
+          result_data: Json
+          tool_name: string
+        }
+        Insert: {
+          cache_key: string
+          created_at?: string
+          expires_at: string
+          hit_count?: number
+          id?: string
+          query: string
+          result_data: Json
+          tool_name: string
+        }
+        Update: {
+          cache_key?: string
+          created_at?: string
+          expires_at?: string
+          hit_count?: number
+          id?: string
+          query?: string
+          result_data?: Json
+          tool_name?: string
+        }
+        Relationships: []
+      }
       travel_intel_cache: {
         Row: {
           cache_key: string
