@@ -234,6 +234,15 @@ const Header = () => {
                   </Link>
 
                   <Link
+                    to="/my-trips"
+                    onClick={() => setMobileOpen(false)}
+                    className="text-lg font-semibold text-secondary hover:text-secondary/80 transition-colors flex items-center gap-2 py-2"
+                  >
+                    <Briefcase className="h-4 w-4" />
+                    My Trips
+                  </Link>
+
+                  <Link
                     to="/install"
                     onClick={() => setMobileOpen(false)}
                     className="text-lg font-medium text-secondary hover:text-secondary/80 transition-colors flex items-center gap-2 py-2"
