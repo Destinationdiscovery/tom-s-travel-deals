@@ -1,6 +1,6 @@
 import { Heart, ExternalLink, Twitter, Instagram, Rss, Briefcase, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import NewsletterCTASection from "@/components/NewsletterCTASection";
+
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -24,7 +24,6 @@ const Footer = () => {
           </Link>
         </div>
       </section>
-      <NewsletterCTASection />
       <footer className="bg-primary text-primary-foreground py-16" role="contentinfo" aria-label="Site footer">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">

@@ -24,7 +24,7 @@ import PopularSavesSection from "@/components/PopularSavesSection";
 import ToolsDirectorySection from "@/components/ToolsDirectorySection";
 import AboutPreviewSection from "@/components/AboutPreviewSection";
 import AggregateStatsSection from "@/components/AggregateStatsSection";
-import { classifySearchIntent, toSlug } from "@/lib/searchIntent";
+import { classifySearchIntent, classifyToolIntent, toolIntentToPath, toSlug } from "@/lib/searchIntent";
 
 
 const Index = () => {
@@ -47,6 +47,13 @@ const Index = () => {
   }, [location.hash]);
 
   const handleHeroSearch = (query: string) => {
+    // 1. Route to a specific tool when the query matches one of the 8 tools.
+    const tool = classifyToolIntent(query);
+    if (tool) {
+      navigate(toolIntentToPath(tool, query));
+      return;
+    }
+    // 2. Fall back to listicle vs single-property review flow.
     const intent = classifySearchIntent(query);
     if (intent === "listicle") {
       navigate(`/reviews/${toSlug(query)}`);
