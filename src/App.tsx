@@ -32,6 +32,8 @@ const TravelIntel = lazy(() => import("./pages/TravelIntel"));
 const TopDestinations = lazy(() => import("./pages/TopDestinations"));
 const MyReviews = lazy(() => import("./pages/MyReviews"));
 const MyTrips = lazy(() => import("./pages/MyTrips"));
+const TripWorkspace = lazy(() => import("./pages/TripWorkspace"));
+const SharedTrip = lazy(() => import("./pages/SharedTrip"));
 const Promo = lazy(() => import("./pages/Promo"));
 const TravelSearch = lazy(() => import("./pages/TravelSearch"));
 const Reviews = lazy(() => import("./pages/Reviews"));
