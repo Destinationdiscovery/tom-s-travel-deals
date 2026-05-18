@@ -122,6 +122,7 @@ serve(async (req) => {
       .gt("expires_at", new Date().toISOString()).maybeSingle();
     if (cached) {
       supabase.from("tool_search_cache").update({ hit_count: (cached.hit_count || 0) + 1 }).eq("id", cached.id).then(() => {});
+      supabase.from("tool_search_events").insert({ tool_name: TOOL_NAME, query: raw, cache_hit: true }).then(() => {});
       return new Response(JSON.stringify(cached.result_data), {
         headers: { ...corsHeaders, "Content-Type": "application/json", "X-Cache": "HIT" },
       });
