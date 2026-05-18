@@ -1,0 +1,28 @@
+# ReviewThenGo
+
+> AI Travel Answer Engine. Get honest, synthesized answers about destinations, hotels, packing, safety, and timing — pulled from TripAdvisor, Google Reviews, Booking.com, Reddit, Expedia and more.
+
+ReviewThenGo aggregates traveler reviews and uses AI to deliver direct, trustworthy answers to specific travel questions. Built for travelers who want the truth without scrolling through hundreds of opinions.
+
+## Pages
+
+- [Home](/): Ask any travel question and get a synthesized answer.
+- [Compass](/compass): Long-form travel guides and destination articles.
+- [Guides](/guides): Evergreen travel advice hub.
+- [Destinations](/destinations): Browse destination reviews and intel.
+- [Tools](/tools): Travel planning tools.
+
+## Tools
+
+- [Best Time to Visit](/best-time): Find the ideal travel window for any destination.
+- [Itinerary Builder](/itinerary): Generate a day-by-day trip plan.
+- [Trip Packing](/gear): Smart packing lists tailored to your trip.
+- [Safety Scores](/safety): Honest safety ratings for destinations.
+- [Compare Reviews](/compare): Side-by-side hotel and destination comparisons.
+- [Know Before You Go](/know-before-you-go): Visa, currency, customs intel.
+
+## Optional
+
+- [About](/about): What ReviewThenGo is and how it works.
+- [Privacy](/privacy): Privacy policy.
+- [Terms](/terms): Terms of service.
