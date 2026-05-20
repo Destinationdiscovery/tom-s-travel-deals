@@ -90,7 +90,7 @@ const HeroSection = ({ onSearch, isSearching }: HeroSectionProps) => {
           Plan smarter. Travel better.
         </p>
         <h1 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold mb-3 leading-tight text-white">
-          What do you need to know before your next trip?
+          Shouldn't planning a trip take less than 12 browser tabs?
         </h1>
         <p className="text-white/80 text-base md:text-lg font-light mb-6">
           Hotel reviews, itineraries, visa rules, packing lists, safety scores and more. Ask anything.
