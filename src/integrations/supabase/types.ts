@@ -526,6 +526,108 @@ export type Database = {
         }
         Relationships: []
       }
+      compass_destinations_log: {
+        Row: {
+          destination: string
+          id: string
+          used_at: string
+          used_in_edition: number | null
+        }
+        Insert: {
+          destination: string
+          id?: string
+          used_at?: string
+          used_in_edition?: number | null
+        }
+        Update: {
+          destination?: string
+          id?: string
+          used_at?: string
+          used_in_edition?: number | null
+        }
+        Relationships: []
+      }
+      compass_editions: {
+        Row: {
+          best_time_data: Json | null
+          created_at: string
+          currency_data: Json | null
+          destination: string | null
+          destination_data: Json | null
+          edition_number: number
+          flight_deals_data: Json | null
+          full_html: string | null
+          full_text: string | null
+          generation_metadata: Json | null
+          hotel_data: Json | null
+          id: string
+          issue_date: string
+          itinerary_data: Json | null
+          perplexity_citations: Json | null
+          run_id: string | null
+          safety_data: Json | null
+          sent_at: string | null
+          status: Database["public"]["Enums"]["compass_edition_status"]
+          subject_line: string | null
+          subject_line_options: string[] | null
+          subscriber_count: number | null
+          travel_intel_data: Json | null
+          updated_at: string
+        }
+        Insert: {
+          best_time_data?: Json | null
+          created_at?: string
+          currency_data?: Json | null
+          destination?: string | null
+          destination_data?: Json | null
+          edition_number?: number
+          flight_deals_data?: Json | null
+          full_html?: string | null
+          full_text?: string | null
+          generation_metadata?: Json | null
+          hotel_data?: Json | null
+          id?: string
+          issue_date?: string
+          itinerary_data?: Json | null
+          perplexity_citations?: Json | null
+          run_id?: string | null
+          safety_data?: Json | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["compass_edition_status"]
+          subject_line?: string | null
+          subject_line_options?: string[] | null
+          subscriber_count?: number | null
+          travel_intel_data?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          best_time_data?: Json | null
+          created_at?: string
+          currency_data?: Json | null
+          destination?: string | null
+          destination_data?: Json | null
+          edition_number?: number
+          flight_deals_data?: Json | null
+          full_html?: string | null
+          full_text?: string | null
+          generation_metadata?: Json | null
+          hotel_data?: Json | null
+          id?: string
+          issue_date?: string
+          itinerary_data?: Json | null
+          perplexity_citations?: Json | null
+          run_id?: string | null
+          safety_data?: Json | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["compass_edition_status"]
+          subject_line?: string | null
+          subject_line_options?: string[] | null
+          subscriber_count?: number | null
+          travel_intel_data?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       email_log: {
         Row: {
           booking_id: string | null
@@ -942,25 +1044,40 @@ export type Database = {
       }
       subscribers: {
         Row: {
+          country: string | null
           created_at: string
           email: string
+          first_name: string | null
           id: string
           interests: string[] | null
           source_slug: string | null
+          status: Database["public"]["Enums"]["subscriber_status"]
+          tags: string[] | null
+          unsubscribed_at: string | null
         }
         Insert: {
+          country?: string | null
           created_at?: string
           email: string
+          first_name?: string | null
           id?: string
           interests?: string[] | null
           source_slug?: string | null
+          status?: Database["public"]["Enums"]["subscriber_status"]
+          tags?: string[] | null
+          unsubscribed_at?: string | null
         }
         Update: {
+          country?: string | null
           created_at?: string
           email?: string
+          first_name?: string | null
           id?: string
           interests?: string[] | null
           source_slug?: string | null
+          status?: Database["public"]["Enums"]["subscriber_status"]
+          tags?: string[] | null
+          unsubscribed_at?: string | null
         }
         Relationships: []
       }
@@ -1475,8 +1592,10 @@ export type Database = {
         | "deposit_due"
         | "trip_start"
         | "trip_end"
+      compass_edition_status: "generating" | "draft" | "ready" | "sent"
       email_type: "quote" | "followup" | "pre_departure" | "after_trip"
       quote_status: "draft" | "sent" | "accepted" | "expired" | "booked"
+      subscriber_status: "active" | "unsubscribed" | "bounced"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1614,8 +1733,10 @@ export const Constants = {
         "trip_start",
         "trip_end",
       ],
+      compass_edition_status: ["generating", "draft", "ready", "sent"],
       email_type: ["quote", "followup", "pre_departure", "after_trip"],
       quote_status: ["draft", "sent", "accepted", "expired", "booked"],
+      subscriber_status: ["active", "unsubscribed", "bounced"],
     },
   },
 } as const
