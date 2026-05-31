@@ -63,6 +63,7 @@ const GearAdmin = () => {
           {activeTab === "reviews" && <FeaturedReviewsManager />}
           {activeTab === "blog" && <BlogPostCreator />}
           {activeTab === "gear" && <GearImageManager />}
+          {activeTab === "compass" && <CompassDashboard />}
         </main>
       </div>
     </div>
