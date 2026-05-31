@@ -1,9 +1,9 @@
-import { LayoutDashboard, FileText, Calendar, Mail, ImageIcon, Users, ClipboardList, Menu, BookOpen, Star, MapPin, PanelTop, Luggage } from "lucide-react";
+import { LayoutDashboard, FileText, Calendar, Mail, ImageIcon, Users, ClipboardList, Menu, BookOpen, Star, MapPin, PanelTop, Luggage, Compass } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
-export type DashboardTab = "overview" | "quotes" | "calendar" | "emails" | "gear" | "clients" | "bookings" | "blog" | "featured-deals" | "reviews" | "banner-deals";
+export type DashboardTab = "overview" | "quotes" | "calendar" | "emails" | "gear" | "clients" | "bookings" | "blog" | "featured-deals" | "reviews" | "banner-deals" | "compass";
 
 interface TabItem {
   id: DashboardTab;
@@ -36,6 +36,7 @@ const sections: TabSection[] = [
   {
     label: "SITE MANAGEMENT",
     tabs: [
+      { id: "compass", label: "The Compass", icon: Compass },
       { id: "blog", label: "Content Studio", icon: BookOpen },
       { id: "featured-deals", label: "Featured Deals", icon: Star },
       { id: "banner-deals", label: "Banner Deals", icon: PanelTop },
