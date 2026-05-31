@@ -36,6 +36,7 @@ const sections: TabSection[] = [
   {
     label: "SITE MANAGEMENT",
     tabs: [
+      { id: "compass", label: "The Compass", icon: Compass },
       { id: "blog", label: "Content Studio", icon: BookOpen },
       { id: "featured-deals", label: "Featured Deals", icon: Star },
       { id: "banner-deals", label: "Banner Deals", icon: PanelTop },
