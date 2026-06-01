@@ -60,22 +60,26 @@ async function callGeminiJSON<T>(prompt: string): Promise<T> {
 }
 
 // ---- Perplexity Sonar ----
-async function callPerplexity(prompt: string, recency: "day" | "week" | "month" = "month") {
+const PPLX_UNIVERSAL_RULE = `
+CRITICAL: You have live web search. You MUST return real, specific, current results.
+Never say "no data", "no reviews available", "information not found", "no current deals", "data unavailable", or return empty arrays / null values for required fields.
+If your first search yields thin results, broaden the query: nearby city, similar property class, comparable route, regional or global news. Always return the best real, verifiable data you can find.
+Every required field must be populated with a real answer drawn from your search.`;
+
+async function callPerplexity(prompt: string, recency: "day" | "week" | "month" | null = "month") {
+  const body: any = {
+    model: "sonar",
+    messages: [
+      { role: "system", content: `You are a travel intelligence researcher. Return ONLY valid JSON. No markdown, no code fences, no preamble. The response must be parseable by JSON.parse directly.${PPLX_UNIVERSAL_RULE}` },
+      { role: "user", content: prompt },
+    ],
+    return_citations: true,
+  };
+  if (recency) body.search_recency_filter = recency;
   const res = await fetch("https://api.perplexity.ai/chat/completions", {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${PERPLEXITY_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "sonar",
-      messages: [
-        { role: "system", content: "You are a travel intelligence researcher. Return ONLY valid JSON. No markdown, no code fences, no preamble. The response must be parseable by JSON.parse directly." },
-        { role: "user", content: prompt },
-      ],
-      return_citations: true,
-      search_recency_filter: recency,
-    }),
+    headers: { Authorization: `Bearer ${PERPLEXITY_API_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error(`Perplexity ${res.status}: ${await res.text()}`);
   const data = await res.json();
@@ -84,9 +88,22 @@ async function callPerplexity(prompt: string, recency: "day" | "week" | "month" 
   return { text, citations };
 }
 
-async function callPerplexityJSON<T>(prompt: string, recency: "day" | "week" | "month" = "month") {
+async function callPerplexityJSON<T>(prompt: string, recency: "day" | "week" | "month" | null = "month") {
   const { text, citations } = await callPerplexity(prompt, recency);
   return { data: parseJson<T>(text), citations };
+}
+
+// Retry once with broadened scope if the first result fails a sufficiency check.
+async function callPerplexityWithRetry<T>(
+  prompt: string,
+  recency: "day" | "week" | "month" | null,
+  isSufficient: (d: T) => boolean,
+  broadenSuffix: string,
+): Promise<{ data: T; citations: string[] }> {
+  const first = await callPerplexityJSON<T>(prompt, recency);
+  if (isSufficient(first.data)) return first;
+  const broadened = `${prompt}\n\nBROADEN SCOPE: ${broadenSuffix}\nReturn the same JSON shape with real, populated values. Do not return empty arrays or null values.`;
+  return await callPerplexityJSON<T>(broadened, null);
 }
 
 // ---- Progress broadcast ----
