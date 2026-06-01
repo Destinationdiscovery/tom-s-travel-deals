@@ -1,5 +1,5 @@
-import { useState, useCallback } from "react";
-import { useLocation } from "react-router-dom";
+import { useState } from "react";
+
 import { Shield, Menu, Download, ChevronDown, Luggage, Calendar, Map, DollarSign, Plane, Brain, ShieldCheck, Briefcase } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -17,8 +17,6 @@ import {
 const navLinks = [
   { to: "/", label: "Home" },
   { to: "/compass", label: "Blog" },
-  { to: "/guides", label: "Guides" },
-  { to: "/#travel-deals", label: "Deals" },
 ];
 
 const mobileExtraLinks = [
@@ -39,16 +37,9 @@ const toolLinks = [
 const Header = () => {
   const { isAdmin, user } = useAuth();
   const activeTrip = useActiveTrip();
-  const location = useLocation();
+  
   const [mobileOpen, setMobileOpen] = useState(false);
   const [toolsExpanded, setToolsExpanded] = useState(false);
-
-  const handleDealsClick = useCallback((e: React.MouseEvent) => {
-    if (location.pathname === "/") {
-      e.preventDefault();
-      document.getElementById("travel-deals")?.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [location.pathname]);
 
   return (
     <>
@@ -81,7 +72,6 @@ const Header = () => {
               <Link
                 key={link.to}
                 to={link.to}
-                onClick={link.label === "Deals" ? handleDealsClick : undefined}
                 className="text-sm font-medium text-primary-foreground/80 hover:text-primary-foreground transition-colors"
               >
                 {link.label}
@@ -216,13 +206,6 @@ const Header = () => {
                   >
                     Blog
                   </Link>
-                  <Link
-                    to="/guides"
-                    onClick={() => setMobileOpen(false)}
-                    className="text-lg font-medium text-primary-foreground/80 hover:text-primary-foreground transition-colors py-2"
-                  >
-                    Guides
-                  </Link>
 
                   {/* About + Contact */}
                   {mobileExtraLinks.map((link) => (
@@ -236,14 +219,6 @@ const Header = () => {
                     </Link>
                   ))}
 
-                  {/* Deals */}
-                  <Link
-                    to="/#travel-deals"
-                    onClick={(e) => { handleDealsClick(e); setMobileOpen(false); }}
-                    className="text-lg font-medium text-primary-foreground/80 hover:text-primary-foreground transition-colors py-2"
-                  >
-                    Deals
-                  </Link>
 
                   <Link
                     to="/my-trips"
