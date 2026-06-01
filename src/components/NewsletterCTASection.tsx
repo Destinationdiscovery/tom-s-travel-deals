@@ -21,11 +21,11 @@ const NewsletterCTASection = () => {
     setSubmitting(true);
     try {
       const { error } = await supabase.functions.invoke("subscribe", {
-        body: { email: trimmed, source_slug: "newsletter-cta", interests: ["weekly"] },
+        body: { email: trimmed, source_slug: "compass-homepage", interests: ["compass"] },
       });
       if (error) throw error;
-      trackEmailSignup("newsletter-cta");
-      toast({ title: "You're in! 🎉", description: "Check your inbox for The Compass Weekly." });
+      trackEmailSignup("compass-homepage");
+      toast({ title: "You're on the list.", description: "The next edition of The Compass lands soon." });
       setEmail("");
     } catch {
       toast({ title: "Something went wrong", description: "Please try again.", variant: "destructive" });
@@ -42,10 +42,10 @@ const NewsletterCTASection = () => {
             <Mail className="h-6 w-6 text-primary" />
           </div>
           <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-2">
-            The Compass Weekly
+            The Compass
           </h2>
           <p className="text-muted-foreground text-base mb-6">
-            Get hand-picked travel deals, packing tips, and travel news. Every week, free.
+            A biweekly travel briefing. One destination, the best time to go, a sample itinerary, safety notes, and current flight and hotel deals. Free.
           </p>
           <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
             <Input
