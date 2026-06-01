@@ -1,37 +1,45 @@
-## What's actually happening
+## Problem
 
-Your database has 3 subscribers:
-- `jclindustries@outlook.com` (you)
-- `ttzeoul@gmail.com` (you)
-- `test-user-123@example.com`
+The three capture components (`EmailCapturePopup`, `NewsletterCTASection`, `CompassInlineCTA`) all exist and post to the `subscribe` edge function correctly, but **none of them are imported or mounted in any page**. That's why nothing pops when you try to leave the site. The Footer also has no subscribe form, just a link to `/compass`.
 
-All three signed up **before** the `subscribe` function was updated to push new signups into MailerLite. That means **none of them were ever added to your MailerLite group**.
+## Wire the 5 placements
 
-When you published, MailerLite did send to 3 contacts, but those are 3 contacts that already existed in that MailerLite group from somewhere else (manual adds, old imports, MailerLite test contacts). Your two real emails were never in the group, which is why you haven't received anything.
+1. **Exit-intent popup** (`EmailCapturePopup`)
+   Mount once globally in `src/App.tsx` so it's available on every route. Existing component already handles the 7-day dismissal cookie, exit-intent trigger (mouse leaves top of viewport), and 30-second fallback timer. Source slug: `compass-exit-popup`.
 
-## The fix (two parts)
+2. **Homepage subscribe section** (`NewsletterCTASection`)
+   Mount in `src/pages/Index.tsx` between `BlogPreviewSection` and `AggregateStatsSection`. Source slug: `compass-homepage`.
 
-### 1. New edge function: `sync-subscribers-to-mailerlite`
-Admin-only. Reads every `status = 'active'` row from the `subscribers` table and POSTs each one to `https://connect.mailerlite.com/api/subscribers` with `groups: [MAILERLITE_GROUP_ID]`. MailerLite treats duplicate emails as upserts, so it's safe to run repeatedly. Returns a count of how many were synced and how many failed.
+3. **Compass blog index header CTA**
+   Mount `NewsletterCTASection` on `src/pages/Compass.tsx` directly under the hero, before the category filter. Pass a custom source slug `compass-blog-index` by adding an optional prop.
 
-### 2. New edge function: `test-mailerlite-connection`
-Admin-only diagnostic. Calls three MailerLite endpoints and returns a JSON report:
-- `GET /api/groups/{MAILERLITE_GROUP_ID}` to confirm the group exists and show its name + total subscriber count
-- `GET /api/groups/{MAILERLITE_GROUP_ID}/subscribers?limit=50` to list who is actually in the group right now
-- `GET /api/account` to confirm the API token is valid and show the verified sender domain
+4. **Mid-article inline CTA** (`CompassInlineCTA`)
+   In `src/pages/CompassArticle.tsx`, inject `<CompassInlineCTA articleSlug={slug} />` after the 3rd rich-content block so it sits mid-scroll. Source slug: `compass-inline-<slug>`.
 
-### 3. UI buttons in the Compass dashboard Settings tab
-Replace the placeholder "Connect provider" cards in `SettingsPanel.tsx` with a real MailerLite panel containing:
-- **Test connection** button — shows the diagnostic report in a dialog (group name, subscriber count, who's in the group, sender verification status)
-- **Sync subscribers to MailerLite** button — runs the backfill and toasts the result
+5. **Footer subscribe form**
+   Replace the current "Blog" link area in the "Stay Connected" column of `src/components/Footer.tsx` with a slim inline form (email input + Subscribe button) that posts to the `subscribe` function with source slug `compass-footer`. Keep the existing social/RSS icons.
 
-## After you click those two buttons
+## Mobile note
 
-You'll immediately see whether your two emails are in the MailerLite group. If the sync adds them, the next Publish & Send will actually deliver to your inbox. If MailerLite reports the group already contains them but you still don't get mail, the diagnostic will tell us whether it's a sender-verification or deliverability problem instead.
+Exit-intent (mouse leaving the top of viewport) does not fire on touch devices. The existing 30-second fallback timer already covers mobile, so placement #1 still works there.
+
+## Verification
+
+After wiring, use the browser tool to:
+- Load homepage, wait 31s, confirm popup appears, submit a test email, confirm toast + row in `subscribers` table.
+- Move mouse above the viewport on desktop, confirm popup fires.
+- Scroll homepage to the new `NewsletterCTASection`, submit, confirm row.
+- Open a Compass article, scroll to mid-article CTA, submit, confirm row.
+- Submit footer form, confirm row.
+- Clear `localStorage` key `rtg-email-popup-dismissed` between popup tests.
 
 ## Files touched
-- `supabase/functions/sync-subscribers-to-mailerlite/index.ts` (new)
-- `supabase/functions/test-mailerlite-connection/index.ts` (new)
-- `src/components/dashboard/compass/SettingsPanel.tsx` (rewritten)
 
-No database changes, no new secrets.
+- `src/App.tsx` (mount popup)
+- `src/pages/Index.tsx` (add NewsletterCTASection)
+- `src/pages/Compass.tsx` (add NewsletterCTASection with custom slug)
+- `src/pages/CompassArticle.tsx` (inject CompassInlineCTA mid-content)
+- `src/components/NewsletterCTASection.tsx` (add optional `sourceSlug` + `interests` props)
+- `src/components/Footer.tsx` (add subscribe form)
+
+No DB or edge-function changes needed.
