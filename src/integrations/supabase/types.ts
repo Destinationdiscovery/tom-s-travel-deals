@@ -563,7 +563,9 @@ export type Database = {
           id: string
           issue_date: string
           itinerary_data: Json | null
+          mailerlite_campaign_id: string | null
           perplexity_citations: Json | null
+          published_at: string | null
           run_id: string | null
           safety_data: Json | null
           sent_at: string | null
@@ -589,7 +591,9 @@ export type Database = {
           id?: string
           issue_date?: string
           itinerary_data?: Json | null
+          mailerlite_campaign_id?: string | null
           perplexity_citations?: Json | null
+          published_at?: string | null
           run_id?: string | null
           safety_data?: Json | null
           sent_at?: string | null
@@ -615,7 +619,9 @@ export type Database = {
           id?: string
           issue_date?: string
           itinerary_data?: Json | null
+          mailerlite_campaign_id?: string | null
           perplexity_citations?: Json | null
+          published_at?: string | null
           run_id?: string | null
           safety_data?: Json | null
           sent_at?: string | null
