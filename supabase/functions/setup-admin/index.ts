@@ -11,6 +11,17 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Require a shared secret header so this privileged endpoint cannot be
+  // invoked by anonymous callers. Set SETUP_SECRET in project secrets.
+  const expectedSecret = Deno.env.get("SETUP_SECRET");
+  const providedSecret = req.headers.get("x-setup-secret");
+  if (!expectedSecret || providedSecret !== expectedSecret) {
+    return new Response(
+      JSON.stringify({ error: "Forbidden" }),
+      { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
   try {
     const adminEmail = Deno.env.get("ADMIN_EMAIL");
     const adminPassword = Deno.env.get("ADMIN_PASSWORD");
