@@ -25,15 +25,18 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Verify admin via JWT
+    // Verify admin via JWT OR allow service-role (cron/internal)
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
     const token = authHeader.replace("Bearer ", "");
-    const { data: userData } = await supabase.auth.getUser(token);
-    if (!userData?.user) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
-    const { data: roleRow } = await supabase
-      .from("user_roles").select("role").eq("user_id", userData.user.id).eq("role", "admin").maybeSingle();
-    if (!roleRow) return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: corsHeaders });
+    const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    if (token !== SERVICE_KEY) {
+      const { data: userData } = await supabase.auth.getUser(token);
+      if (!userData?.user) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
+      const { data: roleRow } = await supabase
+        .from("user_roles").select("role").eq("user_id", userData.user.id).eq("role", "admin").maybeSingle();
+      if (!roleRow) return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: corsHeaders });
+    }
 
     const { edition_id } = await req.json();
     if (!edition_id) return new Response(JSON.stringify({ error: "edition_id required" }), { status: 400, headers: corsHeaders });
