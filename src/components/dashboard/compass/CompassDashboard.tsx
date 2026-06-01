@@ -183,6 +183,7 @@ const CompassDashboard = () => {
                       <Button size="sm" variant="ghost" onClick={() => setEditingId(e.id)}><Pencil className="h-4 w-4" /></Button>
                       <Button size="sm" variant="ghost" disabled title="Connect email provider in Settings to enable sending"><Send className="h-4 w-4" /></Button>
                       <Button size="sm" variant="ghost" onClick={() => duplicate(e.id)}><Copy className="h-4 w-4" /></Button>
+                      <Button size="sm" variant="ghost" onClick={() => setDeleteTarget(e)} className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
                     </td>
                   </tr>
                 ))}
