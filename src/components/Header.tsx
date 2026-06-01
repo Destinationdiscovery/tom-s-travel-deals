@@ -37,7 +37,7 @@ const toolLinks = [
 const Header = () => {
   const { isAdmin, user } = useAuth();
   const activeTrip = useActiveTrip();
-  const location = useLocation();
+  
   const [mobileOpen, setMobileOpen] = useState(false);
   const [toolsExpanded, setToolsExpanded] = useState(false);
 
