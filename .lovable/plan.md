@@ -1,40 +1,58 @@
-# Compass Newsletter: Delete + Anti-Empty Prompts
+# MailerLite integration for The Compass
 
-Two fixes to `CompassDashboard.tsx` and `supabase/functions/generate-compass-edition/index.ts`.
+Free tier: 1,000 subs, 12,000 emails/mo, automations + campaigns included. Manual publish only — no cron, no auto-send risk.
 
-## 1. Delete editions
+## 1. Secrets to add
+- `MAILERLITE_API_TOKEN` — from MailerLite → Integrations → Developer API
+- `MAILERLITE_GROUP_ID` — numeric ID of your "Compass Subscribers" group
 
-**File:** `src/components/dashboard/compass/CompassDashboard.tsx`
+## 2. MailerLite account setup (you do this once)
+1. Verify sender email at mailerlite.com
+2. Create a Group called "Compass Subscribers"
+3. Create an Automation: Trigger = "When subscriber joins group: Compass Subscribers" → Action = send welcome email with a link to `https://www.reviewthengo.com/compass` (latest edition)
+4. Grab API token + Group ID, paste into Lovable secrets
 
-- Add a trash icon button to each row in the editions table, next to Duplicate.
-- Wrap in `AlertDialog` confirmation ("Delete edition #N? This cannot be undone.").
-- On confirm: `supabase.from("compass_editions").delete().eq("id", id)`, toast success, reload list.
-- Admin RLS already allows DELETE; no migration needed.
+## 3. Sync subscribers to MailerLite on signup
+Edit `supabase/functions/subscribe/index.ts`:
+- After successful Supabase upsert, POST to `https://connect.mailerlite.com/api/subscribers` with email, fields (source, interests as comma string), and `groups: [MAILERLITE_GROUP_ID]`
+- Fail open: MailerLite errors logged but don't block the user signup
+- MailerLite's automation handles the welcome email automatically
 
-## 2. Rewrite prompts so sections never come back empty
+## 4. Schema additions
+Migration adds to `compass_editions`:
+- `published_at timestamptz`
+- `mailerlite_campaign_id text`
 
-**Problem:** Current prompts let the model say "no reviews available" or return empty arrays for steps 6 (flight deals), 7 (honest hotel pick), and 8 (travel intel). These three already call Perplexity Sonar, which always finds something. The fix is in the prompt language plus stricter fallback behavior.
+## 5. New edge function: `publish-compass-edition`
+- Admin-guarded via `requireAdmin`
+- Input: `{ edition_id }`
+- Loads edition, requires `status = 'ready'` and non-empty `full_html` + `subject_line`
+- POST `https://connect.mailerlite.com/api/campaigns` with type=regular, subject, from, html, filter targeting the Compass group
+- POST `/campaigns/{id}/schedule` with delivery=instant
+- Update edition: `status='sent'`, `sent_at=now()`, `published_at=now()`, `mailerlite_campaign_id`, `subscriber_count` (live count from subscribers table)
 
-**File:** `supabase/functions/generate-compass-edition/index.ts`
+## 6. Dashboard UI changes
+`CompassDashboard.tsx` action column gets two new buttons per row:
+- **Mark Ready** (yellow, for `draft` only) — flips status to `ready`
+- **Publish & Send** (green, for `ready` only) — opens AlertDialog "Send edition #N to {activeSubs} subscribers now?", then invokes `publish-compass-edition`
+- `sent` rows show subject + "Sent {date} to N" — Publish hidden
+- Disable both for editions with no `full_html`
 
-Rewrite the three research prompts with these new rules baked in:
+## 7. SettingsPanel update
+Replace the placeholder Mailchimp/Kit/Brevo cards with a single MailerLite status card showing "Connected" if both secrets exist (checked via a tiny `mailerlite-status` edge function or just assumed-present), plus link to MailerLite dashboard.
 
-- **Universal rule (added to all Perplexity prompts):** "You have live web search. You MUST return real, specific results. Never say 'no data', 'no reviews available', 'information not found', or return empty arrays. If your first search yields nothing, broaden the query (nearby city, similar property class, comparable route, regional news) and return the best real data you can find. Every field must be populated with a real, current, verifiable answer."
+## 8. Memory update
+Replace the Kit/Resend welcome memory with one describing MailerLite as the active newsletter provider, the welcome-via-group-automation pattern, and the manual Publish flow.
 
-- **Step 6 (flights):** require at least 3 real deals. If no current sale to the exact destination, return the cheapest current published fares from major US/Canadian hubs to that destination plus 2 comparable regional routes. Never "no deals found".
+## Files
+- New: `supabase/functions/publish-compass-edition/index.ts`
+- New: migration adding `published_at` + `mailerlite_campaign_id` columns
+- Edit: `supabase/functions/subscribe/index.ts`
+- Edit: `src/components/dashboard/compass/CompassDashboard.tsx`
+- Edit: `src/components/dashboard/compass/SettingsPanel.tsx`
+- Memory: update `mem://integrations/resend/welcome-email-status` (or add `mem://integrations/mailerlite/newsletter-integration`)
 
-- **Step 7 (hotel):** require one well-reviewed property in the destination region with aggregated traveller sentiment from TripAdvisor, Google, Booking.com, and Reddit. If the exact destination has thin coverage, pick the most reviewed notable property within 100 km and label location accordingly. `what_reviewers_love` must have 3 items, `what_reviewers_flag` must have 2, `reddit_consensus` must be a real sentence. Never empty.
-
-- **Step 8 (travel intel):** require 3 to 4 real news items from the past 2 weeks. If destination-specific news is thin, broaden to regional or global traveller-relevant news (advisories, airline policy, visa rules, currency shifts). Never fewer than 3 items.
-
-- **Step 9 (final assembly):** add instruction "Never write phrases like 'no reviews found', 'data unavailable', 'no current deals'. If a research field looks thin, write around it using what is available. Always present confident, specific copy."
-
-- **Fallback hardening:** change the `runStep` fallbacks for steps 6, 7, 8 so that on failure the orchestrator retries Perplexity once with a broader query (drop `search_recency_filter`, widen scope to country/region) before accepting an empty fallback. If still empty, omit the section header in step 9 rather than render an empty block.
-
-No schema changes, no new tools. Only prompt text, one retry helper, and the delete UI.
-
-## Technical notes
-
-- Delete uses existing admin RLS policy (`ALL` on `compass_editions`).
-- Retry helper: a small `callPerplexityWithRetry(prompt, recency)` that runs once, checks the parsed JSON has the required non-empty fields, and if not re-runs without recency filter and with a broadened prompt suffix.
-- No changes to Gemini-only steps (1, 2, 5, 9, 10) beyond the step-9 anti-empty clause.
+## Out of scope (by your request)
+- No cron / auto-send
+- No RSS feed for MailerLite (manual publish is enough)
+- No open/click rate import (MailerLite dashboard shows these)
