@@ -1,3 +1,5 @@
+import { requireAdmin } from "../_shared/adminAuth.ts";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -8,6 +10,9 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
+  const _auth = await requireAdmin(req, corsHeaders);
+  if (_auth instanceof Response) return _auth;
 
   try {
     const { email } = await req.json();

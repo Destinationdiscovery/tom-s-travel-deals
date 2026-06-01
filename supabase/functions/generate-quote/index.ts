@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+import { requireAdmin } from "../_shared/adminAuth.ts";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
@@ -77,6 +78,8 @@ function stripExpiryLanguage(md: string): string {
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+    const _auth = await requireAdmin(req, corsHeaders);
+    if (_auth instanceof Response) return _auth;
 
   try {
     const { prompt, attachmentPaths, clientName, clientEmail, includeThingsToDo = true, advisory } = await req.json();
