@@ -11,6 +11,7 @@ import TravelersAskSection from "@/components/TravelersAskSection";
 import RecentReviewsHomepage from "@/components/RecentReviewsHomepage";
 
 import BlogPreviewSection from "@/components/BlogPreviewSection";
+import NewsletterCTASection from "@/components/NewsletterCTASection";
 import TrendingQueriesSection from "@/components/TrendingQueriesSection";
 import HomepageFAQ from "@/components/HomepageFAQ";
 import { homepageFaqData } from "@/components/HomepageFAQ";
