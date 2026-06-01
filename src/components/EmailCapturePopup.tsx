@@ -126,10 +126,10 @@ const EmailCapturePopup = () => {
         </div>
 
         <h2 className="font-display text-2xl font-bold text-foreground text-center mb-2">
-          Get Weekly Exclusive Deals
+          The Compass. Travel intel, every two weeks.
         </h2>
         <p className="text-sm text-muted-foreground text-center mb-4">
-          Join 5,000+ Canadian travelers getting the best deals, reviews, and tips delivered weekly.
+          One short email with a featured destination, best time to go, a sample itinerary, safety read, and live flight and hotel deals. No spam, just signal.
         </p>
 
         {/* Interest checkboxes */}
