@@ -98,6 +98,15 @@ const CompassDashboard = () => {
     load();
   };
 
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    const { error } = await supabase.from("compass_editions" as any).delete().eq("id", deleteTarget.id);
+    if (error) toast({ title: "Delete failed", description: error.message, variant: "destructive" });
+    else toast({ title: `Edition #${deleteTarget.edition_number} deleted` });
+    setDeleteTarget(null);
+    load();
+  };
+
   if (editingId) return <EditionEditor editionId={editingId} onClose={() => { setEditingId(null); load(); }} />;
 
   return (
