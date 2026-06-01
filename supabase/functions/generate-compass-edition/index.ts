@@ -410,13 +410,34 @@ Deno.serve(async (req) => {
           () => callGeminiJSON<any>(step5Prompt(destination.destination)),
           { best_months: "", best_reason: "" }),
         runStep(6, "Sourcing current flight deals...", progress,
-          async () => { const r = await callPerplexityJSON<any>(step6Prompt(destination.destination), "week"); allCitations.push({ step: 6, urls: r.citations }); return r.data; },
+          async () => {
+            const r = await callPerplexityWithRetry<any>(
+              step6Prompt(destination.destination), "week",
+              (d) => Array.isArray(d?.deals) && d.deals.length >= 3,
+              `Broaden to lowest published roundtrip fares from any major US/Canadian hub to ${destination.destination} plus the strongest current sales to comparable destinations in the same region.`,
+            );
+            allCitations.push({ step: 6, urls: r.citations }); return r.data;
+          },
           { deals: [], disclaimer: "" }),
         runStep(7, "Selecting hotel pick...", progress,
-          async () => { const r = await callPerplexityJSON<any>(step7Prompt(destination.destination), "month"); allCitations.push({ step: 7, urls: r.citations }); return r.data; },
+          async () => {
+            const r = await callPerplexityWithRetry<any>(
+              step7Prompt(destination.destination), "month",
+              (d) => !!d?.hotel_name && Array.isArray(d?.what_reviewers_love) && d.what_reviewers_love.length >= 3 && Array.isArray(d?.what_reviewers_flag) && d.what_reviewers_flag.length >= 2 && !!d?.reddit_consensus,
+              `Pick the most reviewed notable hotel within 100 km of ${destination.destination}. Use aggregated TripAdvisor, Google, Booking.com, and Reddit data. Populate every field with real content.`,
+            );
+            allCitations.push({ step: 7, urls: r.citations }); return r.data;
+          },
           { hotel_name: "", what_reviewers_love: [], what_reviewers_flag: [], verdict: "", disclaimer: "" }),
         runStep(8, "Generating travel intel briefing...", progress,
-          async () => { const r = await callPerplexityJSON<any>(step8Prompt(), "week"); allCitations.push({ step: 8, urls: r.citations }); return r.data; },
+          async () => {
+            const r = await callPerplexityWithRetry<any>(
+              step8Prompt(), "week",
+              (d) => Array.isArray(d?.items) && d.items.length >= 3,
+              `Broaden to global traveller-relevant news from the past month: advisories, visa changes, airline policy, currency shifts, strikes, weather disruptions affecting US and Canadian travellers.`,
+            );
+            allCitations.push({ step: 8, urls: r.citations }); return r.data;
+          },
           { items: [] }),
       ]);
       meta.step_2_api = "gemini-2.5-pro"; meta.step_2_status = s2.ok ? "ok" : "failed";
