@@ -64,11 +64,11 @@ const EmailCapturePopup = () => {
     setSubmitting(true);
     try {
       const { error } = await supabase.functions.invoke("subscribe", {
-        body: { email: trimmed, source_slug: "popup", interests },
+        body: { email: trimmed, source_slug: "compass-exit-popup", interests },
       });
       if (error) throw error;
-      trackEmailSignup("popup");
-      toast({ title: "You're in! 🎉", description: "Check your inbox for weekly deals." });
+      trackEmailSignup("compass-exit-popup");
+      toast({ title: "You're on The Compass list.", description: "Look for the next edition in your inbox." });
       dismiss();
     } catch {
       toast({ title: "Something went wrong", description: "Please try again.", variant: "destructive" });
@@ -126,10 +126,10 @@ const EmailCapturePopup = () => {
         </div>
 
         <h2 className="font-display text-2xl font-bold text-foreground text-center mb-2">
-          Get Weekly Exclusive Deals
+          The Compass. Travel intel, every two weeks.
         </h2>
         <p className="text-sm text-muted-foreground text-center mb-4">
-          Join 5,000+ Canadian travelers getting the best deals, reviews, and tips delivered weekly.
+          One short email with a featured destination, best time to go, a sample itinerary, safety read, and live flight and hotel deals. No spam, just signal.
         </p>
 
         {/* Interest checkboxes */}
