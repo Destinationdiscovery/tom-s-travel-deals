@@ -163,6 +163,7 @@ const SubscribersPanel = () => {
                 <th className="text-left p-2">Date</th>
                 <th className="text-left p-2">Country</th>
                 <th className="text-left p-2">Status</th>
+                <th className="text-right p-2">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -173,9 +174,14 @@ const SubscribersPanel = () => {
                   <td className="p-2 text-muted-foreground">{new Date(s.created_at).toLocaleDateString()}</td>
                   <td className="p-2 text-muted-foreground">{s.country ?? "—"}</td>
                   <td className="p-2"><Badge variant={s.status === "active" ? "default" : "outline"}>{s.status}</Badge></td>
+                  <td className="p-2 text-right">
+                    <Button size="sm" variant="ghost" onClick={() => removeSub(s)} className="text-destructive hover:text-destructive">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </td>
                 </tr>
               ))}
-              {filtered.length === 0 && <tr><td colSpan={5} className="p-6 text-center text-muted-foreground">No subscribers match these filters.</td></tr>}
+              {filtered.length === 0 && <tr><td colSpan={6} className="p-6 text-center text-muted-foreground">No subscribers match these filters.</td></tr>}
             </tbody>
           </table>
         </div>
