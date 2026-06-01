@@ -1,5 +1,5 @@
-import { useState, useCallback } from "react";
-import { useLocation } from "react-router-dom";
+import { useState } from "react";
+
 import { Shield, Menu, Download, ChevronDown, Luggage, Calendar, Map, DollarSign, Plane, Brain, ShieldCheck, Briefcase } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
