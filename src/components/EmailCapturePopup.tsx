@@ -77,7 +77,8 @@ const EmailCapturePopup = () => {
       if (error) throw error;
       trackEmailSignup("compass-exit-popup");
       toast({ title: "You're on The Compass list.", description: "Look for the next edition in your inbox." });
-      dismiss();
+      localStorage.setItem(SUBSCRIBED_KEY, String(Date.now()));
+      setVisible(false);
     } catch {
       toast({ title: "Something went wrong", description: "Please try again.", variant: "destructive" });
     } finally {
