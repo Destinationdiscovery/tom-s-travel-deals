@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, RefreshCw, Monitor, Smartphone } from "lucide-react";
+import { ArrowLeft, RefreshCw, Monitor, Smartphone, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Props { editionId: string; onClose: () => void; }
@@ -20,6 +20,7 @@ const EditionEditor = ({ editionId, onClose }: Props) => {
   const { toast } = useToast();
   const [edition, setEdition] = useState<any>(null);
   const [saving, setSaving] = useState(false);
+  const [publishing, setPublishing] = useState(false);
   const [regen, setRegen] = useState<number | null>(null);
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
   const [subject, setSubject] = useState("");
@@ -62,15 +63,46 @@ const EditionEditor = ({ editionId, onClose }: Props) => {
     }
   };
 
+  const publish = async () => {
+    if (!confirm(`Send this edition to all active subscribers via MailerLite?\n\nSubject: ${subject}`)) return;
+    setPublishing(true);
+    try {
+      // Save any pending edits first
+      await supabase.from("compass_editions" as any).update({ subject_line: subject, full_text: fullText }).eq("id", editionId);
+      const { data, error } = await supabase.functions.invoke("publish-compass-edition", {
+        body: { edition_id: editionId },
+      });
+      if (error) throw error;
+      toast({ title: "Sent!", description: `Delivered to ${data?.subscriber_count ?? "all"} subscribers.` });
+      await load();
+    } catch (e: any) {
+      toast({ title: "Publish failed", description: e?.message, variant: "destructive" });
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  const isSent = edition.status === "sent";
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <Button variant="ghost" onClick={onClose}><ArrowLeft className="h-4 w-4 mr-2" />Back to editions</Button>
-        <div className="space-x-2">
-          <Button variant="outline" onClick={() => save()} disabled={saving}>Save draft</Button>
-          <Button onClick={() => save("ready")} disabled={saving}>Mark as ready</Button>
+        <div className="flex gap-2 flex-wrap">
+          <Button variant="outline" onClick={() => save()} disabled={saving || isSent}>Save draft</Button>
+          <Button variant="outline" onClick={() => save("ready")} disabled={saving || isSent}>Mark as ready</Button>
+          <Button onClick={publish} disabled={publishing || isSent} className="bg-primary">
+            <Send className={`h-4 w-4 mr-2 ${publishing ? "animate-pulse" : ""}`} />
+            {isSent ? "Sent" : publishing ? "Sending..." : "Publish & Send"}
+          </Button>
         </div>
       </div>
+      {isSent && (
+        <Card className="p-3 bg-green-500/10 border-green-500/30 text-sm">
+          ✓ Sent {edition.sent_at ? new Date(edition.sent_at).toLocaleString() : ""} to {edition.subscriber_count ?? 0} subscribers
+          {edition.mailerlite_campaign_id && ` (MailerLite campaign ${edition.mailerlite_campaign_id})`}
+        </Card>
+      )}
 
       <div className="grid lg:grid-cols-2 gap-4">
         {/* Left panel */}

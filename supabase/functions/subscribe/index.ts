@@ -39,6 +39,28 @@ Deno.serve(async (req) => {
 
     if (error) throw error;
 
+    // Sync to MailerLite (fire-and-forget)
+    const ML_TOKEN = Deno.env.get("MAILERLITE_API_TOKEN");
+    const ML_GROUP = Deno.env.get("MAILERLITE_GROUP_ID");
+    if (ML_TOKEN && ML_GROUP) {
+      fetch("https://connect.mailerlite.com/api/subscribers", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${ML_TOKEN}`,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          email: normalizedEmail,
+          groups: [ML_GROUP],
+          status: "active",
+          fields: {
+            source: source_slug || "Homepage",
+          },
+        }),
+      }).catch((e) => console.error("MailerLite sync failed:", e));
+    }
+
     // Notify admin of new subscriber (fire-and-forget)
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
     if (RESEND_API_KEY) {
