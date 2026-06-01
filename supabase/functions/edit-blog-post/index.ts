@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
+import { requireAdmin } from "../_shared/adminAuth.ts";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -37,6 +38,8 @@ You are EDITING an existing article based on the user's instruction. Apply ONLY 
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+    const _auth = await requireAdmin(req, corsHeaders);
+    if (_auth instanceof Response) return _auth;
 
   try {
     const body = await req.json();

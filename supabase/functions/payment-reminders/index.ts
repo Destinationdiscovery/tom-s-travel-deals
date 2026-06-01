@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+import { requireAdmin } from "../_shared/adminAuth.ts";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -12,6 +13,8 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+    const _auth = await requireAdmin(req, corsHeaders);
+    if (_auth instanceof Response) return _auth;
 
   try {
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
