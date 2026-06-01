@@ -36,6 +36,7 @@ const CompassDashboard = () => {
   const [genOpen, setGenOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [previewHtml, setPreviewHtml] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Edition | null>(null);
 
   const load = async () => {
     const [{ data: eds }, { count }] = await Promise.all([
