@@ -17,8 +17,6 @@ import {
 const navLinks = [
   { to: "/", label: "Home" },
   { to: "/compass", label: "Blog" },
-  { to: "/guides", label: "Guides" },
-  { to: "/#travel-deals", label: "Deals" },
 ];
 
 const mobileExtraLinks = [

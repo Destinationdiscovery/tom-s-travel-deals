@@ -1,45 +1,25 @@
-## Problem
+## 1. Remove Guides and Deals tabs
 
-The three capture components (`EmailCapturePopup`, `NewsletterCTASection`, `CompassInlineCTA`) all exist and post to the `subscribe` edge function correctly, but **none of them are imported or mounted in any page**. That's why nothing pops when you try to leave the site. The Footer also has no subscribe form, just a link to `/compass`.
+In `src/components/Header.tsx`:
+- Remove "Guides" and "Deals" entries from `navLinks`.
+- Remove the `handleDealsClick` callback (no longer needed).
+- Remove the mobile "Guides" link and mobile "Deals" link from the sheet nav.
 
-## Wire the 5 placements
+Leaves desktop nav as: Home, Blog, Tools. Mobile nav loses Guides and Deals too. The `/guides` route in `App.tsx` stays intact (still reachable by direct URL); user only asked to remove the tabs.
 
-1. **Exit-intent popup** (`EmailCapturePopup`)
-   Mount once globally in `src/App.tsx` so it's available on every route. Existing component already handles the 7-day dismissal cookie, exit-intent trigger (mouse leaves top of viewport), and 30-second fallback timer. Source slug: `compass-exit-popup`.
+## 2. Fix exit-intent popup not appearing
 
-2. **Homepage subscribe section** (`NewsletterCTASection`)
-   Mount in `src/pages/Index.tsx` between `BlogPreviewSection` and `AggregateStatsSection`. Source slug: `compass-homepage`.
+The `EmailCapturePopup` is mounted globally in `App.tsx`, but it self-suppresses when `localStorage["rtg-email-popup-dismissed"]` is set within the last 7 days. Since you previously closed it (or submitted on a prior test), the flag is set on your browser, so neither the 30-second timer nor the exit-intent listener arms.
 
-3. **Compass blog index header CTA**
-   Mount `NewsletterCTASection` on `src/pages/Compass.tsx` directly under the hero, before the category filter. Pass a custom source slug `compass-blog-index` by adding an optional prop.
+Fix in `src/components/EmailCapturePopup.tsx`:
+- Lower the dismissal window from 7 days to 3 days so it returns sooner on repeat visits.
+- Distinguish "submitted" from "dismissed": after a successful subscribe, set a separate `rtg-email-popup-subscribed` flag (permanent) so subscribers never see it again, but a simple close only suppresses for 3 days.
+- Add a touch-based mobile trigger: also show the popup after the user scrolls past 60% of the page, in addition to the existing 30s fallback and desktop mouse-leave trigger.
+- Keep ESC/focus-trap behavior as-is.
 
-4. **Mid-article inline CTA** (`CompassInlineCTA`)
-   In `src/pages/CompassArticle.tsx`, inject `<CompassInlineCTA articleSlug={slug} />` after the 3rd rich-content block so it sits mid-scroll. Source slug: `compass-inline-<slug>`.
-
-5. **Footer subscribe form**
-   Replace the current "Blog" link area in the "Stay Connected" column of `src/components/Footer.tsx` with a slim inline form (email input + Subscribe button) that posts to the `subscribe` function with source slug `compass-footer`. Keep the existing social/RSS icons.
-
-## Mobile note
-
-Exit-intent (mouse leaving the top of viewport) does not fire on touch devices. The existing 30-second fallback timer already covers mobile, so placement #1 still works there.
-
-## Verification
-
-After wiring, use the browser tool to:
-- Load homepage, wait 31s, confirm popup appears, submit a test email, confirm toast + row in `subscribers` table.
-- Move mouse above the viewport on desktop, confirm popup fires.
-- Scroll homepage to the new `NewsletterCTASection`, submit, confirm row.
-- Open a Compass article, scroll to mid-article CTA, submit, confirm row.
-- Submit footer form, confirm row.
-- Clear `localStorage` key `rtg-email-popup-dismissed` between popup tests.
+For your immediate test, after this change ships, open DevTools to clear `localStorage` keys `rtg-email-popup-dismissed` and `rtg-email-popup-subscribed` once, then reload and either wait 30s, scroll 60% down, or fling the mouse to the top.
 
 ## Files touched
 
-- `src/App.tsx` (mount popup)
-- `src/pages/Index.tsx` (add NewsletterCTASection)
-- `src/pages/Compass.tsx` (add NewsletterCTASection with custom slug)
-- `src/pages/CompassArticle.tsx` (inject CompassInlineCTA mid-content)
-- `src/components/NewsletterCTASection.tsx` (add optional `sourceSlug` + `interests` props)
-- `src/components/Footer.tsx` (add subscribe form)
-
-No DB or edge-function changes needed.
+- `src/components/Header.tsx` (remove tabs)
+- `src/components/EmailCapturePopup.tsx` (broader trigger conditions)
