@@ -72,6 +72,7 @@ const App = () => {
           <BrowserRouter>
             <ScrollToTop />
             <ReturningTripBanner />
+            <EmailCapturePopup />
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<Index />} />
