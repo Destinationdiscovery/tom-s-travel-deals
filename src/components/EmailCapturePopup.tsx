@@ -64,11 +64,11 @@ const EmailCapturePopup = () => {
     setSubmitting(true);
     try {
       const { error } = await supabase.functions.invoke("subscribe", {
-        body: { email: trimmed, source_slug: "popup", interests },
+        body: { email: trimmed, source_slug: "compass-exit-popup", interests },
       });
       if (error) throw error;
-      trackEmailSignup("popup");
-      toast({ title: "You're in! 🎉", description: "Check your inbox for weekly deals." });
+      trackEmailSignup("compass-exit-popup");
+      toast({ title: "You're on The Compass list.", description: "Look for the next edition in your inbox." });
       dismiss();
     } catch {
       toast({ title: "Something went wrong", description: "Please try again.", variant: "destructive" });
