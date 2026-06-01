@@ -100,6 +100,8 @@ const Compass = () => {
         </div>
       </section>
 
+      <NewsletterCTASection sourceSlug="compass-blog-index" interests={["compass", "blog"]} />
+
       {/* Category Filter */}
       <section className="py-8 border-b border-border bg-background sticky top-[73px] z-40">
         <div className="container mx-auto px-4">
