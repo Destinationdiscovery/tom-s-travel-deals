@@ -221,7 +221,10 @@ const CompassDashboard = () => {
                     <td className="p-3 text-right space-x-1">
                       <Button size="sm" variant="ghost" onClick={() => setPreviewHtml(e.full_html)} disabled={!e.full_html}><Eye className="h-4 w-4" /></Button>
                       <Button size="sm" variant="ghost" onClick={() => setEditingId(e.id)}><Pencil className="h-4 w-4" /></Button>
-                      <Button size="sm" variant="ghost" disabled title="Connect email provider in Settings to enable sending"><Send className="h-4 w-4" /></Button>
+                      <Button size="sm" variant="ghost" onClick={() => testSend(e)} disabled={testingId === e.id || !e.full_html} title="Send test copy to one email"><MailCheck className={`h-4 w-4 ${testingId === e.id ? "animate-pulse" : ""}`} /></Button>
+                      <Button size="sm" variant="ghost" onClick={() => publish(e)} disabled={publishingId === e.id || e.status === "sent" || !e.full_html} title={e.status === "sent" ? "Already sent" : "Publish & send to all subscribers"}><Send className={`h-4 w-4 ${publishingId === e.id ? "animate-pulse" : ""} ${e.status === "sent" ? "text-muted-foreground" : "text-primary"}`} /></Button>
+                      <Button size="sm" variant="ghost" onClick={() => duplicate(e.id)}><Copy className="h-4 w-4" /></Button>
+                      <Button size="sm" variant="ghost" onClick={() => setDeleteTarget(e)} className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
                       <Button size="sm" variant="ghost" onClick={() => duplicate(e.id)}><Copy className="h-4 w-4" /></Button>
                       <Button size="sm" variant="ghost" onClick={() => setDeleteTarget(e)} className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
                     </td>
