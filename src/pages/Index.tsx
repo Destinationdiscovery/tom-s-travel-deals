@@ -171,6 +171,7 @@ const Index = () => {
 
         <ToolsDirectorySection />
         <BlogPreviewSection />
+        <NewsletterCTASection sourceSlug="compass-homepage" interests={["compass"]} />
         <AggregateStatsSection />
         <AboutPreviewSection />
         <HomepageFAQ />
