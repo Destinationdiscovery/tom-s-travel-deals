@@ -8,6 +8,33 @@ import { trackEmailSignup } from "@/lib/analytics";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const [email, setEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const { toast } = useToast();
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = email.trim();
+    if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      toast({ title: "Invalid email", description: "Please enter a valid email address.", variant: "destructive" });
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.functions.invoke("subscribe", {
+        body: { email: trimmed, source_slug: "compass-footer", interests: ["compass"] },
+      });
+      if (error) throw error;
+      trackEmailSignup("compass-footer");
+      toast({ title: "You're on The Compass list.", description: "The next edition lands soon." });
+      setEmail("");
+    } catch {
+      toast({ title: "Something went wrong", description: "Please try again.", variant: "destructive" });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
 
   return (
     <>
