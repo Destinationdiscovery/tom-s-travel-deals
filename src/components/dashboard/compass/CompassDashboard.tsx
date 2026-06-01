@@ -109,6 +109,44 @@ const CompassDashboard = () => {
     load();
   };
 
+  const publish = async (e: Edition) => {
+    if (e.status === "sent") return;
+    if (!e.full_html) { toast({ title: "No HTML to send. Generate or edit the edition first.", variant: "destructive" }); return; }
+    if (!confirm(`Send edition #${e.edition_number} to all active subscribers via MailerLite?`)) return;
+    setPublishingId(e.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("publish-compass-edition", { body: { edition_id: e.id } });
+      if (error) throw error;
+      toast({ title: "Sent!", description: `Delivered to ${data?.subscriber_count ?? "all"} subscribers.` });
+      load();
+    } catch (err: any) {
+      toast({ title: "Publish failed", description: err?.message, variant: "destructive" });
+    } finally {
+      setPublishingId(null);
+    }
+  };
+
+  const testSend = async (e: Edition) => {
+    if (!e.full_html) { toast({ title: "No HTML to send.", variant: "destructive" }); return; }
+    const email = prompt(`Send a TEST copy of edition #${e.edition_number} to which email?`, "jclindustries@outlook.com");
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      if (email !== null) toast({ title: "Invalid email", variant: "destructive" });
+      return;
+    }
+    setTestingId(e.id);
+    try {
+      const { error } = await supabase.functions.invoke("send-edition-test", {
+        body: { edition_id: e.id, email: email.trim().toLowerCase() },
+      });
+      if (error) throw error;
+      toast({ title: "Test sent", description: `Delivered to ${email}` });
+    } catch (err: any) {
+      toast({ title: "Test send failed", description: err?.message, variant: "destructive" });
+    } finally {
+      setTestingId(null);
+    }
+  };
+
   if (editingId) return <EditionEditor editionId={editingId} onClose={() => { setEditingId(null); load(); }} />;
 
   return (
