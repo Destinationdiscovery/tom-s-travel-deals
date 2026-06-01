@@ -25,24 +25,31 @@ const EmailCapturePopup = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    if (localStorage.getItem(SUBSCRIBED_KEY)) return;
     const dismissed = localStorage.getItem(STORAGE_KEY);
     if (dismissed) {
       const dismissedAt = parseInt(dismissed, 10);
       if (Date.now() - dismissedAt < DISMISS_DAYS * 86400000) return;
     }
 
+    const show = () => setVisible(true);
+
     const handleMouseLeave = (e: MouseEvent) => {
-      if (e.clientY <= 0) {
-        setVisible(true);
-        document.documentElement.removeEventListener("mouseleave", handleMouseLeave);
-      }
+      if (e.clientY <= 0) show();
+    };
+    const handleScroll = () => {
+      const scrolled = window.scrollY + window.innerHeight;
+      const total = document.documentElement.scrollHeight;
+      if (total > 0 && scrolled / total >= 0.6) show();
     };
     document.documentElement.addEventListener("mouseleave", handleMouseLeave);
-    const timer = setTimeout(() => setVisible(true), 30000);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    const timer = setTimeout(show, 30000);
 
     return () => {
       clearTimeout(timer);
       document.documentElement.removeEventListener("mouseleave", handleMouseLeave);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
