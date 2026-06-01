@@ -8,6 +8,7 @@ import { ArrowRight, Clock } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
 import heroImg from "@/assets/blog-hero-nightsky.png";
 import { supabase } from "@/integrations/supabase/client";
+import NewsletterCTASection from "@/components/NewsletterCTASection";
 
 const categories = ["All", "Packing", "Guides", "Budget", "Insurance", "Timing"];
 
@@ -98,6 +99,8 @@ const Compass = () => {
           </p>
         </div>
       </section>
+
+      <NewsletterCTASection sourceSlug="compass-blog-index" interests={["compass", "blog"]} />
 
       {/* Category Filter */}
       <section className="py-8 border-b border-border bg-background sticky top-[73px] z-40">

@@ -6,7 +6,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { trackEmailSignup } from "@/lib/analytics";
 
-const NewsletterCTASection = () => {
+interface NewsletterCTASectionProps {
+  sourceSlug?: string;
+  interests?: string[];
+}
+
+const NewsletterCTASection = ({ sourceSlug = "compass-homepage", interests = ["compass"] }: NewsletterCTASectionProps = {}) => {
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
@@ -21,10 +26,10 @@ const NewsletterCTASection = () => {
     setSubmitting(true);
     try {
       const { error } = await supabase.functions.invoke("subscribe", {
-        body: { email: trimmed, source_slug: "compass-homepage", interests: ["compass"] },
+        body: { email: trimmed, source_slug: sourceSlug, interests },
       });
       if (error) throw error;
-      trackEmailSignup("compass-homepage");
+      trackEmailSignup(sourceSlug);
       toast({ title: "You're on the list.", description: "The next edition of The Compass lands soon." });
       setEmail("");
     } catch {
