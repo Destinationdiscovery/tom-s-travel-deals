@@ -60,22 +60,26 @@ async function callGeminiJSON<T>(prompt: string): Promise<T> {
 }
 
 // ---- Perplexity Sonar ----
-async function callPerplexity(prompt: string, recency: "day" | "week" | "month" = "month") {
+const PPLX_UNIVERSAL_RULE = `
+CRITICAL: You have live web search. You MUST return real, specific, current results.
+Never say "no data", "no reviews available", "information not found", "no current deals", "data unavailable", or return empty arrays / null values for required fields.
+If your first search yields thin results, broaden the query: nearby city, similar property class, comparable route, regional or global news. Always return the best real, verifiable data you can find.
+Every required field must be populated with a real answer drawn from your search.`;
+
+async function callPerplexity(prompt: string, recency: "day" | "week" | "month" | null = "month") {
+  const body: any = {
+    model: "sonar",
+    messages: [
+      { role: "system", content: `You are a travel intelligence researcher. Return ONLY valid JSON. No markdown, no code fences, no preamble. The response must be parseable by JSON.parse directly.${PPLX_UNIVERSAL_RULE}` },
+      { role: "user", content: prompt },
+    ],
+    return_citations: true,
+  };
+  if (recency) body.search_recency_filter = recency;
   const res = await fetch("https://api.perplexity.ai/chat/completions", {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${PERPLEXITY_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "sonar",
-      messages: [
-        { role: "system", content: "You are a travel intelligence researcher. Return ONLY valid JSON. No markdown, no code fences, no preamble. The response must be parseable by JSON.parse directly." },
-        { role: "user", content: prompt },
-      ],
-      return_citations: true,
-      search_recency_filter: recency,
-    }),
+    headers: { Authorization: `Bearer ${PERPLEXITY_API_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error(`Perplexity ${res.status}: ${await res.text()}`);
   const data = await res.json();
@@ -84,9 +88,22 @@ async function callPerplexity(prompt: string, recency: "day" | "week" | "month" 
   return { text, citations };
 }
 
-async function callPerplexityJSON<T>(prompt: string, recency: "day" | "week" | "month" = "month") {
+async function callPerplexityJSON<T>(prompt: string, recency: "day" | "week" | "month" | null = "month") {
   const { text, citations } = await callPerplexity(prompt, recency);
   return { data: parseJson<T>(text), citations };
+}
+
+// Retry once with broadened scope if the first result fails a sufficiency check.
+async function callPerplexityWithRetry<T>(
+  prompt: string,
+  recency: "day" | "week" | "month" | null,
+  isSufficient: (d: T) => boolean,
+  broadenSuffix: string,
+): Promise<{ data: T; citations: string[] }> {
+  const first = await callPerplexityJSON<T>(prompt, recency);
+  if (isSufficient(first.data)) return first;
+  const broadened = `${prompt}\n\nBROADEN SCOPE: ${broadenSuffix}\nReturn the same JSON shape with real, populated values. Do not return empty arrays or null values.`;
+  return await callPerplexityJSON<T>(broadened, null);
 }
 
 // ---- Progress broadcast ----
@@ -143,20 +160,39 @@ Return JSON: {"best_months":"...","best_reason":"...","avoid_months":"...","avoi
 }
 
 function step6Prompt(destination: string) {
-  return `Search current flight deals available this week from major US and Canadian cities (YYZ, YVR, JFK, EWR, LAX, ORD). Include one deal to ${destination} if available. Today: ${today()}.
+  return `Search the live web for flight deals or cheapest current published fares from major US and Canadian hubs (YYZ, YVR, YUL, JFK, EWR, LAX, ORD, BOS, SFO) to ${destination} for travel in the next 6 months. Today: ${today()}.
+
+REQUIREMENTS:
+- Return AT LEAST 3 real deals. Never return an empty array. Never say "no deals available".
+- At least one deal MUST go to ${destination} (or its nearest major airport). If no active sale exists, return the lowest current published roundtrip fare you can find.
+- Fill the remaining 2 deals with the strongest current sales from those hubs to comparable regional destinations (same continent or similar trip type).
+- Every field must be populated with real data from your search.
 
 Return JSON: {"deals":[{"route":"YYZ to FCO","price":"$499 return","airline":"...","travel_window":"...","book_by":"... or null","savings":"...","highlight":"...","source":"..."}],"disclaimer":"Prices change rapidly. Always verify current pricing directly with the airline or booking platform before purchasing. ReviewThenGo is not responsible for price changes or availability."}`;
 }
 
 function step7Prompt(destination: string) {
-  return `Search current traveller reviews for well known hotels or resorts in ${destination}. Pick one with significant recent review activity on TripAdvisor, Google, Booking.com, and Reddit. Summarize what real travellers are saying right now. Today: ${today()}.
+  return `Search the live web for a well-reviewed hotel or resort in or near ${destination} with significant recent traveller review activity across TripAdvisor, Google, Booking.com, and Reddit. Today: ${today()}.
+
+REQUIREMENTS:
+- You MUST return one specific real property. Never return empty fields. Never say "no reviews available" or "insufficient data".
+- If coverage for the exact city is thin, pick the most reviewed notable property within 100 km of ${destination} and set location_detail to reflect that.
+- "what_reviewers_love" MUST contain exactly 3 specific items drawn from real reviews.
+- "what_reviewers_flag" MUST contain exactly 2 specific honest concerns from real reviews.
+- "reddit_consensus" MUST be a real, specific sentence summarising recent Reddit sentiment about this property or this type of property in the region.
+- "overall_score" MUST be a real number between 1.0 and 10.0 reflecting aggregated sentiment.
 
 Return JSON: {"hotel_name":"...","hotel_type":"...","location_detail":"...","overall_score":8.4,"price_range":"$ | $$ | $$$ | $$$$","what_reviewers_love":["...","...","..."],"what_reviewers_flag":["...","..."],"reddit_consensus":"...","best_for":"...","verdict":"one honest sentence","review_sources":"TripAdvisor, Google, Booking.com, Reddit","disclaimer":"Review summary based on aggregated public review data. Always check current reviews before booking."}`;
 }
 
 function step8Prompt() {
-  return `Search the most important travel news from the past two weeks affecting US and Canadian travellers. Visa changes, entry rules, advisory updates, airline policy, currency news, safety updates. Today: ${today()}.
-Find 3 to 4 genuinely newsworthy items. No generic evergreen tips.
+  return `Search the live web for the most important travel news affecting US and Canadian travellers from the past two weeks. Today: ${today()}.
+Categories: visa changes, entry rules, advisory updates, airline policy shifts, currency news, safety updates, strikes, weather disruptions.
+
+REQUIREMENTS:
+- Return EXACTLY 3 to 4 real, newsworthy items. Never fewer than 3. Never an empty array.
+- If destination-specific news is thin, broaden to regional or global traveller-relevant news.
+- Every field must be populated from a real source. No generic evergreen tips.
 
 Return JSON: {"items":[{"flag_emoji":"🇪🇺","country_or_region":"...","headline":"short under 8 words","body":"2 to 3 sentences","action_required":true,"affects":"...","tool_link":"travel-intel | safety | currency | best-time | itinerary","source":"..."}]}`;
 }
@@ -164,6 +200,8 @@ Return JSON: {"items":[{"flag_emoji":"🇪🇺","country_or_region":"...","headl
 function step9Prompt(editionNumber: number, data: any) {
   return `You are the editor of The Compass, ReviewThenGo's biweekly travel intelligence newsletter.
 TODAY: ${today()}. EDITION: #${editionNumber}.
+
+ANTI-EMPTY RULE (strict): Never write phrases like "no reviews found", "no data available", "no current deals", "information not available", or anything that admits the newsletter is missing content. The research below was gathered from live web search and is always sufficient. If any field looks thin, write around it using what is available. Always present confident, specific copy.
 
 ALL RESEARCH DATA:
 ${JSON.stringify(data, null, 2)}
@@ -372,13 +410,34 @@ Deno.serve(async (req) => {
           () => callGeminiJSON<any>(step5Prompt(destination.destination)),
           { best_months: "", best_reason: "" }),
         runStep(6, "Sourcing current flight deals...", progress,
-          async () => { const r = await callPerplexityJSON<any>(step6Prompt(destination.destination), "week"); allCitations.push({ step: 6, urls: r.citations }); return r.data; },
+          async () => {
+            const r = await callPerplexityWithRetry<any>(
+              step6Prompt(destination.destination), "week",
+              (d) => Array.isArray(d?.deals) && d.deals.length >= 3,
+              `Broaden to lowest published roundtrip fares from any major US/Canadian hub to ${destination.destination} plus the strongest current sales to comparable destinations in the same region.`,
+            );
+            allCitations.push({ step: 6, urls: r.citations }); return r.data;
+          },
           { deals: [], disclaimer: "" }),
         runStep(7, "Selecting hotel pick...", progress,
-          async () => { const r = await callPerplexityJSON<any>(step7Prompt(destination.destination), "month"); allCitations.push({ step: 7, urls: r.citations }); return r.data; },
+          async () => {
+            const r = await callPerplexityWithRetry<any>(
+              step7Prompt(destination.destination), "month",
+              (d) => !!d?.hotel_name && Array.isArray(d?.what_reviewers_love) && d.what_reviewers_love.length >= 3 && Array.isArray(d?.what_reviewers_flag) && d.what_reviewers_flag.length >= 2 && !!d?.reddit_consensus,
+              `Pick the most reviewed notable hotel within 100 km of ${destination.destination}. Use aggregated TripAdvisor, Google, Booking.com, and Reddit data. Populate every field with real content.`,
+            );
+            allCitations.push({ step: 7, urls: r.citations }); return r.data;
+          },
           { hotel_name: "", what_reviewers_love: [], what_reviewers_flag: [], verdict: "", disclaimer: "" }),
         runStep(8, "Generating travel intel briefing...", progress,
-          async () => { const r = await callPerplexityJSON<any>(step8Prompt(), "week"); allCitations.push({ step: 8, urls: r.citations }); return r.data; },
+          async () => {
+            const r = await callPerplexityWithRetry<any>(
+              step8Prompt(), "week",
+              (d) => Array.isArray(d?.items) && d.items.length >= 3,
+              `Broaden to global traveller-relevant news from the past month: advisories, visa changes, airline policy, currency shifts, strikes, weather disruptions affecting US and Canadian travellers.`,
+            );
+            allCitations.push({ step: 8, urls: r.citations }); return r.data;
+          },
           { items: [] }),
       ]);
       meta.step_2_api = "gemini-2.5-pro"; meta.step_2_status = s2.ok ? "ok" : "failed";

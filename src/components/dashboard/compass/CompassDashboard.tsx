@@ -4,7 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Sparkles, Mail, Eye, Pencil, Send, Copy } from "lucide-react";
+import { Sparkles, Mail, Eye, Pencil, Send, Copy, Trash2 } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import GenerationProgressModal from "./GenerationProgressModal";
 import EditionEditor from "./EditionEditor";
@@ -32,6 +36,7 @@ const CompassDashboard = () => {
   const [genOpen, setGenOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [previewHtml, setPreviewHtml] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Edition | null>(null);
 
   const load = async () => {
     const [{ data: eds }, { count }] = await Promise.all([
@@ -90,6 +95,15 @@ const CompassDashboard = () => {
     copy.sent_at = null;
     await supabase.from("compass_editions" as any).insert(copy);
     toast({ title: "Edition duplicated" });
+    load();
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    const { error } = await supabase.from("compass_editions" as any).delete().eq("id", deleteTarget.id);
+    if (error) toast({ title: "Delete failed", description: error.message, variant: "destructive" });
+    else toast({ title: `Edition #${deleteTarget.edition_number} deleted` });
+    setDeleteTarget(null);
     load();
   };
 
@@ -169,6 +183,7 @@ const CompassDashboard = () => {
                       <Button size="sm" variant="ghost" onClick={() => setEditingId(e.id)}><Pencil className="h-4 w-4" /></Button>
                       <Button size="sm" variant="ghost" disabled title="Connect email provider in Settings to enable sending"><Send className="h-4 w-4" /></Button>
                       <Button size="sm" variant="ghost" onClick={() => duplicate(e.id)}><Copy className="h-4 w-4" /></Button>
+                      <Button size="sm" variant="ghost" onClick={() => setDeleteTarget(e)} className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
                     </td>
                   </tr>
                 ))}
@@ -198,6 +213,21 @@ const CompassDashboard = () => {
           </div>
         </div>
       )}
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete edition #{deleteTarget?.edition_number}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This permanently removes the edition and all its generated content. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
