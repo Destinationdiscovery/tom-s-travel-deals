@@ -225,8 +225,6 @@ const CompassDashboard = () => {
                       <Button size="sm" variant="ghost" onClick={() => publish(e)} disabled={publishingId === e.id || e.status === "sent" || !e.full_html} title={e.status === "sent" ? "Already sent" : "Publish & send to all subscribers"}><Send className={`h-4 w-4 ${publishingId === e.id ? "animate-pulse" : ""} ${e.status === "sent" ? "text-muted-foreground" : "text-primary"}`} /></Button>
                       <Button size="sm" variant="ghost" onClick={() => duplicate(e.id)}><Copy className="h-4 w-4" /></Button>
                       <Button size="sm" variant="ghost" onClick={() => setDeleteTarget(e)} className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
-                      <Button size="sm" variant="ghost" onClick={() => duplicate(e.id)}><Copy className="h-4 w-4" /></Button>
-                      <Button size="sm" variant="ghost" onClick={() => setDeleteTarget(e)} className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
                     </td>
                   </tr>
                 ))}
