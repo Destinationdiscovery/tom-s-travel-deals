@@ -206,13 +206,6 @@ const Header = () => {
                   >
                     Blog
                   </Link>
-                  <Link
-                    to="/guides"
-                    onClick={() => setMobileOpen(false)}
-                    className="text-lg font-medium text-primary-foreground/80 hover:text-primary-foreground transition-colors py-2"
-                  >
-                    Guides
-                  </Link>
 
                   {/* About + Contact */}
                   {mobileExtraLinks.map((link) => (
@@ -226,14 +219,6 @@ const Header = () => {
                     </Link>
                   ))}
 
-                  {/* Deals */}
-                  <Link
-                    to="/#travel-deals"
-                    onClick={(e) => { handleDealsClick(e); setMobileOpen(false); }}
-                    className="text-lg font-medium text-primary-foreground/80 hover:text-primary-foreground transition-colors py-2"
-                  >
-                    Deals
-                  </Link>
 
                   <Link
                     to="/my-trips"
