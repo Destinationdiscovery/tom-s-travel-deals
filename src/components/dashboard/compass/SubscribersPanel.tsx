@@ -80,6 +80,13 @@ const SubscribersPanel = () => {
     else { toast({ title: "Subscriber added" }); setNewEmail(""); load(); }
   };
 
+  const removeSub = async (s: Sub) => {
+    if (!confirm(`Delete subscriber ${s.email}? This cannot be undone.`)) return;
+    const { error } = await supabase.from("subscribers" as any).delete().eq("id", s.id);
+    if (error) toast({ title: "Delete failed", description: error.message, variant: "destructive" });
+    else { toast({ title: "Subscriber deleted" }); load(); }
+  };
+
   return (
     <div className="space-y-4">
       <div className="grid md:grid-cols-3 gap-4">
