@@ -133,11 +133,29 @@ const Footer = () => {
 
             {/* Connect */}
             <div>
-              <h4 className="font-display font-semibold text-lg mb-4">Connect</h4>
-              <p className="text-primary-foreground/70 text-sm mb-4">
-                Follow along for travel deals, tips, and behind-the-scenes from real trips.
+              <h4 className="font-display font-semibold text-lg mb-4">The Compass</h4>
+              <p className="text-primary-foreground/70 text-sm mb-3">
+                Biweekly travel briefing. One destination, fully briefed. Free.
               </p>
-              <div className="flex items-center gap-4 mb-6">
+              <form onSubmit={handleSubscribe} className="flex flex-col gap-2 mb-5">
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  aria-label="Email address"
+                  className="h-10 px-3 rounded-md bg-primary-foreground/10 border border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/40 text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
+                />
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="inline-flex items-center justify-center gap-1.5 h-10 px-4 rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/90 transition-colors text-sm font-semibold disabled:opacity-60"
+                >
+                  {submitting ? "Subscribing..." : (<>Subscribe <Send className="h-3.5 w-3.5" /></>)}
+                </button>
+              </form>
+              <div className="flex items-center gap-4">
                 <a href="https://x.com/TomLaracyTravel" target="_blank" rel="noopener noreferrer" aria-label="Twitter" className="text-primary-foreground/60 hover:text-secondary transition-colors">
                   <Twitter className="h-5 w-5" />
                 </a>
