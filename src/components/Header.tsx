@@ -41,13 +41,6 @@ const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [toolsExpanded, setToolsExpanded] = useState(false);
 
-  const handleDealsClick = useCallback((e: React.MouseEvent) => {
-    if (location.pathname === "/") {
-      e.preventDefault();
-      document.getElementById("travel-deals")?.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [location.pathname]);
-
   return (
     <>
       <a
@@ -79,7 +72,6 @@ const Header = () => {
               <Link
                 key={link.to}
                 to={link.to}
-                onClick={link.label === "Deals" ? handleDealsClick : undefined}
                 className="text-sm font-medium text-primary-foreground/80 hover:text-primary-foreground transition-colors"
               >
                 {link.label}
