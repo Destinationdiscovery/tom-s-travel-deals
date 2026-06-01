@@ -309,8 +309,8 @@ function renderHTML(editionNumber: number, fullText: string, sections: any, dest
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>The Compass #${editionNumber}</title></head>
 <body style="margin:0;padding:0;background:#f8fafc;font-family:Arial,sans-serif">
 <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:8px;overflow:hidden">
-  <div style="background:#0a0f1a;padding:32px;text-align:center">
-    <div style="font-family:Georgia,serif;font-size:28px;color:#00c9a7;letter-spacing:4px">THE COMPASS</div>
+  <div style="background:#0a0f1a;padding:32px 16px;text-align:center">
+    <div style="font-family:Georgia,serif;font-size:26px;line-height:1.1;color:#00c9a7;letter-spacing:2px;white-space:nowrap;-webkit-text-size-adjust:100%;text-size-adjust:100%">THE&nbsp;COMPASS</div>
     <div style="font-family:Arial,sans-serif;font-size:12px;color:#8b9ab0;margin-top:8px">Issue #${editionNumber} . ${today()}</div>
   </div>
   <div style="padding:32px">
