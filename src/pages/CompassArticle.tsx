@@ -10,6 +10,7 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/
 import SEOHead from "@/components/SEOHead";
 import AuthorBio from "@/components/AuthorBio";
 import CompassArticleToolsCTA from "@/components/CompassArticleToolsCTA";
+import CompassInlineCTA from "@/components/CompassInlineCTA";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
