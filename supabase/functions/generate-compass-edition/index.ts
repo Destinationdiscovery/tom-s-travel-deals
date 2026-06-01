@@ -201,6 +201,8 @@ function step9Prompt(editionNumber: number, data: any) {
   return `You are the editor of The Compass, ReviewThenGo's biweekly travel intelligence newsletter.
 TODAY: ${today()}. EDITION: #${editionNumber}.
 
+ANTI-EMPTY RULE (strict): Never write phrases like "no reviews found", "no data available", "no current deals", "information not available", or anything that admits the newsletter is missing content. The research below was gathered from live web search and is always sufficient. If any field looks thin, write around it using what is available. Always present confident, specific copy.
+
 ALL RESEARCH DATA:
 ${JSON.stringify(data, null, 2)}
 
