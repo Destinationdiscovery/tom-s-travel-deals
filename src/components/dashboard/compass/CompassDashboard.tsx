@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Sparkles, Mail, Eye, Pencil, Send, Copy, Trash2 } from "lucide-react";
+import { Sparkles, Mail, Eye, Pencil, Send, Copy, Trash2, MailCheck } from "lucide-react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -37,6 +37,8 @@ const CompassDashboard = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [previewHtml, setPreviewHtml] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Edition | null>(null);
+  const [publishingId, setPublishingId] = useState<string | null>(null);
+  const [testingId, setTestingId] = useState<string | null>(null);
 
   const load = async () => {
     const [{ data: eds }, { count }] = await Promise.all([
@@ -105,6 +107,44 @@ const CompassDashboard = () => {
     else toast({ title: `Edition #${deleteTarget.edition_number} deleted` });
     setDeleteTarget(null);
     load();
+  };
+
+  const publish = async (e: Edition) => {
+    if (e.status === "sent") return;
+    if (!e.full_html) { toast({ title: "No HTML to send. Generate or edit the edition first.", variant: "destructive" }); return; }
+    if (!confirm(`Send edition #${e.edition_number} to all active subscribers via MailerLite?`)) return;
+    setPublishingId(e.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("publish-compass-edition", { body: { edition_id: e.id } });
+      if (error) throw error;
+      toast({ title: "Sent!", description: `Delivered to ${data?.subscriber_count ?? "all"} subscribers.` });
+      load();
+    } catch (err: any) {
+      toast({ title: "Publish failed", description: err?.message, variant: "destructive" });
+    } finally {
+      setPublishingId(null);
+    }
+  };
+
+  const testSend = async (e: Edition) => {
+    if (!e.full_html) { toast({ title: "No HTML to send.", variant: "destructive" }); return; }
+    const email = prompt(`Send a TEST copy of edition #${e.edition_number} to which email?`, "jclindustries@outlook.com");
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      if (email !== null) toast({ title: "Invalid email", variant: "destructive" });
+      return;
+    }
+    setTestingId(e.id);
+    try {
+      const { error } = await supabase.functions.invoke("send-edition-test", {
+        body: { edition_id: e.id, email: email.trim().toLowerCase() },
+      });
+      if (error) throw error;
+      toast({ title: "Test sent", description: `Delivered to ${email}` });
+    } catch (err: any) {
+      toast({ title: "Test send failed", description: err?.message, variant: "destructive" });
+    } finally {
+      setTestingId(null);
+    }
   };
 
   if (editingId) return <EditionEditor editionId={editingId} onClose={() => { setEditingId(null); load(); }} />;
@@ -181,7 +221,8 @@ const CompassDashboard = () => {
                     <td className="p-3 text-right space-x-1">
                       <Button size="sm" variant="ghost" onClick={() => setPreviewHtml(e.full_html)} disabled={!e.full_html}><Eye className="h-4 w-4" /></Button>
                       <Button size="sm" variant="ghost" onClick={() => setEditingId(e.id)}><Pencil className="h-4 w-4" /></Button>
-                      <Button size="sm" variant="ghost" disabled title="Connect email provider in Settings to enable sending"><Send className="h-4 w-4" /></Button>
+                      <Button size="sm" variant="ghost" onClick={() => testSend(e)} disabled={testingId === e.id || !e.full_html} title="Send test copy to one email"><MailCheck className={`h-4 w-4 ${testingId === e.id ? "animate-pulse" : ""}`} /></Button>
+                      <Button size="sm" variant="ghost" onClick={() => publish(e)} disabled={publishingId === e.id || e.status === "sent" || !e.full_html} title={e.status === "sent" ? "Already sent" : "Publish & send to all subscribers"}><Send className={`h-4 w-4 ${publishingId === e.id ? "animate-pulse" : ""} ${e.status === "sent" ? "text-muted-foreground" : "text-primary"}`} /></Button>
                       <Button size="sm" variant="ghost" onClick={() => duplicate(e.id)}><Copy className="h-4 w-4" /></Button>
                       <Button size="sm" variant="ghost" onClick={() => setDeleteTarget(e)} className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
                     </td>
