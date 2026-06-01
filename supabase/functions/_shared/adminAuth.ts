@@ -21,6 +21,12 @@ export async function requireAdmin(
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
+  // Allow internal server-to-server calls (e.g. pg_cron) that authenticate
+  // with the service role key directly.
+  if (token === serviceKey) {
+    return { userId: "service_role" };
+  }
+
   const userClient = createClient(supabaseUrl, anonKey, {
     global: { headers: { Authorization: `Bearer ${token}` } },
   });
