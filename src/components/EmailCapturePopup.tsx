@@ -7,7 +7,8 @@ import { useToast } from "@/hooks/use-toast";
 import { trackEmailSignup } from "@/lib/analytics";
 
 const STORAGE_KEY = "rtg-email-popup-dismissed";
-const DISMISS_DAYS = 7;
+const SUBSCRIBED_KEY = "rtg-email-popup-subscribed";
+const DISMISS_DAYS = 3;
 
 const INTEREST_OPTIONS = [
   { id: "destinations", label: "Destinations" },
