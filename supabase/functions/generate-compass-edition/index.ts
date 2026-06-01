@@ -160,20 +160,39 @@ Return JSON: {"best_months":"...","best_reason":"...","avoid_months":"...","avoi
 }
 
 function step6Prompt(destination: string) {
-  return `Search current flight deals available this week from major US and Canadian cities (YYZ, YVR, JFK, EWR, LAX, ORD). Include one deal to ${destination} if available. Today: ${today()}.
+  return `Search the live web for flight deals or cheapest current published fares from major US and Canadian hubs (YYZ, YVR, YUL, JFK, EWR, LAX, ORD, BOS, SFO) to ${destination} for travel in the next 6 months. Today: ${today()}.
+
+REQUIREMENTS:
+- Return AT LEAST 3 real deals. Never return an empty array. Never say "no deals available".
+- At least one deal MUST go to ${destination} (or its nearest major airport). If no active sale exists, return the lowest current published roundtrip fare you can find.
+- Fill the remaining 2 deals with the strongest current sales from those hubs to comparable regional destinations (same continent or similar trip type).
+- Every field must be populated with real data from your search.
 
 Return JSON: {"deals":[{"route":"YYZ to FCO","price":"$499 return","airline":"...","travel_window":"...","book_by":"... or null","savings":"...","highlight":"...","source":"..."}],"disclaimer":"Prices change rapidly. Always verify current pricing directly with the airline or booking platform before purchasing. ReviewThenGo is not responsible for price changes or availability."}`;
 }
 
 function step7Prompt(destination: string) {
-  return `Search current traveller reviews for well known hotels or resorts in ${destination}. Pick one with significant recent review activity on TripAdvisor, Google, Booking.com, and Reddit. Summarize what real travellers are saying right now. Today: ${today()}.
+  return `Search the live web for a well-reviewed hotel or resort in or near ${destination} with significant recent traveller review activity across TripAdvisor, Google, Booking.com, and Reddit. Today: ${today()}.
+
+REQUIREMENTS:
+- You MUST return one specific real property. Never return empty fields. Never say "no reviews available" or "insufficient data".
+- If coverage for the exact city is thin, pick the most reviewed notable property within 100 km of ${destination} and set location_detail to reflect that.
+- "what_reviewers_love" MUST contain exactly 3 specific items drawn from real reviews.
+- "what_reviewers_flag" MUST contain exactly 2 specific honest concerns from real reviews.
+- "reddit_consensus" MUST be a real, specific sentence summarising recent Reddit sentiment about this property or this type of property in the region.
+- "overall_score" MUST be a real number between 1.0 and 10.0 reflecting aggregated sentiment.
 
 Return JSON: {"hotel_name":"...","hotel_type":"...","location_detail":"...","overall_score":8.4,"price_range":"$ | $$ | $$$ | $$$$","what_reviewers_love":["...","...","..."],"what_reviewers_flag":["...","..."],"reddit_consensus":"...","best_for":"...","verdict":"one honest sentence","review_sources":"TripAdvisor, Google, Booking.com, Reddit","disclaimer":"Review summary based on aggregated public review data. Always check current reviews before booking."}`;
 }
 
 function step8Prompt() {
-  return `Search the most important travel news from the past two weeks affecting US and Canadian travellers. Visa changes, entry rules, advisory updates, airline policy, currency news, safety updates. Today: ${today()}.
-Find 3 to 4 genuinely newsworthy items. No generic evergreen tips.
+  return `Search the live web for the most important travel news affecting US and Canadian travellers from the past two weeks. Today: ${today()}.
+Categories: visa changes, entry rules, advisory updates, airline policy shifts, currency news, safety updates, strikes, weather disruptions.
+
+REQUIREMENTS:
+- Return EXACTLY 3 to 4 real, newsworthy items. Never fewer than 3. Never an empty array.
+- If destination-specific news is thin, broaden to regional or global traveller-relevant news.
+- Every field must be populated from a real source. No generic evergreen tips.
 
 Return JSON: {"items":[{"flag_emoji":"🇪🇺","country_or_region":"...","headline":"short under 8 words","body":"2 to 3 sentences","action_required":true,"affects":"...","tool_link":"travel-intel | safety | currency | best-time | itinerary","source":"..."}]}`;
 }
