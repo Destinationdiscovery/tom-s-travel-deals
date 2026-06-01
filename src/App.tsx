@@ -9,6 +9,7 @@ import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import ScrollToTop from "@/components/ScrollToTop";
 import ReturningTripBanner from "@/components/trips/ReturningTripBanner";
+import EmailCapturePopup from "@/components/EmailCapturePopup";
 import { touchSession } from "@/lib/tripSession";
 
 const Index = lazy(() => import("./pages/Index"));
