@@ -353,8 +353,15 @@ const CompassArticle = () => {
             <div className="bg-card rounded-2xl shadow-soft p-8 md:p-12">
               <div className="prose prose-lg dark:prose-invert max-w-none prose-a:!text-primary prose-a:no-underline">
                 {article.richContent && article.richContent.length > 0 ? (
-                  // Render rich content with images and headings
-                  article.richContent.map((block, index) => renderContentBlock(block, index))
+                  // Render rich content with images and headings, inject inline CTA after 3rd block
+                  article.richContent.map((block, index) => (
+                    <React.Fragment key={index}>
+                      {renderContentBlock(block, index)}
+                      {index === 2 && (
+                        <CompassInlineCTA articleSlug={slug} />
+                      )}
+                    </React.Fragment>
+                  ))
                 ) : (
                   // Fallback to simple text paragraphs
                   article.content.map((paragraph, index) => (
