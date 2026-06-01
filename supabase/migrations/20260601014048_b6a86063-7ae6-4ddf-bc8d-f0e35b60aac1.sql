@@ -1,0 +1,1 @@
+UPDATE public.compass_editions SET status = 'draft', published_at = NULL, sent_at = NULL, mailerlite_campaign_id = NULL WHERE id = 'ceb8fa6f-063d-4f47-bb87-f773d4507d71';
