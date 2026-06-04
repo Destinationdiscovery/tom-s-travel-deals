@@ -42,31 +42,24 @@ const CompassPreviewModal = ({ triggerVariant = "ghost", triggerLabel = "Preview
       });
   }, [open, loaded]);
 
-  const Trigger = () => {
-    if (triggerVariant === "link") {
-      return (
-        <button type="button" className={`text-sm text-primary underline underline-offset-2 hover:opacity-80 ${className}`}>
-          {triggerLabel}
-        </button>
-      );
-    }
-    return (
-      <Button
-        type="button"
-        variant={triggerVariant === "button" ? "default" : "ghost"}
-        size="sm"
-        className={className}
-      >
-        <Eye className="h-4 w-4 mr-1.5" />
-        {triggerLabel}
-      </Button>
-    );
-  };
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Trigger />
+        {triggerVariant === "link" ? (
+          <button type="button" className={`text-sm text-primary underline underline-offset-2 hover:opacity-80 ${className}`}>
+            {triggerLabel}
+          </button>
+        ) : (
+          <Button
+            type="button"
+            variant={triggerVariant === "button" ? "default" : "ghost"}
+            size="sm"
+            className={className}
+          >
+            <Eye className="h-4 w-4 mr-1.5" />
+            {triggerLabel}
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="max-w-3xl w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col">
         <DialogHeader className="px-6 py-4 border-b shrink-0">
