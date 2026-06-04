@@ -9,6 +9,7 @@ import SEOHead from "@/components/SEOHead";
 import heroImg from "@/assets/blog-hero-nightsky.png";
 import { supabase } from "@/integrations/supabase/client";
 import NewsletterCTASection from "@/components/NewsletterCTASection";
+import CompassPreviewModal from "@/components/CompassPreviewModal";
 
 const categories = ["All", "Packing", "Guides", "Budget", "Insurance", "Timing"];
 
@@ -97,6 +98,9 @@ const Compass = () => {
             Insider tips and travel wisdom from over a decade of experience as a travel consultant. 
             Practical advice to help you travel smarter.
           </p>
+          <div className="mt-5 flex justify-center">
+            <CompassPreviewModal triggerVariant="button" triggerLabel="Preview the latest Compass edition" className="bg-white/15 hover:bg-white/25 text-white backdrop-blur-sm border border-white/30" />
+          </div>
         </div>
       </section>
 

@@ -389,6 +389,9 @@ const CompassArticle = () => {
               </div>
             )}
 
+            {/* End-of-article newsletter capture */}
+            <CompassInlineCTA articleSlug={slug ? `end-${slug}` : "end"} className="mt-8" />
+
             {/* Internal Links - Related on ReviewThenGo */}
             {article.internal_links && article.internal_links.length > 0 && (
               <div className="bg-card rounded-2xl shadow-soft p-8 md:p-12 mt-8">

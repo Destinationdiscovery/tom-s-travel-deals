@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { trackEmailSignup } from "@/lib/analytics";
+import CompassPreviewModal from "@/components/CompassPreviewModal";
 
 interface NewsletterCTASectionProps {
   sourceSlug?: string;
@@ -73,6 +74,9 @@ const NewsletterCTASection = ({ sourceSlug = "compass-homepage", interests = ["c
           <p className="text-xs text-muted-foreground mt-3">
             No spam. Unsubscribe anytime.
           </p>
+          <div className="mt-3 flex justify-center">
+            <CompassPreviewModal triggerVariant="ghost" triggerLabel="Preview the latest edition" />
+          </div>
         </div>
       </div>
     </section>
