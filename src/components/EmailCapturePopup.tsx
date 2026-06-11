@@ -26,6 +26,8 @@ const EmailCapturePopup = () => {
 
   useEffect(() => {
     if (localStorage.getItem(SUBSCRIBED_KEY)) return;
+    // Don't show inside the admin portal
+    if (typeof window !== "undefined" && window.location.pathname.startsWith("/gear-admin")) return;
     const dismissed = localStorage.getItem(STORAGE_KEY);
     if (dismissed) {
       const dismissedAt = parseInt(dismissed, 10);
@@ -37,19 +39,12 @@ const EmailCapturePopup = () => {
     const handleMouseLeave = (e: MouseEvent) => {
       if (e.clientY <= 0) show();
     };
-    const handleScroll = () => {
-      const scrolled = window.scrollY + window.innerHeight;
-      const total = document.documentElement.scrollHeight;
-      if (total > 0 && scrolled / total >= 0.6) show();
-    };
     document.documentElement.addEventListener("mouseleave", handleMouseLeave);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    const timer = setTimeout(show, 30000);
+    const timer = setTimeout(show, 60000);
 
     return () => {
       clearTimeout(timer);
       document.documentElement.removeEventListener("mouseleave", handleMouseLeave);
-      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
