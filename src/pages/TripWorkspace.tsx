@@ -632,6 +632,16 @@ const TripWorkspace = () => {
         <Button variant="outline" onClick={handleShare} className="flex-1 gap-1.5 h-12"><Share2 className="h-4 w-4" /> Share</Button>
         <Button variant="outline" onClick={() => window.print()} className="flex-1 gap-1.5 h-12"><Printer className="h-4 w-4" /> PDF</Button>
       </div>
+      </div>
+      {reviewingHotelId && (
+        <HotelReviewForm
+          tripHotelId={reviewingHotelId}
+          propertyName={hotels.find((h) => h.id === reviewingHotelId)?.property_name ?? "this hotel"}
+          open={!!reviewingHotelId}
+          onOpenChange={(o) => { if (!o) setReviewingHotelId(null); }}
+          onSaved={() => setReviewedHotelIds(new Set([...reviewedHotelIds, reviewingHotelId!]))}
+        />
+      )}
       <Footer />
     </div>
   );
