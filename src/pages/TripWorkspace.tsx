@@ -240,37 +240,39 @@ const TripWorkspace = () => {
           />
         </div>
 
-        {/* Hotels */}
-        <Section title="Hotels" icon={Hotel} cta={<Button asChild variant="outline" size="sm"><Link to="/">Find more</Link></Button>}>
-          {hotels.length === 0 ? (
-            <Empty msg="No hotels saved yet. Use the Add to Trip button on any review." />
-          ) : (
-            <div className="grid gap-3 md:grid-cols-2">
-              {hotels.map((h) => (
-                <div key={h.id} className="bg-background border rounded-xl p-3 flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    {h.slug ? (
-                      <Link to={`/review/${h.slug}`} className="font-medium text-foreground truncate hover:text-primary block">
-                        {h.property_name}
-                      </Link>
-                    ) : (
-                      <p className="font-medium text-foreground truncate">{h.property_name}</p>
-                    )}
-                    {h.location && <p className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="h-3 w-3" /> {h.location}</p>}
+        {/* Hotels (single-destination only; multi-destination shows hotels per stop) */}
+        {!trip.is_multi_destination && (
+          <Section title="Hotels" icon={Hotel} cta={<Button asChild variant="outline" size="sm"><Link to="/">Find more</Link></Button>}>
+            {hotels.length === 0 ? (
+              <Empty msg="No hotels saved yet. Use the Add to Trip button on any review." />
+            ) : (
+              <div className="grid gap-3 md:grid-cols-2">
+                {hotels.map((h) => (
+                  <div key={h.id} className="bg-background border rounded-xl p-3 flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      {h.slug ? (
+                        <Link to={`/review/${h.slug}`} className="font-medium text-foreground truncate hover:text-primary block">
+                          {h.property_name}
+                        </Link>
+                      ) : (
+                        <p className="font-medium text-foreground truncate">{h.property_name}</p>
+                      )}
+                      {h.location && <p className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="h-3 w-3" /> {h.location}</p>}
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {h.overall_rating && (
+                        <span className="text-sm font-medium">{h.overall_rating}<Star className="h-3 w-3 inline ml-0.5 text-accent fill-accent" /></span>
+                      )}
+                      <button onClick={() => removeHotel(h.id)} className="text-muted-foreground hover:text-destructive">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    {h.overall_rating && (
-                      <span className="text-sm font-medium">{h.overall_rating}<Star className="h-3 w-3 inline ml-0.5 text-accent fill-accent" /></span>
-                    )}
-                    <button onClick={() => removeHotel(h.id)} className="text-muted-foreground hover:text-destructive">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </Section>
+                ))}
+              </div>
+            )}
+          </Section>
+        )}
 
         {/* Itinerary */}
         <Section title="Itinerary" icon={ListChecks}>
