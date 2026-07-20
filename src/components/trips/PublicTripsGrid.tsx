@@ -17,6 +17,7 @@ interface TripCard {
   author_display_name: string | null;
   published_at: string | null;
   view_count: number;
+  share_count: number;
   hotel_count: number;
 }
 
