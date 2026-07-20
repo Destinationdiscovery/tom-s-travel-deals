@@ -75,6 +75,9 @@ const TripWorkspace = () => {
   const [newDayTitle, setNewDayTitle] = useState("");
   const [packingExpanded, setPackingExpanded] = useState(false);
   const [gearExpanded, setGearExpanded] = useState(false);
+  const [newGearTitle, setNewGearTitle] = useState("");
+  const [newGearUrl, setNewGearUrl] = useState("");
+  const [openNotes, setOpenNotes] = useState<Record<string, boolean>>({});
 
   const logistics = logisticsAll.find((l) => l.leg_id === null) ?? null;
 
