@@ -187,24 +187,16 @@ const PublishTripPanel = ({ trip, hotelCount, legCount, onUpdated }: Props) => {
             <Button size="sm" variant="outline" asChild><a href={publicUrl} target="_blank" rel="noopener noreferrer">Open</a></Button>
           </div>
 
-          <div className="grid sm:grid-cols-2 gap-3 mb-4">
-            <label className="text-xs uppercase tracking-wide text-muted-foreground flex flex-col gap-1">
-              Author name (public)
-              <Input
-                defaultValue={trip.author_display_name ?? ""}
-                placeholder="How to credit you"
-                onBlur={(e) => savePatch({ author_display_name: e.target.value.trim() || null })}
-              />
-            </label>
-            <label className="text-xs uppercase tracking-wide text-muted-foreground flex flex-col gap-1">
-              Cover image URL (optional)
-              <Input
-                defaultValue={trip.cover_image_url ?? ""}
-                placeholder="https://..."
-                onBlur={(e) => savePatch({ cover_image_url: e.target.value.trim() || null })}
-              />
-            </label>
-          </div>
+          {CoverImageControl}
+
+          <label className="text-xs uppercase tracking-wide text-muted-foreground flex flex-col gap-1 mb-4">
+            Author name (public)
+            <Input
+              defaultValue={trip.author_display_name ?? ""}
+              placeholder="How to credit you"
+              onBlur={(e) => savePatch({ author_display_name: e.target.value.trim() || null })}
+            />
+          </label>
 
           <label className="flex items-center gap-2 text-sm mb-4">
             <Switch
