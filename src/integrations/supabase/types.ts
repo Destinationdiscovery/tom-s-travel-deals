@@ -904,18 +904,21 @@ export type Database = {
           display_name: string | null
           id: string
           newsletter_opt_in: boolean
+          username: string | null
         }
         Insert: {
           created_at?: string
           display_name?: string | null
           id: string
           newsletter_opt_in?: boolean
+          username?: string | null
         }
         Update: {
           created_at?: string
           display_name?: string | null
           id?: string
           newsletter_opt_in?: boolean
+          username?: string | null
         }
         Relationships: []
       }
@@ -1623,6 +1626,7 @@ export type Database = {
           notes: string | null
           public_slug: string | null
           published_at: string | null
+          share_count: number
           share_token: string
           slug: string
           start_date: string | null
@@ -1647,6 +1651,7 @@ export type Database = {
           notes?: string | null
           public_slug?: string | null
           published_at?: string | null
+          share_count?: number
           share_token?: string
           slug: string
           start_date?: string | null
@@ -1671,6 +1676,7 @@ export type Database = {
           notes?: string | null
           public_slug?: string | null
           published_at?: string | null
+          share_count?: number
           share_token?: string
           slug?: string
           start_date?: string | null
@@ -1849,6 +1855,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_trip_share: { Args: { _slug: string }; Returns: undefined }
       increment_trip_view: { Args: { _slug: string }; Returns: undefined }
       list_public_trips: {
         Args: { _destination?: string; _limit?: number; _offset?: number }
@@ -1861,6 +1868,7 @@ export type Database = {
           id: string
           public_slug: string
           published_at: string
+          share_count: number
           start_date: string
           trip_name: string
           trip_type: string
