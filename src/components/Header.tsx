@@ -201,6 +201,13 @@ const Header = () => {
 
                   {/* Blog, Guides */}
                   <Link
+                    to="/trips"
+                    onClick={() => setMobileOpen(false)}
+                    className="text-lg font-medium text-primary-foreground/80 hover:text-primary-foreground transition-colors py-2"
+                  >
+                    Explore Trips
+                  </Link>
+                  <Link
                     to="/compass"
                     onClick={() => setMobileOpen(false)}
                     className="text-lg font-medium text-primary-foreground/80 hover:text-primary-foreground transition-colors py-2"
