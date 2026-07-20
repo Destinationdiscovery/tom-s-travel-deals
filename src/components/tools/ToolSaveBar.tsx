@@ -25,7 +25,8 @@ interface Props {
   onCopy?: () => string | Promise<string>;
 }
 
-interface Trip { id: string; slug: string; trip_name: string; }
+interface Trip { id: string; slug: string; trip_name: string; is_multi_destination: boolean; }
+interface Leg { id: string; name: string; destination: string | null; leg_number: number; }
 
 const slugify = (s: string) =>
   s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 60) ||
@@ -44,6 +45,8 @@ const ToolSaveBar = ({ toolType, label, destination, payload, onExportPdf, onCop
   const [newName, setNewName] = useState("");
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [legPickerFor, setLegPickerFor] = useState<Trip | null>(null);
+  const [legs, setLegs] = useState<Leg[]>([]);
 
   useEffect(() => {
     if (!pickerOpen || !user) return;
@@ -51,7 +54,7 @@ const ToolSaveBar = ({ toolType, label, destination, payload, onExportPdf, onCop
     (async () => {
       const { data } = await (supabase as any)
         .from("trips")
-        .select("id, slug, trip_name")
+        .select("id, slug, trip_name, is_multi_destination")
         .eq("user_id", user.id)
         .order("updated_at", { ascending: false });
       setTrips((data ?? []) as Trip[]);
@@ -59,21 +62,39 @@ const ToolSaveBar = ({ toolType, label, destination, payload, onExportPdf, onCop
     })();
   }, [pickerOpen, user]);
 
-  const saveToTrip = async (trip: Trip) => {
+  const doSave = async (trip: Trip, legId: string | null) => {
     setSaving(true);
     try {
-      await applyPayloadToTrip(trip.id, toolType, payload);
+      await applyPayloadToTrip(trip.id, toolType, payload, legId);
       await (supabase as any).from("trips").update({ updated_at: new Date().toISOString() }).eq("id", trip.id);
       toast({
         title: `Added to "${trip.trip_name}"`,
-        description: "Open the trip to organize it.",
+        description: legId ? "Saved to the selected stop." : "Open the trip to organize it.",
       });
     } catch (e: any) {
       toast({ title: "Could not save", description: e?.message ?? "Try again.", variant: "destructive" });
     } finally {
       setSaving(false);
       setPickerOpen(false);
+      setLegPickerFor(null);
     }
+  };
+
+  const saveToTrip = async (trip: Trip) => {
+    if (trip.is_multi_destination) {
+      const { data } = await (supabase as any)
+        .from("trip_legs").select("id, name, destination, leg_number")
+        .eq("trip_id", trip.id).order("leg_number");
+      const rows = (data ?? []) as Leg[];
+      if (rows.length === 0) {
+        await doSave(trip, null);
+        return;
+      }
+      setLegs(rows);
+      setLegPickerFor(trip);
+      return;
+    }
+    await doSave(trip, null);
   };
 
   const createTripAndSave = async () => {
@@ -84,7 +105,7 @@ const ToolSaveBar = ({ toolType, label, destination, payload, onExportPdf, onCop
       const { data, error } = await (supabase as any)
         .from("trips")
         .insert({ user_id: user.id, trip_name: newName.trim(), slug, destination: destination ?? null })
-        .select("id, slug, trip_name")
+        .select("id, slug, trip_name, is_multi_destination")
         .single();
       if (error || !data) throw error;
       await applyPayloadToTrip(data.id, toolType, payload);
