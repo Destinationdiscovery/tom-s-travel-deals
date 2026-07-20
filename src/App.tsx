@@ -35,6 +35,8 @@ const MyReviews = lazy(() => import("./pages/MyReviews"));
 const MyTrips = lazy(() => import("./pages/MyTrips"));
 const TripWorkspace = lazy(() => import("./pages/TripWorkspace"));
 const SharedTrip = lazy(() => import("./pages/SharedTrip"));
+const PublicTrip = lazy(() => import("./pages/PublicTrip"));
+const PublicTripsGallery = lazy(() => import("./pages/PublicTripsGallery"));
 const Promo = lazy(() => import("./pages/Promo"));
 const TravelSearch = lazy(() => import("./pages/TravelSearch"));
 const Reviews = lazy(() => import("./pages/Reviews"));
@@ -100,6 +102,8 @@ const App = () => {
                 <Route path="/my-trips" element={<MyTrips />} />
                 <Route path="/my-trips/:slug" element={<TripWorkspace />} />
                 <Route path="/trip/:token" element={<SharedTrip />} />
+                <Route path="/trips" element={<PublicTripsGallery />} />
+                <Route path="/trips/:slug" element={<PublicTrip />} />
                 <Route path="/promo" element={<Promo />} />
                 <Route path="/search" element={<TravelSearch />} />
                 <Route path="/reviews/:query" element={<Reviews />} />

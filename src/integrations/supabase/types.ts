@@ -1219,6 +1219,59 @@ export type Database = {
           },
         ]
       }
+      trip_hotel_reviews: {
+        Row: {
+          cons: string[]
+          created_at: string
+          id: string
+          notes: string | null
+          overall_rating: number | null
+          pros: string[]
+          stayed_from: string | null
+          stayed_to: string | null
+          trip_hotel_id: string
+          updated_at: string
+          user_id: string
+          verdict: string | null
+        }
+        Insert: {
+          cons?: string[]
+          created_at?: string
+          id?: string
+          notes?: string | null
+          overall_rating?: number | null
+          pros?: string[]
+          stayed_from?: string | null
+          stayed_to?: string | null
+          trip_hotel_id: string
+          updated_at?: string
+          user_id: string
+          verdict?: string | null
+        }
+        Update: {
+          cons?: string[]
+          created_at?: string
+          id?: string
+          notes?: string | null
+          overall_rating?: number | null
+          pros?: string[]
+          stayed_from?: string | null
+          stayed_to?: string | null
+          trip_hotel_id?: string
+          updated_at?: string
+          user_id?: string
+          verdict?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_hotel_reviews_trip_hotel_id_fkey"
+            columns: ["trip_hotel_id"]
+            isOneToOne: true
+            referencedRelation: "trip_hotels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trip_hotels: {
         Row: {
           best_for: string[]
@@ -1557,12 +1610,19 @@ export type Database = {
       }
       trips: {
         Row: {
+          author_display_name: string | null
+          cover_image_url: string | null
           created_at: string
           destination: string | null
           end_date: string | null
+          hidden_by_admin: boolean
           id: string
           is_multi_destination: boolean
+          is_published: boolean
+          list_in_gallery: boolean
           notes: string | null
+          public_slug: string | null
+          published_at: string | null
           share_token: string
           slug: string
           start_date: string | null
@@ -1571,14 +1631,22 @@ export type Database = {
           trip_type: string | null
           updated_at: string
           user_id: string
+          view_count: number
         }
         Insert: {
+          author_display_name?: string | null
+          cover_image_url?: string | null
           created_at?: string
           destination?: string | null
           end_date?: string | null
+          hidden_by_admin?: boolean
           id?: string
           is_multi_destination?: boolean
+          is_published?: boolean
+          list_in_gallery?: boolean
           notes?: string | null
+          public_slug?: string | null
+          published_at?: string | null
           share_token?: string
           slug: string
           start_date?: string | null
@@ -1587,14 +1655,22 @@ export type Database = {
           trip_type?: string | null
           updated_at?: string
           user_id: string
+          view_count?: number
         }
         Update: {
+          author_display_name?: string | null
+          cover_image_url?: string | null
           created_at?: string
           destination?: string | null
           end_date?: string | null
+          hidden_by_admin?: boolean
           id?: string
           is_multi_destination?: boolean
+          is_published?: boolean
+          list_in_gallery?: boolean
           notes?: string | null
+          public_slug?: string | null
+          published_at?: string | null
           share_token?: string
           slug?: string
           start_date?: string | null
@@ -1603,6 +1679,7 @@ export type Database = {
           trip_type?: string | null
           updated_at?: string
           user_id?: string
+          view_count?: number
         }
         Relationships: []
       }
@@ -1733,6 +1810,7 @@ export type Database = {
           subject_line: string
         }[]
       }
+      get_public_trip: { Args: { _slug: string }; Returns: Json }
       get_quote_by_share_token: {
         Args: { _token: string }
         Returns: {
@@ -1770,6 +1848,24 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      increment_trip_view: { Args: { _slug: string }; Returns: undefined }
+      list_public_trips: {
+        Args: { _destination?: string; _limit?: number; _offset?: number }
+        Returns: {
+          author_display_name: string
+          cover_image_url: string
+          destination: string
+          end_date: string
+          hotel_count: number
+          id: string
+          public_slug: string
+          published_at: string
+          start_date: string
+          trip_name: string
+          trip_type: string
+          view_count: number
+        }[]
       }
     }
     Enums: {

@@ -12,12 +12,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import {
   ArrowLeft, MapPin, Calendar, Share2, Printer, Plus, Trash2,
-  Hotel, ListChecks, Backpack, ShieldCheck, ExternalLink, Star, Loader2, Pencil, Check, X,
+  Hotel, ListChecks, Backpack, ShieldCheck, ExternalLink, Star, Loader2, Pencil, Check, X, MessageSquarePlus,
 } from "lucide-react";
 
 
 import TripLegsSection, { type Leg } from "@/components/trips/TripLegsSection";
 import TripPackingGenerator from "@/components/trips/TripPackingGenerator";
+import PublishTripPanel from "@/components/trips/PublishTripPanel";
+import HotelReviewForm from "@/components/trips/HotelReviewForm";
 
 interface Trip {
   id: string;
@@ -32,6 +34,11 @@ interface Trip {
   notes: string | null;
   share_token: string;
   is_multi_destination: boolean;
+  is_published?: boolean;
+  public_slug?: string | null;
+  list_in_gallery?: boolean;
+  author_display_name?: string | null;
+  cover_image_url?: string | null;
 }
 
 interface HotelRow {
@@ -78,6 +85,8 @@ const TripWorkspace = () => {
   const [packingExpanded, setPackingExpanded] = useState(false);
   const [editingPackingId, setEditingPackingId] = useState<string | null>(null);
   const [editingPackingLabel, setEditingPackingLabel] = useState("");
+  const [reviewingHotelId, setReviewingHotelId] = useState<string | null>(null);
+  const [reviewedHotelIds, setReviewedHotelIds] = useState<Set<string>>(new Set());
 
 
   const logistics = logisticsAll.find((l) => l.leg_id === null) ?? null;
@@ -93,7 +102,7 @@ const TripWorkspace = () => {
       .from("trips").select("*").eq("user_id", user.id).eq("slug", slug).maybeSingle();
     if (!t) { setLoading(false); return; }
     setTrip(t as Trip);
-    const [h, d, p, g, l, lg, tr] = await Promise.all([
+    const [h, d, p, g, l, lg, tr, rev] = await Promise.all([
       (supabase as any).from("trip_hotels").select("*").eq("trip_id", t.id).order("sort_order"),
       (supabase as any).from("trip_itinerary_days").select("*").eq("trip_id", t.id).order("day_number"),
       (supabase as any).from("trip_packing_items").select("*").eq("trip_id", t.id).order("sort_order"),
@@ -101,6 +110,7 @@ const TripWorkspace = () => {
       (supabase as any).from("trip_logistics").select("*").eq("trip_id", t.id),
       (supabase as any).from("trip_legs").select("*").eq("trip_id", t.id).order("leg_number"),
       (supabase as any).from("trip_transit").select("*").eq("trip_id", t.id),
+      (supabase as any).from("trip_hotel_reviews").select("trip_hotel_id").eq("user_id", user.id),
     ]);
     setHotels((h.data ?? []) as HotelRow[]);
     setDays((d.data ?? []) as DayRow[]);
@@ -109,6 +119,7 @@ const TripWorkspace = () => {
     setLogisticsAll((l.data ?? []) as LogisticsRow[]);
     setLegs((lg.data ?? []) as Leg[]);
     setTransit((tr.data ?? []) as TransitRow[]);
+    setReviewedHotelIds(new Set(((rev.data ?? []) as any[]).map((r) => r.trip_hotel_id)));
     setLoading(false);
   };
 
@@ -337,35 +348,57 @@ const TripWorkspace = () => {
           />
         </div>
 
+        {/* Publish / Share */}
+        <PublishTripPanel
+          trip={trip}
+          hotelCount={hotels.length}
+          legCount={legs.length}
+          onUpdated={(patch) => setTrip({ ...trip, ...patch } as Trip)}
+        />
+
         {/* Hotels (single-destination only; multi-destination shows hotels per stop) */}
         {!trip.is_multi_destination && (
           <Section title="Hotels" icon={Hotel} cta={<Button asChild variant="outline" size="sm"><Link to="/">Find more</Link></Button>}>
             {hotels.length === 0 ? (
               <Empty msg="No hotels saved yet. Use the Add to Trip button on any review." />
             ) : (
-              <div className="grid gap-3 md:grid-cols-2">
-                {hotels.map((h) => (
-                  <div key={h.id} className="bg-background border rounded-xl p-3 flex items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      {h.slug ? (
-                        <Link to={`/review/${h.slug}`} className="font-medium text-foreground truncate hover:text-primary block">
-                          {h.property_name}
-                        </Link>
-                      ) : (
-                        <p className="font-medium text-foreground truncate">{h.property_name}</p>
-                      )}
-                      {h.location && <p className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="h-3 w-3" /> {h.location}</p>}
+              <div className="grid gap-3 md:grid-cols-1">
+                {hotels.map((h) => {
+                  const reviewed = reviewedHotelIds.has(h.id);
+                  return (
+                    <div key={h.id} className="bg-background border rounded-xl p-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          {h.slug ? (
+                            <Link to={`/review/${h.slug}`} className="font-medium text-foreground truncate hover:text-primary block">
+                              {h.property_name}
+                            </Link>
+                          ) : (
+                            <p className="font-medium text-foreground truncate">{h.property_name}</p>
+                          )}
+                          {h.location && <p className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="h-3 w-3" /> {h.location}</p>}
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {h.overall_rating && (
+                            <span className="text-sm font-medium">{h.overall_rating}<Star className="h-3 w-3 inline ml-0.5 text-accent fill-accent" /></span>
+                          )}
+                          <button onClick={() => removeHotel(h.id)} className="text-muted-foreground hover:text-destructive" aria-label="Remove hotel">
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant={reviewed ? "outline" : "secondary"}
+                        className="mt-2 gap-1.5 h-8"
+                        onClick={() => setReviewingHotelId(h.id)}
+                      >
+                        <MessageSquarePlus className="h-3.5 w-3.5" />
+                        {reviewed ? "Edit your review" : "Add your review"}
+                      </Button>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      {h.overall_rating && (
-                        <span className="text-sm font-medium">{h.overall_rating}<Star className="h-3 w-3 inline ml-0.5 text-accent fill-accent" /></span>
-                      )}
-                      <button onClick={() => removeHotel(h.id)} className="text-muted-foreground hover:text-destructive">
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </Section>
@@ -599,6 +632,15 @@ const TripWorkspace = () => {
         <Button variant="outline" onClick={handleShare} className="flex-1 gap-1.5 h-12"><Share2 className="h-4 w-4" /> Share</Button>
         <Button variant="outline" onClick={() => window.print()} className="flex-1 gap-1.5 h-12"><Printer className="h-4 w-4" /> PDF</Button>
       </div>
+      {reviewingHotelId && (
+        <HotelReviewForm
+          tripHotelId={reviewingHotelId}
+          propertyName={hotels.find((h) => h.id === reviewingHotelId)?.property_name ?? "this hotel"}
+          open={!!reviewingHotelId}
+          onOpenChange={(o) => { if (!o) setReviewingHotelId(null); }}
+          onSaved={() => setReviewedHotelIds(new Set([...reviewedHotelIds, reviewingHotelId!]))}
+        />
+      )}
       <Footer />
     </div>
   );
