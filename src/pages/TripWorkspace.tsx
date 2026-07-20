@@ -12,8 +12,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import {
   ArrowLeft, MapPin, Calendar, Share2, Printer, Plus, Trash2,
-  Hotel, ListChecks, Backpack, ShoppingBag, ShieldCheck, ExternalLink, Star, StickyNote,
+  Hotel, ListChecks, Backpack, ShieldCheck, ExternalLink, Star, Loader2,
 } from "lucide-react";
+
 
 import TripLegsSection, { type Leg } from "@/components/trips/TripLegsSection";
 import TripPackingGenerator from "@/components/trips/TripPackingGenerator";
@@ -72,12 +73,10 @@ const TripWorkspace = () => {
   const [legs, setLegs] = useState<Leg[]>([]);
   const [transit, setTransit] = useState<TransitRow[]>([]);
   const [newPacking, setNewPacking] = useState("");
+  const [addingPacking, setAddingPacking] = useState(false);
   const [newDayTitle, setNewDayTitle] = useState("");
   const [packingExpanded, setPackingExpanded] = useState(false);
-  const [gearExpanded, setGearExpanded] = useState(false);
-  const [newGearTitle, setNewGearTitle] = useState("");
-  const [newGearUrl, setNewGearUrl] = useState("");
-  const [openNotes, setOpenNotes] = useState<Record<string, boolean>>({});
+
 
   const logistics = logisticsAll.find((l) => l.leg_id === null) ?? null;
 
