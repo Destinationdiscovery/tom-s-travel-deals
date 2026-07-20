@@ -362,8 +362,6 @@ const TripWorkspace = () => {
                   {visible.map((p) => {
                     const product = gearByLabel.get(p.label.toLowerCase());
                     const affiliateUrl = product?.affiliate_url;
-                    const notesKey = `p-${p.id}`;
-                    const notesOpen = !!openNotes[notesKey] || !!(p.notes && p.notes.trim());
                     return (
                       <li key={p.id} className="bg-background border rounded-lg px-3 py-2">
                         <div className="flex items-center gap-2">
@@ -382,25 +380,16 @@ const TripWorkspace = () => {
                           ) : (
                             <span className={`flex-1 ${p.checked ? "line-through text-muted-foreground" : ""}`}>{p.label}</span>
                           )}
-                          <button
-                            onClick={() => setOpenNotes((s) => ({ ...s, [notesKey]: !s[notesKey] }))}
-                            className={`shrink-0 ${notesOpen ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
-                            title="Add notes"
-                          >
-                            <StickyNote className="h-4 w-4" />
-                          </button>
                           <button onClick={() => removePacking(p.id)} className="text-muted-foreground hover:text-destructive shrink-0">
                             <Trash2 className="h-4 w-4" />
                           </button>
                         </div>
-                        {notesOpen && (
-                          <Textarea
-                            value={p.notes ?? ""}
-                            onChange={(e) => updatePackingNotes(p.id, e.target.value)}
-                            placeholder="How useful was this? Notes for next trip..."
-                            className="mt-2 text-xs min-h-[60px]"
-                          />
-                        )}
+                        <Textarea
+                          defaultValue={p.notes ?? ""}
+                          onChange={(e) => updatePackingNotes(p.id, e.target.value)}
+                          placeholder="How useful was this? Notes for next trip..."
+                          className="mt-2 text-xs min-h-[52px]"
+                        />
                       </li>
                     );
                   })}
