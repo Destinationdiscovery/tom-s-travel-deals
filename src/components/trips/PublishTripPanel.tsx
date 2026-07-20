@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Globe, Copy, Loader2, EyeOff } from "lucide-react";
+import { Globe, Copy, Loader2, EyeOff, Upload, X } from "lucide-react";
 
 interface Trip {
   id: string;
