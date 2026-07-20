@@ -45,6 +45,7 @@ const MyTrips = () => {
   const [newOpen, setNewOpen] = useState(false);
   const [newName, setNewName] = useState("");
   const [newDest, setNewDest] = useState("");
+  const [newMulti, setNewMulti] = useState(false);
   const [renameTrip, setRenameTrip] = useState<TripRow | null>(null);
   const [renameTo, setRenameTo] = useState("");
 
