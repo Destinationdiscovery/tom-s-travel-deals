@@ -112,17 +112,24 @@ const PublicTrip = () => {
 
       <main className="container mx-auto px-4 max-w-4xl pb-16 -mt-8">
         <div className="bg-card rounded-2xl p-6 md:p-8 shadow-soft">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase tracking-wide mb-2">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase tracking-wide mb-2 flex-wrap">
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary">Shared trip</span>
             <span className="flex items-center gap-1"><Eye className="h-3 w-3" /> {trip.view_count ?? 0} views</span>
+            <span className="flex items-center gap-1"><Share2 className="h-3 w-3" /> {trip.share_count ?? 0} shares</span>
           </div>
-          <h1 className="font-display text-3xl md:text-4xl font-bold">{trip.trip_name}</h1>
+          <div className="flex items-start justify-between gap-3 flex-wrap">
+            <h1 className="font-display text-3xl md:text-4xl font-bold">{trip.trip_name}</h1>
+            <Button size="sm" variant="outline" onClick={handleShare} className="gap-1.5">
+              <Share2 className="h-4 w-4" /> Share
+            </Button>
+          </div>
           <div className="flex flex-wrap gap-4 mt-2 text-sm text-muted-foreground">
             {trip.destination && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {trip.destination}</span>}
             {dateStr && <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" /> {dateStr}</span>}
-            {trip.author_display_name && <span>by {trip.author_display_name}</span>}
+            {trip.author_display_name && <span>by <span className="font-medium text-foreground">@{trip.author_display_name}</span></span>}
           </div>
         </div>
+
 
         {/* Global hotels (single-destination trips) */}
         {globalHotels.length > 0 && (
