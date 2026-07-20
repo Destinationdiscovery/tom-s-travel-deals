@@ -187,6 +187,50 @@ const TripWorkspace = () => {
     setPacking(packing.map((p) => p.id === id ? { ...p, notes } : p));
     await (supabase as any).from("trip_packing_items").update({ notes }).eq("id", id);
   };
+  const startEditPacking = (p: PackingRow) => {
+    setEditingPackingId(p.id);
+    setEditingPackingLabel(p.label);
+  };
+  const cancelEditPacking = () => {
+    setEditingPackingId(null);
+    setEditingPackingLabel("");
+  };
+  const saveEditPacking = async () => {
+    if (!editingPackingId) return;
+    const newLabel = editingPackingLabel.trim();
+    if (!newLabel) { cancelEditPacking(); return; }
+    const current = packing.find((p) => p.id === editingPackingId);
+    const oldLabel = current?.label ?? "";
+    setPacking(packing.map((p) => p.id === editingPackingId ? { ...p, label: newLabel } : p));
+    await (supabase as any).from("trip_packing_items").update({ label: newLabel }).eq("id", editingPackingId);
+
+    // Refresh affiliate link for the renamed item.
+    if (trip && newLabel.toLowerCase() !== oldLabel.toLowerCase()) {
+      try {
+        const { data } = await supabase.functions.invoke("amazon-affiliate-link", {
+          body: { query: newLabel, country: (await import("@/lib/geo")).detectCountry() },
+        });
+        const affiliateUrl = data?.url as string | undefined;
+        // Remove any existing matching gear rows for the old label.
+        const matches = gear.filter((g) => String(g.product?.title ?? "").toLowerCase() === oldLabel.toLowerCase());
+        for (const m of matches) {
+          await (supabase as any).from("trip_gear_items").delete().eq("id", m.id);
+        }
+        let remaining = gear.filter((g) => !matches.some((m) => m.id === g.id));
+        if (affiliateUrl) {
+          const { data: gRow } = await (supabase as any)
+            .from("trip_gear_items")
+            .insert({ trip_id: trip.id, product: { title: newLabel, affiliate_url: affiliateUrl } })
+            .select("*").single();
+          if (gRow) remaining = [...remaining, gRow as GearRow];
+        }
+        setGear(remaining);
+      } catch (e) {
+        console.warn("refresh affiliate on rename failed", e);
+      }
+    }
+    cancelEditPacking();
+  };
 
 
 
