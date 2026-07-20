@@ -547,8 +547,11 @@ const TripWorkspace = () => {
             logistics={logisticsAll}
             transit={transit}
             onChanged={() => void load()}
+            reviewedHotelIds={reviewedHotelIds}
+            onReviewHotel={(hotelId) => setReviewingHotelId(hotelId)}
           />
         )}
+
 
         {/* Logistics (trip-wide) */}
         <Section title={trip.is_multi_destination ? "Trip-wide logistics" : "Logistics"} icon={ShieldCheck}>
