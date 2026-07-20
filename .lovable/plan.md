@@ -1,44 +1,60 @@
-## 1. Move The Compass newsletter section higher on the homepage
+# Multi-destination trips with transit between stops
 
-In `src/pages/Index.tsx`, the `<NewsletterCTASection sourceSlug="compass-homepage" />` currently sits between `BlogPreviewSection` and `AggregateStatsSection`, well below the fold. Move it up so it appears right after `HowItWorks` (and before `TravelersAskSection`). That places it in the first 1.5 screens for both mobile and desktop, before users have to scroll through reviews/tools/blog.
+## What you'll get
 
-## 2. Add end-of-article newsletter capture
+- When you create a trip, you pick **Single destination** (one place, one set of hotels/itinerary/logistics) or **Multi-destination** (an ordered list of stops).
+- A multi-destination trip is broken into **legs**. Each leg has its own name, destination, dates, hotels, itinerary, packing list, gear picks, and logistics (best time, safety, currency, travel intel).
+- Between every two consecutive legs, a **transit card** shows driving distance and drive time (Google Maps) with quick links for other modes.
+- You can add unlimited legs (day tours, side trips, next city, etc.), reorder them, and delete them.
+- The "Add to trip" button in every tool (Best Time, Safety, Currency, Travel Intel, hotel reviews, gear) will let you pick which trip **and which leg** to save the result to.
 
-`src/pages/CompassArticle.tsx` already has `CompassInlineCTA` injected mid-article (after the third rich-content block) but nothing at the end. Add a second `<CompassInlineCTA articleSlug={slug} />` right after the FAQ accordion and before `CompassArticleToolsCTA`, so every article ends with a capture. Use a distinct `source_slug` of `compass-article-end-{slug}` (pass via a new optional `placement` prop or by reusing the existing slug arg — the simplest is a tiny prop addition).
+## New trip shapes
 
-## 3. Add a "Preview the latest edition" button
+```text
+Single destination trip                  Multi-destination trip
+------------------------                 -----------------------
+Trip header                              Trip header
+  Destination, dates, notes                Notes, overall dates (auto from legs)
+Hotels                                   Leg 1: Rome (Jul 7-10)
+Itinerary                                  Hotels, Itinerary, Packing, Gear, Logistics
+Packing                                  ~ Transit: 240 km, 2h 40m driving ~
+Gear                                     Leg 2: Sorrento (Jul 10-14)
+Logistics                                  Hotels, Itinerary, Packing, Gear, Logistics
+                                         ~ Transit: 60 km, 1h 10m driving ~
+                                         Leg 3: Monopoli day tour (Jul 15)
+                                           Hotels, Itinerary, ...
+```
 
-There is one sent edition in `compass_editions` (#3, Scottish Highlands) with `full_html` populated. Add a preview affordance that opens a modal showing it.
+## Data model changes
 
-- New component `src/components/CompassPreviewModal.tsx`: a shadcn `Dialog` with a max-w-3xl, max-h-[85vh] scrollable body that renders the edition inside a sandboxed `<iframe srcDoc={full_html}>` so MailerLite-styled HTML cannot leak styles into the app. Includes a "Subscribe to get the next one" button at the bottom that scrolls to the nearest capture form (or opens the popup).
-- Fetch the latest `status='sent'` edition via a small inline Supabase query: `select id, edition_number, subject_line, destination, issue_date, full_html from compass_editions where status='sent' order by issue_date desc limit 1`. Cache in component state. Show a skeleton while loading; if nothing returns, hide the button.
-- Wire a "Preview latest edition" link/button into:
-  - `src/components/NewsletterCTASection.tsx` (under the subscribe form, small ghost button: "Preview the latest edition")
-  - `src/pages/Compass.tsx` hero area, next to or below the description
-  - `src/components/CompassInlineCTA.tsx` (small text link "See a sample")
+- `trips.is_multi_destination` boolean, default false.
+- New table `trip_legs` (id, trip_id, leg_number, name, destination, start_date, end_date, notes).
+- Add nullable `leg_id` foreign key to `trip_hotels`, `trip_itinerary_days`, `trip_packing_items`, `trip_gear_items`, `trip_logistics`. Existing rows keep `leg_id` null and behave as the single-destination trip.
+- New table `trip_transit` (trip_id, from_leg_id, to_leg_id, distance_meters, duration_seconds, mode, options jsonb, updated_at). Cached so we don't hit Google on every render.
+- RLS: same "owner only" policies as the rest of the trip tables.
 
-## 4. Verify exit/scroll/timer popup triggers actually fire
+## Google Maps integration
 
-After build, use the browser tool to load the preview, clear `localStorage['rtg-email-popup-dismissed']` and `rtg-email-popup-subscribed`, then exercise each trigger and screenshot:
+- Link the Google Maps Platform connector (uses the gateway; no new API key needed from you).
+- New edge function `trip-transit` calls Routes API `computeRoutes` in driving mode using the two leg destinations. Result cached in `trip_transit`.
+- Transit card also links out to Google Maps for train, bus, or flight options (mode buttons: Drive / Train / Fly).
 
-- Desktop 1280x720: wait 30s on `/` → popup should appear (timer path).
-- Desktop: reload, move mouse to top edge → popup should appear (mouse-leave path).
-- Mobile 390x844: reload, scroll to ~65% of page → popup should appear (scroll path).
-- After submit: confirm `rtg-email-popup-subscribed` is set and popup does not return on reload.
-- After close (X): confirm `rtg-email-popup-dismissed` is set and popup is suppressed for 3 days.
+## UI changes
 
-Report results inline; fix any trigger that does not fire (likely candidates: scroll calc using wrong element, listeners removed on route change, or popup blocked by another modal).
+- `MyTrips` "Create trip" dialog gets a toggle: **Single destination** or **Multi-destination**.
+- `TripWorkspace` renders legs as expandable sections when `is_multi_destination`. Add-leg button at the bottom, reorder + delete on each leg.
+- `ToolSaveBar` and `AddToTripButton` dialogs get a second step "Which leg?" when the chosen trip is multi-destination.
+- Existing single-destination trips render exactly as they do today.
 
-## 5. RLS / data access check
+## Migration approach for your data
 
-The preview modal reads `compass_editions` from the browser. Confirm there is a SELECT policy allowing public/anon read of `status='sent'` rows. If not, add a migration with a `GRANT SELECT ... TO anon, authenticated` and a policy `USING (status = 'sent')`. (Will verify the existing policy before deciding whether a migration is needed.)
+Per your note, you'll delete the current Sorrento / Monopoli / Italy Summer 2026 trips and start over. The `cached_reviews`, `travel_intel_cache`, `tool_search_cache` etc. rows are untouched so all your previous searches remain instant. I'll only drop the trip rows.
 
-## Files touched
+## Technical notes
 
-- `src/pages/Index.tsx` — reorder sections
-- `src/pages/CompassArticle.tsx` — add end-of-article CTA
-- `src/components/CompassInlineCTA.tsx` — optional `placement` prop for source tagging + small "See a sample" link
-- `src/components/CompassPreviewModal.tsx` — NEW
-- `src/components/NewsletterCTASection.tsx` — add preview button
-- `src/pages/Compass.tsx` — add preview button in hero
-- (optional) `supabase/migrations/...` — public read policy for sent editions, only if missing
+- Schema migration includes GRANTs and RLS policies for every new table.
+- `trip-transit` edge function: `verify_jwt = false` by default, validates trip ownership by checking `auth.uid()` against `trips.user_id` before returning cached or fresh data.
+- Uses `routes.googleapis.com/directions/v2:computeRoutes` via the connector gateway with `travelMode: DRIVE`, `routingPreference: TRAFFIC_UNAWARE`.
+- No changes to compass, blog, CRM, or auth systems.
+
+Approve and I'll ship it in one pass: migration, connector link, edge function, then the UI updates.
