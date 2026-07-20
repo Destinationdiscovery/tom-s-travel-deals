@@ -166,6 +166,7 @@ const PublishTripPanel = ({ trip, hotelCount, legCount, onUpdated }: Props) => {
           <p className="text-sm text-muted-foreground mb-3">
             Publish your trip to get a public link and show it in the community gallery so other travelers can learn from it.
           </p>
+          {CoverImageControl}
           {!ready && (
             <div className="text-xs text-muted-foreground bg-muted/50 rounded-lg p-3 mb-3">
               Before publishing, please add: {!trip.trip_name?.trim() && "a title, "}{!trip.destination?.trim() && "a destination, "}{hotelCount === 0 && legCount === 0 && "at least one hotel or stop, "}
