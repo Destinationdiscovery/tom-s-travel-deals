@@ -36,6 +36,14 @@ interface HotelRow {
 interface DayRow { id: string; day_number: number; content: any; }
 interface PackingRow { id: string; label: string; checked: boolean; }
 interface GearRow { id: string; product: any; purchased: boolean; }
+interface LogisticsRow {
+  id?: string;
+  best_time: any | null;
+  safety: any | null;
+  visa: any | null;
+  currency: any | null;
+  flights: any | null;
+}
 
 const TripWorkspace = () => {
   const { slug } = useParams<{ slug: string }>();
