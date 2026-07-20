@@ -25,6 +25,7 @@ import PopularSavesSection from "@/components/PopularSavesSection";
 import ToolsDirectorySection from "@/components/ToolsDirectorySection";
 import AboutPreviewSection from "@/components/AboutPreviewSection";
 import AggregateStatsSection from "@/components/AggregateStatsSection";
+import PublicTripsGrid from "@/components/trips/PublicTripsGrid";
 import { classifySearchIntent, classifyToolIntent, toolIntentToPath, toSlug } from "@/lib/searchIntent";
 
 
@@ -128,6 +129,12 @@ const Index = () => {
       <AffiliateDisclosureBanner />
       <main id="main-content">
         <HeroSection onSearch={handleHeroSearch} isSearching={isLoading} />
+        <PublicTripsGrid
+          showHeader={true}
+          showViewAll={true}
+          limit={6}
+          enableSearch={false}
+        />
         <TrustBadges />
 
         <div ref={resultsRef} className="container mx-auto px-4">
