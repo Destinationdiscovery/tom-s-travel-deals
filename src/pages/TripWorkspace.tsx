@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import {
   ArrowLeft, MapPin, Calendar, Share2, Printer, Plus, Trash2,
-  Hotel, ListChecks, Backpack, ShieldCheck, ExternalLink, Star, Loader2,
+  Hotel, ListChecks, Backpack, ShieldCheck, ExternalLink, Star, Loader2, Pencil, Check, X,
 } from "lucide-react";
 
 
