@@ -392,7 +392,7 @@ const TripWorkspace = () => {
                               href={affiliateUrl}
                               target="_blank"
                               rel="noopener noreferrer sponsored"
-                              className="flex-1 min-w-0 truncate inline-flex items-center gap-1 text-foreground hover:text-primic hover:underline"
+                              className="flex-1 min-w-0 truncate inline-flex items-center gap-1 text-foreground hover:text-primary hover:underline"
                               title={p.label}
                             >
                               <span className="truncate">{p.label}</span>
