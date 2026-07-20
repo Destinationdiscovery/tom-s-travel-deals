@@ -152,7 +152,11 @@ const ToolSaveBar = ({ toolType, label, destination, payload, onExportPdf, onCop
     return (
       <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
         <PopoverTrigger asChild>
-          <Button disabled={saving} className="w-full sm:w-auto">
+          <Button
+            disabled={saving}
+            onClick={() => setPickerOpen((o) => !o)}
+            className="w-full sm:w-auto"
+          >
             {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
             {activeTrip ? `Add to ${activeTrip.name}` : "Save to a trip"}
           </Button>
