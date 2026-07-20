@@ -1178,6 +1178,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          leg_id: string | null
           product: Json
           purchased: boolean
           trip_id: string
@@ -1185,6 +1186,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          leg_id?: string | null
           product?: Json
           purchased?: boolean
           trip_id: string
@@ -1192,11 +1194,19 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          leg_id?: string | null
           product?: Json
           purchased?: boolean
           trip_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "trip_gear_items_leg_id_fkey"
+            columns: ["leg_id"]
+            isOneToOne: false
+            referencedRelation: "trip_legs"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "trip_gear_items_trip_id_fkey"
             columns: ["trip_id"]
@@ -1212,6 +1222,7 @@ export type Database = {
           cons: string[]
           created_at: string
           id: string
+          leg_id: string | null
           location: string | null
           overall_rating: number | null
           property_name: string
@@ -1229,6 +1240,7 @@ export type Database = {
           cons?: string[]
           created_at?: string
           id?: string
+          leg_id?: string | null
           location?: string | null
           overall_rating?: number | null
           property_name: string
@@ -1246,6 +1258,7 @@ export type Database = {
           cons?: string[]
           created_at?: string
           id?: string
+          leg_id?: string | null
           location?: string | null
           overall_rating?: number | null
           property_name?: string
@@ -1259,6 +1272,13 @@ export type Database = {
           trip_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "trip_hotels_leg_id_fkey"
+            columns: ["leg_id"]
+            isOneToOne: false
+            referencedRelation: "trip_legs"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "trip_hotels_trip_id_fkey"
             columns: ["trip_id"]
@@ -1274,6 +1294,7 @@ export type Database = {
           created_at: string
           day_number: number
           id: string
+          leg_id: string | null
           trip_id: string
         }
         Insert: {
@@ -1281,6 +1302,7 @@ export type Database = {
           created_at?: string
           day_number: number
           id?: string
+          leg_id?: string | null
           trip_id: string
         }
         Update: {
@@ -1288,11 +1310,66 @@ export type Database = {
           created_at?: string
           day_number?: number
           id?: string
+          leg_id?: string | null
           trip_id?: string
         }
         Relationships: [
           {
+            foreignKeyName: "trip_itinerary_days_leg_id_fkey"
+            columns: ["leg_id"]
+            isOneToOne: false
+            referencedRelation: "trip_legs"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "trip_itinerary_days_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_legs: {
+        Row: {
+          created_at: string
+          destination: string | null
+          end_date: string | null
+          id: string
+          leg_number: number
+          name: string
+          notes: string | null
+          start_date: string | null
+          trip_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          destination?: string | null
+          end_date?: string | null
+          id?: string
+          leg_number: number
+          name: string
+          notes?: string | null
+          start_date?: string | null
+          trip_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          destination?: string | null
+          end_date?: string | null
+          id?: string
+          leg_number?: number
+          name?: string
+          notes?: string | null
+          start_date?: string | null
+          trip_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_legs_trip_id_fkey"
             columns: ["trip_id"]
             isOneToOne: false
             referencedRelation: "trips"
@@ -1307,6 +1384,7 @@ export type Database = {
           currency: Json | null
           currency_checked: boolean
           flights: Json | null
+          leg_id: string | null
           safety: Json | null
           safety_checked: boolean
           trip_id: string
@@ -1320,6 +1398,7 @@ export type Database = {
           currency?: Json | null
           currency_checked?: boolean
           flights?: Json | null
+          leg_id?: string | null
           safety?: Json | null
           safety_checked?: boolean
           trip_id: string
@@ -1333,6 +1412,7 @@ export type Database = {
           currency?: Json | null
           currency_checked?: boolean
           flights?: Json | null
+          leg_id?: string | null
           safety?: Json | null
           safety_checked?: boolean
           trip_id?: string
@@ -1341,6 +1421,13 @@ export type Database = {
           visa_checked?: boolean
         }
         Relationships: [
+          {
+            foreignKeyName: "trip_logistics_leg_id_fkey"
+            columns: ["leg_id"]
+            isOneToOne: false
+            referencedRelation: "trip_legs"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "trip_logistics_trip_id_fkey"
             columns: ["trip_id"]
@@ -1356,6 +1443,7 @@ export type Database = {
           created_at: string
           id: string
           label: string
+          leg_id: string | null
           sort_order: number
           trip_id: string
         }
@@ -1364,6 +1452,7 @@ export type Database = {
           created_at?: string
           id?: string
           label: string
+          leg_id?: string | null
           sort_order?: number
           trip_id: string
         }
@@ -1372,12 +1461,84 @@ export type Database = {
           created_at?: string
           id?: string
           label?: string
+          leg_id?: string | null
           sort_order?: number
           trip_id?: string
         }
         Relationships: [
           {
+            foreignKeyName: "trip_packing_items_leg_id_fkey"
+            columns: ["leg_id"]
+            isOneToOne: false
+            referencedRelation: "trip_legs"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "trip_packing_items_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_transit: {
+        Row: {
+          distance_meters: number | null
+          duration_seconds: number | null
+          from_address: string | null
+          from_leg_id: string
+          id: string
+          mode: string
+          options: Json | null
+          to_address: string | null
+          to_leg_id: string
+          trip_id: string
+          updated_at: string
+        }
+        Insert: {
+          distance_meters?: number | null
+          duration_seconds?: number | null
+          from_address?: string | null
+          from_leg_id: string
+          id?: string
+          mode?: string
+          options?: Json | null
+          to_address?: string | null
+          to_leg_id: string
+          trip_id: string
+          updated_at?: string
+        }
+        Update: {
+          distance_meters?: number | null
+          duration_seconds?: number | null
+          from_address?: string | null
+          from_leg_id?: string
+          id?: string
+          mode?: string
+          options?: Json | null
+          to_address?: string | null
+          to_leg_id?: string
+          trip_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_transit_from_leg_id_fkey"
+            columns: ["from_leg_id"]
+            isOneToOne: false
+            referencedRelation: "trip_legs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_transit_to_leg_id_fkey"
+            columns: ["to_leg_id"]
+            isOneToOne: false
+            referencedRelation: "trip_legs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_transit_trip_id_fkey"
             columns: ["trip_id"]
             isOneToOne: false
             referencedRelation: "trips"
@@ -1391,6 +1552,7 @@ export type Database = {
           destination: string | null
           end_date: string | null
           id: string
+          is_multi_destination: boolean
           notes: string | null
           share_token: string
           slug: string
@@ -1406,6 +1568,7 @@ export type Database = {
           destination?: string | null
           end_date?: string | null
           id?: string
+          is_multi_destination?: boolean
           notes?: string | null
           share_token?: string
           slug: string
@@ -1421,6 +1584,7 @@ export type Database = {
           destination?: string | null
           end_date?: string | null
           id?: string
+          is_multi_destination?: boolean
           notes?: string | null
           share_token?: string
           slug?: string
