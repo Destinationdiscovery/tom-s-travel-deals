@@ -1549,6 +1549,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_latest_sent_compass_edition: {
+        Args: never
+        Returns: {
+          destination: string
+          edition_number: number
+          full_html: string
+          id: string
+          issue_date: string
+          subject_line: string
+        }[]
+      }
       get_quote_by_share_token: {
         Args: { _token: string }
         Returns: {

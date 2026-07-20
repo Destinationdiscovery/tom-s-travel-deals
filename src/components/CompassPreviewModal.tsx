@@ -29,17 +29,14 @@ const CompassPreviewModal = ({ triggerVariant = "ghost", triggerLabel = "Preview
     if (!open || loaded) return;
     setLoading(true);
     (supabase as any)
-      .from("compass_editions")
-      .select("id, edition_number, subject_line, destination, issue_date, full_html")
-      .eq("status", "sent")
-      .order("issue_date", { ascending: false })
-      .limit(1)
-      .maybeSingle()
+      .rpc("get_latest_sent_compass_edition")
       .then(({ data }: any) => {
-        if (data) setEdition(data);
+        const row = Array.isArray(data) ? data[0] : data;
+        if (row) setEdition(row);
         setLoading(false);
         setLoaded(true);
       });
+
   }, [open, loaded]);
 
   return (
