@@ -15,6 +15,8 @@ import {
   Hotel, ListChecks, Backpack, ShoppingBag, ShieldCheck, ExternalLink, Star,
 } from "lucide-react";
 
+import TripLegsSection, { type Leg } from "@/components/trips/TripLegsSection";
+
 interface Trip {
   id: string;
   user_id: string;
@@ -27,22 +29,30 @@ interface Trip {
   trip_type: string | null;
   notes: string | null;
   share_token: string;
+  is_multi_destination: boolean;
 }
 
 interface HotelRow {
   id: string; slug: string | null; property_name: string;
-  location: string | null; overall_rating: number | null; top_pick: boolean;
+  location: string | null; overall_rating: number | null; top_pick: boolean; leg_id: string | null;
 }
 interface DayRow { id: string; day_number: number; content: any; }
 interface PackingRow { id: string; label: string; checked: boolean; }
 interface GearRow { id: string; product: any; purchased: boolean; }
 interface LogisticsRow {
-  id?: string;
+  id: string;
+  leg_id: string | null;
+  trip_id: string;
   best_time: any | null;
   safety: any | null;
   visa: any | null;
   currency: any | null;
   flights: any | null;
+}
+interface TransitRow {
+  id: string; from_leg_id: string; to_leg_id: string;
+  distance_meters: number | null; duration_seconds: number | null; mode: string;
+  from_address: string | null; to_address: string | null;
 }
 
 const TripWorkspace = () => {
