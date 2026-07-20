@@ -12,12 +12,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import {
   ArrowLeft, MapPin, Calendar, Share2, Printer, Plus, Trash2,
-  Hotel, ListChecks, Backpack, ShieldCheck, ExternalLink, Star, Loader2, Pencil, Check, X,
+  Hotel, ListChecks, Backpack, ShieldCheck, ExternalLink, Star, Loader2, Pencil, Check, X, MessageSquarePlus,
 } from "lucide-react";
 
 
 import TripLegsSection, { type Leg } from "@/components/trips/TripLegsSection";
 import TripPackingGenerator from "@/components/trips/TripPackingGenerator";
+import PublishTripPanel from "@/components/trips/PublishTripPanel";
+import HotelReviewForm from "@/components/trips/HotelReviewForm";
 
 interface Trip {
   id: string;
@@ -32,6 +34,11 @@ interface Trip {
   notes: string | null;
   share_token: string;
   is_multi_destination: boolean;
+  is_published?: boolean;
+  public_slug?: string | null;
+  list_in_gallery?: boolean;
+  author_display_name?: string | null;
+  cover_image_url?: string | null;
 }
 
 interface HotelRow {
@@ -78,6 +85,8 @@ const TripWorkspace = () => {
   const [packingExpanded, setPackingExpanded] = useState(false);
   const [editingPackingId, setEditingPackingId] = useState<string | null>(null);
   const [editingPackingLabel, setEditingPackingLabel] = useState("");
+  const [reviewingHotelId, setReviewingHotelId] = useState<string | null>(null);
+  const [reviewedHotelIds, setReviewedHotelIds] = useState<Set<string>>(new Set());
 
 
   const logistics = logisticsAll.find((l) => l.leg_id === null) ?? null;
