@@ -149,20 +149,12 @@ const ToolSaveBar = ({ toolType, label, destination, payload, onExportPdf, onCop
         </Button>
       );
     }
-    if (activeTrip) {
-      return (
-        <Button onClick={handleSaveToActive} disabled={saving} className="w-full sm:w-auto">
-          {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
-          Add to {activeTrip.name}
-        </Button>
-      );
-    }
     return (
       <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
         <PopoverTrigger asChild>
           <Button disabled={saving} className="w-full sm:w-auto">
             {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
-            Save to a trip
+            {activeTrip ? `Add to ${activeTrip.name}` : "Save to a trip"}
           </Button>
         </PopoverTrigger>
         <PopoverContent side="top" align="center" className="w-80">
@@ -171,8 +163,8 @@ const ToolSaveBar = ({ toolType, label, destination, payload, onExportPdf, onCop
               <p className="text-sm text-muted-foreground">Loading...</p>
             ) : trips.length > 0 ? (
               <div>
-                <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Your trips</p>
-                <div className="space-y-1 max-h-48 overflow-y-auto">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Choose a trip</p>
+                <div className="space-y-1 max-h-56 overflow-y-auto">
                   {trips.map((t) => (
                     <button
                       key={t.id}
