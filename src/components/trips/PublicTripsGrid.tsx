@@ -142,10 +142,13 @@ const PublicTripsGrid = ({
                     <span className="flex items-center gap-1">
                       <Eye className="h-3 w-3" /> {t.view_count}
                     </span>
+                    <span className="flex items-center gap-1">
+                      <Share2 className="h-3 w-3" /> {t.share_count ?? 0}
+                    </span>
                   </div>
                   {t.author_display_name && (
                     <p className="text-xs text-muted-foreground mt-2">
-                      by {t.author_display_name}
+                      by <span className="font-medium text-foreground">@{t.author_display_name}</span>
                     </p>
                   )}
                 </div>
