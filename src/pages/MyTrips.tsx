@@ -45,6 +45,7 @@ const MyTrips = () => {
   const [newOpen, setNewOpen] = useState(false);
   const [newName, setNewName] = useState("");
   const [newDest, setNewDest] = useState("");
+  const [newMulti, setNewMulti] = useState(false);
   const [renameTrip, setRenameTrip] = useState<TripRow | null>(null);
   const [renameTo, setRenameTo] = useState("");
 
@@ -129,16 +130,32 @@ const MyTrips = () => {
     const slug = slugify(name) + "-" + Math.random().toString(36).slice(2, 6);
     const { data, error } = await (supabase as any)
       .from("trips")
-      .insert({ user_id: user.id, trip_name: name, slug, destination: newDest.trim() || null })
-      .select("slug")
+      .insert({
+        user_id: user.id,
+        trip_name: name,
+        slug,
+        destination: newDest.trim() || null,
+        is_multi_destination: newMulti,
+      })
+      .select("id, slug")
       .single();
     if (error) {
       toast({ title: "Could not create trip", description: error.message, variant: "destructive" });
       return;
     }
+    // For multi-destination trips, seed a first leg using the destination (if given)
+    if (newMulti && data?.id) {
+      await (supabase as any).from("trip_legs").insert({
+        trip_id: data.id,
+        leg_number: 1,
+        name: newDest.trim() || "Stop 1",
+        destination: newDest.trim() || null,
+      });
+    }
     setNewOpen(false);
     setNewName("");
     setNewDest("");
+    setNewMulti(false);
     toast({ title: `Trip "${name}" created` });
     navigate(`/my-trips/${data.slug}`);
   };
@@ -285,8 +302,19 @@ const MyTrips = () => {
               <DialogTitle className="font-display">Create a Trip</DialogTitle>
             </DialogHeader>
             <form onSubmit={(e) => { e.preventDefault(); void handleCreate(); }} className="flex flex-col gap-3 pt-2">
-              <Input placeholder="Trip name (e.g. Mexico 2026)" value={newName} onChange={(e) => setNewName(e.target.value)} maxLength={60} autoFocus />
-              <Input placeholder="Destination (optional)" value={newDest} onChange={(e) => setNewDest(e.target.value)} maxLength={80} />
+              <Input placeholder="Trip name (e.g. Italy 2026)" value={newName} onChange={(e) => setNewName(e.target.value)} maxLength={60} autoFocus />
+              <Input placeholder={newMulti ? "First stop (optional)" : "Destination (optional)"} value={newDest} onChange={(e) => setNewDest(e.target.value)} maxLength={80} />
+              <div className="rounded-lg border p-3 space-y-2">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Trip type</p>
+                <label className="flex items-start gap-2 text-sm cursor-pointer">
+                  <input type="radio" checked={!newMulti} onChange={() => setNewMulti(false)} className="mt-0.5" />
+                  <span><b>Single destination</b> — one place (e.g. an all-inclusive, city break).</span>
+                </label>
+                <label className="flex items-start gap-2 text-sm cursor-pointer">
+                  <input type="radio" checked={newMulti} onChange={() => setNewMulti(true)} className="mt-0.5" />
+                  <span><b>Multiple destinations</b> — add stops with dates, hotels, and transit between them.</span>
+                </label>
+              </div>
               <Button type="submit" disabled={!newName.trim()}>Create Trip</Button>
             </form>
           </DialogContent>

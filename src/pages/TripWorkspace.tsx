@@ -15,6 +15,8 @@ import {
   Hotel, ListChecks, Backpack, ShoppingBag, ShieldCheck, ExternalLink, Star,
 } from "lucide-react";
 
+import TripLegsSection, { type Leg } from "@/components/trips/TripLegsSection";
+
 interface Trip {
   id: string;
   user_id: string;
@@ -27,22 +29,30 @@ interface Trip {
   trip_type: string | null;
   notes: string | null;
   share_token: string;
+  is_multi_destination: boolean;
 }
 
 interface HotelRow {
   id: string; slug: string | null; property_name: string;
-  location: string | null; overall_rating: number | null; top_pick: boolean;
+  location: string | null; overall_rating: number | null; top_pick: boolean; leg_id: string | null;
 }
 interface DayRow { id: string; day_number: number; content: any; }
 interface PackingRow { id: string; label: string; checked: boolean; }
 interface GearRow { id: string; product: any; purchased: boolean; }
 interface LogisticsRow {
-  id?: string;
+  id: string;
+  leg_id: string | null;
+  trip_id: string;
   best_time: any | null;
   safety: any | null;
   visa: any | null;
   currency: any | null;
   flights: any | null;
+}
+interface TransitRow {
+  id: string; from_leg_id: string; to_leg_id: string;
+  distance_meters: number | null; duration_seconds: number | null; mode: string;
+  from_address: string | null; to_address: string | null;
 }
 
 const TripWorkspace = () => {
@@ -57,9 +67,13 @@ const TripWorkspace = () => {
   const [days, setDays] = useState<DayRow[]>([]);
   const [packing, setPacking] = useState<PackingRow[]>([]);
   const [gear, setGear] = useState<GearRow[]>([]);
-  const [logistics, setLogistics] = useState<LogisticsRow | null>(null);
+  const [logisticsAll, setLogisticsAll] = useState<LogisticsRow[]>([]);
+  const [legs, setLegs] = useState<Leg[]>([]);
+  const [transit, setTransit] = useState<TransitRow[]>([]);
   const [newPacking, setNewPacking] = useState("");
   const [newDayTitle, setNewDayTitle] = useState("");
+
+  const logistics = logisticsAll.find((l) => l.leg_id === null) ?? null;
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/");
@@ -72,18 +86,22 @@ const TripWorkspace = () => {
       .from("trips").select("*").eq("user_id", user.id).eq("slug", slug).maybeSingle();
     if (!t) { setLoading(false); return; }
     setTrip(t as Trip);
-    const [h, d, p, g, l] = await Promise.all([
+    const [h, d, p, g, l, lg, tr] = await Promise.all([
       (supabase as any).from("trip_hotels").select("*").eq("trip_id", t.id).order("sort_order"),
       (supabase as any).from("trip_itinerary_days").select("*").eq("trip_id", t.id).order("day_number"),
       (supabase as any).from("trip_packing_items").select("*").eq("trip_id", t.id).order("sort_order"),
       (supabase as any).from("trip_gear_items").select("*").eq("trip_id", t.id).order("created_at"),
-      (supabase as any).from("trip_logistics").select("*").eq("trip_id", t.id).maybeSingle(),
+      (supabase as any).from("trip_logistics").select("*").eq("trip_id", t.id),
+      (supabase as any).from("trip_legs").select("*").eq("trip_id", t.id).order("leg_number"),
+      (supabase as any).from("trip_transit").select("*").eq("trip_id", t.id),
     ]);
     setHotels((h.data ?? []) as HotelRow[]);
     setDays((d.data ?? []) as DayRow[]);
     setPacking((p.data ?? []) as PackingRow[]);
     setGear((g.data ?? []) as GearRow[]);
-    setLogistics((l.data ?? null) as LogisticsRow | null);
+    setLogisticsAll((l.data ?? []) as LogisticsRow[]);
+    setLegs((lg.data ?? []) as Leg[]);
+    setTransit((tr.data ?? []) as TransitRow[]);
     setLoading(false);
   };
 
@@ -324,8 +342,21 @@ const TripWorkspace = () => {
           )}
         </Section>
 
-        {/* Logistics */}
-        <Section title="Logistics" icon={ShieldCheck}>
+        {/* Multi-destination legs */}
+        {trip.is_multi_destination && (
+          <TripLegsSection
+            tripId={trip.id}
+            legs={legs}
+            setLegs={setLegs}
+            hotels={hotels}
+            logistics={logisticsAll}
+            transit={transit}
+            onChanged={() => void load()}
+          />
+        )}
+
+        {/* Logistics (trip-wide) */}
+        <Section title={trip.is_multi_destination ? "Trip-wide logistics" : "Logistics"} icon={ShieldCheck}>
           {logistics && (logistics.best_time || logistics.safety || logistics.visa || logistics.currency || logistics.flights) ? (
             <div className="grid gap-3 md:grid-cols-2 mb-4">
               {logistics.best_time && (
@@ -335,8 +366,8 @@ const TripWorkspace = () => {
                   detail={Array.isArray(logistics.best_time.bestMonths) ? `Ideal: ${logistics.best_time.bestMonths.join(", ")}` : undefined}
                   href="/best-time"
                   onClear={async () => {
-                    await (supabase as any).from("trip_logistics").update({ best_time: null, best_time_confirmed: false }).eq("trip_id", trip.id);
-                    setLogistics({ ...logistics, best_time: null });
+                    await (supabase as any).from("trip_logistics").update({ best_time: null, best_time_confirmed: false }).eq("id", logistics.id);
+                    setLogisticsAll(logisticsAll.map((r) => r.id === logistics.id ? { ...r, best_time: null } : r));
                   }}
                 />
               )}
@@ -347,8 +378,8 @@ const TripWorkspace = () => {
                   detail={logistics.safety.overallScore ? `Overall score: ${logistics.safety.overallScore}/5` : undefined}
                   href="/safety"
                   onClear={async () => {
-                    await (supabase as any).from("trip_logistics").update({ safety: null, safety_checked: false }).eq("trip_id", trip.id);
-                    setLogistics({ ...logistics, safety: null });
+                    await (supabase as any).from("trip_logistics").update({ safety: null, safety_checked: false }).eq("id", logistics.id);
+                    setLogisticsAll(logisticsAll.map((r) => r.id === logistics.id ? { ...r, safety: null } : r));
                   }}
                 />
               )}
@@ -358,8 +389,8 @@ const TripWorkspace = () => {
                   summary={logistics.visa.verdict || logistics.visa.visa || logistics.visa.destination}
                   href="/travel-intel"
                   onClear={async () => {
-                    await (supabase as any).from("trip_logistics").update({ visa: null, visa_checked: false }).eq("trip_id", trip.id);
-                    setLogistics({ ...logistics, visa: null });
+                    await (supabase as any).from("trip_logistics").update({ visa: null, visa_checked: false }).eq("id", logistics.id);
+                    setLogisticsAll(logisticsAll.map((r) => r.id === logistics.id ? { ...r, visa: null } : r));
                   }}
                 />
               )}
@@ -370,8 +401,8 @@ const TripWorkspace = () => {
                   detail={logistics.currency.rate ? `Rate: ${logistics.currency.rate}` : undefined}
                   href="/currency"
                   onClear={async () => {
-                    await (supabase as any).from("trip_logistics").update({ currency: null, currency_checked: false }).eq("trip_id", trip.id);
-                    setLogistics({ ...logistics, currency: null });
+                    await (supabase as any).from("trip_logistics").update({ currency: null, currency_checked: false }).eq("id", logistics.id);
+                    setLogisticsAll(logisticsAll.map((r) => r.id === logistics.id ? { ...r, currency: null } : r));
                   }}
                 />
               )}
@@ -381,15 +412,17 @@ const TripWorkspace = () => {
                   summary={logistics.flights.verdict || logistics.flights.route || "Flight notes saved"}
                   href="/flights"
                   onClear={async () => {
-                    await (supabase as any).from("trip_logistics").update({ flights: null }).eq("trip_id", trip.id);
-                    setLogistics({ ...logistics, flights: null });
+                    await (supabase as any).from("trip_logistics").update({ flights: null }).eq("id", logistics.id);
+                    setLogisticsAll(logisticsAll.map((r) => r.id === logistics.id ? { ...r, flights: null } : r));
                   }}
                 />
               )}
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Check visa requirements, currency, best time to visit, and safety from the tools menu and save outputs to this trip.
+              {trip.is_multi_destination
+                ? "Save travel intel for the whole trip here, or per-stop from the tools using the stop picker."
+                : "Check visa requirements, currency, best time to visit, and safety from the tools menu and save outputs to this trip."}
             </p>
           )}
           <div className="flex flex-wrap gap-2 mt-3">

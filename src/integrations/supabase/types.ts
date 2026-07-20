@@ -1384,6 +1384,7 @@ export type Database = {
           currency: Json | null
           currency_checked: boolean
           flights: Json | null
+          id: string
           leg_id: string | null
           safety: Json | null
           safety_checked: boolean
@@ -1398,6 +1399,7 @@ export type Database = {
           currency?: Json | null
           currency_checked?: boolean
           flights?: Json | null
+          id?: string
           leg_id?: string | null
           safety?: Json | null
           safety_checked?: boolean
@@ -1412,6 +1414,7 @@ export type Database = {
           currency?: Json | null
           currency_checked?: boolean
           flights?: Json | null
+          id?: string
           leg_id?: string | null
           safety?: Json | null
           safety_checked?: boolean
@@ -1431,7 +1434,7 @@ export type Database = {
           {
             foreignKeyName: "trip_logistics_trip_id_fkey"
             columns: ["trip_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "trips"
             referencedColumns: ["id"]
           },
