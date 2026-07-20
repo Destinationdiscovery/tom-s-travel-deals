@@ -16,6 +16,7 @@ import {
 
 const navLinks = [
   { to: "/", label: "Home" },
+  { to: "/trips", label: "Explore Trips" },
   { to: "/compass", label: "Blog" },
 ];
 
