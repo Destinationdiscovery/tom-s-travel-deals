@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import {
-  MapPin, Calendar, Plus, Trash2, Hotel, Route, Loader2, ArrowDown, Clock, Star, ExternalLink,
+  MapPin, Calendar, Plus, Trash2, Hotel, Route, Loader2, ArrowDown, Clock, Star, ExternalLink, MessageSquarePlus,
 } from "lucide-react";
+
 
 export interface Leg {
   id: string;
