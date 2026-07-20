@@ -154,7 +154,7 @@ const ToolSaveBar = ({ toolType, label, destination, payload, onExportPdf, onCop
         <PopoverTrigger asChild>
           <Button
             disabled={saving}
-            onClick={() => setPickerOpen((o) => !o)}
+            onClick={() => { console.log("[SaveBar] toggle picker", !pickerOpen); setPickerOpen((o) => !o); }}
             className="w-full sm:w-auto"
           >
             {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
