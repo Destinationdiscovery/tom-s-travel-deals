@@ -200,32 +200,49 @@ const TripLegsSection = ({ tripId, legs, setLegs, hotels, logistics, transit, on
                     {lh.length === 0 ? (
                       <p className="text-xs text-muted-foreground italic">None yet. Use "Find hotel" above, then choose "Add to Trip" on a review and pick this stop.</p>
                     ) : (
-                      <ul className="space-y-1">
-                        {lh.map((h) => (
-                          <li key={h.id} className="text-sm flex items-center justify-between gap-2 group">
-                            {h.slug ? (
-                              <Link to={`/review/${h.slug}`} className="truncate hover:text-primary">{h.property_name}</Link>
-                            ) : (
-                              <span className="truncate">{h.property_name}</span>
-                            )}
-                            <div className="flex items-center gap-2 shrink-0">
-                              {h.overall_rating && (
-                                <span className="text-xs">{h.overall_rating}<Star className="h-3 w-3 inline ml-0.5 text-accent fill-accent" /></span>
+                      <ul className="space-y-2">
+                        {lh.map((h) => {
+                          const reviewed = reviewedHotelIds?.has(h.id);
+                          return (
+                            <li key={h.id} className="text-sm bg-background/60 border rounded-lg px-2.5 py-2">
+                              <div className="flex items-center justify-between gap-2">
+                                {h.slug ? (
+                                  <Link to={`/review/${h.slug}`} className="truncate hover:text-primary">{h.property_name}</Link>
+                                ) : (
+                                  <span className="truncate">{h.property_name}</span>
+                                )}
+                                <div className="flex items-center gap-2 shrink-0">
+                                  {h.overall_rating && (
+                                    <span className="text-xs">{h.overall_rating}<Star className="h-3 w-3 inline ml-0.5 text-accent fill-accent" /></span>
+                                  )}
+                                  <button
+                                    onClick={async () => {
+                                      await (supabase as any).from("trip_hotels").delete().eq("id", h.id);
+                                      onChanged();
+                                    }}
+                                    className="text-muted-foreground hover:text-destructive"
+                                    aria-label="Remove hotel"
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </button>
+                                </div>
+                              </div>
+                              {onReviewHotel && (
+                                <Button
+                                  size="sm"
+                                  variant={reviewed ? "outline" : "secondary"}
+                                  className="mt-2 gap-1.5 h-7 text-xs"
+                                  onClick={() => onReviewHotel(h.id)}
+                                >
+                                  <MessageSquarePlus className="h-3.5 w-3.5" />
+                                  {reviewed ? "Edit your stay review" : "Rate your stay"}
+                                </Button>
                               )}
-                              <button
-                                onClick={async () => {
-                                  await (supabase as any).from("trip_hotels").delete().eq("id", h.id);
-                                  onChanged();
-                                }}
-                                className="text-muted-foreground hover:text-destructive"
-                                aria-label="Remove hotel"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </button>
-                            </div>
-                          </li>
-                        ))}
+                            </li>
+                          );
+                        })}
                       </ul>
+
                     )}
                   </div>
 
