@@ -130,16 +130,32 @@ const MyTrips = () => {
     const slug = slugify(name) + "-" + Math.random().toString(36).slice(2, 6);
     const { data, error } = await (supabase as any)
       .from("trips")
-      .insert({ user_id: user.id, trip_name: name, slug, destination: newDest.trim() || null })
-      .select("slug")
+      .insert({
+        user_id: user.id,
+        trip_name: name,
+        slug,
+        destination: newDest.trim() || null,
+        is_multi_destination: newMulti,
+      })
+      .select("id, slug")
       .single();
     if (error) {
       toast({ title: "Could not create trip", description: error.message, variant: "destructive" });
       return;
     }
+    // For multi-destination trips, seed a first leg using the destination (if given)
+    if (newMulti && data?.id) {
+      await (supabase as any).from("trip_legs").insert({
+        trip_id: data.id,
+        leg_number: 1,
+        name: newDest.trim() || "Stop 1",
+        destination: newDest.trim() || null,
+      });
+    }
     setNewOpen(false);
     setNewName("");
     setNewDest("");
+    setNewMulti(false);
     toast({ title: `Trip "${name}" created` });
     navigate(`/my-trips/${data.slug}`);
   };
