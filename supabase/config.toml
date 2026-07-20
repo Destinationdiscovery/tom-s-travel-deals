@@ -81,3 +81,7 @@ verify_jwt = false
 [functions.articles-feed]
 verify_jwt = false
 
+[functions.amazon-affiliate-link]
+verify_jwt = false
+
+
