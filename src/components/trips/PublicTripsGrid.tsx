@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MapPin, Hotel, Calendar, Eye, ArrowRight } from "lucide-react";
+import { MapPin, Hotel, Calendar, Eye, ArrowRight, Share2 } from "lucide-react";
 
 interface TripCard {
   id: string;
@@ -17,6 +17,7 @@ interface TripCard {
   author_display_name: string | null;
   published_at: string | null;
   view_count: number;
+  share_count: number;
   hotel_count: number;
 }
 
@@ -141,10 +142,13 @@ const PublicTripsGrid = ({
                     <span className="flex items-center gap-1">
                       <Eye className="h-3 w-3" /> {t.view_count}
                     </span>
+                    <span className="flex items-center gap-1">
+                      <Share2 className="h-3 w-3" /> {t.share_count ?? 0}
+                    </span>
                   </div>
                   {t.author_display_name && (
                     <p className="text-xs text-muted-foreground mt-2">
-                      by {t.author_display_name}
+                      by <span className="font-medium text-foreground">@{t.author_display_name}</span>
                     </p>
                   )}
                 </div>

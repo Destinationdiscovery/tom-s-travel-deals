@@ -7,7 +7,8 @@ import SEOHead from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import HotelReviewCard from "@/components/trips/HotelReviewCard";
-import { MapPin, Calendar, Hotel, ListChecks, Backpack, Star, Eye, Route, ExternalLink } from "lucide-react";
+import { MapPin, Calendar, Hotel, ListChecks, Backpack, Star, Eye, Route, ExternalLink, Share2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface PublicData {
   trip: any;
@@ -25,6 +26,25 @@ const PublicTrip = () => {
   const [data, setData] = useState<PublicData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  const handleShare = async () => {
+    if (!slug) return;
+    const url = `${window.location.origin}/trips/${slug}`;
+    const title = data?.trip?.trip_name ?? "Trip plan";
+    try {
+      if (navigator.share) {
+        await navigator.share({ title, url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast({ title: "Link copied", description: "Share it with friends." });
+      }
+      await (supabase as any).rpc("increment_trip_share", { _slug: slug });
+      setData((d) => d ? { ...d, trip: { ...d.trip, share_count: (d.trip.share_count ?? 0) + 1 } } : d);
+    } catch {
+      // user dismissed share sheet
+    }
+  };
 
   useEffect(() => {
     (async () => {
@@ -92,17 +112,24 @@ const PublicTrip = () => {
 
       <main className="container mx-auto px-4 max-w-4xl pb-16 -mt-8">
         <div className="bg-card rounded-2xl p-6 md:p-8 shadow-soft">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase tracking-wide mb-2">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase tracking-wide mb-2 flex-wrap">
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary">Shared trip</span>
             <span className="flex items-center gap-1"><Eye className="h-3 w-3" /> {trip.view_count ?? 0} views</span>
+            <span className="flex items-center gap-1"><Share2 className="h-3 w-3" /> {trip.share_count ?? 0} shares</span>
           </div>
-          <h1 className="font-display text-3xl md:text-4xl font-bold">{trip.trip_name}</h1>
+          <div className="flex items-start justify-between gap-3 flex-wrap">
+            <h1 className="font-display text-3xl md:text-4xl font-bold">{trip.trip_name}</h1>
+            <Button size="sm" variant="outline" onClick={handleShare} className="gap-1.5">
+              <Share2 className="h-4 w-4" /> Share
+            </Button>
+          </div>
           <div className="flex flex-wrap gap-4 mt-2 text-sm text-muted-foreground">
             {trip.destination && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {trip.destination}</span>}
             {dateStr && <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" /> {dateStr}</span>}
-            {trip.author_display_name && <span>by {trip.author_display_name}</span>}
+            {trip.author_display_name && <span>by <span className="font-medium text-foreground">@{trip.author_display_name}</span></span>}
           </div>
         </div>
+
 
         {/* Global hotels (single-destination trips) */}
         {globalHotels.length > 0 && (
