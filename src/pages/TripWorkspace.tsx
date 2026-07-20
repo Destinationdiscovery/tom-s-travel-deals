@@ -102,7 +102,7 @@ const TripWorkspace = () => {
       .from("trips").select("*").eq("user_id", user.id).eq("slug", slug).maybeSingle();
     if (!t) { setLoading(false); return; }
     setTrip(t as Trip);
-    const [h, d, p, g, l, lg, tr] = await Promise.all([
+    const [h, d, p, g, l, lg, tr, rev] = await Promise.all([
       (supabase as any).from("trip_hotels").select("*").eq("trip_id", t.id).order("sort_order"),
       (supabase as any).from("trip_itinerary_days").select("*").eq("trip_id", t.id).order("day_number"),
       (supabase as any).from("trip_packing_items").select("*").eq("trip_id", t.id).order("sort_order"),
@@ -110,6 +110,7 @@ const TripWorkspace = () => {
       (supabase as any).from("trip_logistics").select("*").eq("trip_id", t.id),
       (supabase as any).from("trip_legs").select("*").eq("trip_id", t.id).order("leg_number"),
       (supabase as any).from("trip_transit").select("*").eq("trip_id", t.id),
+      (supabase as any).from("trip_hotel_reviews").select("trip_hotel_id").eq("user_id", user.id),
     ]);
     setHotels((h.data ?? []) as HotelRow[]);
     setDays((d.data ?? []) as DayRow[]);
@@ -118,6 +119,7 @@ const TripWorkspace = () => {
     setLogisticsAll((l.data ?? []) as LogisticsRow[]);
     setLegs((lg.data ?? []) as Leg[]);
     setTransit((tr.data ?? []) as TransitRow[]);
+    setReviewedHotelIds(new Set(((rev.data ?? []) as any[]).map((r) => r.trip_hotel_id)));
     setLoading(false);
   };
 
