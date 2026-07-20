@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 
 import TripLegsSection, { type Leg } from "@/components/trips/TripLegsSection";
+import TripPackingGenerator from "@/components/trips/TripPackingGenerator";
 
 interface Trip {
   id: string;
