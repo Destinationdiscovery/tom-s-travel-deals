@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import {
   ArrowLeft, MapPin, Calendar, Share2, Printer, Plus, Trash2,
-  Hotel, ListChecks, Backpack, ShoppingBag, ShieldCheck, ExternalLink, Star,
+  Hotel, ListChecks, Backpack, ShoppingBag, ShieldCheck, ExternalLink, Star, StickyNote,
 } from "lucide-react";
 
 import TripLegsSection, { type Leg } from "@/components/trips/TripLegsSection";
@@ -38,8 +38,8 @@ interface HotelRow {
   location: string | null; overall_rating: number | null; top_pick: boolean; leg_id: string | null;
 }
 interface DayRow { id: string; day_number: number; content: any; }
-interface PackingRow { id: string; label: string; checked: boolean; }
-interface GearRow { id: string; product: any; purchased: boolean; }
+interface PackingRow { id: string; label: string; checked: boolean; notes?: string | null; }
+interface GearRow { id: string; product: any; purchased: boolean; notes?: string | null; }
 interface LogisticsRow {
   id: string;
   leg_id: string | null;
@@ -75,6 +75,9 @@ const TripWorkspace = () => {
   const [newDayTitle, setNewDayTitle] = useState("");
   const [packingExpanded, setPackingExpanded] = useState(false);
   const [gearExpanded, setGearExpanded] = useState(false);
+  const [newGearTitle, setNewGearTitle] = useState("");
+  const [newGearUrl, setNewGearUrl] = useState("");
+  const [openNotes, setOpenNotes] = useState<Record<string, boolean>>({});
 
   const logistics = logisticsAll.find((l) => l.leg_id === null) ?? null;
 
@@ -139,6 +142,38 @@ const TripWorkspace = () => {
     await (supabase as any).from("trip_packing_items").delete().eq("id", id);
     setPacking(packing.filter((p) => p.id !== id));
   };
+  const updatePackingNotes = async (id: string, notes: string) => {
+    setPacking(packing.map((p) => p.id === id ? { ...p, notes } : p));
+    await (supabase as any).from("trip_packing_items").update({ notes }).eq("id", id);
+  };
+
+  const toggleGear = async (item: GearRow) => {
+    const next = !item.purchased;
+    setGear(gear.map((g) => g.id === item.id ? { ...g, purchased: next } : g));
+    await (supabase as any).from("trip_gear_items").update({ purchased: next }).eq("id", item.id);
+  };
+  const addGear = async () => {
+    if (!trip || !newGearTitle.trim()) return;
+    const product: any = { title: newGearTitle.trim() };
+    if (newGearUrl.trim()) product.affiliate_url = newGearUrl.trim();
+    const { data } = await (supabase as any)
+      .from("trip_gear_items")
+      .insert({ trip_id: trip.id, product })
+      .select("*").single();
+    if (data) setGear([...gear, data as GearRow]);
+    setNewGearTitle("");
+    setNewGearUrl("");
+  };
+  const removeGear = async (id: string) => {
+    await (supabase as any).from("trip_gear_items").delete().eq("id", id);
+    setGear(gear.filter((g) => g.id !== id));
+  };
+  const updateGearNotes = async (id: string, notes: string) => {
+    setGear(gear.map((g) => g.id === id ? { ...g, notes } : g));
+    await (supabase as any).from("trip_gear_items").update({ notes }).eq("id", id);
+  };
+
+
 
   const addDay = async () => {
     if (!trip) return;
@@ -327,38 +362,52 @@ const TripWorkspace = () => {
                   {visible.map((p) => {
                     const product = gearByLabel.get(p.label.toLowerCase());
                     const affiliateUrl = product?.affiliate_url;
+                    const notesKey = `p-${p.id}`;
+                    const notesOpen = !!openNotes[notesKey] || !!(p.notes && p.notes.trim());
                     return (
-                      <li key={p.id} className="flex items-center gap-2 bg-background border rounded-lg px-3 py-2">
-                        <input type="checkbox" checked={p.checked} onChange={() => togglePacking(p)} className="h-4 w-4" />
-                        {affiliateUrl ? (
-                          <a
-                            href={affiliateUrl}
-                            target="_blank"
-                            rel="noopener noreferrer sponsored"
-                            className={`flex-1 min-w-0 truncate inline-flex items-center gap-1 hover:text-primary hover:underline ${p.checked ? "line-through text-muted-foreground" : "text-foreground"}`}
-                            title={p.label}
+                      <li key={p.id} className="bg-background border rounded-lg px-3 py-2">
+                        <div className="flex items-center gap-2">
+                          <input type="checkbox" checked={p.checked} onChange={() => togglePacking(p)} className="h-4 w-4" />
+                          {affiliateUrl ? (
+                            <a
+                              href={affiliateUrl}
+                              target="_blank"
+                              rel="noopener noreferrer sponsored"
+                              className={`flex-1 min-w-0 truncate inline-flex items-center gap-1 hover:text-primary hover:underline ${p.checked ? "line-through text-muted-foreground" : "text-foreground"}`}
+                              title={p.label}
+                            >
+                              <span className="truncate">{p.label}</span>
+                              <ExternalLink className="h-3 w-3 shrink-0 opacity-60" />
+                            </a>
+                          ) : (
+                            <span className={`flex-1 ${p.checked ? "line-through text-muted-foreground" : ""}`}>{p.label}</span>
+                          )}
+                          <button
+                            onClick={() => setOpenNotes((s) => ({ ...s, [notesKey]: !s[notesKey] }))}
+                            className={`shrink-0 ${notesOpen ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                            title="Add notes"
                           >
-                            <span className="truncate">{p.label}</span>
-                            <ExternalLink className="h-3 w-3 shrink-0 opacity-60" />
-                          </a>
-                        ) : (
-                          <span className={`flex-1 ${p.checked ? "line-through text-muted-foreground" : ""}`}>{p.label}</span>
+                            <StickyNote className="h-4 w-4" />
+                          </button>
+                          <button onClick={() => removePacking(p.id)} className="text-muted-foreground hover:text-destructive shrink-0">
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                        {notesOpen && (
+                          <Textarea
+                            value={p.notes ?? ""}
+                            onChange={(e) => updatePackingNotes(p.id, e.target.value)}
+                            placeholder="How useful was this? Notes for next trip..."
+                            className="mt-2 text-xs min-h-[60px]"
+                          />
                         )}
-                        <button onClick={() => removePacking(p.id)} className="text-muted-foreground hover:text-destructive shrink-0">
-                          <Trash2 className="h-4 w-4" />
-                        </button>
                       </li>
                     );
                   })}
                 </ul>
                 {packing.length > 4 && (
                   <div className="mt-3 flex justify-center">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setPackingExpanded((v) => !v)}
-                      className="text-primary"
-                    >
+                    <Button variant="ghost" size="sm" onClick={() => setPackingExpanded((v) => !v)} className="text-primary">
                       {packingExpanded ? "Show less" : `Show all ${packing.length} items`}
                     </Button>
                   </div>
@@ -373,31 +422,65 @@ const TripWorkspace = () => {
 
         {/* Gear */}
         <Section title="Gear picks" icon={ShoppingBag} cta={<Button asChild variant="outline" size="sm"><Link to="/gear">Browse gear</Link></Button>}>
+          <form onSubmit={(e) => { e.preventDefault(); void addGear(); }} className="grid gap-2 sm:grid-cols-[1fr_1fr_auto] mb-3">
+            <Input placeholder="Gear name..." value={newGearTitle} onChange={(e) => setNewGearTitle(e.target.value)} />
+            <Input placeholder="Link (optional)" value={newGearUrl} onChange={(e) => setNewGearUrl(e.target.value)} />
+            <Button type="submit" size="sm" className="gap-1" disabled={!newGearTitle.trim()}><Plus className="h-4 w-4" /> Add</Button>
+          </form>
           {gear.length === 0 ? <Empty msg="No gear saved yet." /> : (
-            <div className="grid gap-3 md:grid-cols-2">
-              {(gearExpanded ? gear : gear.slice(0, 4)).map((g) => (
-                <a key={g.id} href={g.product?.affiliate_url || "#"} target="_blank" rel="noopener noreferrer sponsored"
-                  className="bg-background border rounded-xl p-3 hover:shadow-soft transition-shadow flex items-center gap-3">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{g.product?.title ?? "Gear item"}</p>
-                    {g.product?.price && <p className="text-xs text-muted-foreground">{g.product.price}</p>}
-                  </div>
-                  <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
-                </a>
-              ))}
+            <>
+              <div className="grid gap-3 md:grid-cols-2">
+                {(gearExpanded ? gear : gear.slice(0, 4)).map((g) => {
+                  const url = g.product?.affiliate_url;
+                  const notesKey = `g-${g.id}`;
+                  const notesOpen = !!openNotes[notesKey] || !!(g.notes && g.notes.trim());
+                  return (
+                    <div key={g.id} className="bg-background border rounded-xl p-3">
+                      <div className="flex items-center gap-2">
+                        <input type="checkbox" checked={g.purchased} onChange={() => toggleGear(g)} className="h-4 w-4 shrink-0" />
+                        {url ? (
+                          <a href={url} target="_blank" rel="noopener noreferrer sponsored"
+                            className={`flex-1 min-w-0 inline-flex items-center gap-1 hover:text-primary hover:underline ${g.purchased ? "line-through text-muted-foreground" : "text-foreground"}`}>
+                            <span className="truncate font-medium">{g.product?.title ?? "Gear item"}</span>
+                            <ExternalLink className="h-3 w-3 shrink-0 opacity-60" />
+                          </a>
+                        ) : (
+                          <span className={`flex-1 min-w-0 truncate font-medium ${g.purchased ? "line-through text-muted-foreground" : ""}`}>
+                            {g.product?.title ?? "Gear item"}
+                          </span>
+                        )}
+                        <button
+                          onClick={() => setOpenNotes((s) => ({ ...s, [notesKey]: !s[notesKey] }))}
+                          className={`shrink-0 ${notesOpen ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                          title="Add notes"
+                        >
+                          <StickyNote className="h-4 w-4" />
+                        </button>
+                        <button onClick={() => removeGear(g.id)} className="text-muted-foreground hover:text-destructive shrink-0">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                      {g.product?.price && <p className="text-xs text-muted-foreground mt-1 pl-6">{g.product.price}</p>}
+                      {notesOpen && (
+                        <Textarea
+                          value={g.notes ?? ""}
+                          onChange={(e) => updateGearNotes(g.id, e.target.value)}
+                          placeholder="How useful was this? Notes for next trip..."
+                          className="mt-2 text-xs min-h-[60px]"
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
               {gear.length > 4 && (
-                <div className="md:col-span-2 flex justify-center">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setGearExpanded((v) => !v)}
-                    className="text-primary"
-                  >
+                <div className="mt-3 flex justify-center">
+                  <Button variant="ghost" size="sm" onClick={() => setGearExpanded((v) => !v)} className="text-primary">
                     {gearExpanded ? "Show less" : `Show all ${gear.length} picks`}
                   </Button>
                 </div>
               )}
-            </div>
+            </>
           )}
         </Section>
 

@@ -1179,6 +1179,7 @@ export type Database = {
           created_at: string
           id: string
           leg_id: string | null
+          notes: string | null
           product: Json
           purchased: boolean
           trip_id: string
@@ -1187,6 +1188,7 @@ export type Database = {
           created_at?: string
           id?: string
           leg_id?: string | null
+          notes?: string | null
           product?: Json
           purchased?: boolean
           trip_id: string
@@ -1195,6 +1197,7 @@ export type Database = {
           created_at?: string
           id?: string
           leg_id?: string | null
+          notes?: string | null
           product?: Json
           purchased?: boolean
           trip_id?: string
@@ -1447,6 +1450,7 @@ export type Database = {
           id: string
           label: string
           leg_id: string | null
+          notes: string | null
           sort_order: number
           trip_id: string
         }
@@ -1456,6 +1460,7 @@ export type Database = {
           id?: string
           label: string
           leg_id?: string | null
+          notes?: string | null
           sort_order?: number
           trip_id: string
         }
@@ -1465,6 +1470,7 @@ export type Database = {
           id?: string
           label?: string
           leg_id?: string | null
+          notes?: string | null
           sort_order?: number
           trip_id?: string
         }
