@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import {
   ArrowLeft, MapPin, Calendar, Share2, Printer, Plus, Trash2,
-  Hotel, ListChecks, Backpack, ShieldCheck, ExternalLink, Star, Loader2,
+  Hotel, ListChecks, Backpack, ShieldCheck, ExternalLink, Star, Loader2, Pencil, Check, X,
 } from "lucide-react";
 
 
@@ -76,6 +76,8 @@ const TripWorkspace = () => {
   const [addingPacking, setAddingPacking] = useState(false);
   const [newDayTitle, setNewDayTitle] = useState("");
   const [packingExpanded, setPackingExpanded] = useState(false);
+  const [editingPackingId, setEditingPackingId] = useState<string | null>(null);
+  const [editingPackingLabel, setEditingPackingLabel] = useState("");
 
 
   const logistics = logisticsAll.find((l) => l.leg_id === null) ?? null;
@@ -184,6 +186,50 @@ const TripWorkspace = () => {
   const updatePackingNotes = async (id: string, notes: string) => {
     setPacking(packing.map((p) => p.id === id ? { ...p, notes } : p));
     await (supabase as any).from("trip_packing_items").update({ notes }).eq("id", id);
+  };
+  const startEditPacking = (p: PackingRow) => {
+    setEditingPackingId(p.id);
+    setEditingPackingLabel(p.label);
+  };
+  const cancelEditPacking = () => {
+    setEditingPackingId(null);
+    setEditingPackingLabel("");
+  };
+  const saveEditPacking = async () => {
+    if (!editingPackingId) return;
+    const newLabel = editingPackingLabel.trim();
+    if (!newLabel) { cancelEditPacking(); return; }
+    const current = packing.find((p) => p.id === editingPackingId);
+    const oldLabel = current?.label ?? "";
+    setPacking(packing.map((p) => p.id === editingPackingId ? { ...p, label: newLabel } : p));
+    await (supabase as any).from("trip_packing_items").update({ label: newLabel }).eq("id", editingPackingId);
+
+    // Refresh affiliate link for the renamed item.
+    if (trip && newLabel.toLowerCase() !== oldLabel.toLowerCase()) {
+      try {
+        const { data } = await supabase.functions.invoke("amazon-affiliate-link", {
+          body: { query: newLabel, country: (await import("@/lib/geo")).detectCountry() },
+        });
+        const affiliateUrl = data?.url as string | undefined;
+        // Remove any existing matching gear rows for the old label.
+        const matches = gear.filter((g) => String(g.product?.title ?? "").toLowerCase() === oldLabel.toLowerCase());
+        for (const m of matches) {
+          await (supabase as any).from("trip_gear_items").delete().eq("id", m.id);
+        }
+        let remaining = gear.filter((g) => !matches.some((m) => m.id === g.id));
+        if (affiliateUrl) {
+          const { data: gRow } = await (supabase as any)
+            .from("trip_gear_items")
+            .insert({ trip_id: trip.id, product: { title: newLabel, affiliate_url: affiliateUrl } })
+            .select("*").single();
+          if (gRow) remaining = [...remaining, gRow as GearRow];
+        }
+        setGear(remaining);
+      } catch (e) {
+        console.warn("refresh affiliate on rename failed", e);
+      }
+    }
+    cancelEditPacking();
   };
 
 
@@ -387,23 +433,49 @@ const TripWorkspace = () => {
                       <li key={p.id} className="bg-background border rounded-lg px-3 py-2">
                         <div className="flex items-center gap-2">
                           <input type="checkbox" checked={p.checked} onChange={() => togglePacking(p)} className="h-4 w-4" />
-                          {affiliateUrl ? (
-                            <a
-                              href={affiliateUrl}
-                              target="_blank"
-                              rel="noopener noreferrer sponsored"
-                              className="flex-1 min-w-0 truncate inline-flex items-center gap-1 text-foreground hover:text-primary hover:underline"
-                              title={p.label}
-                            >
-                              <span className="truncate">{p.label}</span>
-                              <ExternalLink className="h-3 w-3 shrink-0 opacity-60" />
-                            </a>
+                          {editingPackingId === p.id ? (
+                            <>
+                              <Input
+                                value={editingPackingLabel}
+                                onChange={(e) => setEditingPackingLabel(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") { e.preventDefault(); void saveEditPacking(); }
+                                  if (e.key === "Escape") cancelEditPacking();
+                                }}
+                                autoFocus
+                                className="h-7 text-sm flex-1"
+                              />
+                              <button onClick={() => void saveEditPacking()} className="text-primary shrink-0" aria-label="Save">
+                                <Check className="h-4 w-4" />
+                              </button>
+                              <button onClick={cancelEditPacking} className="text-muted-foreground hover:text-foreground shrink-0" aria-label="Cancel">
+                                <X className="h-4 w-4" />
+                              </button>
+                            </>
                           ) : (
-                            <span className="flex-1 text-foreground">{p.label}</span>
+                            <>
+                              {affiliateUrl ? (
+                                <a
+                                  href={affiliateUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer sponsored"
+                                  className="flex-1 min-w-0 truncate inline-flex items-center gap-1 text-foreground hover:text-primary hover:underline"
+                                  title={p.label}
+                                >
+                                  <span className="truncate">{p.label}</span>
+                                  <ExternalLink className="h-3 w-3 shrink-0 opacity-60" />
+                                </a>
+                              ) : (
+                                <span className="flex-1 text-foreground truncate" title={p.label}>{p.label}</span>
+                              )}
+                              <button onClick={() => startEditPacking(p)} className="text-muted-foreground hover:text-foreground shrink-0" aria-label="Edit">
+                                <Pencil className="h-3.5 w-3.5" />
+                              </button>
+                              <button onClick={() => removePacking(p.id)} className="text-muted-foreground hover:text-destructive shrink-0" aria-label="Remove">
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </>
                           )}
-                          <button onClick={() => removePacking(p.id)} className="text-muted-foreground hover:text-destructive shrink-0">
-                            <Trash2 className="h-4 w-4" />
-                          </button>
                         </div>
                         <Textarea
                           defaultValue={p.notes ?? ""}
