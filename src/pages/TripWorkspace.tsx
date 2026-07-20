@@ -313,6 +313,14 @@ const TripWorkspace = () => {
           </div>
         </div>
 
+        {/* Publish / Share — high on the page so it's obvious this trip can be shared */}
+        <PublishTripPanel
+          trip={trip}
+          hotelCount={hotels.length}
+          legCount={legs.length}
+          onUpdated={(patch) => setTrip({ ...trip, ...patch } as Trip)}
+        />
+
         {/* Header card */}
         <div className="bg-card rounded-2xl p-6 shadow-soft mb-8">
           <Input
@@ -348,13 +356,6 @@ const TripWorkspace = () => {
           />
         </div>
 
-        {/* Publish / Share */}
-        <PublishTripPanel
-          trip={trip}
-          hotelCount={hotels.length}
-          legCount={legs.length}
-          onUpdated={(patch) => setTrip({ ...trip, ...patch } as Trip)}
-        />
 
         {/* Hotels (single-destination only; multi-destination shows hotels per stop) */}
         {!trip.is_multi_destination && (
