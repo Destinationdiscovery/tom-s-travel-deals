@@ -360,8 +360,15 @@ const TripWorkspace = () => {
         <Section title="Packing list" icon={Backpack}>
           <TripPackingGenerator tripId={trip.id} destination={trip.destination} onDone={load} />
           <form onSubmit={(e) => { e.preventDefault(); void addPacking(); }} className="flex gap-2 mb-3">
-            <Input placeholder="Add item..." value={newPacking} onChange={(e) => setNewPacking(e.target.value)} />
-            <Button type="submit" size="sm" className="gap-1" disabled={!newPacking.trim()}><Plus className="h-4 w-4" /> Add</Button>
+            <Input
+              placeholder="Add item... (we'll find it on Amazon)"
+              value={newPacking}
+              onChange={(e) => setNewPacking(e.target.value)}
+              disabled={addingPacking}
+            />
+            <Button type="submit" size="sm" className="gap-1" disabled={!newPacking.trim() || addingPacking}>
+              {addingPacking ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />} Add
+            </Button>
           </form>
           {packing.length === 0 ? <Empty msg="Nothing on your list yet." /> : (() => {
             const gearByLabel = new Map<string, any>();
@@ -385,14 +392,14 @@ const TripWorkspace = () => {
                               href={affiliateUrl}
                               target="_blank"
                               rel="noopener noreferrer sponsored"
-                              className={`flex-1 min-w-0 truncate inline-flex items-center gap-1 hover:text-primary hover:underline ${p.checked ? "line-through text-muted-foreground" : "text-foreground"}`}
+                              className="flex-1 min-w-0 truncate inline-flex items-center gap-1 text-foreground hover:text-primic hover:underline"
                               title={p.label}
                             >
                               <span className="truncate">{p.label}</span>
                               <ExternalLink className="h-3 w-3 shrink-0 opacity-60" />
                             </a>
                           ) : (
-                            <span className={`flex-1 ${p.checked ? "line-through text-muted-foreground" : ""}`}>{p.label}</span>
+                            <span className="flex-1 text-foreground">{p.label}</span>
                           )}
                           <button onClick={() => removePacking(p.id)} className="text-muted-foreground hover:text-destructive shrink-0">
                             <Trash2 className="h-4 w-4" />
@@ -423,58 +430,6 @@ const TripWorkspace = () => {
           })()}
         </Section>
 
-        {/* Gear */}
-        <Section title="Gear picks" icon={ShoppingBag} cta={<Button asChild variant="outline" size="sm"><Link to="/gear">Browse gear</Link></Button>}>
-          <form onSubmit={(e) => { e.preventDefault(); void addGear(); }} className="grid gap-2 sm:grid-cols-[1fr_1fr_auto] mb-3">
-            <Input placeholder="Gear name..." value={newGearTitle} onChange={(e) => setNewGearTitle(e.target.value)} />
-            <Input placeholder="Link (optional)" value={newGearUrl} onChange={(e) => setNewGearUrl(e.target.value)} />
-            <Button type="submit" size="sm" className="gap-1" disabled={!newGearTitle.trim()}><Plus className="h-4 w-4" /> Add</Button>
-          </form>
-          {gear.length === 0 ? <Empty msg="No gear saved yet." /> : (
-            <>
-              <div className="grid gap-3 md:grid-cols-2">
-                {(gearExpanded ? gear : gear.slice(0, 4)).map((g) => {
-                  const url = g.product?.affiliate_url;
-                  return (
-                    <div key={g.id} className="bg-background border rounded-xl p-3">
-                      <div className="flex items-center gap-2">
-                        <input type="checkbox" checked={g.purchased} onChange={() => toggleGear(g)} className="h-4 w-4 shrink-0" />
-                        {url ? (
-                          <a href={url} target="_blank" rel="noopener noreferrer sponsored"
-                            className={`flex-1 min-w-0 inline-flex items-center gap-1 hover:text-primary hover:underline ${g.purchased ? "line-through text-muted-foreground" : "text-foreground"}`}>
-                            <span className="truncate font-medium">{g.product?.title ?? "Gear item"}</span>
-                            <ExternalLink className="h-3 w-3 shrink-0 opacity-60" />
-                          </a>
-                        ) : (
-                          <span className={`flex-1 min-w-0 truncate font-medium ${g.purchased ? "line-through text-muted-foreground" : ""}`}>
-                            {g.product?.title ?? "Gear item"}
-                          </span>
-                        )}
-                        <button onClick={() => removeGear(g.id)} className="text-muted-foreground hover:text-destructive shrink-0">
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                      {g.product?.price && <p className="text-xs text-muted-foreground mt-1 pl-6">{g.product.price}</p>}
-                      <Textarea
-                        defaultValue={g.notes ?? ""}
-                        onChange={(e) => updateGearNotes(g.id, e.target.value)}
-                        placeholder="How useful was this? Notes for next trip..."
-                        className="mt-2 text-xs min-h-[52px]"
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-              {gear.length > 4 && (
-                <div className="mt-3 flex justify-center">
-                  <Button variant="ghost" size="sm" onClick={() => setGearExpanded((v) => !v)} className="text-primary">
-                    {gearExpanded ? "Show less" : `Show all ${gear.length} picks`}
-                  </Button>
-                </div>
-              )}
-            </>
-          )}
-        </Section>
 
         {/* Multi-destination legs */}
         {trip.is_multi_destination && (
