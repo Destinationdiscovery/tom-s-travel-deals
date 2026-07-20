@@ -324,11 +324,74 @@ const TripWorkspace = () => {
           )}
         </Section>
 
-        {/* Logistics link */}
+        {/* Logistics */}
         <Section title="Logistics" icon={ShieldCheck}>
-          <p className="text-sm text-muted-foreground">
-            Check visa requirements, currency, best time to visit, and safety from the tools menu and save outputs to this trip.
-          </p>
+          {logistics && (logistics.best_time || logistics.safety || logistics.visa || logistics.currency || logistics.flights) ? (
+            <div className="grid gap-3 md:grid-cols-2 mb-4">
+              {logistics.best_time && (
+                <LogisticsCard
+                  title="Best time to visit"
+                  summary={logistics.best_time.verdict || logistics.best_time.destination}
+                  detail={Array.isArray(logistics.best_time.bestMonths) ? `Ideal: ${logistics.best_time.bestMonths.join(", ")}` : undefined}
+                  href="/best-time"
+                  onClear={async () => {
+                    await (supabase as any).from("trip_logistics").update({ best_time: null, best_time_confirmed: false }).eq("trip_id", trip.id);
+                    setLogistics({ ...logistics, best_time: null });
+                  }}
+                />
+              )}
+              {logistics.safety && (
+                <LogisticsCard
+                  title="Safety"
+                  summary={logistics.safety.verdict || logistics.safety.overall || logistics.safety.destination}
+                  detail={logistics.safety.overallScore ? `Overall score: ${logistics.safety.overallScore}/5` : undefined}
+                  href="/safety"
+                  onClear={async () => {
+                    await (supabase as any).from("trip_logistics").update({ safety: null, safety_checked: false }).eq("trip_id", trip.id);
+                    setLogistics({ ...logistics, safety: null });
+                  }}
+                />
+              )}
+              {logistics.visa && (
+                <LogisticsCard
+                  title="Travel intel & visa"
+                  summary={logistics.visa.verdict || logistics.visa.visa || logistics.visa.destination}
+                  href="/travel-intel"
+                  onClear={async () => {
+                    await (supabase as any).from("trip_logistics").update({ visa: null, visa_checked: false }).eq("trip_id", trip.id);
+                    setLogistics({ ...logistics, visa: null });
+                  }}
+                />
+              )}
+              {logistics.currency && (
+                <LogisticsCard
+                  title="Currency"
+                  summary={logistics.currency.verdict || logistics.currency.currency || logistics.currency.destination}
+                  detail={logistics.currency.rate ? `Rate: ${logistics.currency.rate}` : undefined}
+                  href="/currency"
+                  onClear={async () => {
+                    await (supabase as any).from("trip_logistics").update({ currency: null, currency_checked: false }).eq("trip_id", trip.id);
+                    setLogistics({ ...logistics, currency: null });
+                  }}
+                />
+              )}
+              {logistics.flights && (
+                <LogisticsCard
+                  title="Flights"
+                  summary={logistics.flights.verdict || logistics.flights.route || "Flight notes saved"}
+                  href="/flights"
+                  onClear={async () => {
+                    await (supabase as any).from("trip_logistics").update({ flights: null }).eq("trip_id", trip.id);
+                    setLogistics({ ...logistics, flights: null });
+                  }}
+                />
+              )}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Check visa requirements, currency, best time to visit, and safety from the tools menu and save outputs to this trip.
+            </p>
+          )}
           <div className="flex flex-wrap gap-2 mt-3">
             <Button asChild variant="outline" size="sm"><Link to="/safety">Safety</Link></Button>
             <Button asChild variant="outline" size="sm"><Link to="/currency">Currency</Link></Button>
