@@ -190,11 +190,11 @@ const PublishTripPanel = ({ trip, hotelCount, legCount, onUpdated }: Props) => {
           {CoverImageControl}
 
           <label className="text-xs uppercase tracking-wide text-muted-foreground flex flex-col gap-1 mb-4">
-            Author name (public)
+            Your username (shown publicly as @name)
             <Input
               defaultValue={trip.author_display_name ?? ""}
-              placeholder="How to credit you"
-              onBlur={(e) => savePatch({ author_display_name: e.target.value.trim() || null })}
+              placeholder="e.g. tomtravels"
+              onBlur={(e) => savePatch({ author_display_name: e.target.value.trim().replace(/^@/, "") || null })}
             />
           </label>
 
