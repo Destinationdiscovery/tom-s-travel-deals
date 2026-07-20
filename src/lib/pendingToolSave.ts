@@ -41,55 +41,48 @@ export function clearPendingSave() {
   } catch {}
 }
 
-/** Writes the payload into the matching trip child table for a trip id. */
-export async function applyPayloadToTrip(tripId: string, toolType: ToolType, payload: any) {
+/** Writes the payload into the matching trip child table for a trip id (optionally scoped to a leg). */
+export async function applyPayloadToTrip(tripId: string, toolType: ToolType, payload: any, legId?: string | null) {
   const sb = supabase as any;
+  const leg = legId ?? null;
   switch (toolType) {
     case "gear": {
       const items = (payload?.items ?? []) as any[];
       if (!items.length) return;
-      await sb.from("trip_gear_items").insert(items.map((p) => ({ trip_id: tripId, product: p })));
+      await sb.from("trip_gear_items").insert(items.map((p) => ({ trip_id: tripId, leg_id: leg, product: p })));
       return;
     }
     case "itinerary": {
       const days = (payload?.days ?? []) as any[];
       if (!days.length) return;
+      const conflict = leg ? "leg_id,day_number" : "trip_id,day_number";
       await sb.from("trip_itinerary_days").upsert(
-        days.map((d, i) => ({ trip_id: tripId, day_number: d?.day ?? i + 1, content: d })),
-        { onConflict: "trip_id,day_number" }
+        days.map((d, i) => ({ trip_id: tripId, leg_id: leg, day_number: d?.day ?? i + 1, content: d })),
+        { onConflict: conflict }
       );
       return;
     }
     case "best-time":
-      await sb
-        .from("trip_logistics")
-        .upsert({ trip_id: tripId, best_time: payload, best_time_confirmed: true }, { onConflict: "trip_id" });
+      await upsertLogistics(sb, tripId, leg, { best_time: payload, best_time_confirmed: true });
       return;
     case "safety":
-      await sb
-        .from("trip_logistics")
-        .upsert({ trip_id: tripId, safety: payload, safety_checked: true }, { onConflict: "trip_id" });
+      await upsertLogistics(sb, tripId, leg, { safety: payload, safety_checked: true });
       return;
     case "travel-intel":
-      await sb
-        .from("trip_logistics")
-        .upsert({ trip_id: tripId, visa: payload, visa_checked: true }, { onConflict: "trip_id" });
+      await upsertLogistics(sb, tripId, leg, { visa: payload, visa_checked: true });
       return;
     case "currency":
-      await sb
-        .from("trip_logistics")
-        .upsert({ trip_id: tripId, currency: payload, currency_checked: true }, { onConflict: "trip_id" });
+      await upsertLogistics(sb, tripId, leg, { currency: payload, currency_checked: true });
       return;
     case "flights":
-      await sb
-        .from("trip_logistics")
-        .upsert({ trip_id: tripId, flights: payload }, { onConflict: "trip_id" });
+      await upsertLogistics(sb, tripId, leg, { flights: payload });
       return;
     case "destinations": {
       const hotel = payload?.hotel ?? payload;
       if (!hotel) return;
       await sb.from("trip_hotels").insert({
         trip_id: tripId,
+        leg_id: leg,
         slug: hotel.slug ?? null,
         property_name: hotel.propertyName ?? hotel.property_name ?? "Saved property",
         location: hotel.location ?? null,
@@ -102,5 +95,17 @@ export async function applyPayloadToTrip(tripId: string, toolType: ToolType, pay
       });
       return;
     }
+  }
+}
+
+async function upsertLogistics(sb: any, tripId: string, legId: string | null, patch: Record<string, any>) {
+  const base = sb.from("trip_logistics").select("id").eq("trip_id", tripId);
+  const { data: existing } = legId
+    ? await base.eq("leg_id", legId).maybeSingle()
+    : await base.is("leg_id", null).maybeSingle();
+  if (existing?.id) {
+    await sb.from("trip_logistics").update(patch).eq("id", existing.id);
+  } else {
+    await sb.from("trip_logistics").insert({ trip_id: tripId, leg_id: legId, ...patch });
   }
 }
