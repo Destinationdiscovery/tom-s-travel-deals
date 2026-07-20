@@ -150,57 +150,60 @@ const ToolSaveBar = ({ toolType, label, destination, payload, onExportPdf, onCop
       );
     }
     return (
-      <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            disabled={saving}
-            onClick={() => { console.log("[SaveBar] toggle picker", !pickerOpen); setPickerOpen((o) => !o); }}
-            className="w-full sm:w-auto"
-          >
-            {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
-            {activeTrip ? `Add to ${activeTrip.name}` : "Save to a trip"}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent side="top" align="center" className="w-80">
-          <div className="space-y-3">
-            {loadingTrips ? (
-              <p className="text-sm text-muted-foreground">Loading...</p>
-            ) : trips.length > 0 ? (
-              <div>
-                <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Choose a trip</p>
-                <div className="space-y-1 max-h-56 overflow-y-auto">
-                  {trips.map((t) => (
-                    <button
-                      key={t.id}
-                      onClick={() => saveToTrip(t)}
-                      className="w-full text-left px-3 py-2 rounded-lg border bg-background hover:bg-muted transition-colors text-sm font-medium"
-                    >
-                      {t.trip_name}
-                    </button>
-                  ))}
+      <>
+        <Button
+          disabled={saving}
+          onClick={() => setPickerOpen(true)}
+          className="w-full sm:w-auto"
+        >
+          {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
+          {activeTrip ? `Add to ${activeTrip.name}` : "Save to a trip"}
+        </Button>
+        <Dialog open={pickerOpen} onOpenChange={setPickerOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="font-display">Add to a trip</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
+              {loadingTrips ? (
+                <p className="text-sm text-muted-foreground">Loading...</p>
+              ) : trips.length > 0 ? (
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Choose a trip</p>
+                  <div className="space-y-1 max-h-56 overflow-y-auto">
+                    {trips.map((t) => (
+                      <button
+                        key={t.id}
+                        onClick={() => saveToTrip(t)}
+                        className="w-full text-left px-3 py-2 rounded-lg border bg-background hover:bg-muted transition-colors text-sm font-medium"
+                      >
+                        {t.trip_name}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">No trips yet, create one below.</p>
-            )}
-            <form
-              onSubmit={(e) => { e.preventDefault(); void createTripAndSave(); }}
-              className="border-t pt-3"
-            >
-              <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Or new trip</p>
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Trip name"
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  maxLength={60}
-                />
-                <Button type="submit" disabled={!newName.trim() || saving}>Create</Button>
-              </div>
-            </form>
-          </div>
-        </PopoverContent>
-      </Popover>
+              ) : (
+                <p className="text-sm text-muted-foreground">No trips yet, create one below.</p>
+              )}
+              <form
+                onSubmit={(e) => { e.preventDefault(); void createTripAndSave(); }}
+                className="border-t pt-3"
+              >
+                <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Or new trip</p>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Trip name"
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    maxLength={60}
+                  />
+                  <Button type="submit" disabled={!newName.trim() || saving}>Create</Button>
+                </div>
+              </form>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </>
     );
   })();
 
