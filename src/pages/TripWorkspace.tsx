@@ -76,6 +76,8 @@ const TripWorkspace = () => {
   const [addingPacking, setAddingPacking] = useState(false);
   const [newDayTitle, setNewDayTitle] = useState("");
   const [packingExpanded, setPackingExpanded] = useState(false);
+  const [editingPackingId, setEditingPackingId] = useState<string | null>(null);
+  const [editingPackingLabel, setEditingPackingLabel] = useState("");
 
 
   const logistics = logisticsAll.find((l) => l.leg_id === null) ?? null;
