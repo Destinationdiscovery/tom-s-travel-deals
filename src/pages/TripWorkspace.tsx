@@ -72,16 +72,18 @@ const TripWorkspace = () => {
       .from("trips").select("*").eq("user_id", user.id).eq("slug", slug).maybeSingle();
     if (!t) { setLoading(false); return; }
     setTrip(t as Trip);
-    const [h, d, p, g] = await Promise.all([
+    const [h, d, p, g, l] = await Promise.all([
       (supabase as any).from("trip_hotels").select("*").eq("trip_id", t.id).order("sort_order"),
       (supabase as any).from("trip_itinerary_days").select("*").eq("trip_id", t.id).order("day_number"),
       (supabase as any).from("trip_packing_items").select("*").eq("trip_id", t.id).order("sort_order"),
       (supabase as any).from("trip_gear_items").select("*").eq("trip_id", t.id).order("created_at"),
+      (supabase as any).from("trip_logistics").select("*").eq("trip_id", t.id).maybeSingle(),
     ]);
     setHotels((h.data ?? []) as HotelRow[]);
     setDays((d.data ?? []) as DayRow[]);
     setPacking((p.data ?? []) as PackingRow[]);
     setGear((g.data ?? []) as GearRow[]);
+    setLogistics((l.data ?? null) as LogisticsRow | null);
     setLoading(false);
   };
 
