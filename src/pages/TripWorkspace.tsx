@@ -433,23 +433,49 @@ const TripWorkspace = () => {
                       <li key={p.id} className="bg-background border rounded-lg px-3 py-2">
                         <div className="flex items-center gap-2">
                           <input type="checkbox" checked={p.checked} onChange={() => togglePacking(p)} className="h-4 w-4" />
-                          {affiliateUrl ? (
-                            <a
-                              href={affiliateUrl}
-                              target="_blank"
-                              rel="noopener noreferrer sponsored"
-                              className="flex-1 min-w-0 truncate inline-flex items-center gap-1 text-foreground hover:text-primary hover:underline"
-                              title={p.label}
-                            >
-                              <span className="truncate">{p.label}</span>
-                              <ExternalLink className="h-3 w-3 shrink-0 opacity-60" />
-                            </a>
+                          {editingPackingId === p.id ? (
+                            <>
+                              <Input
+                                value={editingPackingLabel}
+                                onChange={(e) => setEditingPackingLabel(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") { e.preventDefault(); void saveEditPacking(); }
+                                  if (e.key === "Escape") cancelEditPacking();
+                                }}
+                                autoFocus
+                                className="h-7 text-sm flex-1"
+                              />
+                              <button onClick={() => void saveEditPacking()} className="text-primary shrink-0" aria-label="Save">
+                                <Check className="h-4 w-4" />
+                              </button>
+                              <button onClick={cancelEditPacking} className="text-muted-foreground hover:text-foreground shrink-0" aria-label="Cancel">
+                                <X className="h-4 w-4" />
+                              </button>
+                            </>
                           ) : (
-                            <span className="flex-1 text-foreground">{p.label}</span>
+                            <>
+                              {affiliateUrl ? (
+                                <a
+                                  href={affiliateUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer sponsored"
+                                  className="flex-1 min-w-0 truncate inline-flex items-center gap-1 text-foreground hover:text-primary hover:underline"
+                                  title={p.label}
+                                >
+                                  <span className="truncate">{p.label}</span>
+                                  <ExternalLink className="h-3 w-3 shrink-0 opacity-60" />
+                                </a>
+                              ) : (
+                                <span className="flex-1 text-foreground truncate" title={p.label}>{p.label}</span>
+                              )}
+                              <button onClick={() => startEditPacking(p)} className="text-muted-foreground hover:text-foreground shrink-0" aria-label="Edit">
+                                <Pencil className="h-3.5 w-3.5" />
+                              </button>
+                              <button onClick={() => removePacking(p.id)} className="text-muted-foreground hover:text-destructive shrink-0" aria-label="Remove">
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </>
                           )}
-                          <button onClick={() => removePacking(p.id)} className="text-muted-foreground hover:text-destructive shrink-0">
-                            <Trash2 className="h-4 w-4" />
-                          </button>
                         </div>
                         <Textarea
                           defaultValue={p.notes ?? ""}
