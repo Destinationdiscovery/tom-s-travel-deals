@@ -67,9 +67,13 @@ const TripWorkspace = () => {
   const [days, setDays] = useState<DayRow[]>([]);
   const [packing, setPacking] = useState<PackingRow[]>([]);
   const [gear, setGear] = useState<GearRow[]>([]);
-  const [logistics, setLogistics] = useState<LogisticsRow | null>(null);
+  const [logisticsAll, setLogisticsAll] = useState<LogisticsRow[]>([]);
+  const [legs, setLegs] = useState<Leg[]>([]);
+  const [transit, setTransit] = useState<TransitRow[]>([]);
   const [newPacking, setNewPacking] = useState("");
   const [newDayTitle, setNewDayTitle] = useState("");
+
+  const logistics = logisticsAll.find((l) => l.leg_id === null) ?? null;
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/");
@@ -82,18 +86,22 @@ const TripWorkspace = () => {
       .from("trips").select("*").eq("user_id", user.id).eq("slug", slug).maybeSingle();
     if (!t) { setLoading(false); return; }
     setTrip(t as Trip);
-    const [h, d, p, g, l] = await Promise.all([
+    const [h, d, p, g, l, lg, tr] = await Promise.all([
       (supabase as any).from("trip_hotels").select("*").eq("trip_id", t.id).order("sort_order"),
       (supabase as any).from("trip_itinerary_days").select("*").eq("trip_id", t.id).order("day_number"),
       (supabase as any).from("trip_packing_items").select("*").eq("trip_id", t.id).order("sort_order"),
       (supabase as any).from("trip_gear_items").select("*").eq("trip_id", t.id).order("created_at"),
-      (supabase as any).from("trip_logistics").select("*").eq("trip_id", t.id).maybeSingle(),
+      (supabase as any).from("trip_logistics").select("*").eq("trip_id", t.id),
+      (supabase as any).from("trip_legs").select("*").eq("trip_id", t.id).order("leg_number"),
+      (supabase as any).from("trip_transit").select("*").eq("trip_id", t.id),
     ]);
     setHotels((h.data ?? []) as HotelRow[]);
     setDays((d.data ?? []) as DayRow[]);
     setPacking((p.data ?? []) as PackingRow[]);
     setGear((g.data ?? []) as GearRow[]);
-    setLogistics((l.data ?? null) as LogisticsRow | null);
+    setLogisticsAll((l.data ?? []) as LogisticsRow[]);
+    setLegs((lg.data ?? []) as Leg[]);
+    setTransit((tr.data ?? []) as TransitRow[]);
     setLoading(false);
   };
 
