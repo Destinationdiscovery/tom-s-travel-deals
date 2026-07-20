@@ -185,23 +185,40 @@ const TripLegsSection = ({ tripId, legs, setLegs, hotels, logistics, transit, on
 
                   {/* Hotels for this leg */}
                   <div className="mt-3 border-t pt-3">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground flex items-center gap-1 mb-2">
-                      <Hotel className="h-3 w-3" /> Hotels
-                    </p>
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-xs uppercase tracking-wide text-muted-foreground flex items-center gap-1">
+                        <Hotel className="h-3 w-3" /> Hotels
+                      </p>
+                      <Button asChild size="sm" variant="outline" className="h-7 text-xs gap-1">
+                        <Link to="/"><Plus className="h-3 w-3" /> Find hotel</Link>
+                      </Button>
+                    </div>
                     {lh.length === 0 ? (
-                      <p className="text-xs text-muted-foreground italic">None yet. Use "Add to Trip" on any review, then choose this stop.</p>
+                      <p className="text-xs text-muted-foreground italic">None yet. Use "Find hotel" above, then choose "Add to Trip" on a review and pick this stop.</p>
                     ) : (
                       <ul className="space-y-1">
                         {lh.map((h) => (
-                          <li key={h.id} className="text-sm flex items-center justify-between gap-2">
+                          <li key={h.id} className="text-sm flex items-center justify-between gap-2 group">
                             {h.slug ? (
                               <Link to={`/review/${h.slug}`} className="truncate hover:text-primary">{h.property_name}</Link>
                             ) : (
                               <span className="truncate">{h.property_name}</span>
                             )}
-                            {h.overall_rating && (
-                              <span className="text-xs shrink-0">{h.overall_rating}<Star className="h-3 w-3 inline ml-0.5 text-accent fill-accent" /></span>
-                            )}
+                            <div className="flex items-center gap-2 shrink-0">
+                              {h.overall_rating && (
+                                <span className="text-xs">{h.overall_rating}<Star className="h-3 w-3 inline ml-0.5 text-accent fill-accent" /></span>
+                              )}
+                              <button
+                                onClick={async () => {
+                                  await (supabase as any).from("trip_hotels").delete().eq("id", h.id);
+                                  onChanged();
+                                }}
+                                className="text-muted-foreground hover:text-destructive"
+                                aria-label="Remove hotel"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
                           </li>
                         ))}
                       </ul>
