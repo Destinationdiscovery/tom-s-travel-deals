@@ -48,9 +48,12 @@ interface Props {
   logistics: Logistics[];
   transit: Transit[];
   onChanged: () => void;
+  reviewedHotelIds?: Set<string>;
+  onReviewHotel?: (hotelId: string) => void;
 }
 
-const TripLegsSection = ({ tripId, legs, setLegs, hotels, logistics, transit, onChanged }: Props) => {
+const TripLegsSection = ({ tripId, legs, setLegs, hotels, logistics, transit, onChanged, reviewedHotelIds, onReviewHotel }: Props) => {
+
   const { toast } = useToast();
   const [newName, setNewName] = useState("");
   const [newDest, setNewDest] = useState("");
