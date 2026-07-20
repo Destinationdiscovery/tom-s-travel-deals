@@ -424,4 +424,22 @@ const Empty = ({ msg }: { msg: string }) => (
   <p className="text-sm text-muted-foreground italic">{msg}</p>
 );
 
+const LogisticsCard = ({
+  title, summary, detail, href, onClear,
+}: { title: string; summary?: string; detail?: string; href: string; onClear: () => void | Promise<void> }) => (
+  <div className="bg-background border rounded-xl p-3">
+    <div className="flex items-start justify-between gap-2 mb-1">
+      <p className="text-xs uppercase tracking-wide text-muted-foreground">{title}</p>
+      <button onClick={() => void onClear()} className="text-muted-foreground hover:text-destructive shrink-0" aria-label={`Remove ${title}`}>
+        <Trash2 className="h-3.5 w-3.5" />
+      </button>
+    </div>
+    {summary && <p className="text-sm text-foreground font-medium">{summary}</p>}
+    {detail && <p className="text-xs text-muted-foreground mt-1">{detail}</p>}
+    <Link to={href} className="text-xs text-primary hover:underline inline-flex items-center gap-1 mt-2">
+      View full details <ExternalLink className="h-3 w-3" />
+    </Link>
+  </div>
+);
+
 export default TripWorkspace;
