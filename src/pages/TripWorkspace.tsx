@@ -142,6 +142,38 @@ const TripWorkspace = () => {
     await (supabase as any).from("trip_packing_items").delete().eq("id", id);
     setPacking(packing.filter((p) => p.id !== id));
   };
+  const updatePackingNotes = async (id: string, notes: string) => {
+    setPacking(packing.map((p) => p.id === id ? { ...p, notes } : p));
+    await (supabase as any).from("trip_packing_items").update({ notes }).eq("id", id);
+  };
+
+  const toggleGear = async (item: GearRow) => {
+    const next = !item.purchased;
+    setGear(gear.map((g) => g.id === item.id ? { ...g, purchased: next } : g));
+    await (supabase as any).from("trip_gear_items").update({ purchased: next }).eq("id", item.id);
+  };
+  const addGear = async () => {
+    if (!trip || !newGearTitle.trim()) return;
+    const product: any = { title: newGearTitle.trim() };
+    if (newGearUrl.trim()) product.affiliate_url = newGearUrl.trim();
+    const { data } = await (supabase as any)
+      .from("trip_gear_items")
+      .insert({ trip_id: trip.id, product })
+      .select("*").single();
+    if (data) setGear([...gear, data as GearRow]);
+    setNewGearTitle("");
+    setNewGearUrl("");
+  };
+  const removeGear = async (id: string) => {
+    await (supabase as any).from("trip_gear_items").delete().eq("id", id);
+    setGear(gear.filter((g) => g.id !== id));
+  };
+  const updateGearNotes = async (id: string, notes: string) => {
+    setGear(gear.map((g) => g.id === id ? { ...g, notes } : g));
+    await (supabase as any).from("trip_gear_items").update({ notes }).eq("id", id);
+  };
+
+
 
   const addDay = async () => {
     if (!trip) return;
