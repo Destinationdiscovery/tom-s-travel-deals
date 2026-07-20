@@ -38,8 +38,8 @@ interface HotelRow {
   location: string | null; overall_rating: number | null; top_pick: boolean; leg_id: string | null;
 }
 interface DayRow { id: string; day_number: number; content: any; }
-interface PackingRow { id: string; label: string; checked: boolean; }
-interface GearRow { id: string; product: any; purchased: boolean; }
+interface PackingRow { id: string; label: string; checked: boolean; notes?: string | null; }
+interface GearRow { id: string; product: any; purchased: boolean; notes?: string | null; }
 interface LogisticsRow {
   id: string;
   leg_id: string | null;
