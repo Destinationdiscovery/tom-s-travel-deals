@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import {
   ArrowLeft, MapPin, Calendar, Share2, Printer, Plus, Trash2,
-  Hotel, ListChecks, Backpack, ShoppingBag, ShieldCheck, ExternalLink, Star,
+  Hotel, ListChecks, Backpack, ShoppingBag, ShieldCheck, ExternalLink, Star, StickyNote,
 } from "lucide-react";
 
 import TripLegsSection, { type Leg } from "@/components/trips/TripLegsSection";
