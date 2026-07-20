@@ -33,14 +33,16 @@ export function useActiveTrip(): ActiveTrip | null {
     (async () => {
       const { data } = await (supabase as any)
         .from("trips")
-        .select("slug,name")
+        .select("slug,trip_name")
+        .eq("user_id", user.id)
         .order("updated_at", { ascending: false })
         .limit(1)
         .maybeSingle();
-      const next = data ? { slug: data.slug as string, name: data.name as string } : null;
+      const next = data ? { slug: data.slug as string, name: data.trip_name as string } : null;
       cache = { userId: user.id, trip: next };
       if (!cancelled) setTrip(next);
     })();
+
     return () => { cancelled = true; };
   }, [user]);
 
