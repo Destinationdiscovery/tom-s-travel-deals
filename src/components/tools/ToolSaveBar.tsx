@@ -4,7 +4,7 @@ import { Loader2, Plus, FileDown, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useRef, useEffect as useEffectRaw } from "react";
+
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useActiveTrip } from "@/hooks/useActiveTrip";
 import { useToast } from "@/hooks/use-toast";
