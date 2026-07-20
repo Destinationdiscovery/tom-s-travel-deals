@@ -130,47 +130,62 @@ const TripWorkspace = () => {
   };
   const addPacking = async () => {
     if (!trip || !newPacking.trim()) return;
-    const { data } = await (supabase as any)
-      .from("trip_packing_items")
-      .insert({ trip_id: trip.id, label: newPacking.trim(), sort_order: packing.length })
-      .select("*").single();
-    if (data) setPacking([...packing, data as PackingRow]);
-    setNewPacking("");
+    const label = newPacking.trim();
+    setAddingPacking(true);
+    try {
+      // 1. Fetch an Amazon affiliate search link for this item.
+      let affiliateUrl: string | null = null;
+      try {
+        const { data } = await supabase.functions.invoke("amazon-affiliate-link", {
+          body: { query: label, country: (await import("@/lib/geo")).detectCountry() },
+        });
+        if (data?.url) affiliateUrl = data.url as string;
+      } catch (e) {
+        console.warn("amazon-affiliate-link failed", e);
+      }
+
+      // 2. Insert the packing item.
+      const { data: pRow } = await (supabase as any)
+        .from("trip_packing_items")
+        .insert({ trip_id: trip.id, label, sort_order: packing.length })
+        .select("*").single();
+      if (pRow) setPacking([...packing, pRow as PackingRow]);
+
+      // 3. Store a matching gear row so the packing card shows the Amazon link + notes.
+      if (affiliateUrl) {
+        const { data: gRow } = await (supabase as any)
+          .from("trip_gear_items")
+          .insert({
+            trip_id: trip.id,
+            product: { title: label, affiliate_url: affiliateUrl },
+          })
+          .select("*").single();
+        if (gRow) setGear([...gear, gRow as GearRow]);
+      }
+    } finally {
+      setAddingPacking(false);
+      setNewPacking("");
+    }
   };
   const removePacking = async (id: string) => {
+    const item = packing.find((p) => p.id === id);
     await (supabase as any).from("trip_packing_items").delete().eq("id", id);
     setPacking(packing.filter((p) => p.id !== id));
+    // Also remove any matching gear row so the affiliate card disappears with the item.
+    if (item) {
+      const label = item.label.toLowerCase();
+      const match = gear.find((g) => String(g.product?.title ?? "").toLowerCase() === label);
+      if (match) {
+        await (supabase as any).from("trip_gear_items").delete().eq("id", match.id);
+        setGear(gear.filter((g) => g.id !== match.id));
+      }
+    }
   };
   const updatePackingNotes = async (id: string, notes: string) => {
     setPacking(packing.map((p) => p.id === id ? { ...p, notes } : p));
     await (supabase as any).from("trip_packing_items").update({ notes }).eq("id", id);
   };
 
-  const toggleGear = async (item: GearRow) => {
-    const next = !item.purchased;
-    setGear(gear.map((g) => g.id === item.id ? { ...g, purchased: next } : g));
-    await (supabase as any).from("trip_gear_items").update({ purchased: next }).eq("id", item.id);
-  };
-  const addGear = async () => {
-    if (!trip || !newGearTitle.trim()) return;
-    const product: any = { title: newGearTitle.trim() };
-    if (newGearUrl.trim()) product.affiliate_url = newGearUrl.trim();
-    const { data } = await (supabase as any)
-      .from("trip_gear_items")
-      .insert({ trip_id: trip.id, product })
-      .select("*").single();
-    if (data) setGear([...gear, data as GearRow]);
-    setNewGearTitle("");
-    setNewGearUrl("");
-  };
-  const removeGear = async (id: string) => {
-    await (supabase as any).from("trip_gear_items").delete().eq("id", id);
-    setGear(gear.filter((g) => g.id !== id));
-  };
-  const updateGearNotes = async (id: string, notes: string) => {
-    setGear(gear.map((g) => g.id === id ? { ...g, notes } : g));
-    await (supabase as any).from("trip_gear_items").update({ notes }).eq("id", id);
-  };
 
 
 
