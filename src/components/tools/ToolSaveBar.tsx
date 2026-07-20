@@ -180,48 +180,77 @@ const ToolSaveBar = ({ toolType, label, destination, payload, onExportPdf, onCop
           {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
           {activeTrip ? `Add to ${activeTrip.name}` : "Save to a trip"}
         </Button>
-        <Dialog open={pickerOpen} onOpenChange={setPickerOpen}>
+        <Dialog open={pickerOpen} onOpenChange={(o) => { setPickerOpen(o); if (!o) setLegPickerFor(null); }}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle className="font-display">Add to a trip</DialogTitle>
+              <DialogTitle className="font-display">
+                {legPickerFor ? `Which stop on "${legPickerFor.trip_name}"?` : "Add to a trip"}
+              </DialogTitle>
             </DialogHeader>
-            <div className="space-y-3">
-              {loadingTrips ? (
-                <p className="text-sm text-muted-foreground">Loading...</p>
-              ) : trips.length > 0 ? (
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Choose a trip</p>
-                  <div className="space-y-1 max-h-56 overflow-y-auto">
-                    {trips.map((t) => (
-                      <button
-                        key={t.id}
-                        onClick={() => saveToTrip(t)}
-                        className="w-full text-left px-3 py-2 rounded-lg border bg-background hover:bg-muted transition-colors text-sm font-medium"
-                      >
-                        {t.trip_name}
-                      </button>
-                    ))}
+            {legPickerFor ? (
+              <div className="space-y-2">
+                <div className="space-y-1 max-h-64 overflow-y-auto">
+                  {legs.map((l) => (
+                    <button
+                      key={l.id}
+                      onClick={() => doSave(legPickerFor, l.id)}
+                      className="w-full text-left px-3 py-2 rounded-lg border bg-background hover:bg-muted transition-colors text-sm"
+                    >
+                      <div className="font-medium">{l.name}</div>
+                      {l.destination && <div className="text-xs text-muted-foreground">{l.destination}</div>}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => doSave(legPickerFor, null)}
+                    className="w-full text-left px-3 py-2 rounded-lg border border-dashed bg-background hover:bg-muted transition-colors text-xs text-muted-foreground"
+                  >
+                    Save to the whole trip instead
+                  </button>
+                </div>
+                <button onClick={() => setLegPickerFor(null)} className="text-xs text-muted-foreground hover:text-foreground">
+                  ← Back to trips
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {loadingTrips ? (
+                  <p className="text-sm text-muted-foreground">Loading...</p>
+                ) : trips.length > 0 ? (
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Choose a trip</p>
+                    <div className="space-y-1 max-h-56 overflow-y-auto">
+                      {trips.map((t) => (
+                        <button
+                          key={t.id}
+                          onClick={() => saveToTrip(t)}
+                          className="w-full text-left px-3 py-2 rounded-lg border bg-background hover:bg-muted transition-colors text-sm font-medium flex items-center justify-between"
+                        >
+                          <span>{t.trip_name}</span>
+                          {t.is_multi_destination && <span className="text-[10px] uppercase tracking-wide text-muted-foreground">multi-stop</span>}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">No trips yet, create one below.</p>
-              )}
-              <form
-                onSubmit={(e) => { e.preventDefault(); void createTripAndSave(); }}
-                className="border-t pt-3"
-              >
-                <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Or new trip</p>
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Trip name"
-                    value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
-                    maxLength={60}
-                  />
-                  <Button type="submit" disabled={!newName.trim() || saving}>Create</Button>
-                </div>
-              </form>
-            </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No trips yet, create one below.</p>
+                )}
+                <form
+                  onSubmit={(e) => { e.preventDefault(); void createTripAndSave(); }}
+                  className="border-t pt-3"
+                >
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Or new trip</p>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Trip name"
+                      value={newName}
+                      onChange={(e) => setNewName(e.target.value)}
+                      maxLength={60}
+                    />
+                    <Button type="submit" disabled={!newName.trim() || saving}>Create</Button>
+                  </div>
+                </form>
+              </div>
+            )}
           </DialogContent>
         </Dialog>
       </>
