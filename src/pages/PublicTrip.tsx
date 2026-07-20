@@ -7,7 +7,8 @@ import SEOHead from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import HotelReviewCard from "@/components/trips/HotelReviewCard";
-import { MapPin, Calendar, Hotel, ListChecks, Backpack, Star, Eye, Route, ExternalLink } from "lucide-react";
+import { MapPin, Calendar, Hotel, ListChecks, Backpack, Star, Eye, Route, ExternalLink, Share2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface PublicData {
   trip: any;
