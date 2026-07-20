@@ -73,6 +73,8 @@ const TripWorkspace = () => {
   const [transit, setTransit] = useState<TransitRow[]>([]);
   const [newPacking, setNewPacking] = useState("");
   const [newDayTitle, setNewDayTitle] = useState("");
+  const [packingExpanded, setPackingExpanded] = useState(false);
+  const [gearExpanded, setGearExpanded] = useState(false);
 
   const logistics = logisticsAll.find((l) => l.leg_id === null) ?? null;
 
@@ -312,36 +314,89 @@ const TripWorkspace = () => {
             <Input placeholder="Add item..." value={newPacking} onChange={(e) => setNewPacking(e.target.value)} />
             <Button type="submit" size="sm" className="gap-1" disabled={!newPacking.trim()}><Plus className="h-4 w-4" /> Add</Button>
           </form>
-          {packing.length === 0 ? <Empty msg="Nothing on your list yet." /> : (
-            <ul className="grid gap-2 sm:grid-cols-2">
-              {packing.map((p) => (
-                <li key={p.id} className="flex items-center gap-2 bg-background border rounded-lg px-3 py-2">
-                  <input type="checkbox" checked={p.checked} onChange={() => togglePacking(p)} className="h-4 w-4" />
-                  <span className={`flex-1 ${p.checked ? "line-through text-muted-foreground" : ""}`}>{p.label}</span>
-                  <button onClick={() => removePacking(p.id)} className="text-muted-foreground hover:text-destructive">
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+          {packing.length === 0 ? <Empty msg="Nothing on your list yet." /> : (() => {
+            const gearByLabel = new Map<string, any>();
+            for (const g of gear) {
+              const t = g.product?.title ? String(g.product.title).toLowerCase() : null;
+              if (t && !gearByLabel.has(t)) gearByLabel.set(t, g.product);
+            }
+            const visible = packingExpanded ? packing : packing.slice(0, 4);
+            return (
+              <>
+                <ul className="grid gap-2 sm:grid-cols-2">
+                  {visible.map((p) => {
+                    const product = gearByLabel.get(p.label.toLowerCase());
+                    const affiliateUrl = product?.affiliate_url;
+                    return (
+                      <li key={p.id} className="flex items-center gap-2 bg-background border rounded-lg px-3 py-2">
+                        <input type="checkbox" checked={p.checked} onChange={() => togglePacking(p)} className="h-4 w-4" />
+                        {affiliateUrl ? (
+                          <a
+                            href={affiliateUrl}
+                            target="_blank"
+                            rel="noopener noreferrer sponsored"
+                            className={`flex-1 min-w-0 truncate inline-flex items-center gap-1 hover:text-primary hover:underline ${p.checked ? "line-through text-muted-foreground" : "text-foreground"}`}
+                            title={p.label}
+                          >
+                            <span className="truncate">{p.label}</span>
+                            <ExternalLink className="h-3 w-3 shrink-0 opacity-60" />
+                          </a>
+                        ) : (
+                          <span className={`flex-1 ${p.checked ? "line-through text-muted-foreground" : ""}`}>{p.label}</span>
+                        )}
+                        <button onClick={() => removePacking(p.id)} className="text-muted-foreground hover:text-destructive shrink-0">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+                {packing.length > 4 && (
+                  <div className="mt-3 flex justify-center">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setPackingExpanded((v) => !v)}
+                      className="text-primary"
+                    >
+                      {packingExpanded ? "Show less" : `Show all ${packing.length} items`}
+                    </Button>
+                  </div>
+                )}
+                <p className="text-[10px] text-muted-foreground mt-2 text-center">
+                  Amazon links may earn us a commission at no extra cost to you.
+                </p>
+              </>
+            );
+          })()}
         </Section>
 
         {/* Gear */}
         <Section title="Gear picks" icon={ShoppingBag} cta={<Button asChild variant="outline" size="sm"><Link to="/gear">Browse gear</Link></Button>}>
           {gear.length === 0 ? <Empty msg="No gear saved yet." /> : (
             <div className="grid gap-3 md:grid-cols-2">
-              {gear.map((g) => (
-                <a key={g.id} href={g.product?.affiliate_url || "#"} target="_blank" rel="noopener noreferrer"
+              {(gearExpanded ? gear : gear.slice(0, 4)).map((g) => (
+                <a key={g.id} href={g.product?.affiliate_url || "#"} target="_blank" rel="noopener noreferrer sponsored"
                   className="bg-background border rounded-xl p-3 hover:shadow-soft transition-shadow flex items-center gap-3">
-                  {g.product?.image_url && <img src={g.product.image_url} alt="" className="h-12 w-12 object-cover rounded" />}
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate">{g.product?.title ?? "Gear item"}</p>
                     {g.product?.price && <p className="text-xs text-muted-foreground">{g.product.price}</p>}
                   </div>
-                  <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                  <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
                 </a>
               ))}
+              {gear.length > 4 && (
+                <div className="md:col-span-2 flex justify-center">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setGearExpanded((v) => !v)}
+                    className="text-primary"
+                  >
+                    {gearExpanded ? "Show less" : `Show all ${gear.length} picks`}
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </Section>
