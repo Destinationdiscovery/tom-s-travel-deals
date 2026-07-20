@@ -421,8 +421,6 @@ const TripWorkspace = () => {
               <div className="grid gap-3 md:grid-cols-2">
                 {(gearExpanded ? gear : gear.slice(0, 4)).map((g) => {
                   const url = g.product?.affiliate_url;
-                  const notesKey = `g-${g.id}`;
-                  const notesOpen = !!openNotes[notesKey] || !!(g.notes && g.notes.trim());
                   return (
                     <div key={g.id} className="bg-background border rounded-xl p-3">
                       <div className="flex items-center gap-2">
@@ -438,26 +436,17 @@ const TripWorkspace = () => {
                             {g.product?.title ?? "Gear item"}
                           </span>
                         )}
-                        <button
-                          onClick={() => setOpenNotes((s) => ({ ...s, [notesKey]: !s[notesKey] }))}
-                          className={`shrink-0 ${notesOpen ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
-                          title="Add notes"
-                        >
-                          <StickyNote className="h-4 w-4" />
-                        </button>
                         <button onClick={() => removeGear(g.id)} className="text-muted-foreground hover:text-destructive shrink-0">
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
                       {g.product?.price && <p className="text-xs text-muted-foreground mt-1 pl-6">{g.product.price}</p>}
-                      {notesOpen && (
-                        <Textarea
-                          value={g.notes ?? ""}
-                          onChange={(e) => updateGearNotes(g.id, e.target.value)}
-                          placeholder="How useful was this? Notes for next trip..."
-                          className="mt-2 text-xs min-h-[60px]"
-                        />
-                      )}
+                      <Textarea
+                        defaultValue={g.notes ?? ""}
+                        onChange={(e) => updateGearNotes(g.id, e.target.value)}
+                        placeholder="How useful was this? Notes for next trip..."
+                        className="mt-2 text-xs min-h-[52px]"
+                      />
                     </div>
                   );
                 })}
