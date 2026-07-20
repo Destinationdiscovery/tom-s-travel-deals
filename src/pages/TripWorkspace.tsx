@@ -73,6 +73,8 @@ const TripWorkspace = () => {
   const [transit, setTransit] = useState<TransitRow[]>([]);
   const [newPacking, setNewPacking] = useState("");
   const [newDayTitle, setNewDayTitle] = useState("");
+  const [packingExpanded, setPackingExpanded] = useState(false);
+  const [gearExpanded, setGearExpanded] = useState(false);
 
   const logistics = logisticsAll.find((l) => l.leg_id === null) ?? null;
 
