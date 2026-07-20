@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 
 import TripLegsSection, { type Leg } from "@/components/trips/TripLegsSection";
+import TripPackingGenerator from "@/components/trips/TripPackingGenerator";
 
 interface Trip {
   id: string;
@@ -304,6 +305,7 @@ const TripWorkspace = () => {
 
         {/* Packing */}
         <Section title="Packing list" icon={Backpack}>
+          <TripPackingGenerator tripId={trip.id} destination={trip.destination} onDone={load} />
           <form onSubmit={(e) => { e.preventDefault(); void addPacking(); }} className="flex gap-2 mb-3">
             <Input placeholder="Add item..." value={newPacking} onChange={(e) => setNewPacking(e.target.value)} />
             <Button type="submit" size="sm" className="gap-1" disabled={!newPacking.trim()}><Plus className="h-4 w-4" /> Add</Button>
