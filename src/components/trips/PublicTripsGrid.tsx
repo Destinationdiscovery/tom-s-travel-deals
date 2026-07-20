@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MapPin, Hotel, Calendar, Eye, ArrowRight } from "lucide-react";
+import { MapPin, Hotel, Calendar, Eye, ArrowRight, Share2 } from "lucide-react";
 
 interface TripCard {
   id: string;
