@@ -302,8 +302,19 @@ const MyTrips = () => {
               <DialogTitle className="font-display">Create a Trip</DialogTitle>
             </DialogHeader>
             <form onSubmit={(e) => { e.preventDefault(); void handleCreate(); }} className="flex flex-col gap-3 pt-2">
-              <Input placeholder="Trip name (e.g. Mexico 2026)" value={newName} onChange={(e) => setNewName(e.target.value)} maxLength={60} autoFocus />
-              <Input placeholder="Destination (optional)" value={newDest} onChange={(e) => setNewDest(e.target.value)} maxLength={80} />
+              <Input placeholder="Trip name (e.g. Italy 2026)" value={newName} onChange={(e) => setNewName(e.target.value)} maxLength={60} autoFocus />
+              <Input placeholder={newMulti ? "First stop (optional)" : "Destination (optional)"} value={newDest} onChange={(e) => setNewDest(e.target.value)} maxLength={80} />
+              <div className="rounded-lg border p-3 space-y-2">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Trip type</p>
+                <label className="flex items-start gap-2 text-sm cursor-pointer">
+                  <input type="radio" checked={!newMulti} onChange={() => setNewMulti(false)} className="mt-0.5" />
+                  <span><b>Single destination</b> — one place (e.g. an all-inclusive, city break).</span>
+                </label>
+                <label className="flex items-start gap-2 text-sm cursor-pointer">
+                  <input type="radio" checked={newMulti} onChange={() => setNewMulti(true)} className="mt-0.5" />
+                  <span><b>Multiple destinations</b> — add stops with dates, hotels, and transit between them.</span>
+                </label>
+              </div>
               <Button type="submit" disabled={!newName.trim()}>Create Trip</Button>
             </form>
           </DialogContent>
