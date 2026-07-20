@@ -57,6 +57,7 @@ const TripWorkspace = () => {
   const [days, setDays] = useState<DayRow[]>([]);
   const [packing, setPacking] = useState<PackingRow[]>([]);
   const [gear, setGear] = useState<GearRow[]>([]);
+  const [logistics, setLogistics] = useState<LogisticsRow | null>(null);
   const [newPacking, setNewPacking] = useState("");
   const [newDayTitle, setNewDayTitle] = useState("");
 
