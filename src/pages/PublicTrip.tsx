@@ -26,6 +26,25 @@ const PublicTrip = () => {
   const [data, setData] = useState<PublicData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  const handleShare = async () => {
+    if (!slug) return;
+    const url = `${window.location.origin}/trips/${slug}`;
+    const title = data?.trip?.trip_name ?? "Trip plan";
+    try {
+      if (navigator.share) {
+        await navigator.share({ title, url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast({ title: "Link copied", description: "Share it with friends." });
+      }
+      await (supabase as any).rpc("increment_trip_share", { _slug: slug });
+      setData((d) => d ? { ...d, trip: { ...d.trip, share_count: (d.trip.share_count ?? 0) + 1 } } : d);
+    } catch {
+      // user dismissed share sheet
+    }
+  };
 
   useEffect(() => {
     (async () => {
