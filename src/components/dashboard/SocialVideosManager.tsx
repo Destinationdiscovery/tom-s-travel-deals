@@ -134,7 +134,12 @@ const SocialVideosManager = () => {
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <Label>Platform</Label>
-              <Select value={form.platform} onValueChange={(v) => setForm((f) => ({ ...f, platform: v as SocialPlatform }))}>
+              <Select value={form.platform} onValueChange={(v) => setForm((f) => {
+                const platform = v as SocialPlatform;
+                const currentDefault = DEFAULT_PROFILE_URLS[f.platform];
+                const shouldSwap = !f.profile_url || f.profile_url === currentDefault;
+                return { ...f, platform, profile_url: shouldSwap ? DEFAULT_PROFILE_URLS[platform] : f.profile_url };
+              })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="tiktok">TikTok</SelectItem>
