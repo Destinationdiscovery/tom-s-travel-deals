@@ -24,10 +24,16 @@ interface Row {
   is_active: boolean;
 }
 
+const DEFAULT_PROFILE_URLS: Record<SocialPlatform, string> = {
+  tiktok: "https://www.tiktok.com/@reviewthengo.com?_r=1&_t=ZS-98DgT1BJ6uo",
+  instagram: "",
+  youtube: "",
+};
+
 const emptyForm = {
   platform: "tiktok" as SocialPlatform,
   video_url: "",
-  profile_url: "",
+  profile_url: DEFAULT_PROFILE_URLS.tiktok,
   thumbnail_url: "",
   caption: "",
   review_slug: "",
