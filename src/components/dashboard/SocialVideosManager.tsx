@@ -24,10 +24,16 @@ interface Row {
   is_active: boolean;
 }
 
+const DEFAULT_PROFILE_URLS: Record<SocialPlatform, string> = {
+  tiktok: "https://www.tiktok.com/@reviewthengo.com?_r=1&_t=ZS-98DgT1BJ6uo",
+  instagram: "",
+  youtube: "",
+};
+
 const emptyForm = {
   platform: "tiktok" as SocialPlatform,
   video_url: "",
-  profile_url: "",
+  profile_url: DEFAULT_PROFILE_URLS.tiktok,
   thumbnail_url: "",
   caption: "",
   review_slug: "",
@@ -128,7 +134,12 @@ const SocialVideosManager = () => {
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <Label>Platform</Label>
-              <Select value={form.platform} onValueChange={(v) => setForm((f) => ({ ...f, platform: v as SocialPlatform }))}>
+              <Select value={form.platform} onValueChange={(v) => setForm((f) => {
+                const platform = v as SocialPlatform;
+                const currentDefault = DEFAULT_PROFILE_URLS[f.platform];
+                const shouldSwap = !f.profile_url || f.profile_url === currentDefault;
+                return { ...f, platform, profile_url: shouldSwap ? DEFAULT_PROFILE_URLS[platform] : f.profile_url };
+              })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="tiktok">TikTok</SelectItem>
