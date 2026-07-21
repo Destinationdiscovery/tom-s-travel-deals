@@ -181,7 +181,7 @@ const Index = () => {
         </section>
 
         <ToolsDirectorySection />
-        <BlogPreviewSection />
+        <AggregateStatsSection>
         <AggregateStatsSection />
         <AboutPreviewSection />
         <HomepageFAQ />
