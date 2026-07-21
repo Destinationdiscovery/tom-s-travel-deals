@@ -150,6 +150,7 @@ const Index = () => {
         </div>
 
         <HowItWorks />
+        <BlogPreviewSection />
         <NewsletterCTASection sourceSlug="compass-homepage" interests={["compass"]} />
         <TravelersAskSection />
         <TrendingQueriesSection />
@@ -180,7 +181,6 @@ const Index = () => {
         </section>
 
         <ToolsDirectorySection />
-        <BlogPreviewSection />
         <AggregateStatsSection />
         <AboutPreviewSection />
         <HomepageFAQ />
