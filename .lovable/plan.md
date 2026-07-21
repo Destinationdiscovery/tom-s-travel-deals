@@ -1,78 +1,48 @@
 
-# Shareable Trip Plans + Personal Hotel Reviews
+# Social Video Cards Beside Reviews
 
-Turn any trip into a polished, read-only "trip story" that anyone can view on the site. Owners choose when to publish, add a structured mini-review for each hotel they stayed at, and other users can browse published trips in a new gallery.
+Add a new content type: social videos (TikTok, Instagram Reels, YouTube Shorts) that you manage from the admin dashboard and appear alongside review cards on the homepage and on individual review pages. Videos play inline; a small icon on each card links out to your profile.
 
-## Recommendation on your open question
+## What you'll see
 
-**Yes, let all signed-in users publish their trips.** It gives you free, authentic, SEO-friendly content (real itineraries with real reviews), and it mirrors how Wanderlog / Polarsteps grew. Guardrails:
+**Admin (`/gear-admin`)** — new "Social Videos" panel:
+- Add a video: platform (TikTok / Instagram / YouTube), video URL, thumbnail image (upload or paste URL), caption, optional review slug to attach it to, sort order, active toggle.
+- Edit, reorder, delete.
 
-- Publishing requires being signed in (already true to create a trip).
-- Owner must explicitly click **Publish** per trip. Default is private.
-- Owner can **Unpublish** anytime, which invalidates the public URL and removes it from the gallery.
-- New trips get a "Publish" checklist (needs title, destination, at least 1 stop) before the button unlocks, so the gallery stays high quality.
-- Admin (you) can hide any trip from the gallery via a boolean flag, without deleting it.
+**Homepage** — new "Watch real trips" row directly under the "Explore real trips" gallery, showing up to 6 active videos as cards.
 
-## User experience
+**Review page (`/review/:slug`)** — a "See it on video" strip near the top showing videos where `review_slug` matches (falls back to hiding the strip if none exist).
 
-### For the trip owner
-1. In `TripWorkspace`, a new **Share** panel shows:
-   - Status pill: Draft / Published
-   - "Publish trip" button (or "Unpublish")
-   - Once published: copyable public URL + "List in public gallery" toggle
-   - Per-hotel **"Add your review"** button that opens a structured form (rating, one-line verdict, pros, cons, notes, stayed-on dates)
-2. Their own review shows inline next to the aggregated ReviewThenGo review on the shared view.
-
-### For a visitor
-1. Lands on `/trips/:slug` (pretty slug, not a token) and sees the full itinerary read-only: legs, transit, hotels, best-time, safety, packing list, etc.
-2. Each hotel shows: the ReviewThenGo aggregated review summary + the owner's personal mini-review side-by-side, with a link to the full `/review/:slug` page.
-3. Header shows author name, destination, dates, "X people saved this."
-4. No email gate. A single soft CTA at the bottom: "Get trip ideas like this in your inbox" (existing Compass capture).
-5. Browsable gallery at `/trips` with filters (destination, duration, trip type) and cards showing hero image, title, author, length, hotel count.
+**Card behavior** — thumbnail with a play button overlay. Click plays inline (TikTok/Instagram/YouTube embed iframe in a modal). A small platform icon (TikTok/IG/YT) in the corner links directly to your profile in a new tab.
 
 ## Technical section
 
-### Database (single migration)
-- `trips` — add columns:
-  - `is_published boolean NOT NULL DEFAULT false`
-  - `published_at timestamptz`
-  - `public_slug text UNIQUE` (generated from trip_name + short hash on first publish; keep existing `share_token` as a private preview link)
-  - `list_in_gallery boolean NOT NULL DEFAULT true`
-  - `hidden_by_admin boolean NOT NULL DEFAULT false`
-  - `author_display_name text`, `cover_image_url text` (optional, editable at publish time)
-  - `view_count int NOT NULL DEFAULT 0`
-- New table `trip_hotel_reviews`:
-  - `id`, `trip_hotel_id` (FK, unique — one review per hotel per trip), `user_id`, `overall_rating numeric(2,1)`, `verdict text`, `pros text[]`, `cons text[]`, `notes text`, `stayed_from date`, `stayed_to date`, timestamps
-  - GRANT to authenticated + service_role
-  - RLS: owner can CRUD their own; anon/auth can SELECT rows whose parent trip is published & not hidden
-- Update `get_shared_trip` RPC (SECURITY DEFINER) to:
-  - Accept either token OR public_slug
-  - Only return rows when `is_published AND NOT hidden_by_admin`
-  - Include `trip_hotel_reviews` joined per hotel
-  - Include author display name (from `profiles`)
-- New RPC `list_public_trips(_limit, _offset, _destination)` returning gallery card data (SECURITY DEFINER, filters `is_published AND list_in_gallery AND NOT hidden_by_admin`).
-- Keep existing token-based sharing for pre-publish preview.
+### Database
+New table `social_videos`:
+- `platform text` (check: tiktok | instagram | youtube)
+- `video_url text` (link to the original post)
+- `embed_url text` (auto-derived for iframe: TikTok oEmbed, IG reel, YouTube embed)
+- `profile_url text` (your profile link for that platform, stored per-video for flexibility)
+- `thumbnail_url text`
+- `caption text`
+- `review_slug text` (nullable — attaches to a specific review page)
+- `sort_order int`, `is_active bool`, `created_at`, `updated_at`
+
+Grants + RLS:
+- `GRANT SELECT` to anon + authenticated (public read of active rows).
+- `GRANT ALL` to service_role.
+- RLS: public SELECT where `is_active = true`; INSERT/UPDATE/DELETE only for admin (`has_role(auth.uid(), 'admin')`).
+
+Thumbnails reuse the existing `blog-images` storage bucket (already public).
 
 ### Frontend
-- New page `src/pages/PublicTrip.tsx` at route `/trips/:slug` — renders full itinerary read-only, uses updated `get_shared_trip`. Reuse blocks from existing `SharedTrip.tsx` and `TripWorkspace.tsx` (extract shared read-only components: `HotelBlock`, `TransitBlock`, `PackingBlock`, `LogisticsBlock`).
-- New page `src/pages/PublicTripsGallery.tsx` at `/trips` — grid of cards, destination filter, pagination.
-- New component `src/components/trips/HotelReviewForm.tsx` — structured form (rating slider, verdict input, pros/cons multi-tag, notes textarea, stay dates). Autosaves.
-- New component `src/components/trips/HotelReviewCard.tsx` — displays the mini-review; used in both owner workspace and public trip page.
-- New component `src/components/trips/PublishTripPanel.tsx` — publish/unpublish, slug preview, gallery toggle, cover image URL, author display name. Runs "publishability check" (title/destination/≥1 leg) before enabling Publish.
-- `TripWorkspace.tsx` — mount `PublishTripPanel` at the top and an "Add your review" button on each hotel row.
-- `Header.tsx` — add "Explore trips" link pointing to `/trips`.
-- SEO: `PublicTrip.tsx` sets title/description/OG based on trip name + destination; add JSON-LD `TravelAction`/`ItemList`. Add published trips to `generate-sitemap` edge function.
-- Admin: add "Trips" tab in the existing CRM/admin dashboard listing published trips with a "Hide from gallery" toggle (sets `hidden_by_admin`).
+- `src/components/dashboard/SocialVideosManager.tsx` — CRUD panel mounted in the admin dashboard (add to `DashboardSidebar.tsx` / `GearAdmin.tsx` routing).
+- `src/components/social/SocialVideoCard.tsx` — thumbnail + play overlay + platform icon linking to `profile_url`.
+- `src/components/social/SocialVideoModal.tsx` — inline iframe player (uses embed URL per platform).
+- `src/components/social/SocialVideoRow.tsx` — horizontal scroll row of cards; accepts optional `reviewSlug` filter and a title.
+- Mount on `src/pages/Index.tsx` right below `PublicTripsGrid`.
+- Mount on `src/pages/AIReview.tsx` (review detail page) near the top, filtered by current slug, hidden when no matches.
 
-### Out of scope for this pass
-- Email delivery of the full plan (deferred; visitor just visits the public URL).
-- PDF export.
-- Comments on trips (existing `comments` table can be wired later via `page_type = 'trip'`).
-
-### Rollout order
-1. Migration (schema + RPC updates + RLS + grants).
-2. `HotelReviewForm` + `HotelReviewCard` + owner-side editing in `TripWorkspace`.
-3. `PublishTripPanel` + publish/unpublish flow + slug generation.
-4. `PublicTrip.tsx` page + route + SEO.
-5. `PublicTripsGallery.tsx` + `/trips` route + Header link + sitemap.
-6. Admin hide toggle.
+### Out of scope
+- Auto-pulling videos from TikTok/Instagram/YouTube APIs.
+- Analytics on video plays (can be added later using the existing `tool_search_events` pattern).
