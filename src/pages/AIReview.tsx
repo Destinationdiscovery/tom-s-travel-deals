@@ -179,6 +179,9 @@ const AIReview = () => {
               affiliateUrl={affiliateUrl ?? undefined}
             />
             {slug && (
+              <SocialVideoRow title="See it on video" reviewSlug={slug} limit={8} />
+            )}
+            {slug && (
               <div className="container mx-auto px-4 py-8 max-w-6xl">
                 <ReviewEngagement slug={slug} pageType="ai-review" />
               </div>
