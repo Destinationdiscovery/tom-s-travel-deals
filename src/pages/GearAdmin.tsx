@@ -15,6 +15,7 @@ import FeaturedDealsManager from "@/components/dashboard/FeaturedDealsManager";
 import FeaturedReviewsManager from "@/components/dashboard/FeaturedReviewsManager";
 import BannerDealsManager from "@/components/dashboard/BannerDealsManager";
 import CompassDashboard from "@/components/dashboard/compass/CompassDashboard";
+import SocialVideosManager from "@/components/dashboard/SocialVideosManager";
 import SEOHead from "@/components/SEOHead";
 
 const GearAdmin = () => {
@@ -64,6 +65,7 @@ const GearAdmin = () => {
           {activeTab === "blog" && <BlogPostCreator />}
           {activeTab === "gear" && <GearImageManager />}
           {activeTab === "compass" && <CompassDashboard />}
+          {activeTab === "social-videos" && <SocialVideosManager />}
         </main>
       </div>
     </div>

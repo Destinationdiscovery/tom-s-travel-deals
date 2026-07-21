@@ -13,6 +13,7 @@ import type { CachedReview } from "@/hooks/useGenerateReview";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useReviewHistory } from "@/hooks/useReviewHistory";
 import SEOHead from "@/components/SEOHead";
+import SocialVideoRow from "@/components/social/SocialVideoRow";
 
 const AIReview = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -178,6 +179,9 @@ const AIReview = () => {
               onNewReview={handleNewReview}
               affiliateUrl={affiliateUrl ?? undefined}
             />
+            {slug && (
+              <SocialVideoRow title="See it on video" reviewSlug={slug} limit={8} />
+            )}
             {slug && (
               <div className="container mx-auto px-4 py-8 max-w-6xl">
                 <ReviewEngagement slug={slug} pageType="ai-review" />

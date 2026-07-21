@@ -1051,6 +1051,51 @@ export type Database = {
         }
         Relationships: []
       }
+      social_videos: {
+        Row: {
+          caption: string | null
+          created_at: string
+          embed_url: string | null
+          id: string
+          is_active: boolean
+          platform: string
+          profile_url: string | null
+          review_slug: string | null
+          sort_order: number
+          thumbnail_url: string | null
+          updated_at: string
+          video_url: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          embed_url?: string | null
+          id?: string
+          is_active?: boolean
+          platform: string
+          profile_url?: string | null
+          review_slug?: string | null
+          sort_order?: number
+          thumbnail_url?: string | null
+          updated_at?: string
+          video_url: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          embed_url?: string | null
+          id?: string
+          is_active?: boolean
+          platform?: string
+          profile_url?: string | null
+          review_slug?: string | null
+          sort_order?: number
+          thumbnail_url?: string | null
+          updated_at?: string
+          video_url?: string
+        }
+        Relationships: []
+      }
       subscribers: {
         Row: {
           country: string | null
