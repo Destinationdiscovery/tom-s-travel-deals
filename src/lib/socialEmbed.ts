@@ -21,7 +21,7 @@ export function deriveEmbedUrl(platform: SocialPlatform, url: string): string {
       const parts = u.pathname.split("/").filter(Boolean);
       const vIdx = parts.indexOf("video");
       const id = vIdx >= 0 ? parts[vIdx + 1] : parts[parts.length - 1];
-      return id ? `https://www.tiktok.com/embed/v2/${id}` : url;
+      return id ? `https://www.tiktok.com/player/v1/${id}?music_info=1&description=1` : url;
     }
     if (platform === "instagram") {
       // https://www.instagram.com/reel/<id>/  or /p/<id>/
