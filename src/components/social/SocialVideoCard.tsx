@@ -77,6 +77,7 @@ const SocialVideoCard = ({ video }: { video: SocialVideo }) => {
         open={open}
         onOpenChange={setOpen}
         embedUrl={embed}
+        videoUrl={video.video_url}
         caption={video.caption}
         platform={video.platform}
       />
