@@ -33,6 +33,7 @@ type EditDraft = {
   product_name: string; brand: string; category: string; hero_image_url: string;
   rating: string; pros_csv: string; cons_csv: string; notes: string; used_on: string;
   affiliate_url: string; price_range: string;
+  gallery_image_urls: string[];
 };
 
 const toDraft = (r: Review): EditDraft => ({
@@ -47,6 +48,7 @@ const toDraft = (r: Review): EditDraft => ({
   used_on: r.used_on ?? "",
   affiliate_url: r.affiliate_url ?? "",
   price_range: r.price_range ?? "",
+  gallery_image_urls: r.gallery_image_urls ?? [],
 });
 
 const FeaturedGearReviewsManager = () => {
