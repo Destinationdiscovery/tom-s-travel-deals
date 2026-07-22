@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEOHead from "@/components/SEOHead";
 import { supabase } from "@/integrations/supabase/client";
+import { ImageLightbox } from "@/components/ui/image-lightbox";
 import { Star, Check, X, ExternalLink, ArrowLeft, Luggage } from "lucide-react";
 
 interface Review {
