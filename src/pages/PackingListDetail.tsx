@@ -236,30 +236,8 @@ const PackingListDetail = () => {
           </div>
         )}
 
-        {/* Affiliate cards (optional, below) */}
-        {affiliateItems.length > 0 && (
-          <div className="max-w-4xl mx-auto mb-8">
-            <h2 className="font-display text-xl font-bold mb-3">Gear picks Tom uses</h2>
-            <p className="text-xs text-muted-foreground mb-4">Affiliate links, may earn a commission at no cost to you.</p>
-            <ul className="grid gap-3 sm:grid-cols-2">
-              {affiliateItems.map((it) => (
-                <li key={it.id} className="bg-card border border-border rounded-xl p-3 flex gap-3">
-                  <div className="w-14 h-14 rounded-lg bg-muted overflow-hidden shrink-0 flex items-center justify-center">
-                    {it.image_url ? <img src={it.image_url} alt={it.label} className="w-full h-full object-cover" /> : <Package className="h-5 w-5 text-muted-foreground" />}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium text-foreground">{it.label}</p>
-                    {it.notes && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{it.notes}</p>}
-                    <a href={it.amazon_url!} target="_blank" rel="noopener sponsored"
-                      className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline mt-1">
-                      View on Amazon <ExternalLink className="h-3 w-3" />
-                    </a>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        {/* Affiliate cards removed - clean checklist only */}
+
 
         <div className="mt-10 bg-card border border-border rounded-2xl p-6 text-center">
           <h3 className="font-display text-xl font-bold mb-2">Want to save this to your own trip?</h3>
