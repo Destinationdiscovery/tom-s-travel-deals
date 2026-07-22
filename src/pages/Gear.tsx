@@ -9,8 +9,9 @@ import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useGearIntel } from "@/hooks/useGearIntel";
-import { GearLoading, PackingResultCard, ProductReviewPanel, GearCitations, PackingNarrative } from "@/components/gear/GearResults";
+import { GearLoading, PackingNarrative } from "@/components/gear/GearResults";
 import PackingChecklist from "@/components/gear/PackingChecklist";
+
 import ToolSaveBar from "@/components/tools/ToolSaveBar";
 import SEOHead from "@/components/SEOHead";
 import { supabase } from "@/integrations/supabase/client";
