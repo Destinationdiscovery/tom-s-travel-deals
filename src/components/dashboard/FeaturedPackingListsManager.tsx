@@ -22,11 +22,13 @@ interface List {
   source: string; source_trip_id: string | null; is_published: boolean;
   published_at: string | null; sort_order: number;
   narrative?: string | null; source_query?: string | null;
+  admin_notes?: string | null;
 }
 interface Item {
   id: string; list_id: string; label: string; category: string | null;
   quantity: number | null; notes: string | null; amazon_url: string | null;
   image_url: string | null; sort_order: number;
+  is_custom?: boolean;
   // client-only extras from AI generate
   _brand?: string; _price?: string; _reason?: string;
 }
