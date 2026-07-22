@@ -38,7 +38,7 @@ const DEFAULT_CARDS: GearCard[] = [
 ];
 
 const Gear = () => {
-  const { loading, error, packingData, reviewData, reviewLoading, fetchPackingList, fetchProductReview, clearReview, clearAll } = useGearIntel();
+  const { loading, error, packingData, fetchPackingList, clearAll } = useGearIntel();
   const [searchQuery, setSearchQuery] = useState("");
   const [cards, setCards] = useState<GearCard[]>(DEFAULT_CARDS);
 
@@ -82,14 +82,8 @@ const Gear = () => {
 
   const handleSearch = () => {
     if (searchQuery.trim().length >= 2) {
-      clearReview();
       fetchPackingList(searchQuery.trim());
     }
-  };
-
-  const handleReviewProduct = (productName: string) => {
-    fetchProductReview(productName);
-    window.scrollTo({ top: 400, behavior: "smooth" });
   };
 
   const navigate = useNavigate();
@@ -99,7 +93,8 @@ const Gear = () => {
     navigate("/");
   };
 
-  const hasResults = packingData || reviewData || loading || reviewLoading;
+  const hasResults = packingData || loading;
+
 
   return (
     <div className="min-h-screen bg-background">
