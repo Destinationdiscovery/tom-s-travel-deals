@@ -911,11 +911,13 @@ export type Database = {
           description: string | null
           id: string
           is_published: boolean
+          narrative: string | null
           published_at: string | null
           season: string | null
           slug: string
           sort_order: number
           source: string
+          source_query: string | null
           source_trip_id: string | null
           title: string
           trip_types: string[] | null
@@ -929,11 +931,13 @@ export type Database = {
           description?: string | null
           id?: string
           is_published?: boolean
+          narrative?: string | null
           published_at?: string | null
           season?: string | null
           slug: string
           sort_order?: number
           source?: string
+          source_query?: string | null
           source_trip_id?: string | null
           title: string
           trip_types?: string[] | null
@@ -947,11 +951,13 @@ export type Database = {
           description?: string | null
           id?: string
           is_published?: boolean
+          narrative?: string | null
           published_at?: string | null
           season?: string | null
           slug?: string
           sort_order?: number
           source?: string
+          source_query?: string | null
           source_trip_id?: string | null
           title?: string
           trip_types?: string[] | null
