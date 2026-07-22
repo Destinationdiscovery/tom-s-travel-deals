@@ -43,9 +43,7 @@ Allow: /
 User-agent: *
 Allow: /
 
-# Static fallback (submit this one in Google Search Console)
-Sitemap: https://www.reviewthengo.com/sitemap.xml
-# Dynamic sitemap (auto-includes all DB content, zero maintenance)
+# Single source of truth: dynamic sitemap (auto-includes all published DB content)
 Sitemap: https://iomrjljlydboniioohkv.supabase.co/functions/v1/generate-sitemap
 # Full-text crawlable feeds for AI bots (every article body on a single page)
 # Compass articles:    https://iomrjljlydboniioohkv.supabase.co/functions/v1/articles-feed?expand=1
