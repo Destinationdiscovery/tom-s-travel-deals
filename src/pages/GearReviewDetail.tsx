@@ -111,6 +111,28 @@ const GearReviewDetail = () => {
           </div>
         </div>
 
+        {r.gallery_image_urls && r.gallery_image_urls.length > 0 && (() => {
+          const all = [r.hero_image_url, ...r.gallery_image_urls].filter(Boolean) as string[];
+          return (
+            <div className="mb-8">
+              <h2 className="font-display text-lg font-bold mb-3">More photos</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                {r.gallery_image_urls.map((url, i) => (
+                  <button
+                    key={i}
+                    onClick={() => { setLightboxIndex(all.indexOf(url)); setLightboxOpen(true); }}
+                    className="aspect-square rounded-xl overflow-hidden border border-border group focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    <img src={url} alt={`${r.product_name} photo ${i + 1}`} loading="lazy" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                  </button>
+                ))}
+              </div>
+              <ImageLightbox images={all} initialIndex={lightboxIndex} isOpen={lightboxOpen} onClose={() => setLightboxOpen(false)} />
+            </div>
+          );
+        })()}
+
+
         {(r.pros?.length || r.cons?.length) ? (
           <div className="grid md:grid-cols-2 gap-4 mb-8">
             {r.pros && r.pros.length > 0 && (
