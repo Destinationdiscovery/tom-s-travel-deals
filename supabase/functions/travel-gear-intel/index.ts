@@ -244,7 +244,7 @@ serve(async (req) => {
 
     const trimQuery = query.trim().toLowerCase();
     const userCountry = (country || "US").toUpperCase();
-    const cacheKey = `${type}:${trimQuery}`;
+    const cacheKey = `${type}-v2generic:${trimQuery}`;
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
