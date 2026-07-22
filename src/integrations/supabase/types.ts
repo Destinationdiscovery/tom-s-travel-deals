@@ -863,6 +863,7 @@ export type Database = {
           created_at: string
           id: string
           image_url: string | null
+          is_custom: boolean
           label: string
           list_id: string
           notes: string | null
@@ -875,6 +876,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          is_custom?: boolean
           label: string
           list_id: string
           notes?: string | null
@@ -887,6 +889,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          is_custom?: boolean
           label?: string
           list_id?: string
           notes?: string | null
@@ -905,6 +908,7 @@ export type Database = {
       }
       featured_packing_lists: {
         Row: {
+          admin_notes: string | null
           cover_image_url: string | null
           created_at: string
           created_by: string | null
@@ -925,6 +929,7 @@ export type Database = {
           view_count: number
         }
         Insert: {
+          admin_notes?: string | null
           cover_image_url?: string | null
           created_at?: string
           created_by?: string | null
@@ -945,6 +950,7 @@ export type Database = {
           view_count?: number
         }
         Update: {
+          admin_notes?: string | null
           cover_image_url?: string | null
           created_at?: string
           created_by?: string | null
