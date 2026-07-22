@@ -91,6 +91,8 @@ const PackingListDetail = () => {
           ))}
         </div>
 
+        {list.narrative && <PackingNarrative narrative={list.narrative} />}
+
         {items.length === 0 ? (
           <p className="text-muted-foreground">No items in this list yet.</p>
         ) : (
