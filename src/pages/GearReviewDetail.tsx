@@ -12,6 +12,7 @@ interface Review {
   pros: string[] | null; cons: string[] | null; notes: string | null;
   used_on: string | null; first_used_at: string | null;
   affiliate_url: string | null; price_range: string | null;
+  gallery_image_urls: string[] | null;
 }
 
 const GearReviewDetail = () => {
