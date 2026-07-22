@@ -784,6 +784,190 @@ export type Database = {
         }
         Relationships: []
       }
+      featured_gear_reviews: {
+        Row: {
+          affiliate_url: string | null
+          brand: string | null
+          category: string | null
+          cons: string[] | null
+          created_at: string
+          created_by: string | null
+          first_used_at: string | null
+          hero_image_url: string | null
+          id: string
+          is_published: boolean
+          notes: string | null
+          price_range: string | null
+          product_name: string
+          pros: string[] | null
+          published_at: string | null
+          rating: number | null
+          slug: string
+          sort_order: number
+          updated_at: string
+          used_on: string | null
+          view_count: number
+        }
+        Insert: {
+          affiliate_url?: string | null
+          brand?: string | null
+          category?: string | null
+          cons?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          first_used_at?: string | null
+          hero_image_url?: string | null
+          id?: string
+          is_published?: boolean
+          notes?: string | null
+          price_range?: string | null
+          product_name: string
+          pros?: string[] | null
+          published_at?: string | null
+          rating?: number | null
+          slug: string
+          sort_order?: number
+          updated_at?: string
+          used_on?: string | null
+          view_count?: number
+        }
+        Update: {
+          affiliate_url?: string | null
+          brand?: string | null
+          category?: string | null
+          cons?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          first_used_at?: string | null
+          hero_image_url?: string | null
+          id?: string
+          is_published?: boolean
+          notes?: string | null
+          price_range?: string | null
+          product_name?: string
+          pros?: string[] | null
+          published_at?: string | null
+          rating?: number | null
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+          used_on?: string | null
+          view_count?: number
+        }
+        Relationships: []
+      }
+      featured_packing_list_items: {
+        Row: {
+          amazon_url: string | null
+          category: string | null
+          created_at: string
+          id: string
+          image_url: string | null
+          label: string
+          list_id: string
+          notes: string | null
+          quantity: number | null
+          sort_order: number
+        }
+        Insert: {
+          amazon_url?: string | null
+          category?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          label: string
+          list_id: string
+          notes?: string | null
+          quantity?: number | null
+          sort_order?: number
+        }
+        Update: {
+          amazon_url?: string | null
+          category?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          label?: string
+          list_id?: string
+          notes?: string | null
+          quantity?: number | null
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "featured_packing_list_items_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "featured_packing_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      featured_packing_lists: {
+        Row: {
+          cover_image_url: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_published: boolean
+          published_at: string | null
+          season: string | null
+          slug: string
+          sort_order: number
+          source: string
+          source_trip_id: string | null
+          title: string
+          trip_types: string[] | null
+          updated_at: string
+          view_count: number
+        }
+        Insert: {
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          published_at?: string | null
+          season?: string | null
+          slug: string
+          sort_order?: number
+          source?: string
+          source_trip_id?: string | null
+          title: string
+          trip_types?: string[] | null
+          updated_at?: string
+          view_count?: number
+        }
+        Update: {
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          published_at?: string | null
+          season?: string | null
+          slug?: string
+          sort_order?: number
+          source?: string
+          source_trip_id?: string | null
+          title?: string
+          trip_types?: string[] | null
+          updated_at?: string
+          view_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "featured_packing_lists_source_trip_id_fkey"
+            columns: ["source_trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       featured_reviews: {
         Row: {
           affiliate_url: string | null
@@ -1058,6 +1242,7 @@ export type Database = {
           embed_url: string | null
           id: string
           is_active: boolean
+          is_featured: boolean
           platform: string
           profile_url: string | null
           review_slug: string | null
@@ -1072,6 +1257,7 @@ export type Database = {
           embed_url?: string | null
           id?: string
           is_active?: boolean
+          is_featured?: boolean
           platform: string
           profile_url?: string | null
           review_slug?: string | null
@@ -1086,6 +1272,7 @@ export type Database = {
           embed_url?: string | null
           id?: string
           is_active?: boolean
+          is_featured?: boolean
           platform?: string
           profile_url?: string | null
           review_slug?: string | null
