@@ -16,6 +16,8 @@ import FeaturedReviewsManager from "@/components/dashboard/FeaturedReviewsManage
 import BannerDealsManager from "@/components/dashboard/BannerDealsManager";
 import CompassDashboard from "@/components/dashboard/compass/CompassDashboard";
 import SocialVideosManager from "@/components/dashboard/SocialVideosManager";
+import FeaturedPackingListsManager from "@/components/dashboard/FeaturedPackingListsManager";
+import FeaturedGearReviewsManager from "@/components/dashboard/FeaturedGearReviewsManager";
 import SEOHead from "@/components/SEOHead";
 
 const GearAdmin = () => {
@@ -66,6 +68,8 @@ const GearAdmin = () => {
           {activeTab === "gear" && <GearImageManager />}
           {activeTab === "compass" && <CompassDashboard />}
           {activeTab === "social-videos" && <SocialVideosManager />}
+          {activeTab === "packing-lists" && <FeaturedPackingListsManager />}
+          {activeTab === "gear-reviews" && <FeaturedGearReviewsManager />}
         </main>
       </div>
     </div>

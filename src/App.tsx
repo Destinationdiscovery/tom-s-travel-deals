@@ -48,6 +48,11 @@ const PublicQuote = lazy(() => import("./pages/PublicQuote"));
 const Install = lazy(() => import("./pages/Install"));
 const PropertyRedirect = lazy(() => import("./pages/PropertyRedirect"));
 const DestinationHub = lazy(() => import("./pages/DestinationHub"));
+const SocialVideosGallery = lazy(() => import("./pages/SocialVideosGallery"));
+const FeaturedPackingListsPage = lazy(() => import("./pages/FeaturedPackingListsPage"));
+const PackingListDetail = lazy(() => import("./pages/PackingListDetail"));
+const GearReviewsPage = lazy(() => import("./pages/GearReviewsPage"));
+const GearReviewDetail = lazy(() => import("./pages/GearReviewDetail"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -114,6 +119,11 @@ const App = () => {
                 <Route path="/quote/:token" element={<PublicQuote />} />
                 <Route path="/install" element={<Install />} />
                 <Route path="/properties/:city/:name" element={<PropertyRedirect />} />
+                <Route path="/videos" element={<SocialVideosGallery />} />
+                <Route path="/packing-lists" element={<FeaturedPackingListsPage />} />
+                <Route path="/packing-lists/:slug" element={<PackingListDetail />} />
+                <Route path="/gear-reviews" element={<GearReviewsPage />} />
+                <Route path="/gear-reviews/:slug" element={<GearReviewDetail />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
