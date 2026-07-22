@@ -15,7 +15,10 @@ interface Review {
   pros: string[] | null; cons: string[] | null; notes: string | null;
   used_on: string | null; affiliate_url: string | null; price_range: string | null;
   is_published: boolean; published_at: string | null;
+  gallery_image_urls: string[] | null;
 }
+
+const MAX_GALLERY = 4;
 
 const slugify = (s: string) =>
   s.toLowerCase().normalize("NFKD").replace(/[^\w\s-]/g, "").trim().replace(/\s+/g, "-").slice(0, 80);
@@ -30,6 +33,7 @@ type EditDraft = {
   product_name: string; brand: string; category: string; hero_image_url: string;
   rating: string; pros_csv: string; cons_csv: string; notes: string; used_on: string;
   affiliate_url: string; price_range: string;
+  gallery_image_urls: string[];
 };
 
 const toDraft = (r: Review): EditDraft => ({
@@ -44,6 +48,7 @@ const toDraft = (r: Review): EditDraft => ({
   used_on: r.used_on ?? "",
   affiliate_url: r.affiliate_url ?? "",
   price_range: r.price_range ?? "",
+  gallery_image_urls: r.gallery_image_urls ?? [],
 });
 
 const FeaturedGearReviewsManager = () => {
@@ -139,6 +144,7 @@ const FeaturedGearReviewsManager = () => {
       used_on: d.used_on.trim() || null,
       affiliate_url: d.affiliate_url.trim() || null,
       price_range: d.price_range.trim() || null,
+      gallery_image_urls: d.gallery_image_urls.slice(0, MAX_GALLERY),
     }).eq("id", id);
     if (error) { toast({ title: "Save failed", description: error.message, variant: "destructive" }); return; }
     toast({ title: "Review updated" });
@@ -274,8 +280,38 @@ const FeaturedGearReviewsManager = () => {
                                       <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && uploadHero(e.target.files[0], (url) => setEdits((s) => ({ ...s, [r.id]: { ...d, hero_image_url: url } })), (b) => setUploadingRow(b ? r.id : null))} />
                                     </label>
                                     <Input placeholder="…or paste URL" value={d.hero_image_url} onChange={(e) => setEdits((s) => ({ ...s, [r.id]: { ...d, hero_image_url: e.target.value } }))} />
-                                  </div>
                                 </div>
+                              </div>
+                              <div className="md:col-span-2">
+                                <Label className="text-xs">Additional photos (up to {MAX_GALLERY})</Label>
+                                <div className="flex flex-wrap gap-2 mt-1">
+                                  {d.gallery_image_urls.map((url, i) => (
+                                    <div key={i} className="relative w-20 h-20">
+                                      <img src={url} className="w-20 h-20 object-cover rounded border" />
+                                      <button
+                                        type="button"
+                                        onClick={() => setEdits((s) => ({ ...s, [r.id]: { ...d, gallery_image_urls: d.gallery_image_urls.filter((_, j) => j !== i) } }))}
+                                        className="absolute -top-1.5 -right-1.5 bg-destructive text-destructive-foreground rounded-full p-0.5"
+                                      >
+                                        <Trash2 className="h-3 w-3" />
+                                      </button>
+                                    </div>
+                                  ))}
+                                  {d.gallery_image_urls.length < MAX_GALLERY && (
+                                    <label className="w-20 h-20 border border-dashed rounded flex flex-col items-center justify-center text-[10px] text-muted-foreground cursor-pointer hover:bg-secondary/50">
+                                      {uploadingRow === `${r.id}-gal` ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Upload className="h-4 w-4 mb-1" /> Add</>}
+                                      <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && uploadHero(
+                                        e.target.files[0],
+                                        (url) => setEdits((s) => {
+                                          const cur = s[r.id] ?? d;
+                                          return { ...s, [r.id]: { ...cur, gallery_image_urls: [...cur.gallery_image_urls, url].slice(0, MAX_GALLERY) } };
+                                        }),
+                                        (b) => setUploadingRow(b ? `${r.id}-gal` : null),
+                                      )} />
+                                    </label>
+                                  )}
+                                </div>
+                              </div>
                               </div>
                               <div><Label className="text-xs">Pros (one per line)</Label><Textarea rows={4} value={d.pros_csv} onChange={(e) => setEdits((s) => ({ ...s, [r.id]: { ...d, pros_csv: e.target.value } }))} /></div>
                               <div><Label className="text-xs">Cons (one per line)</Label><Textarea rows={4} value={d.cons_csv} onChange={(e) => setEdits((s) => ({ ...s, [r.id]: { ...d, cons_csv: e.target.value } }))} /></div>
