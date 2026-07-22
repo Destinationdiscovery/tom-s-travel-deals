@@ -1,0 +1,1 @@
+ALTER TABLE public.featured_gear_reviews ADD COLUMN IF NOT EXISTS gallery_image_urls text[] NOT NULL DEFAULT '{}';

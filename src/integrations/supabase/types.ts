@@ -793,6 +793,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           first_used_at: string | null
+          gallery_image_urls: string[]
           hero_image_url: string | null
           id: string
           is_published: boolean
@@ -816,6 +817,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           first_used_at?: string | null
+          gallery_image_urls?: string[]
           hero_image_url?: string | null
           id?: string
           is_published?: boolean
@@ -839,6 +841,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           first_used_at?: string | null
+          gallery_image_urls?: string[]
           hero_image_url?: string | null
           id?: string
           is_published?: boolean
