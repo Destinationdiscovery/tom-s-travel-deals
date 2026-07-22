@@ -5,10 +5,12 @@ import Footer from "@/components/Footer";
 import SEOHead from "@/components/SEOHead";
 import { supabase } from "@/integrations/supabase/client";
 import { ExternalLink, Package, ArrowLeft } from "lucide-react";
+import { PackingNarrative } from "@/components/gear/GearResults";
 
 interface List {
   id: string; slug: string; title: string; description: string | null;
   cover_image_url: string | null; season: string | null; trip_types: string[] | null;
+  narrative?: string | null;
 }
 interface Item {
   id: string; label: string; category: string | null; quantity: number | null;
