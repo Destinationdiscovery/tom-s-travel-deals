@@ -43,8 +43,8 @@ Allow: /
 User-agent: *
 Allow: /
 
-# Single source of truth: dynamic sitemap (auto-includes all published DB content)
-Sitemap: https://iomrjljlydboniioohkv.supabase.co/functions/v1/generate-sitemap
+# Single source of truth: sitemap served from our own domain (rebuilt from the generate-sitemap Edge Function at deploy time)
+Sitemap: https://www.reviewthengo.com/sitemap.xml
 # Full-text crawlable feeds for AI bots (every article body on a single page)
 # Compass articles:    https://iomrjljlydboniioohkv.supabase.co/functions/v1/articles-feed?expand=1
 # Destination reviews: https://iomrjljlydboniioohkv.supabase.co/functions/v1/articles-feed?type=destinations&expand=1
