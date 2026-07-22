@@ -1,56 +1,47 @@
-## Goal
+## Simplify Packing List (client + admin)
 
-In Agent HQ, generating a Featured Packing List should feel exactly like using the public /gear tool: type a query ("Sorrento beach August"), the AI builds the packing list with narrative + checklist + product cards, and you can then edit, add notes, add/remove items, and publish it as a featured list.
+Strip the packing tool down to a clean generic checklist. No product names, no brand cards, no affiliate links anywhere. Both client and admin see the same list; admin gets extra editing controls.
 
-## What changes
+### What the list looks like everywhere
+- AI-generated trip briefing (narrative) at top.
+- Single checklist grouped by category (Packing, Clothing, Beach, Tech, Health, etc.).
+- Each row = generic item name only (e.g. "Polarized sunglasses", "Hard shell suitcase", "Beach tote bag") + checkbox.
+- User-added items appear in the same category but visually distinct (accent color + small "Added" tag).
+- "Add item" input at bottom of each category (or one global add with category dropdown).
+- Notes section at bottom.
 
-Rework `FeaturedPackingListsManager.tsx` so it becomes a two-mode panel:
+### Client side (`/gear` tool + public `/packing-lists/:slug`)
+- Remove `PackingResultCard` grid (brand/image/price/Amazon button) entirely.
+- Remove the "gear picks" affiliate card section on the public list page.
+- Keep narrative + checklist + add-item + visitor notes (localStorage per list).
+- Added items get accent styling + "Added" badge; persist in localStorage on `/gear`, in localStorage on public list pages.
 
-1. **List browser** (default): shows all existing featured lists (draft/live) with edit / publish / delete / view actions.
-2. **Editor view** (opens when you Create or click a list): renders the same components the /gear tool uses, plus admin controls.
+### Admin side (`FeaturedPackingListsManager`)
+- Same clean checklist view (no product cards, no affiliate URL fields, no per-item internal notes textareas).
+- Admin can:
+  - Edit the AI briefing/write-up (textarea).
+  - Rename any item inline.
+  - Add items (marked as admin-added, shown in accent color to visitors too — "Tom's pick").
+  - Remove items.
+  - Recategorize items (small category dropdown per row).
+  - Edit the bottom notes block (already exists as `admin_notes`).
+  - Toggle Live/Draft, edit title/description/cover.
+- Autosave preserved.
 
-### Editor view layout (reuses public tool)
+### Data
+- Keep existing `featured_packing_list_items` table; stop writing `brand`, `image_url`, `amazon_url`, `price_range`, per-item `notes`. No migration required (columns stay, just unused). `is_custom` flag stays to color admin-added items on the public view.
+- `GearItem` rendering on `/gear` becomes name-only; underlying `useGearIntel` response can keep returning full data (ignored in UI).
 
-```text
-[ Search box: "Where are you going? e.g. Sorrento beach August" ] [Generate]
-   ↓ (calls the same useGearIntel.fetchPackingList)
-─────────────────────────────────────────────
-Title  [inline editable]        Season / Trip types  [inline]
-Cover image  [upload / URL]     Live toggle · Save · View
-─────────────────────────────────────────────
-<PackingNarrative>              ← from GearResults, editable textarea overlay
-<PackingChecklist>              ← from PackingChecklist (visual parity)
-<PackingResultCard grid>        ← from GearResults, with per-card Notes textarea + Remove
-[ + Add item manually ]         ← name / category / affiliate URL / notes
-```
+### Files to change
+- `src/pages/Gear.tsx` — replace results grid with new `PackingChecklistClean` component; keep narrative + add-item + notes.
+- `src/components/gear/PackingChecklist.tsx` — extend with add-item control, user-added highlighting, notes textarea (or wrap in a new client component).
+- `src/components/gear/GearResults.tsx` — retire `PackingResultCard` from client flow (keep file for now, unused export can go).
+- `src/components/dashboard/FeaturedPackingListsManager.tsx` — replace product-card editor with checklist editor (rename / category / delete / add).
+- `src/pages/PackingListDetail.tsx` — remove "gear picks" affiliate cards; render clean checklist with admin-added highlight + admin notes at bottom.
 
-- The generate step calls `useGearIntel().fetchPackingList(query)` (same hook the public tool uses), so admins see the identical output.
-- On "Save to list", we persist the AI narrative into `featured_packing_lists.description` (or a new `narrative` column, see Technical) and each item into `featured_packing_list_items` with `label`, `category`, `amazon_url` (from `amazonUrl`), `image_url` (from `imageUrl`), `notes`.
-- After save, editor stays open and switches into "loaded list" mode: same UI, but items come from the DB and every edit (label, category, notes, url, add, delete) autosaves like the trip workspace notes do today.
-- "Import from trip" and "Create blank curated list" remain available as secondary entry points into the same editor.
+### Out of scope
+- `useGearIntel` / `travel-gear-intel` edge function stays as-is (still generates the item list).
+- Trip Workspace packing (separate feature) — unchanged.
 
-### Admin extras on top of the public tool
-
-- Per-item **Notes** textarea (autosaves) directly under each product card.
-- Per-item **Edit** for label, category and affiliate URL.
-- **Add item** row (manual entry) at the end of the grid.
-- **Regenerate** button to rerun the AI for the same query without losing already-saved manual items (new AI items are appended, duplicates by name are skipped).
-- **Live/Draft** toggle and public **View** link.
-
-### Public `/packing-lists/:slug` page
-
-Update `PackingListDetail.tsx` to render using the same visual pieces (`PackingNarrative`, `PackingChecklist`, `PackingResultCard`) so what admins preview matches what visitors see. Review-this / affiliate CTA behavior stays.
-
-## Technical notes
-
-- Add optional `narrative TEXT` column to `featured_packing_lists` (migration) so the AI briefing survives across sessions. Existing rows unaffected.
-- No new tables. Existing `featured_packing_list_items` already has `label`, `category`, `notes`, `amazon_url`, `image_url` — enough to store /gear items.
-- `useGearIntel` is client-side only, no changes needed; reuse as-is.
-- Autosave pattern: debounce 500ms per field, same as trip workspace item notes.
-- `PackingResultCard`'s "Review This" button (product reviews) is left interactive in admin so you can vet items before saving.
-
-## Out of scope
-
-- No changes to the /gear public tool itself.
-- No changes to gear reviews manager.
-- No changes to the discovery hub cards.
+### Open question
+Confirm: on `/gear` (client tool), should user-added items persist across sessions via localStorage keyed by the query, same pattern as check state? (Assuming yes.)
