@@ -158,25 +158,17 @@ const Gear = () => {
           )}
 
           {loading && !packingData && <GearLoading label="Building your packing list..." />}
-          {reviewLoading && <GearLoading label="Researching product reviews..." />}
-          {reviewData && !reviewLoading && <ProductReviewPanel review={reviewData} onBack={clearReview} />}
-          {packingData && !reviewData && !reviewLoading && (
+          {packingData && (
             <div className="space-y-6 animate-fade-in">
               <div className="text-center mb-8">
                 <h2 className="font-display text-2xl font-bold text-foreground mb-2">Your Packing List</h2>
-                <p className="text-muted-foreground">Click "Review This" on any item for a full product review based on real Amazon reviews.</p>
+                <p className="text-muted-foreground">A clean generic checklist. Add your own items and notes. Everything is saved on this device.</p>
               </div>
               <PackingNarrative narrative={packingData.narrative} />
               <PackingChecklist items={packingData.items} querySlug={searchQuery} />
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
-                {packingData.items.map((item, i) => (
-                  <PackingResultCard key={i} item={item} onReview={handleReviewProduct} />
-                ))}
-              </div>
-              <GearCitations citations={packingData.citations} />
-              <p className="text-xs text-muted-foreground text-center mt-4">Amazon links may earn us a commission at no extra cost to you.</p>
             </div>
           )}
+
 
           {/* Featured Gear Cards - show when no results */}
           {!hasResults && (
