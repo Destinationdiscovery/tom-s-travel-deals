@@ -22,11 +22,13 @@ interface List {
   source: string; source_trip_id: string | null; is_published: boolean;
   published_at: string | null; sort_order: number;
   narrative?: string | null; source_query?: string | null;
+  admin_notes?: string | null;
 }
 interface Item {
   id: string; list_id: string; label: string; category: string | null;
   quantity: number | null; notes: string | null; amazon_url: string | null;
   image_url: string | null; sort_order: number;
+  is_custom?: boolean;
   // client-only extras from AI generate
   _brand?: string; _price?: string; _reason?: string;
 }
@@ -325,7 +327,7 @@ const PackingListEditor = ({ listId, onBack }: EditorProps) => {
 
   const addManualItem = async () => {
     const { data: inserted } = await (supabase as any).from("featured_packing_list_items").insert({
-      list_id: listId, label: "New item", category: "Packing", sort_order: items.length,
+      list_id: listId, label: "New item", category: "Packing", sort_order: items.length, is_custom: true,
     }).select("*").single();
     if (inserted) setItems((prev) => [...prev, inserted as Item]);
   };
@@ -466,65 +468,61 @@ const PackingListEditor = ({ listId, onBack }: EditorProps) => {
           {items.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {items.map((it) => (
-                <Card key={it.id} className="overflow-hidden">
+                <Card key={it.id} className={`overflow-hidden ${it.is_custom ? "border-primary/60 bg-primary/5" : ""}`}>
                   <CardContent className="p-4 space-y-3">
+                    {it.is_custom && (
+                      <span className="inline-block text-[10px] font-bold uppercase tracking-wider bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
+                        Your addition
+                      </span>
+                    )}
                     <div className="grid grid-cols-[1fr_140px_auto] gap-2">
-                      <Input value={it.label} onChange={(e) => patchItem(it.id, { label: e.target.value })} placeholder="Item name" />
+                      <Input value={it.label} onChange={(e) => patchItem(it.id, { label: e.target.value })} placeholder="Item name (generic, e.g. Hard shell suitcase)" />
                       <Input value={it.category ?? ""} onChange={(e) => patchItem(it.id, { category: e.target.value })} placeholder="Category" />
                       <Button size="icon" variant="ghost" onClick={() => removeItem(it.id)}>
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     </div>
-                    {it.image_url && (
-                      <div className="h-32 rounded-md overflow-hidden bg-muted">
-                        <img src={it.image_url} alt={it.label} className="w-full h-full object-contain" />
-                      </div>
-                    )}
                     <Input
                       value={it.amazon_url ?? ""}
                       onChange={(e) => patchItem(it.id, { amazon_url: e.target.value })}
-                      placeholder="Amazon / affiliate URL"
+                      placeholder="Optional affiliate URL (shown as separate card)"
                     />
                     <div>
-                      <Label className="text-xs">Notes (shown on public page)</Label>
+                      <Label className="text-xs">Notes (internal / not shown in checklist)</Label>
                       <Textarea
-                        rows={3}
+                        rows={2}
                         value={it.notes ?? ""}
                         onChange={(e) => patchItem(it.id, { notes: e.target.value })}
                         placeholder="Why this item, how you used it, tips…"
                       />
                     </div>
-                    <div className="flex items-center justify-between text-xs">
-                      <Button size="sm" variant="secondary" className="gap-1.5" onClick={() => fetchProductReview(it.label)}>
-                        <Sparkles className="h-3 w-3" /> Review this
-                      </Button>
-                      {it.amazon_url && (
-                        <a href={it.amazon_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-muted-foreground hover:text-primary">
-                          Open link <ExternalLink className="h-3 w-3" />
-                        </a>
-                      )}
-                    </div>
+                    {it.amazon_url && (
+                      <a href={it.amazon_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary">
+                        Open link <ExternalLink className="h-3 w-3" />
+                      </a>
+                    )}
                   </CardContent>
                 </Card>
               ))}
             </div>
           )}
 
-          {/* Read-only visual preview of the public card (uses actual PackingResultCard) */}
-          {items.length > 0 && (
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Public preview</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {gearItems.map((g, i) => (
-                  <PackingResultCard key={i} item={g} onReview={(name) => fetchProductReview(name)} />
-                ))}
-              </div>
-            </div>
-          )}
-
           <Button onClick={addManualItem} variant="outline" className="gap-1.5">
             <Plus className="h-4 w-4" /> Add item manually
           </Button>
+
+          {/* Admin notes at bottom of list */}
+          <Card>
+            <CardContent className="p-5 space-y-2">
+              <Label className="flex items-center gap-1.5"><Sparkles className="h-3.5 w-3.5 text-primary" /> Notes at bottom of list (shown to visitors)</Label>
+              <Textarea
+                rows={5}
+                value={list.admin_notes ?? ""}
+                onChange={(e) => patchList({ admin_notes: e.target.value })}
+                placeholder="Anything you want visitors to know after they see the checklist. Autosaves."
+              />
+            </CardContent>
+          </Card>
         </>
       )}
     </div>
