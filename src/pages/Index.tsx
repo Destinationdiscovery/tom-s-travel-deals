@@ -25,8 +25,7 @@ import PopularSavesSection from "@/components/PopularSavesSection";
 import ToolsDirectorySection from "@/components/ToolsDirectorySection";
 import AboutPreviewSection from "@/components/AboutPreviewSection";
 import AggregateStatsSection from "@/components/AggregateStatsSection";
-import PublicTripsGrid from "@/components/trips/PublicTripsGrid";
-import SocialVideoRow from "@/components/social/SocialVideoRow";
+import DiscoveryHub from "@/components/home/DiscoveryHub";
 import { classifySearchIntent, classifyToolIntent, toolIntentToPath, toSlug } from "@/lib/searchIntent";
 
 
@@ -130,13 +129,7 @@ const Index = () => {
       <AffiliateDisclosureBanner />
       <main id="main-content">
         <HeroSection onSearch={handleHeroSearch} isSearching={isLoading} />
-        <PublicTripsGrid
-          showHeader={true}
-          showViewAll={true}
-          limit={6}
-          enableSearch={false}
-        />
-        <SocialVideoRow title="Watch real trips" subtitle="Short videos from our travels on TikTok, Instagram, and YouTube." limit={12} />
+        <DiscoveryHub />
         <TrustBadges />
 
         <div ref={resultsRef} className="container mx-auto px-4">

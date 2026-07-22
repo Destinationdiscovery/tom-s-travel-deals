@@ -22,6 +22,7 @@ interface Row {
   review_slug: string | null;
   sort_order: number;
   is_active: boolean;
+  is_featured: boolean;
 }
 
 const DEFAULT_PROFILE_URLS: Record<SocialPlatform, string> = {
@@ -109,6 +110,14 @@ const SocialVideosManager = () => {
 
   const toggleActive = async (id: string, is_active: boolean) => {
     await (supabase as any).from("social_videos").update({ is_active }).eq("id", id);
+    fetchRows();
+  };
+
+  const setFeatured = async (id: string) => {
+    // clear all, then set this one
+    await (supabase as any).from("social_videos").update({ is_featured: false }).neq("id", "00000000-0000-0000-0000-000000000000");
+    await (supabase as any).from("social_videos").update({ is_featured: true }).eq("id", id);
+    toast({ title: "Pinned as homepage featured video" });
     fetchRows();
   };
 
@@ -234,9 +243,14 @@ const SocialVideosManager = () => {
                       <Switch checked={r.is_active} onCheckedChange={(v) => toggleActive(r.id, v)} />
                       <span className="text-xs text-muted-foreground">{r.is_active ? "Active" : "Hidden"}</span>
                     </div>
-                    <Button size="icon" variant="ghost" onClick={() => deleteRow(r.id)}>
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button size="sm" variant={r.is_featured ? "default" : "outline"} onClick={() => setFeatured(r.id)} className="h-7 text-xs px-2">
+                        {r.is_featured ? "★ Featured" : "Pin as featured"}
+                      </Button>
+                      <Button size="icon" variant="ghost" onClick={() => deleteRow(r.id)}>
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

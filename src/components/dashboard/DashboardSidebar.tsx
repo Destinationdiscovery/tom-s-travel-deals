@@ -1,9 +1,9 @@
-import { LayoutDashboard, FileText, Calendar, Mail, ImageIcon, Users, ClipboardList, Menu, BookOpen, Star, MapPin, PanelTop, Luggage, Compass, Video } from "lucide-react";
+import { LayoutDashboard, FileText, Calendar, Mail, ImageIcon, Users, ClipboardList, Menu, BookOpen, Star, MapPin, PanelTop, Luggage, Compass, Video, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
-export type DashboardTab = "overview" | "quotes" | "calendar" | "emails" | "gear" | "clients" | "bookings" | "blog" | "featured-deals" | "reviews" | "banner-deals" | "compass" | "social-videos";
+export type DashboardTab = "overview" | "quotes" | "calendar" | "emails" | "gear" | "clients" | "bookings" | "blog" | "featured-deals" | "reviews" | "banner-deals" | "compass" | "social-videos" | "packing-lists" | "gear-reviews";
 
 interface TabItem {
   id: DashboardTab;
@@ -43,6 +43,8 @@ const sections: TabSection[] = [
       { id: "reviews", label: "Featured Reviews", icon: MapPin },
       { id: "gear", label: "Featured Gear", icon: Luggage },
       { id: "social-videos", label: "Social Videos", icon: Video },
+      { id: "packing-lists", label: "Packing Lists", icon: Package },
+      { id: "gear-reviews", label: "Gear Reviews", icon: Luggage },
     ],
   },
 ];

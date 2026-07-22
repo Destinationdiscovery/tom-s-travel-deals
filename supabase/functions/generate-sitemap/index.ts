@@ -20,6 +20,9 @@ const STATIC_URLS: { loc: string; changefreq: string; priority: string }[] = [
   { loc: "/flights", changefreq: "weekly", priority: "0.9" },
   { loc: "/safety", changefreq: "weekly", priority: "0.8" },
   { loc: "/travel-intel", changefreq: "monthly", priority: "0.8" },
+  { loc: "/videos", changefreq: "weekly", priority: "0.7" },
+  { loc: "/packing-lists", changefreq: "weekly", priority: "0.8" },
+  { loc: "/gear-reviews", changefreq: "weekly", priority: "0.8" },
   { loc: "/about", changefreq: "monthly", priority: "0.5" },
   { loc: "/contact", changefreq: "monthly", priority: "0.5" },
   { loc: "/compare", changefreq: "monthly", priority: "0.5" },
@@ -221,6 +224,38 @@ Deno.serve(async (req) => {
         changefreq: "weekly",
         priority: "0.8",
       });
+    }
+
+    // featured_packing_lists -> /packing-lists/{slug}
+    const packingLists = await fetchAllPaginated<{ slug: string; updated_at: string | null }>(
+      (from, to) =>
+        supabase
+          .from("featured_packing_lists")
+          .select("slug, updated_at")
+          .eq("is_published", true)
+          .order("updated_at", { ascending: false })
+          .range(from, to) as any
+    );
+    for (const p of packingLists) {
+      const safe = safePathSegment(p.slug);
+      if (!safe) continue;
+      push({ loc: `/packing-lists/${safe}`, lastmod: toIsoDate(p.updated_at), changefreq: "monthly", priority: "0.7" });
+    }
+
+    // featured_gear_reviews -> /gear-reviews/{slug}
+    const gearReviews = await fetchAllPaginated<{ slug: string; updated_at: string | null }>(
+      (from, to) =>
+        supabase
+          .from("featured_gear_reviews")
+          .select("slug, updated_at")
+          .eq("is_published", true)
+          .order("updated_at", { ascending: false })
+          .range(from, to) as any
+    );
+    for (const g of gearReviews) {
+      const safe = safePathSegment(g.slug);
+      if (!safe) continue;
+      push({ loc: `/gear-reviews/${safe}`, lastmod: toIsoDate(g.updated_at), changefreq: "monthly", priority: "0.7" });
     }
 
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
