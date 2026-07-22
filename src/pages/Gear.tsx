@@ -9,8 +9,9 @@ import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useGearIntel } from "@/hooks/useGearIntel";
-import { GearLoading, PackingResultCard, ProductReviewPanel, GearCitations, PackingNarrative } from "@/components/gear/GearResults";
+import { GearLoading, PackingNarrative } from "@/components/gear/GearResults";
 import PackingChecklist from "@/components/gear/PackingChecklist";
+
 import ToolSaveBar from "@/components/tools/ToolSaveBar";
 import SEOHead from "@/components/SEOHead";
 import { supabase } from "@/integrations/supabase/client";
@@ -37,7 +38,7 @@ const DEFAULT_CARDS: GearCard[] = [
 ];
 
 const Gear = () => {
-  const { loading, error, packingData, reviewData, reviewLoading, fetchPackingList, fetchProductReview, clearReview, clearAll } = useGearIntel();
+  const { loading, error, packingData, fetchPackingList, clearAll } = useGearIntel();
   const [searchQuery, setSearchQuery] = useState("");
   const [cards, setCards] = useState<GearCard[]>(DEFAULT_CARDS);
 
@@ -81,14 +82,8 @@ const Gear = () => {
 
   const handleSearch = () => {
     if (searchQuery.trim().length >= 2) {
-      clearReview();
       fetchPackingList(searchQuery.trim());
     }
-  };
-
-  const handleReviewProduct = (productName: string) => {
-    fetchProductReview(productName);
-    window.scrollTo({ top: 400, behavior: "smooth" });
   };
 
   const navigate = useNavigate();
@@ -98,7 +93,8 @@ const Gear = () => {
     navigate("/");
   };
 
-  const hasResults = packingData || reviewData || loading || reviewLoading;
+  const hasResults = packingData || loading;
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -162,25 +158,17 @@ const Gear = () => {
           )}
 
           {loading && !packingData && <GearLoading label="Building your packing list..." />}
-          {reviewLoading && <GearLoading label="Researching product reviews..." />}
-          {reviewData && !reviewLoading && <ProductReviewPanel review={reviewData} onBack={clearReview} />}
-          {packingData && !reviewData && !reviewLoading && (
+          {packingData && (
             <div className="space-y-6 animate-fade-in">
               <div className="text-center mb-8">
                 <h2 className="font-display text-2xl font-bold text-foreground mb-2">Your Packing List</h2>
-                <p className="text-muted-foreground">Click "Review This" on any item for a full product review based on real Amazon reviews.</p>
+                <p className="text-muted-foreground">A clean generic checklist. Add your own items and notes. Everything is saved on this device.</p>
               </div>
               <PackingNarrative narrative={packingData.narrative} />
               <PackingChecklist items={packingData.items} querySlug={searchQuery} />
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
-                {packingData.items.map((item, i) => (
-                  <PackingResultCard key={i} item={item} onReview={handleReviewProduct} />
-                ))}
-              </div>
-              <GearCitations citations={packingData.citations} />
-              <p className="text-xs text-muted-foreground text-center mt-4">Amazon links may earn us a commission at no extra cost to you.</p>
             </div>
           )}
+
 
           {/* Featured Gear Cards - show when no results */}
           {!hasResults && (
@@ -231,10 +219,11 @@ const Gear = () => {
           examples={gearAEO.examples}
           faqs={gearAEO.faqs}
           toolPath="/gear"
-          onCardClick={(q) => { setSearchQuery(q); clearReview(); fetchPackingList(q); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+          onCardClick={(q) => { setSearchQuery(q); fetchPackingList(q); window.scrollTo({ top: 0, behavior: "smooth" }); }}
         />
       </main>
-      {packingData && !reviewData && (
+      {packingData && (
+
         <>
           <div aria-hidden className="h-28 md:h-20" />
           <ToolSaveBar

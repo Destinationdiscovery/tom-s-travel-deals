@@ -438,95 +438,82 @@ const PackingListEditor = ({ listId, onBack }: EditorProps) => {
         </CardContent>
       </Card>
 
-      {/* Live product review panel (when admin clicks Review This on a card) */}
-      {reviewLoading && <GearLoading label="Researching product reviews..." />}
-      {reviewData && !reviewLoading && <ProductReviewPanel review={reviewData} onBack={clearReview} />}
+      {/* Narrative editor */}
+      <Card>
+        <CardContent className="p-5 space-y-2">
+          <Label className="flex items-center gap-1.5"><Sparkles className="h-3.5 w-3.5 text-primary" /> Trip briefing (shown to visitors)</Label>
+          <Textarea
+            rows={6}
+            value={list.narrative ?? ""}
+            onChange={(e) => patchList({ narrative: e.target.value })}
+            placeholder="AI briefing will appear here after generating. Edit freely."
+          />
+        </CardContent>
+      </Card>
 
-      {/* Preview / edit: same visual layout as /gear tool */}
-      {!reviewData && (
-        <>
-          {/* Narrative editor */}
-          <Card>
-            <CardContent className="p-5 space-y-2">
-              <Label className="flex items-center gap-1.5"><Sparkles className="h-3.5 w-3.5 text-primary" /> Trip briefing (shown to visitors)</Label>
-              <Textarea
-                rows={6}
-                value={list.narrative ?? ""}
-                onChange={(e) => patchList({ narrative: e.target.value })}
-                placeholder="AI briefing will appear here after generating. Edit freely."
-              />
-            </CardContent>
-          </Card>
+      {list.narrative && <PackingNarrative narrative={list.narrative} />}
 
-          {list.narrative && <PackingNarrative narrative={list.narrative} />}
-
-          {items.length > 0 && (
-            <PackingChecklist items={gearItems} querySlug={list.slug} />
-          )}
-
-          {/* Editable cards grid */}
-          {items.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Clean checklist editor - rename, category, delete inline */}
+      <Card>
+        <CardContent className="p-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <Label className="font-semibold">Packing checklist ({items.length})</Label>
+            <Button onClick={addManualItem} size="sm" variant="outline" className="gap-1.5">
+              <Plus className="h-3.5 w-3.5" /> Add item
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">Generic item names only. Items you add show as highlighted "Added" for visitors.</p>
+          {items.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-4 text-center">No items yet. Generate above or add manually.</p>
+          ) : (
+            <div className="space-y-1.5">
               {items.map((it) => (
-                <Card key={it.id} className={`overflow-hidden ${it.is_custom ? "border-primary/60 bg-primary/5" : ""}`}>
-                  <CardContent className="p-4 space-y-3">
-                    {it.is_custom && (
-                      <span className="inline-block text-[10px] font-bold uppercase tracking-wider bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
-                        Your addition
-                      </span>
-                    )}
-                    <div className="grid grid-cols-[1fr_140px_auto] gap-2">
-                      <Input value={it.label} onChange={(e) => patchItem(it.id, { label: e.target.value })} placeholder="Item name (generic, e.g. Hard shell suitcase)" />
-                      <Input value={it.category ?? ""} onChange={(e) => patchItem(it.id, { category: e.target.value })} placeholder="Category" />
-                      <Button size="icon" variant="ghost" onClick={() => removeItem(it.id)}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
-                    <Input
-                      value={it.amazon_url ?? ""}
-                      onChange={(e) => patchItem(it.id, { amazon_url: e.target.value })}
-                      placeholder="Optional affiliate URL (shown as separate card)"
-                    />
-                    <div>
-                      <Label className="text-xs">Notes (internal / not shown in checklist)</Label>
-                      <Textarea
-                        rows={2}
-                        value={it.notes ?? ""}
-                        onChange={(e) => patchItem(it.id, { notes: e.target.value })}
-                        placeholder="Why this item, how you used it, tips…"
-                      />
-                    </div>
-                    {it.amazon_url && (
-                      <a href={it.amazon_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary">
-                        Open link <ExternalLink className="h-3 w-3" />
-                      </a>
-                    )}
-                  </CardContent>
-                </Card>
+                <div
+                  key={it.id}
+                  className={`flex items-center gap-2 rounded-md border px-2 py-1.5 ${it.is_custom ? "border-emerald-500/40 bg-emerald-500/5" : "border-border/60 bg-background"}`}
+                >
+                  <Input
+                    value={it.label}
+                    onChange={(e) => patchItem(it.id, { label: e.target.value })}
+                    placeholder="Item name"
+                    className="h-8 border-0 shadow-none focus-visible:ring-1 px-2 flex-1"
+                  />
+                  <Input
+                    value={it.category ?? ""}
+                    onChange={(e) => patchItem(it.id, { category: e.target.value })}
+                    placeholder="Category"
+                    className="h-8 w-32"
+                  />
+                  {it.is_custom && (
+                    <span className="text-[9px] uppercase font-bold tracking-wider bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded">
+                      Added
+                    </span>
+                  )}
+                  <Button size="icon" variant="ghost" onClick={() => removeItem(it.id)} className="h-7 w-7">
+                    <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                  </Button>
+                </div>
               ))}
             </div>
           )}
+        </CardContent>
+      </Card>
 
-          <Button onClick={addManualItem} variant="outline" className="gap-1.5">
-            <Plus className="h-4 w-4" /> Add item manually
-          </Button>
-
-          {/* Admin notes at bottom of list */}
-          <Card>
-            <CardContent className="p-5 space-y-2">
-              <Label className="flex items-center gap-1.5"><Sparkles className="h-3.5 w-3.5 text-primary" /> Notes at bottom of list (shown to visitors)</Label>
-              <Textarea
-                rows={5}
-                value={list.admin_notes ?? ""}
-                onChange={(e) => patchList({ admin_notes: e.target.value })}
-                placeholder="Anything you want visitors to know after they see the checklist. Autosaves."
-              />
-            </CardContent>
-          </Card>
-        </>
-      )}
+      {/* Admin notes at bottom of list */}
+      <Card>
+        <CardContent className="p-5 space-y-2">
+          <Label className="flex items-center gap-1.5"><Sparkles className="h-3.5 w-3.5 text-primary" /> Notes at bottom of list (shown to visitors)</Label>
+          <Textarea
+            rows={5}
+            value={list.admin_notes ?? ""}
+            onChange={(e) => patchList({ admin_notes: e.target.value })}
+            placeholder="Anything you want visitors to know after they see the checklist. Autosaves."
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 };
 
 export default FeaturedPackingListsManager;
+

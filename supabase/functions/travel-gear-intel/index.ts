@@ -108,35 +108,30 @@ const PROMPTS: Record<string, (query: string, categories?: string[]) => string> 
   "must-haves": (query, categories) =>
     `You are a travel packing expert. A traveler is planning: "${query}".
 
-For each of the following product categories, find the SINGLE BEST specific product (real brand and model name) to recommend. Research current Amazon bestsellers and expert reviews.
+Return a clean generic packing checklist based on the categories below. Do NOT recommend specific brands or product models. Use only the generic item name from the list.
 
-Product categories to fill:
+Item categories to include (use each as the item name verbatim, or a very light generic rewrite):
 ${(categories || []).map((c, i) => `${i + 1}. ${c}`).join("\n")}
 
 IMPORTANT RULES:
-- NEVER include non-purchasable items like passports, travel insurance, cash/currency, visas, documents, or tickets.
-- Only recommend physical products that can be purchased on Amazon.
-- For each category, find a real, specific product with brand and model name.
-- For each product, include an "imageUrl" field with a direct URL to a product image found online (official brand site, Amazon CDN, or retailer). Use real, publicly accessible image URLs.
-- Also write a "narrative" field: a friendly 2 to 3 paragraph write-up that opens by referencing the trip (destination, season, type of travel inferred from the query) and walks through the most important essentials in flowing sentences, naming each product and briefly explaining why it matters for this specific trip. Do NOT use em-dashes or en-dashes. Use periods, commas, hyphens, or the word "to" instead. Do not use bullet points in the narrative. Keep it conversational and useful, not a list.
+- Item "name" must be GENERIC only (e.g. "Polarized sunglasses", "Hard shell suitcase", "Beach tote bag"). No brand names, no model numbers.
+- NEVER include non-purchasable items like passports, travel insurance, cash, visas, documents, or tickets.
+- Assign each item to one of: Packing, Clothing, Beach, Tech, Health, Safety, Comfort, Accessories, Toiletries.
+- Write a "narrative" field: a friendly 2 to 3 paragraph write-up referencing the destination, season, and trip type inferred from the query, walking through the most important essentials in flowing sentences. Do NOT use em-dashes or en-dashes. Use periods, commas, hyphens, or "to" instead. No bullet points. Conversational and useful.
 
-Return your response as valid JSON only (no markdown, no code blocks):
+Return valid JSON only (no markdown, no code blocks):
 
 {
-  "narrative": "For your [trip context] you'll want to focus on... A [Product Name] keeps... Pair that with a [Product Name] so you can... etc.",
+  "narrative": "For your [trip context] you'll want...",
   "items": [
     {
-      "name": "Specific Product Name with Model",
-      "brand": "Brand Name",
-      "priceRange": "$XX - $XX",
-      "reason": "Why this specific product is the best choice for this trip (1-2 sentences)",
-      "category": "Category like Packing, Tech, Comfort, Safety, Health, Clothing, Beach, etc.",
-      "imageUrl": "https://example.com/product-image.jpg"
+      "name": "Generic item name",
+      "category": "Packing"
     }
   ]
-}
+}`,
 
-Be specific with product names. Example: "Osprey Farpoint 40 Travel Backpack" not just "Travel backpack".`,
+
 
   review: (query) =>
     `You are a travel gear reviewer. Research "${query}" thoroughly using Amazon reviews, expert reviews, YouTube reviews, and travel blogs.
@@ -249,7 +244,7 @@ serve(async (req) => {
 
     const trimQuery = query.trim().toLowerCase();
     const userCountry = (country || "US").toUpperCase();
-    const cacheKey = `${type}:${trimQuery}`;
+    const cacheKey = `${type}-v2generic:${trimQuery}`;
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
