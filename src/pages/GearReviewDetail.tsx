@@ -20,6 +20,8 @@ const GearReviewDetail = () => {
   const { slug } = useParams();
   const [r, setR] = useState<Review | null>(null);
   const [loading, setLoading] = useState(true);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   useEffect(() => {
     if (!slug) return;
