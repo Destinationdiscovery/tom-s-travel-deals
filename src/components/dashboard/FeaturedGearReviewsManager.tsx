@@ -15,7 +15,10 @@ interface Review {
   pros: string[] | null; cons: string[] | null; notes: string | null;
   used_on: string | null; affiliate_url: string | null; price_range: string | null;
   is_published: boolean; published_at: string | null;
+  gallery_image_urls: string[] | null;
 }
+
+const MAX_GALLERY = 4;
 
 const slugify = (s: string) =>
   s.toLowerCase().normalize("NFKD").replace(/[^\w\s-]/g, "").trim().replace(/\s+/g, "-").slice(0, 80);
