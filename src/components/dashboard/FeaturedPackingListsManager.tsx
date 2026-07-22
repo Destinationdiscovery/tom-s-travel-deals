@@ -327,7 +327,7 @@ const PackingListEditor = ({ listId, onBack }: EditorProps) => {
 
   const addManualItem = async () => {
     const { data: inserted } = await (supabase as any).from("featured_packing_list_items").insert({
-      list_id: listId, label: "New item", category: "Packing", sort_order: items.length,
+      list_id: listId, label: "New item", category: "Packing", sort_order: items.length, is_custom: true,
     }).select("*").single();
     if (inserted) setItems((prev) => [...prev, inserted as Item]);
   };
