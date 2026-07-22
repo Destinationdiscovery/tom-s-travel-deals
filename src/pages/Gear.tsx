@@ -219,10 +219,11 @@ const Gear = () => {
           examples={gearAEO.examples}
           faqs={gearAEO.faqs}
           toolPath="/gear"
-          onCardClick={(q) => { setSearchQuery(q); clearReview(); fetchPackingList(q); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+          onCardClick={(q) => { setSearchQuery(q); fetchPackingList(q); window.scrollTo({ top: 0, behavior: "smooth" }); }}
         />
       </main>
-      {packingData && !reviewData && (
+      {packingData && (
+
         <>
           <div aria-hidden className="h-28 md:h-20" />
           <ToolSaveBar
