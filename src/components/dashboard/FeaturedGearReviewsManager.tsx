@@ -144,6 +144,7 @@ const FeaturedGearReviewsManager = () => {
       used_on: d.used_on.trim() || null,
       affiliate_url: d.affiliate_url.trim() || null,
       price_range: d.price_range.trim() || null,
+      gallery_image_urls: d.gallery_image_urls.slice(0, MAX_GALLERY),
     }).eq("id", id);
     if (error) { toast({ title: "Save failed", description: error.message, variant: "destructive" }); return; }
     toast({ title: "Review updated" });
