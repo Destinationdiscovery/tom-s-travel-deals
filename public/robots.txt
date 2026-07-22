@@ -43,8 +43,9 @@ Allow: /
 User-agent: *
 Allow: /
 
-# Sitemap served live from the generate-sitemap Edge Function (always fresh, no rebuild required)
-Sitemap: https://iomrjljlydboniioohkv.supabase.co/functions/v1/generate-sitemap
+# Sitemap regenerated from the generate-sitemap Edge Function at each deploy
+Sitemap: https://www.reviewthengo.com/sitemap.xml
+
 # Full-text crawlable feeds for AI bots (every article body on a single page)
 # Compass articles:    https://iomrjljlydboniioohkv.supabase.co/functions/v1/articles-feed?expand=1
 # Destination reviews: https://iomrjljlydboniioohkv.supabase.co/functions/v1/articles-feed?type=destinations&expand=1
