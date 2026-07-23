@@ -14,16 +14,19 @@ interface ListPreview { slug: string; title: string; cover_image_url: string | n
 interface GearPreview { slug: string; product_name: string; hero_image_url: string | null; rating: number | null }
 
 const CardShell = ({
-  to, onClick, cover, badge, title, subtitle, seeAllTo, seeAllLabel, icon: Icon,
+  to, onClick, cover, badge, cardTitle, title, subtitle, seeAllTo, seeAllLabel, icon: Icon,
 }: {
   to?: string; onClick?: () => void; cover: React.ReactNode; badge?: string;
-  title: string; subtitle: string; seeAllTo: string; seeAllLabel: string;
+  cardTitle: string; title: string; subtitle: string; seeAllTo: string; seeAllLabel: string;
   icon: React.ElementType;
 }) => {
   const Wrapper: any = to ? Link : "button";
   const wrapProps = to ? { to } : { onClick, type: "button" as const };
   return (
     <div className="flex flex-col">
+      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+        {cardTitle}
+      </p>
       <Wrapper
         {...wrapProps}
         className="group block bg-card rounded-2xl overflow-hidden border border-border shadow-soft hover:shadow-lg transition-shadow text-left w-full"
@@ -109,7 +112,8 @@ const DiscoveryHub = () => {
           <CardShell
             to="/trips"
             icon={MapPin}
-            title={trip?.trip_name ?? "Real trips"}
+            cardTitle="Real trips"
+            title={trip?.trip_name ?? "Italy 2026"}
             subtitle="Actual itineraries, real hotels, honest stay reviews."
             seeAllTo="/trips"
             seeAllLabel="View all trips"
@@ -125,7 +129,8 @@ const DiscoveryHub = () => {
             onClick={() => video && setVideoOpen(true)}
             to={video ? undefined : "/videos"}
             icon={Play}
-            badge={video ? "Latest video" : undefined}
+            cardTitle="Latest video"
+            badge={video ? "Watch now" : undefined}
             title={video?.caption ?? "Watch real trips"}
             subtitle="Short videos from my travels on TikTok, Instagram, and YouTube."
             seeAllTo="/videos"
@@ -149,6 +154,7 @@ const DiscoveryHub = () => {
           <CardShell
             to={list ? `/packing-lists/${list.slug}` : "/packing-lists"}
             icon={Package}
+            cardTitle="Packing lists"
             title={list?.title ?? "Featured packing lists"}
             subtitle="Curated lists with Amazon-linked items for every kind of trip."
             seeAllTo="/packing-lists"
@@ -164,6 +170,7 @@ const DiscoveryHub = () => {
           <CardShell
             to={gear ? `/gear-reviews/${gear.slug}` : "/gear-reviews"}
             icon={Luggage}
+            cardTitle="Travel gear"
             title={gear?.product_name ?? "Travel gear I trust"}
             subtitle="Single-product reviews with pros, cons, and honest ratings."
             seeAllTo="/gear-reviews"
