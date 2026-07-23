@@ -14,16 +14,19 @@ interface ListPreview { slug: string; title: string; cover_image_url: string | n
 interface GearPreview { slug: string; product_name: string; hero_image_url: string | null; rating: number | null }
 
 const CardShell = ({
-  to, onClick, cover, badge, title, subtitle, seeAllTo, seeAllLabel, icon: Icon,
+  to, onClick, cover, badge, cardTitle, title, subtitle, seeAllTo, seeAllLabel, icon: Icon,
 }: {
   to?: string; onClick?: () => void; cover: React.ReactNode; badge?: string;
-  title: string; subtitle: string; seeAllTo: string; seeAllLabel: string;
+  cardTitle: string; title: string; subtitle: string; seeAllTo: string; seeAllLabel: string;
   icon: React.ElementType;
 }) => {
   const Wrapper: any = to ? Link : "button";
   const wrapProps = to ? { to } : { onClick, type: "button" as const };
   return (
     <div className="flex flex-col">
+      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+        {cardTitle}
+      </p>
       <Wrapper
         {...wrapProps}
         className="group block bg-card rounded-2xl overflow-hidden border border-border shadow-soft hover:shadow-lg transition-shadow text-left w-full"
