@@ -45,7 +45,7 @@ const MultiTagInput = ({ presets, value, onChange, placeholder = "Type or select
           onChange={(e) => { setInputValue(e.target.value); setOpen(true); }}
           onKeyDown={(e) => {
             if (e.key === "Enter" && inputValue.trim()) { e.preventDefault(); addTag(inputValue); }
-            if (e.key === "Backspace" && !inputValue && value.length > 0) removeTag(value[value.length - 1]);
+            if (e.key === "Backspace" && !inputValue && value.length > 0) removeTag(value[value.length - 1]!);
           }}
           onFocus={() => setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 200)}

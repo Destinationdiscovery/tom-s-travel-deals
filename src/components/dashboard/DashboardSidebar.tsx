@@ -92,7 +92,7 @@ const DashboardSidebar = ({ activeTab, onTabChange, open, onOpenChange }: Dashbo
 
   if (isMobile) {
     return (
-      <Sheet open={open} onOpenChange={onOpenChange}>
+      <Sheet open={open ?? false} onOpenChange={onOpenChange ?? (() => {})}>
         <SheetTrigger asChild>
           <button className="fixed top-20 left-3 z-40 p-2 rounded-lg bg-card border border-border shadow-md">
             <Menu className="h-5 w-5 text-foreground" />

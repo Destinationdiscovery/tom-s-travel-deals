@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Search, Loader2, ArrowLeft, ExternalLink, Home } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "@/lib/router-compat";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ToolAEOContent from "@/components/tools/ToolAEOContent";
@@ -54,12 +54,13 @@ const Gear = () => {
         data.forEach((row: any) => {
           const idx = row.slot_number - 1;
           if (idx >= 0 && idx < 4) {
+            const base = DEFAULT_CARDS[idx]!;
             merged[idx] = {
-              title: row.title || DEFAULT_CARDS[idx].title,
-              description: row.description || DEFAULT_CARDS[idx].description,
-              price: row.price || DEFAULT_CARDS[idx].price,
+              title: row.title || base.title,
+              description: row.description || base.description,
+              price: row.price || base.price,
               affiliateUrl: row.affiliate_url || "",
-              image: row.image_url || DEFAULT_CARDS[idx].image,
+              image: row.image_url || base.image,
             };
           }
         });
@@ -164,7 +165,7 @@ const Gear = () => {
                 <h2 className="font-display text-2xl font-bold text-foreground mb-2">Your Packing List</h2>
                 <p className="text-muted-foreground">A clean generic checklist. Add your own items and notes. Everything is saved on this device.</p>
               </div>
-              <PackingNarrative narrative={packingData.narrative} />
+              <PackingNarrative {...(packingData.narrative !== undefined && { narrative: packingData.narrative })} />
               <PackingChecklist items={packingData.items} querySlug={searchQuery} />
             </div>
           )}

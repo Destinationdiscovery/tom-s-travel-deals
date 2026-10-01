@@ -8,7 +8,7 @@ import { bestTimeAEO } from "@/components/tools/toolAEOContent";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import ToolSaveBar from "@/components/tools/ToolSaveBar";
 
 interface Season {

@@ -60,8 +60,8 @@ const TravelIntel = () => {
   };
 
   const handleCardRun = (q: string, extra?: Record<string, string>) => {
-    const type = (extra?.type as IntelType) || "requirements";
-    runFromParams(type, q, extra?.citizenship);
+    const type = (extra?.["type"] as IntelType) || "requirements";
+    runFromParams(type, q, extra?.["citizenship"]);
   };
 
   const handleSubmit = (type: IntelType) => {

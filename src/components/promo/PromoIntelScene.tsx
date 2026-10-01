@@ -44,7 +44,7 @@ const PromoIntelScene = ({ visible }: PromoIntelSceneProps) => {
     return () => clearInterval(interval);
   }, [visible]);
 
-  const currentTab = TABS[activeTab];
+  const currentTab = TABS[activeTab] ?? TABS[0];
   const items = TAB_CONTENT[currentTab];
 
   return (

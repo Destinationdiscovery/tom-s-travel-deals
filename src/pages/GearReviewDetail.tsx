@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link } from "@/lib/router-compat";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEOHead from "@/components/SEOHead";
@@ -74,7 +74,7 @@ const GearReviewDetail = () => {
         title={`${r.product_name} review | ReviewThenGo`}
         description={r.notes ? r.notes.slice(0, 155) : `Honest review of the ${r.product_name}.`}
         url={`/gear-reviews/${r.slug}`}
-        image={r.hero_image_url ?? undefined}
+        {...(r.hero_image_url && { image: r.hero_image_url })}
         jsonLd={[productJsonLd]}
       />
       <Header />

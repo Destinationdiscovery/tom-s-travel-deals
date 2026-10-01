@@ -533,7 +533,10 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
     } else {
       toast({ title: "Saved!", description: `Quote for ${quote.clientName} saved.` });
       setEditingId(result.data.id);
-      setQuote((prev) => ({ ...prev, shareToken: result.data.share_token }));
+      setQuote((prev) => {
+        const token = result.data?.share_token;
+        return token ? { ...prev, shareToken: token } : prev;
+      });
       fetchQuotes();
     }
     setSaving(false);
@@ -627,7 +630,11 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
     const newItems = [...quote.lineItems];
     const swapIndex = direction === "up" ? index - 1 : index + 1;
     if (swapIndex < 0 || swapIndex >= newItems.length) return;
-    [newItems[index], newItems[swapIndex]] = [newItems[swapIndex], newItems[index]];
+    const current = newItems[index];
+    const target = newItems[swapIndex];
+    if (!current || !target) return;
+    newItems[index] = target;
+    newItems[swapIndex] = current;
     setQuote({ ...quote, lineItems: newItems });
   };
 
@@ -1274,9 +1281,9 @@ const QuoteBuilder = ({ onPreviewMode }: QuoteBuilderProps = {}) => {
           setQuote((prev) => ({ ...prev, ...updates }));
           if (editingId) {
             const dbUpdates: Record<string, any> = {};
-            if ("quoteMarkdown" in updates) dbUpdates.quote_markdown = updates.quoteMarkdown || null;
-            if ("summary" in updates) dbUpdates.summary = updates.summary || null;
-            if ("notes" in updates) dbUpdates.notes = updates.notes || null;
+            if ("quoteMarkdown" in updates) dbUpdates["quote_markdown"] = updates.quoteMarkdown || null;
+            if ("summary" in updates) dbUpdates["summary"] = updates.summary || null;
+            if ("notes" in updates) dbUpdates["notes"] = updates.notes || null;
             if (Object.keys(dbUpdates).length > 0) {
               setSaving(true);
               const { error } = await supabase.from("client_quotes").update(dbUpdates as any).eq("id", editingId);

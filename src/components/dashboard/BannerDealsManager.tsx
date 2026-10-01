@@ -56,6 +56,7 @@ const BannerDealsManager = () => {
 
   const startEdit = (idx: number) => {
     const s = slots[idx] || DEFAULTS[idx];
+    if (!s) return;
     setForm({ affiliate_url: s.affiliate_url, sale_label: s.sale_label, alt_text: s.alt_text });
     setImageFile(null);
     setImagePreview("");
@@ -91,7 +92,7 @@ const BannerDealsManager = () => {
       const payload = {
         slot_number: slotIdx + 1,
         image_url: imageUrl,
-        affiliate_url: form.affiliate_url.trim() || DEFAULTS[slotIdx].affiliate_url,
+        affiliate_url: form.affiliate_url.trim() || DEFAULTS[slotIdx]!.affiliate_url,
         sale_label: form.sale_label.trim() || null,
         alt_text: form.alt_text.trim() || null,
       };

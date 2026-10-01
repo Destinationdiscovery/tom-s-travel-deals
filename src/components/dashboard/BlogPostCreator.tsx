@@ -184,7 +184,7 @@ const BlogPostCreator = () => {
   };
 
   const removeFromImagePool = (index: number) => {
-    URL.revokeObjectURL(imagePoolPreviews[index]);
+    URL.revokeObjectURL(imagePoolPreviews[index] ?? "");
     setImagePool(prev => prev.filter((_, i) => i !== index));
     setImagePoolPreviews(prev => prev.filter((_, i) => i !== index));
   };
@@ -199,7 +199,7 @@ const BlogPostCreator = () => {
   };
 
   const removeChart = (index: number) => {
-    URL.revokeObjectURL(chartPreviews[index]);
+    URL.revokeObjectURL(chartPreviews[index] ?? "");
     setChartFiles(prev => prev.filter((_, i) => i !== index));
     setChartPreviews(prev => prev.filter((_, i) => i !== index));
   };
@@ -300,8 +300,8 @@ const BlogPostCreator = () => {
         if (block.type === "image") {
           const match = block.value.match(/IMAGE_(\d+)/);
           if (match) {
-            const idx = parseInt(match[1], 10);
-            return { ...block, value: uploadedUrls[idx] || "" };
+            const idx = parseInt(match[1] ?? "0", 10);
+            return { ...block, value: uploadedUrls[idx] ?? "" };
           }
         }
         return block;
@@ -330,7 +330,7 @@ const BlogPostCreator = () => {
   };
 
   const addBlock = (type: "text" | "heading" | "image") => {
-    setBlocks([...blocks, { type, value: "", caption: type === "image" ? "" : undefined }]);
+    setBlocks([...blocks, { type, value: "", ...(type === "image" && { caption: "" }) }]);
   };
 
   const updateBlock = (index: number, updates: Partial<ContentBlock>) => {
@@ -345,7 +345,11 @@ const BlogPostCreator = () => {
     const newI = index + direction;
     if (newI < 0 || newI >= blocks.length) return;
     const arr = [...blocks];
-    [arr[index], arr[newI]] = [arr[newI], arr[index]];
+    const a = arr[index];
+    const b = arr[newI];
+    if (!a || !b) return;
+    arr[index] = b;
+    arr[newI] = a;
     setBlocks(arr);
   };
 

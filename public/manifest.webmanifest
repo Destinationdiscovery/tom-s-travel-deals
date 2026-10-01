@@ -1,0 +1,17 @@
+{
+  "name": "ReviewThenGo – Real Reviews & Travel Insights",
+  "short_name": "ReviewThenGo",
+  "description": "Real destination reviews, tested travel gear, and expert insights from an Ontario travel consultant.",
+  "theme_color": "#003366",
+  "background_color": "#f5f5f5",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "start_url": "/",
+  "categories": ["travel", "lifestyle"],
+  "icons": [
+    { "src": "pwa-192x192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "pwa-512x512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "pwa-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

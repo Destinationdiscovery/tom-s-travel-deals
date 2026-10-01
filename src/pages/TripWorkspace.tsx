@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "@/lib/router-compat";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
@@ -561,7 +561,7 @@ const TripWorkspace = () => {
                 <LogisticsCard
                   title="Best time to visit"
                   summary={logistics.best_time.verdict || logistics.best_time.destination}
-                  detail={Array.isArray(logistics.best_time.bestMonths) ? `Ideal: ${logistics.best_time.bestMonths.join(", ")}` : undefined}
+                  {...(Array.isArray(logistics.best_time.bestMonths) && { detail: `Ideal: ${logistics.best_time.bestMonths.join(", ")}` })}
                   href="/best-time"
                   onClear={async () => {
                     await (supabase as any).from("trip_logistics").update({ best_time: null, best_time_confirmed: false }).eq("id", logistics.id);
@@ -573,7 +573,7 @@ const TripWorkspace = () => {
                 <LogisticsCard
                   title="Safety"
                   summary={logistics.safety.verdict || logistics.safety.overall || logistics.safety.destination}
-                  detail={logistics.safety.overallScore ? `Overall score: ${logistics.safety.overallScore}/5` : undefined}
+                  {...(logistics.safety.overallScore && { detail: `Overall score: ${logistics.safety.overallScore}/5` })}
                   href="/safety"
                   onClear={async () => {
                     await (supabase as any).from("trip_logistics").update({ safety: null, safety_checked: false }).eq("id", logistics.id);
@@ -596,7 +596,7 @@ const TripWorkspace = () => {
                 <LogisticsCard
                   title="Currency"
                   summary={logistics.currency.verdict || logistics.currency.currency || logistics.currency.destination}
-                  detail={logistics.currency.rate ? `Rate: ${logistics.currency.rate}` : undefined}
+                  {...(logistics.currency.rate && { detail: `Rate: ${logistics.currency.rate}` })}
                   href="/currency"
                   onClear={async () => {
                     await (supabase as any).from("trip_logistics").update({ currency: null, currency_checked: false }).eq("id", logistics.id);

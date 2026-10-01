@@ -82,6 +82,7 @@ const FeaturedDealsManager = () => {
 
   const startEdit = (idx: number) => {
     const s = slots[idx];
+    if (!s) return;
     setForm({
       name: s.name, location: s.location, affiliateUrl: s.affiliateUrl,
       originalPrice: String(s.originalPrice), salePrice: String(s.salePrice),
@@ -105,7 +106,8 @@ const FeaturedDealsManager = () => {
   const handleSave = async (slotIdx: number) => {
     setSaving(true);
     try {
-      let imageUrl = slots[slotIdx].imageUrl;
+      const currentSlot = slots[slotIdx];
+      let imageUrl = currentSlot?.imageUrl ?? "";
       if (imageFile) {
         const ext = imageFile.name.split(".").pop() || "jpg";
         const fileName = `deal-slot-${slotIdx + 1}-${Date.now()}.${ext}`;
@@ -142,7 +144,7 @@ const FeaturedDealsManager = () => {
       };
 
       const existing = slots[slotIdx];
-      if (existing.isCustom && existing.dbId) {
+      if (existing?.isCustom && existing.dbId) {
         const { error } = await supabase.from("featured_deals").update(payload as any).eq("id", existing.dbId);
         if (error) throw error;
       } else {
@@ -161,7 +163,7 @@ const FeaturedDealsManager = () => {
 
   const handleRevert = async (slotIdx: number) => {
     const s = slots[slotIdx];
-    if (!s.isCustom || !s.dbId) return;
+    if (!s?.isCustom || !s.dbId) return;
     const { error } = await supabase.from("featured_deals").delete().eq("id", s.dbId) as any;
     if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
     else { toast({ title: "Reverted", description: `Slot ${slotIdx + 1} back to default.` }); setEditingSlot(null); fetchAndMerge(); }

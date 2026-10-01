@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet-async";
-import { Navigate, useParams } from "react-router-dom";
+import { Navigate, useParams } from "@/lib/router-compat";
 
 const PropertyRedirect = () => {
   const { name } = useParams<{ city: string; name: string }>();

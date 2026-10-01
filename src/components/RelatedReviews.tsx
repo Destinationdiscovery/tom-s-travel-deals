@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { MapPin, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -28,7 +28,7 @@ const RelatedReviews = ({ currentSlug, currentLocation }: RelatedReviewsProps) =
 
       // 1. Try same-location matches first
       if (currentLocation) {
-        const firstWord = currentLocation.split(",")[0].trim();
+        const firstWord = (currentLocation.split(",")[0] ?? currentLocation).trim();
         const { data } = await supabase
           .from("cached_reviews")
           .select("slug, property_name, location, review_data")

@@ -92,7 +92,7 @@ export function classifySearchIntent(rawQuery: string): SearchIntent {
   const words = q.split(/\s+/);
 
   if (words.length > 5) return "listicle";
-  if (QUESTION_STARTERS.includes(words[0])) return "listicle";
+  if (words[0] !== undefined && QUESTION_STARTERS.includes(words[0])) return "listicle";
   if (PLURAL_PROPERTY_KEYWORDS.some((kw) => words.includes(kw))) return "listicle";
   if (LISTICLE_KEYWORDS.some((kw) => q.includes(kw))) return "listicle";
 

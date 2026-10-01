@@ -67,7 +67,7 @@ const AgentPinboard = () => {
   };
 
   const getColorClass = (color: string) =>
-    COLOR_OPTIONS.find((c) => c.value === color)?.bg || COLOR_OPTIONS[0].bg;
+    COLOR_OPTIONS.find((c) => c.value === color)?.bg || COLOR_OPTIONS[0]!.bg;
 
   return (
     <Card>

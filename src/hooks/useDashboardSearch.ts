@@ -6,7 +6,7 @@ export type ChatMessage = {
   citations?: string[];
 };
 
-const SEARCH_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/dashboard-search`;
+const SEARCH_URL = `${import.meta.env["VITE_SUPABASE_URL"]}/functions/v1/dashboard-search`;
 
 export function useDashboardSearch() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -33,7 +33,7 @@ export function useDashboardSearch() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"]}`,
         },
         body: JSON.stringify({ messages: apiMessages }),
         signal: controller.signal,
@@ -49,7 +49,11 @@ export function useDashboardSearch() {
       let buffer = "";
 
       const upsert = () => {
-        const msg: ChatMessage = { role: "assistant", content: assistantSoFar, citations: citations.length ? citations : undefined };
+        const msg: ChatMessage = {
+          role: "assistant",
+          content: assistantSoFar,
+          ...(citations.length ? { citations } : {}),
+        };
         setMessages((prev) => {
           const last = prev[prev.length - 1];
           if (last?.role === "assistant") {

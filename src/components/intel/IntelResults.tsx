@@ -37,7 +37,7 @@ const Section = ({ icon: Icon, title, items }: { icon: React.ElementType; title:
   </div>
 );
 
-export const Citations = ({ citations }: { citations?: string[] }) => {
+export const Citations = ({ citations }: { citations?: string[] | undefined }) => {
   if (!citations?.length) return null;
   return (
     <div className="mt-6 pt-4 border-t border-border">
@@ -92,7 +92,7 @@ const AdvisoryBadge = ({ level }: { level: number }) => {
     3: { label: "Level 3. Reconsider Travel", className: "bg-orange-500/15 text-orange-700 border-orange-500/30" },
     4: { label: "Level 4. Do Not Travel", className: "bg-red-500/15 text-red-700 border-red-500/30" },
   };
-  const c = config[level] || config[1];
+  const c = config[level] ?? config[1] ?? { label: "", className: "" };
   return <span className={`inline-block px-3 py-1.5 rounded-full text-sm font-semibold border ${c.className}`}>{c.label}</span>;
 };
 

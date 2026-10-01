@@ -19,7 +19,7 @@ export function useCommentCounts(pageType: PageType, slugs: string[]) {
       // Count occurrences per slug
       const counts: Record<string, number> = {};
       slugs.forEach(slug => counts[slug] = 0);
-      data?.forEach(row => {
+      data?.forEach((row: { page_slug: string }) => {
         counts[row.page_slug] = (counts[row.page_slug] || 0) + 1;
       });
       return counts;

@@ -29,18 +29,18 @@ interface LineItem {
 
 interface TripDetailsCardProps {
   resortName: string;
-  destination?: string;
-  roomType?: string;
-  checkIn?: string;
-  checkOut?: string;
+  destination?: string | undefined;
+  roomType?: string | undefined;
+  checkIn?: string | undefined;
+  checkOut?: string | undefined;
   numTravellers: number;
   flights: FlightDetail[];
   lineItems: LineItem[];
   totalPrice: number;
   currency: string;
   inclusions: string[];
-  notes?: string;
-  attachmentUrls?: string[];
+  notes?: string | undefined;
+  attachmentUrls?: string[] | undefined;
 }
 
 const getNights = (checkIn: string, checkOut: string) => {

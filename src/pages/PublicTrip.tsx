@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams } from "@/lib/router-compat";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -267,7 +267,7 @@ const HotelRow = ({ hotel, authorName }: { hotel: any; authorName?: string | nul
       )}
     </div>
     {hotel.personal_review && (
-      <HotelReviewCard review={hotel.personal_review} authorName={authorName} />
+      <HotelReviewCard review={hotel.personal_review} {...(authorName !== undefined && { authorName })} />
     )}
   </div>
 );

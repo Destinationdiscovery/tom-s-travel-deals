@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import { Shield, Menu, Download, ChevronDown, Luggage, Calendar, Map, DollarSign, Plane, Brain, ShieldCheck, Briefcase } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useActiveTrip } from "@/hooks/useActiveTrip";
 import AdminLoginDialog from "@/components/auth/AdminLoginDialog";

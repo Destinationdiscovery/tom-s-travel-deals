@@ -1,13 +1,13 @@
 import { useTheme } from "next-themes";
-import { Toaster as Sonner, toast } from "sonner";
-
-type ToasterProps = React.ComponentProps<typeof Sonner>;
+import { Toaster as Sonner, toast, type ToasterProps } from "sonner";
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = "system" } = useTheme();
 
   return (
+    // @ts-expect-error sonner v2 ToasterProps spread conflicts with exactOptionalPropertyTypes on optional fields
     <Sonner
+      {...props}
       theme={theme as ToasterProps["theme"]}
       className="toaster group"
       toastOptions={{
@@ -19,7 +19,6 @@ const Toaster = ({ ...props }: ToasterProps) => {
           cancelButton: "group-[.toast]:bg-muted group-[.toast]:text-muted-foreground",
         },
       }}
-      {...props}
     />
   );
 };
