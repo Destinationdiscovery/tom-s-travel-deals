@@ -1,26 +1,21 @@
-// Fetches the dynamic sitemap from the generate-sitemap Edge Function
-// and writes it to public/sitemap.xml so it's served from our own domain.
-// Runs via predev / prebuild hooks in package.json.
+// Writes public/sitemap.xml with only the pages that exist now.
+// Runs via the predev / prebuild hooks in package.json. No network needed.
+// When you add a page, add its path to PAGES below.
 
 import { writeFileSync, mkdirSync } from "fs";
 import { resolve, dirname } from "path";
 
-const EDGE_URL =
-  "https://iomrjljlydboniioohkv.supabase.co/functions/v1/generate-sitemap";
+const SITE = "https://www.reviewthengo.com";
+const PAGES = ["/", "/privacy-policy"];
 const OUT_PATH = resolve("public/sitemap.xml");
 
-async function main() {
-  try {
-    const res = await fetch(EDGE_URL);
-    if (!res.ok) throw new Error(`Edge function returned ${res.status}`);
-    const xml = await res.text();
-    mkdirSync(dirname(OUT_PATH), { recursive: true });
-    writeFileSync(OUT_PATH, xml);
-    console.log(`sitemap.xml written (${xml.length} bytes)`);
-  } catch (err) {
-    console.warn(`[generate-sitemap] failed: ${(err as Error).message}`);
-    console.warn("[generate-sitemap] continuing without regenerating sitemap");
-  }
-}
+const today = new Date().toISOString().slice(0, 10);
+const xml =
+  `<?xml version="1.0" encoding="UTF-8"?>\n` +
+  `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
+  PAGES.map((p) => `  <url><loc>${SITE}${p}</loc><lastmod>${today}</lastmod></url>`).join("\n") +
+  `\n</urlset>\n`;
 
-main();
+mkdirSync(dirname(OUT_PATH), { recursive: true });
+writeFileSync(OUT_PATH, xml);
+console.log(`sitemap.xml written (${PAGES.length} pages)`);
