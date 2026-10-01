@@ -10,45 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
-import { Route as ClubsRouteImport } from './routes/clubs'
-import { Route as GalleryRouteImport } from './routes/gallery'
-import { Route as PhotographyRouteImport } from './routes/photography'
 import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
-import { Route as PromoCardsRouteImport } from './routes/promo-cards'
-import { Route as ReelsRouteImport } from './routes/reels'
-import { Route as SocialRouteImport } from './routes/social'
-import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
-import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
-import { Route as AuthenticatedAdminProspectorRouteImport } from './routes/_authenticated/admin/prospector'
-import { Route as AuthenticatedAdminContentIndexRouteImport } from './routes/_authenticated/admin/content/index'
-import { Route as AuthenticatedAdminContentImagesRouteImport } from './routes/_authenticated/admin/content/images'
-import { Route as AuthenticatedAdminContentShowcaseRouteImport } from './routes/_authenticated/admin/content/showcase'
-import { Route as AuthenticatedAdminContentTestimonialsRouteImport } from './routes/_authenticated/admin/content/testimonials'
-import { Route as AuthenticatedAdminContentTextRouteImport } from './routes/_authenticated/admin/content/text'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ClubsRoute = ClubsRouteImport.update({
-  id: '/clubs',
-  path: '/clubs',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GalleryRoute = GalleryRouteImport.update({
-  id: '/gallery',
-  path: '/gallery',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PhotographyRoute = PhotographyRouteImport.update({
-  id: '/photography',
-  path: '/photography',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
@@ -56,193 +22,31 @@ const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
   path: '/privacy-policy',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PromoCardsRoute = PromoCardsRouteImport.update({
-  id: '/promo-cards',
-  path: '/promo-cards',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ReelsRoute = ReelsRouteImport.update({
-  id: '/reels',
-  path: '/reels',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SocialRoute = SocialRouteImport.update({
-  id: '/social',
-  path: '/social',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const UnsubscribeRoute = UnsubscribeRouteImport.update({
-  id: '/unsubscribe',
-  path: '/unsubscribe',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
-  id: '/admin/',
-  path: '/admin/',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedAdminProspectorRoute =
-  AuthenticatedAdminProspectorRouteImport.update({
-    id: '/admin/prospector',
-    path: '/admin/prospector',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAdminContentIndexRoute =
-  AuthenticatedAdminContentIndexRouteImport.update({
-    id: '/admin/content/',
-    path: '/admin/content/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAdminContentImagesRoute =
-  AuthenticatedAdminContentImagesRouteImport.update({
-    id: '/admin/content/images',
-    path: '/admin/content/images',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAdminContentShowcaseRoute =
-  AuthenticatedAdminContentShowcaseRouteImport.update({
-    id: '/admin/content/showcase',
-    path: '/admin/content/showcase',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAdminContentTestimonialsRoute =
-  AuthenticatedAdminContentTestimonialsRouteImport.update({
-    id: '/admin/content/testimonials',
-    path: '/admin/content/testimonials',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAdminContentTextRoute =
-  AuthenticatedAdminContentTextRouteImport.update({
-    id: '/admin/content/text',
-    path: '/admin/content/text',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/clubs': typeof ClubsRoute
-  '/gallery': typeof GalleryRoute
-  '/photography': typeof PhotographyRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
-  '/promo-cards': typeof PromoCardsRoute
-  '/reels': typeof ReelsRoute
-  '/social': typeof SocialRoute
-  '/unsubscribe': typeof UnsubscribeRoute
-  '/admin/prospector': typeof AuthenticatedAdminProspectorRoute
-  '/admin/': typeof AuthenticatedAdminIndexRoute
-  '/admin/content/images': typeof AuthenticatedAdminContentImagesRoute
-  '/admin/content/showcase': typeof AuthenticatedAdminContentShowcaseRoute
-  '/admin/content/testimonials': typeof AuthenticatedAdminContentTestimonialsRoute
-  '/admin/content/text': typeof AuthenticatedAdminContentTextRoute
-  '/admin/content/': typeof AuthenticatedAdminContentIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/clubs': typeof ClubsRoute
-  '/gallery': typeof GalleryRoute
-  '/photography': typeof PhotographyRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
-  '/promo-cards': typeof PromoCardsRoute
-  '/reels': typeof ReelsRoute
-  '/social': typeof SocialRoute
-  '/unsubscribe': typeof UnsubscribeRoute
-  '/admin/prospector': typeof AuthenticatedAdminProspectorRoute
-  '/admin': typeof AuthenticatedAdminIndexRoute
-  '/admin/content/images': typeof AuthenticatedAdminContentImagesRoute
-  '/admin/content/showcase': typeof AuthenticatedAdminContentShowcaseRoute
-  '/admin/content/testimonials': typeof AuthenticatedAdminContentTestimonialsRoute
-  '/admin/content/text': typeof AuthenticatedAdminContentTextRoute
-  '/admin/content': typeof AuthenticatedAdminContentIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
-  '/clubs': typeof ClubsRoute
-  '/gallery': typeof GalleryRoute
-  '/photography': typeof PhotographyRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
-  '/promo-cards': typeof PromoCardsRoute
-  '/reels': typeof ReelsRoute
-  '/social': typeof SocialRoute
-  '/unsubscribe': typeof UnsubscribeRoute
-  '/_authenticated/admin/prospector': typeof AuthenticatedAdminProspectorRoute
-  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
-  '/_authenticated/admin/content/images': typeof AuthenticatedAdminContentImagesRoute
-  '/_authenticated/admin/content/showcase': typeof AuthenticatedAdminContentShowcaseRoute
-  '/_authenticated/admin/content/testimonials': typeof AuthenticatedAdminContentTestimonialsRoute
-  '/_authenticated/admin/content/text': typeof AuthenticatedAdminContentTextRoute
-  '/_authenticated/admin/content/': typeof AuthenticatedAdminContentIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/clubs'
-    | '/gallery'
-    | '/photography'
-    | '/privacy-policy'
-    | '/promo-cards'
-    | '/reels'
-    | '/social'
-    | '/unsubscribe'
-    | '/admin/prospector'
-    | '/admin/'
-    | '/admin/content/images'
-    | '/admin/content/showcase'
-    | '/admin/content/testimonials'
-    | '/admin/content/text'
-    | '/admin/content/'
+  fullPaths: '/' | '/privacy-policy'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/clubs'
-    | '/gallery'
-    | '/photography'
-    | '/privacy-policy'
-    | '/promo-cards'
-    | '/reels'
-    | '/social'
-    | '/unsubscribe'
-    | '/admin/prospector'
-    | '/admin'
-    | '/admin/content/images'
-    | '/admin/content/showcase'
-    | '/admin/content/testimonials'
-    | '/admin/content/text'
-    | '/admin/content'
-  id:
-    | '__root__'
-    | '/'
-    | '/_authenticated'
-    | '/clubs'
-    | '/gallery'
-    | '/photography'
-    | '/privacy-policy'
-    | '/promo-cards'
-    | '/reels'
-    | '/social'
-    | '/unsubscribe'
-    | '/_authenticated/admin/prospector'
-    | '/_authenticated/admin/'
-    | '/_authenticated/admin/content/images'
-    | '/_authenticated/admin/content/showcase'
-    | '/_authenticated/admin/content/testimonials'
-    | '/_authenticated/admin/content/text'
-    | '/_authenticated/admin/content/'
+  to: '/' | '/privacy-policy'
+  id: '__root__' | '/' | '/privacy-policy'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
-  ClubsRoute: typeof ClubsRoute
-  GalleryRoute: typeof GalleryRoute
-  PhotographyRoute: typeof PhotographyRoute
   PrivacyPolicyRoute: typeof PrivacyPolicyRoute
-  PromoCardsRoute: typeof PromoCardsRoute
-  ReelsRoute: typeof ReelsRoute
-  SocialRoute: typeof SocialRoute
-  UnsubscribeRoute: typeof UnsubscribeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -254,34 +58,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated': {
-      id: '/_authenticated'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/clubs': {
-      id: '/clubs'
-      path: '/clubs'
-      fullPath: '/clubs'
-      preLoaderRoute: typeof ClubsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/gallery': {
-      id: '/gallery'
-      path: '/gallery'
-      fullPath: '/gallery'
-      preLoaderRoute: typeof GalleryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/photography': {
-      id: '/photography'
-      path: '/photography'
-      fullPath: '/photography'
-      preLoaderRoute: typeof PhotographyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/privacy-policy': {
       id: '/privacy-policy'
       path: '/privacy-policy'
@@ -289,122 +65,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyPolicyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/promo-cards': {
-      id: '/promo-cards'
-      path: '/promo-cards'
-      fullPath: '/promo-cards'
-      preLoaderRoute: typeof PromoCardsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reels': {
-      id: '/reels'
-      path: '/reels'
-      fullPath: '/reels'
-      preLoaderRoute: typeof ReelsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/social': {
-      id: '/social'
-      path: '/social'
-      fullPath: '/social'
-      preLoaderRoute: typeof SocialRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/unsubscribe': {
-      id: '/unsubscribe'
-      path: '/unsubscribe'
-      fullPath: '/unsubscribe'
-      preLoaderRoute: typeof UnsubscribeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/admin/': {
-      id: '/_authenticated/admin/'
-      path: '/admin'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/admin/prospector': {
-      id: '/_authenticated/admin/prospector'
-      path: '/admin/prospector'
-      fullPath: '/admin/prospector'
-      preLoaderRoute: typeof AuthenticatedAdminProspectorRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/admin/content/': {
-      id: '/_authenticated/admin/content/'
-      path: '/admin/content'
-      fullPath: '/admin/content/'
-      preLoaderRoute: typeof AuthenticatedAdminContentIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/admin/content/images': {
-      id: '/_authenticated/admin/content/images'
-      path: '/admin/content/images'
-      fullPath: '/admin/content/images'
-      preLoaderRoute: typeof AuthenticatedAdminContentImagesRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/admin/content/showcase': {
-      id: '/_authenticated/admin/content/showcase'
-      path: '/admin/content/showcase'
-      fullPath: '/admin/content/showcase'
-      preLoaderRoute: typeof AuthenticatedAdminContentShowcaseRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/admin/content/testimonials': {
-      id: '/_authenticated/admin/content/testimonials'
-      path: '/admin/content/testimonials'
-      fullPath: '/admin/content/testimonials'
-      preLoaderRoute: typeof AuthenticatedAdminContentTestimonialsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/admin/content/text': {
-      id: '/_authenticated/admin/content/text'
-      path: '/admin/content/text'
-      fullPath: '/admin/content/text'
-      preLoaderRoute: typeof AuthenticatedAdminContentTextRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
   }
 }
 
-interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAdminProspectorRoute: typeof AuthenticatedAdminProspectorRoute
-  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
-  AuthenticatedAdminContentImagesRoute: typeof AuthenticatedAdminContentImagesRoute
-  AuthenticatedAdminContentShowcaseRoute: typeof AuthenticatedAdminContentShowcaseRoute
-  AuthenticatedAdminContentTestimonialsRoute: typeof AuthenticatedAdminContentTestimonialsRoute
-  AuthenticatedAdminContentTextRoute: typeof AuthenticatedAdminContentTextRoute
-  AuthenticatedAdminContentIndexRoute: typeof AuthenticatedAdminContentIndexRoute
-}
-
-const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAdminProspectorRoute: AuthenticatedAdminProspectorRoute,
-  AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
-  AuthenticatedAdminContentImagesRoute: AuthenticatedAdminContentImagesRoute,
-  AuthenticatedAdminContentShowcaseRoute:
-    AuthenticatedAdminContentShowcaseRoute,
-  AuthenticatedAdminContentTestimonialsRoute:
-    AuthenticatedAdminContentTestimonialsRoute,
-  AuthenticatedAdminContentTextRoute: AuthenticatedAdminContentTextRoute,
-  AuthenticatedAdminContentIndexRoute: AuthenticatedAdminContentIndexRoute,
-}
-
-const AuthenticatedRouteRouteWithChildren =
-  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
-  ClubsRoute: ClubsRoute,
-  GalleryRoute: GalleryRoute,
-  PhotographyRoute: PhotographyRoute,
   PrivacyPolicyRoute: PrivacyPolicyRoute,
-  PromoCardsRoute: PromoCardsRoute,
-  ReelsRoute: ReelsRoute,
-  SocialRoute: SocialRoute,
-  UnsubscribeRoute: UnsubscribeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
