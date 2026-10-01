@@ -21,18 +21,18 @@ const ClientInsights = () => {
       const counts: Record<string, number> = {};
       data.forEach((q) => {
         const name = q.client_name?.trim().toLowerCase();
-        if (name) counts[name] = (counts[name] || 0) + 1;
+        if (name) counts[name] = (counts[name] ?? 0) + 1;
       });
 
       const names = Object.keys(counts);
-      const repeats = names.filter((n) => counts[n] > 1);
+      const repeats = names.filter((n) => (counts[n] ?? 0) > 1);
       setTotalClients(names.length);
       setRepeatRate(names.length > 0 ? Math.round((repeats.length / names.length) * 100) : 0);
 
       const sorted = repeats
         .map((name) => ({
           name: data.find((q) => q.client_name?.trim().toLowerCase() === name)?.client_name || name,
-          count: counts[name],
+          count: counts[name] ?? 0,
         }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 5);

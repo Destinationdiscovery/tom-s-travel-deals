@@ -53,8 +53,9 @@ const DashboardFunnel = () => {
         <div className="space-y-3">
           {stages.map((stage, i) => {
             const pct = Math.round((stage.count / maxCount) * 100);
-            const conversionPct = i > 0 && stages[i - 1].count > 0
-              ? Math.round((stage.count / stages[i - 1].count) * 100)
+            const prevStage = i > 0 ? stages[i - 1] : undefined;
+            const conversionPct = prevStage && prevStage.count > 0
+              ? Math.round((stage.count / prevStage.count) * 100)
               : null;
             return (
               <div key={stage.label}>

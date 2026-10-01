@@ -3,7 +3,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import ReadingProgress from "@/components/ReadingProgress";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link } from "@/lib/router-compat";
 import { Star, ArrowLeft, Calendar, MapPin, Heart, Share2, Twitter, Facebook, Copy, Check, Package, Plug, Waves, ChevronUp, ArrowRight, List } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import SEOHead from "@/components/SEOHead";
@@ -589,7 +589,7 @@ const DestinationReview = () => {
                       <Heart className={`h-4 w-4 ${isSaved ? "fill-current" : ""}`} />
                       {isSaved ? "Saved" : "Save"}
                     </Button>
-                    {navigator.share ? (
+                    {typeof navigator.share === "function" ? (
                       <Button variant="outline" size="sm" className="gap-2" onClick={handleShare}>
                         <Share2 className="h-4 w-4" />
                         Share

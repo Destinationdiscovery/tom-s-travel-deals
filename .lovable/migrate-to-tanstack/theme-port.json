@@ -1,0 +1,33 @@
+{
+  "customizations": [
+    { "token": "--background/--foreground and full brand palette (light + dark)", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "--navy", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "--gradient-hero", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "--gradient-cool", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "--gradient-ocean", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "--shadow-soft", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "--shadow-elevated", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "--shadow-glow", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "--font-display (Montserrat)", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "--font-body (Open Sans)", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "--radius 0.75rem", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "sidebar tokens (--sidebar-background et al)", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "body base styles (18px Open Sans, safe-area insets)", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "heading font-display base rule", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": ".prose link color overrides", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "text-gradient", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "bg-hero-gradient", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "bg-warm-gradient", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "shadow-soft utility", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "shadow-elevated utility", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "shadow-glow utility", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "animate-float / animate-fade-up / animate-fade-in + keyframes", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "print styles (@media print, quote PDF rules)", "source": "src/index.css", "reappliedIn": "src/styles.css" },
+    { "token": "font-display/font-body utilities", "source": "tailwind.config.ts", "reappliedIn": "src/styles.css" },
+    { "token": "navy color utility", "source": "tailwind.config.ts", "reappliedIn": "src/styles.css" },
+    { "token": "container config (center, 2rem padding, 1400px)", "source": "tailwind.config.ts", "reappliedIn": "src/styles.css" },
+    { "token": "animate-slide-up / animate-slide-in-right / animate-ken-burns + keyframes", "source": "tailwind.config.ts", "reappliedIn": "src/styles.css" },
+    { "token": "accordion-down/accordion-up keyframes", "source": "tailwind.config.ts", "reappliedIn": "src/styles.css" },
+    { "token": "@tailwindcss/typography plugin", "source": "tailwind.config.ts", "reappliedIn": "src/styles.css" }
+  ]
+}

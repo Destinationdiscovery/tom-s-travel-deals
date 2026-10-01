@@ -6,7 +6,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { ArrowRight, MessageCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { compassArticles } from "@/data/compassArticles";
 import { Button } from "@/components/ui/button";
 import { useCommentCounts } from "@/hooks/useCommentCounts";

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import { Search, Star, MapPin, Loader2, X } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";

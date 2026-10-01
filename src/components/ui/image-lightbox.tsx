@@ -89,13 +89,15 @@ const ImageLightbox = ({ images, initialIndex, isOpen, onClose }: ImageLightboxP
 
           {/* Image with swipe support */}
           <img
-            src={images[currentIndex]}
+            src={images[currentIndex] ?? ""}
             alt={`Gallery image ${currentIndex + 1}`}
             className="max-h-[85vh] max-w-[90vw] object-contain rounded-lg"
-            onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
+            onTouchStart={(e) => { touchStartX.current = e.touches[0]?.clientX ?? null; }}
             onTouchEnd={(e) => {
               if (touchStartX.current === null) return;
-              const diff = e.changedTouches[0].clientX - touchStartX.current;
+              const touch = e.changedTouches[0];
+              if (!touch) return;
+              const diff = touch.clientX - touchStartX.current;
               if (Math.abs(diff) > 50) {
                 if (diff > 0) goToPrevious();
                 else goToNext();

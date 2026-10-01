@@ -1,5 +1,5 @@
 import { useEffect, useRef, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import { Star, MapPin, Sparkles, Search, Camera, ListOrdered } from "lucide-react";
 import ReviewLoadingStages from "@/components/ReviewLoadingStages";
 import { Button } from "@/components/ui/button";

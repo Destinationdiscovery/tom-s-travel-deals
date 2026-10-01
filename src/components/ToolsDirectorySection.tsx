@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { Search, Sun, Map, Plane, Backpack, DollarSign, Shield, Globe, ArrowRight } from "lucide-react";
 
 const tools = [

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import { Plus, Loader2, CalendarIcon, ClipboardList, Paperclip, Send, X, FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -239,10 +239,10 @@ const BookingManager = () => {
   };
 
   const createBookingEntries = async (bookingData: {
-    clientName: string; clientEmail?: string; bookingNumber: string;
-    title: string; supplier?: string;
-    dateBooked?: string; depositDue?: string; finalPaymentDue?: string;
-    tripStart?: string; tripEnd?: string;
+    clientName: string; clientEmail?: string | undefined; bookingNumber: string;
+    title: string; supplier?: string | undefined;
+    dateBooked?: string | undefined; depositDue?: string | undefined; finalPaymentDue?: string | undefined;
+    tripStart?: string | undefined; tripEnd?: string | undefined;
   }) => {
     const entries: any[] = [];
     const base = {
@@ -299,7 +299,7 @@ const BookingManager = () => {
     const files = Array.from(e.target.files || []);
     const newAttached: AttachedFile[] = files.map((file) => ({
       file,
-      preview: file.type.startsWith("image/") ? URL.createObjectURL(file) : undefined,
+      ...(file.type.startsWith("image/") && { preview: URL.createObjectURL(file) }),
     }));
     setAttachedFiles((prev) => [...prev, ...newAttached]);
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -308,7 +308,7 @@ const BookingManager = () => {
   const removeFile = (index: number) => {
     setAttachedFiles((prev) => {
       const removed = prev[index];
-      if (removed.preview) URL.revokeObjectURL(removed.preview);
+      if (removed?.preview) URL.revokeObjectURL(removed.preview);
       return prev.filter((_, i) => i !== index);
     });
   };
@@ -316,7 +316,7 @@ const BookingManager = () => {
   const fileToBase64 = (file: File): Promise<string> =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = () => resolve((reader.result as string).split(",")[1]);
+      reader.onload = () => resolve((reader.result as string).split(",")[1] ?? "");
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });

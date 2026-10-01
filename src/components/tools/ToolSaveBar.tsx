@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "@/lib/router-compat";
 import { Loader2, Plus, FileDown, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -120,7 +120,7 @@ const ToolSaveBar = ({ toolType, label, destination, payload, onExportPdf, onCop
   };
 
   const openAuthDialog = () => {
-    stashPendingSave({ toolType, payload, destination, label });
+    stashPendingSave({ toolType, payload, label, ...(destination !== undefined ? { destination } : {}) });
     setAuthDialogOpen(true);
   };
 
@@ -320,7 +320,7 @@ const ToolSaveBar = ({ toolType, label, destination, payload, onExportPdf, onCop
           </DialogHeader>
           <SaveMomentPrompt
             hotelName={label}
-            destination={destination}
+            {...(destination !== undefined ? { destination } : {})}
             onDismiss={() => setAuthDialogOpen(false)}
           />
         </DialogContent>

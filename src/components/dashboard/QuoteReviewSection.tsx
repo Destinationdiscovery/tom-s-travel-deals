@@ -5,18 +5,18 @@ import TripDetailsCard from "./TripDetailsCard";
 
 interface TripDetailsProps {
   resortName: string;
-  destination?: string;
-  roomType?: string;
-  checkIn?: string;
-  checkOut?: string;
+  destination?: string | undefined;
+  roomType?: string | undefined;
+  checkIn?: string | undefined;
+  checkOut?: string | undefined;
   numTravellers: number;
   flights: any[];
   lineItems: any[];
   totalPrice: number;
   currency: string;
   inclusions: string[];
-  notes?: string;
-  attachmentUrls?: string[];
+  notes?: string | undefined;
+  attachmentUrls?: string[] | undefined;
 }
 
 interface QuoteReviewSectionProps {

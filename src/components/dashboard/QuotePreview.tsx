@@ -362,7 +362,7 @@ const PictureManager = ({ markdown, onChange }: PictureManagerProps) => {
     const re = new RegExp(IMG_RE.source, "g");
     let m;
     while ((m = re.exec(markdown)) !== null) {
-      out.push({ alt: m[1], url: m[2], match: m[0] });
+      out.push({ alt: m[1] ?? "", url: m[2] ?? "", match: m[0] ?? "" });
     }
     return out;
   }, [markdown]);
@@ -381,10 +381,12 @@ const PictureManager = ({ markdown, onChange }: PictureManagerProps) => {
     const lines = markdown.split("\n");
     let insertAt = 0;
     for (let i = 0; i < lines.length; i++) {
-      if (lines[i].startsWith("# ") || lines[i].startsWith("## ")) {
+      const line = lines[i];
+      if (line !== undefined && (line.startsWith("# ") || line.startsWith("## "))) {
         // find next blank line after heading
         for (let j = i + 1; j < lines.length; j++) {
-          if (lines[j].trim() === "") { insertAt = j; break; }
+          const next = lines[j];
+          if (next !== undefined && next.trim() === "") { insertAt = j; break; }
         }
         break;
       }

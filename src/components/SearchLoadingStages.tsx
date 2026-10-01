@@ -35,9 +35,11 @@ const SearchLoadingStages = () => {
 
   useEffect(() => {
     if (activeStage >= STAGES.length - 1) return;
+    const currentStage = STAGES[activeStage];
+    if (!currentStage) return;
     const timeout = setTimeout(() => {
       setActiveStage((prev) => prev + 1);
-    }, STAGES[activeStage].duration);
+    }, currentStage.duration);
     return () => clearTimeout(timeout);
   }, [activeStage]);
 

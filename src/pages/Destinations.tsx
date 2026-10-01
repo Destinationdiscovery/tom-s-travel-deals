@@ -6,7 +6,7 @@ import { destinationsAEO } from "@/components/tools/toolAEOContent";
 import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import { Star, ArrowRight, Play, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "@/lib/router-compat";
 import { useGenerateReview } from "@/hooks/useGenerateReview";
 import { useSearchSuggestions } from "@/hooks/useSearchSuggestions";
 import AIReviewResult from "@/components/AIReviewResult";

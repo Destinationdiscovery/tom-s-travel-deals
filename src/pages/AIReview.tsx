@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "@/lib/router-compat";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import AIReviewResult from "@/components/AIReviewResult";
@@ -67,6 +67,12 @@ const AIReview = () => {
         }
         reviewData = genData.review;
         cameFromCache = false;
+      }
+
+      if (!reviewData) {
+        setError("Could not load this review.");
+        setLoading(false);
+        return;
       }
       setFromCache(cameFromCache);
 
@@ -136,14 +142,16 @@ const AIReview = () => {
             { name: "Destinations", url: "/destinations" },
             { name: review.property_name, url: `/review/${review.slug}` },
           ]}
-          faq={seoFaq}
-          aggregateRating={seoRating}
-          jsonLd={review.location ? {
-            "@context": "https://schema.org",
-            "@type": "TouristDestination",
-            name: review.location,
-            description: `Travel reviews and planning tools for ${review.location}`,
-          } : undefined}
+          {...(seoFaq !== undefined && { faq: seoFaq })}
+          {...(seoRating !== undefined && { aggregateRating: seoRating })}
+          {...(review.location && {
+            jsonLd: {
+              "@context": "https://schema.org",
+              "@type": "TouristDestination",
+              name: review.location,
+              description: `Travel reviews and planning tools for ${review.location}`,
+            },
+          })}
         />
       )}
       <Header />
@@ -177,7 +185,7 @@ const AIReview = () => {
               isLoading={false}
               error={error}
               onNewReview={handleNewReview}
-              affiliateUrl={affiliateUrl ?? undefined}
+              {...(affiliateUrl !== null && { affiliateUrl })}
             />
             {slug && (
               <SocialVideoRow title="See it on video" reviewSlug={slug} limit={8} />

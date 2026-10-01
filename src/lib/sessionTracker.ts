@@ -26,7 +26,7 @@ function sendHeartbeat() {
   const sessionId = getSessionId();
   
   // Use sendBeacon for reliability on page unload
-  const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/track-review-view`;
+  const url = `${import.meta.env["VITE_SUPABASE_URL"]}/functions/v1/track-review-view`;
   const payload = JSON.stringify({
     action: "session",
     session_id: sessionId,

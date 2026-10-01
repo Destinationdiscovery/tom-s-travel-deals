@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Heart, ExternalLink, Twitter, Instagram, Rss, Briefcase, ArrowRight, Send } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { trackEmailSignup } from "@/lib/analytics";

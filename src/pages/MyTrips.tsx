@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "@/lib/router-compat";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
@@ -73,9 +73,9 @@ const MyTrips = () => {
       ]);
       const acc: Record<string, TripCounts> = {};
       ids.forEach((id) => (acc[id] = { hotels: 0, days: 0, packing: 0 }));
-      (h.data ?? []).forEach((r: any) => acc[r.trip_id] && acc[r.trip_id].hotels++);
-      (d.data ?? []).forEach((r: any) => acc[r.trip_id] && acc[r.trip_id].days++);
-      (p.data ?? []).forEach((r: any) => acc[r.trip_id] && acc[r.trip_id].packing++);
+      (h.data ?? []).forEach((r: any) => { const c = acc[r.trip_id]; if (c) c.hotels++; });
+      (d.data ?? []).forEach((r: any) => { const c = acc[r.trip_id]; if (c) c.days++; });
+      (p.data ?? []).forEach((r: any) => { const c = acc[r.trip_id]; if (c) c.packing++; });
       setCounts(acc);
     }
     setLoading(false);

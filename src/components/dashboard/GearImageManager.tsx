@@ -53,7 +53,7 @@ const FeaturedGearManager = () => {
             description: row.description || "",
             price: row.price || "",
             affiliateUrl: row.affiliate_url || "",
-            imageUrl: row.image_url || DEFAULTS[idx].imageUrl,
+            imageUrl: row.image_url || DEFAULTS[idx]?.imageUrl || "",
             isCustom: true,
             dbId: row.id,
           };
@@ -66,6 +66,7 @@ const FeaturedGearManager = () => {
 
   const startEdit = (idx: number) => {
     const s = slots[idx];
+    if (!s) return;
     setForm({ title: s.title, description: s.description, price: s.price, affiliateUrl: s.affiliateUrl });
     setImageFile(null);
     setImagePreview("");
@@ -83,7 +84,7 @@ const FeaturedGearManager = () => {
   const handleSave = async (slotIdx: number) => {
     setSaving(true);
     try {
-      let imageUrl = slots[slotIdx].imageUrl;
+      let imageUrl = slots[slotIdx]?.imageUrl ?? "";
       if (imageFile) {
         const ext = imageFile.name.split(".").pop() || "jpg";
         const fileName = `gear-slot-${slotIdx + 1}-${Date.now()}.${ext}`;
@@ -103,7 +104,7 @@ const FeaturedGearManager = () => {
       };
 
       const existing = slots[slotIdx];
-      if (existing.isCustom && existing.dbId) {
+      if (existing?.isCustom && existing.dbId) {
         const { error } = await supabase.from("featured_gear_cards").update(payload as any).eq("id", existing.dbId);
         if (error) throw error;
       } else {
@@ -122,7 +123,7 @@ const FeaturedGearManager = () => {
 
   const handleRevert = async (slotIdx: number) => {
     const s = slots[slotIdx];
-    if (!s.isCustom || !s.dbId) return;
+    if (!s?.isCustom || !s.dbId) return;
     const { error } = await supabase.from("featured_gear_cards").delete().eq("id", s.dbId) as any;
     if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
     else { toast({ title: "Reverted", description: `Slot ${slotIdx + 1} back to default.` }); setEditingSlot(null); fetchAndMerge(); }

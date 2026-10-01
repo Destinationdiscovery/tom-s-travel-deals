@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { ArrowRight, Map, Calendar, ShieldCheck, Plane, DollarSign, Brain, Luggage, Search } from "lucide-react";
 
 interface CompassArticleToolsCTAProps {

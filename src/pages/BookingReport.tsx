@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "@/lib/router-compat";
 import { ArrowLeft, CalendarIcon, MapPin, Ship, RefreshCw, Loader2, Trash2, Paperclip, Send, X, FileText, Download, Image as ImageIcon, Pencil, Sparkles, DollarSign, Check } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -37,7 +37,7 @@ const slugify = (name: string) =>
 const fileToBase64 = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => resolve((reader.result as string).split(",")[1]);
+    reader.onload = () => resolve((reader.result as string).split(",")[1] ?? "");
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
@@ -121,7 +121,7 @@ const BookingReport = () => {
           const signedResults = await Promise.all(
             validFiles.map(f => supabase.storage.from("booking-documents").createSignedUrl(`${clientSlug}/${f.name}`, 3600))
           );
-          setDocuments(validFiles.map((f, i) => ({ name: f.name, url: signedResults[i].data?.signedUrl || "" })).filter(f => f.url));
+          setDocuments(validFiles.map((f, i) => ({ name: f.name, url: signedResults[i]?.data?.signedUrl || "" })).filter(f => f.url));
         }
       }
     }
@@ -152,7 +152,7 @@ const BookingReport = () => {
               if (blob) {
                 const base64 = await new Promise<string>((resolve, reject) => {
                   const reader = new FileReader();
-                  reader.onload = () => resolve((reader.result as string).split(",")[1]);
+                  reader.onload = () => resolve((reader.result as string).split(",")[1] ?? "");
                   reader.onerror = reject;
                   reader.readAsDataURL(blob);
                 });
@@ -261,13 +261,13 @@ const BookingReport = () => {
   const handleChatFileAttach = () => chatFileRef.current?.click();
   const handleChatFilesSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    setChatFiles(prev => [...prev, ...files.map(file => ({ file, preview: file.type.startsWith("image/") ? URL.createObjectURL(file) : undefined }))]);
+    setChatFiles(prev => [...prev, ...files.map(file => ({ file, ...(file.type.startsWith("image/") && { preview: URL.createObjectURL(file) }) }))]);
     if (chatFileRef.current) chatFileRef.current.value = "";
   };
   const removeChatFile = (index: number) => {
     setChatFiles(prev => {
       const removed = prev[index];
-      if (removed.preview) URL.revokeObjectURL(removed.preview);
+      if (removed?.preview) URL.revokeObjectURL(removed.preview);
       return prev.filter((_, i) => i !== index);
     });
   };
@@ -310,7 +310,7 @@ const BookingReport = () => {
                 mergeData[k] = v;
               }
             }
-            if (d.resort_or_trip) mergeData.resort_name = d.resort_or_trip;
+            if (d.resort_or_trip) mergeData['resort_name'] = d.resort_or_trip;
             if (Object.keys(mergeData).length > 0) {
               await supabase.from("booking_details").update(mergeData as any).eq("booking_number", bookingNumber);
             }

@@ -1,5 +1,5 @@
 import { Star, ArrowRight, Play } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import type { Destination } from "@/pages/Destinations";
 
 interface DestinationCardProps {

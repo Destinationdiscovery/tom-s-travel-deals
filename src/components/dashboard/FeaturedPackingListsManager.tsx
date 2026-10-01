@@ -55,7 +55,7 @@ const itemToGearItem = (it: Item): GearItem => ({
   reason: it.notes ?? "",
   category: it.category ?? "Packing",
   amazonUrl: it.amazon_url ?? "",
-  imageUrl: it.image_url ?? undefined,
+  ...(it.image_url !== null && it.image_url !== undefined && { imageUrl: it.image_url }),
 });
 
 // ---------- component ----------

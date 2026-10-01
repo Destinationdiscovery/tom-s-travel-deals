@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link } from "@/lib/router-compat";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ReadingProgress from "@/components/ReadingProgress";
@@ -258,18 +258,18 @@ const CompassArticle = () => {
         image={article.image}
         url={`/compass/${slug}`}
         type="article"
-        publishedTime={publishedIso}
-        modifiedTime={modifiedIso}
+        {...(publishedIso !== undefined && { publishedTime: publishedIso })}
+        {...(modifiedIso !== undefined && { modifiedTime: modifiedIso })}
         author={article.author}
         breadcrumbs={[
           { name: "Home", url: "/" },
           { name: "Blog", url: "/compass" },
           { name: article.title, url: `/compass/${slug}` },
         ]}
-        jsonLd={combinedJsonLd.length > 0 ? combinedJsonLd : undefined}
-        keywords={article.tags}
-        faq={article.faq_items && article.faq_items.length > 0 ? article.faq_items : undefined}
-        alternateUrls={crawlerFeedUrl ? [{ href: crawlerFeedUrl, type: "text/html" }] : undefined}
+        {...(combinedJsonLd.length > 0 && { jsonLd: combinedJsonLd as any })}
+        {...(article.tags !== undefined && { keywords: article.tags })}
+        {...(article.faq_items && article.faq_items.length > 0 && { faq: article.faq_items })}
+        {...(crawlerFeedUrl && { alternateUrls: [{ href: crawlerFeedUrl, type: "text/html" }] })}
       />
       <Header />
       <ReadingProgress />
@@ -420,7 +420,7 @@ const CompassArticle = () => {
             <CompassArticleToolsCTA
               title={article.title}
               category={article.category}
-              tags={article.tags}
+              {...(article.tags !== undefined && { tags: article.tags })}
             />
 
             <AuthorBio />

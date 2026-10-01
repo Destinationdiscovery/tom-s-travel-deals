@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { ArrowLeft, Star, Trash2, Sparkles, Trophy, Loader2 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";

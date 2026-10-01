@@ -180,15 +180,15 @@ const SiteAnalyticsDashboard = () => {
     const toolDayMap: Record<string, number> = {};
     const queryMap: Record<string, { query: string; tool: string; count: number }> = {};
     toolEventData.forEach((e) => {
-      if (!toolMap[e.tool_name]) toolMap[e.tool_name] = { hits: 0, misses: 0 };
-      if (e.cache_hit) toolMap[e.tool_name].hits += 1;
-      else toolMap[e.tool_name].misses += 1;
+      const toolEntry = (toolMap[e.tool_name] ??= { hits: 0, misses: 0 });
+      if (e.cache_hit) toolEntry.hits += 1;
+      else toolEntry.misses += 1;
       const day = e.created_at?.substring(0, 10);
       if (day) toolDayMap[day] = (toolDayMap[day] || 0) + 1;
       if (e.query) {
         const k = `${e.tool_name}|${e.query.toLowerCase()}`;
-        if (!queryMap[k]) queryMap[k] = { query: e.query, tool: e.tool_name, count: 0 };
-        queryMap[k].count += 1;
+        const queryEntry = (queryMap[k] ??= { query: e.query, tool: e.tool_name, count: 0 });
+        queryEntry.count += 1;
       }
     });
     setToolTotals(
@@ -308,10 +308,10 @@ const SiteAnalyticsDashboard = () => {
     const vData = vitalsRes.data || [];
     const vPageMap: Record<string, Record<string, { sum: number; count: number }>> = {};
     vData.forEach((v) => {
-      if (!vPageMap[v.page]) vPageMap[v.page] = {};
-      if (!vPageMap[v.page][v.metric_name]) vPageMap[v.page][v.metric_name] = { sum: 0, count: 0 };
-      vPageMap[v.page][v.metric_name].sum += Number(v.value);
-      vPageMap[v.page][v.metric_name].count += 1;
+      const pageMetrics = (vPageMap[v.page] ??= {});
+      const metricEntry = (pageMetrics[v.metric_name] ??= { sum: 0, count: 0 });
+      metricEntry.sum += Number(v.value);
+      metricEntry.count += 1;
     });
     const vItems: VitalItem[] = [];
     Object.entries(vPageMap).forEach(([page, metrics]) => {
@@ -323,9 +323,9 @@ const SiteAnalyticsDashboard = () => {
 
     const overallMap: Record<string, { sum: number; count: number }> = {};
     vData.forEach((v) => {
-      if (!overallMap[v.metric_name]) overallMap[v.metric_name] = { sum: 0, count: 0 };
-      overallMap[v.metric_name].sum += Number(v.value);
-      overallMap[v.metric_name].count += 1;
+      const overallEntry = (overallMap[v.metric_name] ??= { sum: 0, count: 0 });
+      overallEntry.sum += Number(v.value);
+      overallEntry.count += 1;
     });
     setVitalAverages(Object.entries(overallMap).map(([name, { sum, count }]) => ({
       name, avg: Math.round((sum / count) * 100) / 100,

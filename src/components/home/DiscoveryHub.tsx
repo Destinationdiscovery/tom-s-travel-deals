@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { MapPin, Play, Luggage, Package, ArrowRight, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import SocialVideoModal from "@/components/social/SocialVideoModal";
@@ -16,7 +16,7 @@ interface GearPreview { slug: string; product_name: string; hero_image_url: stri
 const CardShell = ({
   to, onClick, cover, badge, cardTitle, title, subtitle, seeAllTo, seeAllLabel, icon: Icon,
 }: {
-  to?: string; onClick?: () => void; cover: React.ReactNode; badge?: string;
+  to?: string | undefined; onClick?: (() => void) | undefined; cover: React.ReactNode; badge?: string | undefined;
   cardTitle: string; title: string; subtitle: string; seeAllTo: string; seeAllLabel: string;
   icon: React.ElementType;
 }) => {

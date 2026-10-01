@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate, Link } from "@/lib/router-compat";
 import { ArrowLeft, CalendarIcon, MapPin, Plane, DollarSign, Users, Hotel, Tag, RefreshCw, Loader2, FileText, Download, Paperclip, Send, X, Image as ImageIcon, ExternalLink, Ship, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -98,7 +98,7 @@ const slugify = (name: string) =>
 const fileToBase64 = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => resolve((reader.result as string).split(",")[1]);
+    reader.onload = () => resolve((reader.result as string).split(",")[1] ?? "");
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
@@ -172,14 +172,14 @@ const ClientFile = () => {
     if (clientBookings.length > 0) {
       // Get display name from most recent booking
       const sorted = [...clientBookings].sort((a, b) => new Date(b.event_date).getTime() - new Date(a.event_date).getTime());
-      setClientName(sorted[0].client_name);
-      setClientEmail(sorted[0].client_email || "");
+      setClientName(sorted[0]?.client_name || clientSlug);
+      setClientEmail(sorted[0]?.client_email || "");
     } else {
       // Try from booking_details
       const clientDetails = allDetails.filter(d => d.client_name && slugify(d.client_name) === clientSlug);
       if (clientDetails.length > 0) {
-        setClientName(clientDetails[0].client_name || clientSlug);
-        setClientEmail(clientDetails[0].client_email || "");
+        setClientName(clientDetails[0]?.client_name || clientSlug);
+        setClientEmail(clientDetails[0]?.client_email || "");
       } else {
         setClientName(clientSlug.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase()));
       }
@@ -213,7 +213,7 @@ const ClientFile = () => {
       const signedResults = await Promise.all(
         validFiles.map(f => supabase.storage.from("booking-documents").createSignedUrl(`${clientSlug}/${f.name}`, 3600))
       );
-      setDocuments(validFiles.map((f, i) => ({ name: f.name, url: signedResults[i].data?.signedUrl || "" })).filter(f => f.url));
+      setDocuments(validFiles.map((f, i) => ({ name: f.name, url: signedResults[i]?.data?.signedUrl || "" })).filter(f => f.url));
     } else {
       setDocuments([]);
     }
@@ -308,7 +308,7 @@ const ClientFile = () => {
         if (!blob) continue;
         const base64 = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
-          reader.onload = () => resolve((reader.result as string).split(",")[1]);
+          reader.onload = () => resolve((reader.result as string).split(",")[1] ?? "");
           reader.onerror = reject;
           reader.readAsDataURL(blob);
         });
@@ -363,13 +363,13 @@ const ClientFile = () => {
   const handleChatFileAttach = () => chatFileRef.current?.click();
   const handleChatFilesSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    setChatFiles(prev => [...prev, ...files.map(file => ({ file, preview: file.type.startsWith("image/") ? URL.createObjectURL(file) : undefined }))]);
+    setChatFiles(prev => [...prev, ...files.map(file => ({ file, ...(file.type.startsWith("image/") && { preview: URL.createObjectURL(file) }) }))]);
     if (chatFileRef.current) chatFileRef.current.value = "";
   };
   const removeChatFile = (index: number) => {
     setChatFiles(prev => {
       const removed = prev[index];
-      if (removed.preview) URL.revokeObjectURL(removed.preview);
+      if (removed?.preview) URL.revokeObjectURL(removed.preview);
       return prev.filter((_, i) => i !== index);
     });
   };
@@ -564,9 +564,9 @@ const ClientFile = () => {
                           <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
                             {!compact && <Badge variant="outline" className="font-mono text-xs">{card.bookingNumber}</Badge>}
                             {card.supplier && !compact && <span>via {card.supplier}</span>}
-                            {card.details?.cabin_category && <span>{card.details.cabin_category}</span>}
-                            {card.details?.deck && <span>Deck {card.details.deck}</span>}
-                            {card.details?.bed_configuration && <span>{card.details.bed_configuration}</span>}
+                            {card.details?.["cabin_category"] && <span>{card.details["cabin_category"]}</span>}
+                            {card.details?.["deck"] && <span>Deck {card.details["deck"]}</span>}
+                            {card.details?.["bed_configuration"] && <span>{card.details["bed_configuration"]}</span>}
                             {card.details?.destination && !compact && (
                               <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{card.details.destination}</span>
                             )}
@@ -594,7 +594,7 @@ const ClientFile = () => {
                         )}
                         <div>
                           <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1">{compact ? "Cabin" : "Room"}</p>
-                          <p className="text-sm font-medium">{card.details?.cabin_category || card.details?.room_type || "-"}</p>
+                          <p className="text-sm font-medium">{card.details?.["cabin_category"] || card.details?.room_type || "-"}</p>
                         </div>
                         <div>
                           <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1">Travellers</p>
@@ -627,7 +627,8 @@ const ClientFile = () => {
                   {/* Grouped trip cards */}
                   {Object.entries(grouped).map(([groupId, cabins]) => {
                     const first = cabins[0];
-                    const tripName = first.resortName || first.details?.ship_name || "Trip";
+                    if (!first) return null;
+                    const tripName = first.resortName || first.details?.["ship_name"] || "Trip";
                     const supplier = first.supplier || first.details?.supplier || "";
                     const tripDates = first.tripStart && first.tripEnd
                       ? `${format(new Date(first.tripStart), "MMM d")} to ${format(new Date(first.tripEnd), "MMM d, yyyy")}`
