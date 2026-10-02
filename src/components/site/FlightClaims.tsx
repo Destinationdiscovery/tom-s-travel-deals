@@ -196,143 +196,31 @@ export default function FlightClaims() {
       />
 
       <div className="wrap tool-grid stacked" id="tool">
-        <form className="card tool-form" onSubmit={onSubmit} noValidate>
-          <h2>What happened</h2>
-
-          <div className="fgrid">
-          <Select<Issue>
-            id="fc-issue"
-            label="What happened to your flight?"
-            value={finder.issue}
-            onChange={(v) => set("issue", v)}
-            options={(Object.keys(ISSUE_LABEL) as Issue[]).map((k) => ({ value: k, label: ISSUE_LABEL[k] }))}
-          />
-          <Select<Place>
-            id="fc-from"
-            label="Where did the flight leave from?"
-            value={finder.from}
-            onChange={(v) => set("from", v)}
-            options={PLACES.map((p) => ({ value: p, label: PLACE_LABEL[p] }))}
-            hint="Iceland, Norway and Switzerland are not covered by this guide yet."
-          />
-          <Select<Place>
-            id="fc-to"
-            label="Where was it going?"
-            value={finder.to}
-            onChange={(v) => set("to", v)}
-            options={PLACES.map((p) => ({ value: p, label: PLACE_LABEL[p] }))}
-          />
-          <Select<Place>
-            id="fc-airline"
-            label="Where is the airline based?"
-            value={finder.airline}
-            onChange={(v) => set("airline", v)}
-            options={PLACES.map((p) => ({ value: p, label: PLACE_LABEL[p] }))}
-            hint="This matters for flights arriving in the EU or UK."
-          />
-          {finder.issue !== "bumped" ? (
-            <Select<DelayBand>
-              id="fc-delay"
-              label={finder.issue === "cancel" ? "How late did you finally arrive?" : "How late did you arrive?"}
-              value={finder.delay}
-              onChange={(v) => set("delay", v)}
-              options={(Object.keys(DELAY_LABEL) as DelayBand[]).map((k) => ({ value: k, label: DELAY_LABEL[k] }))}
-              hint="Delay is measured at your final destination, not at departure."
-            />
-          ) : null}
-          {showDistance ? (
-            <Select<Distance>
-              id="fc-distance"
-              label="Flight distance"
-              value={finder.distance}
-              onChange={(v) => set("distance", v)}
-              options={(Object.keys(DISTANCE_LABEL) as Distance[]).map((k) => ({ value: k, label: DISTANCE_LABEL[k] }))}
-              hint="EU and UK amounts depend on distance."
-            />
-          ) : null}
-          {showSize ? (
-            <Select<Size>
-              id="fc-size"
-              label="Airline size in Canada"
-              value={finder.size}
-              onChange={(v) => set("size", v)}
-              options={[
-                { value: "unsure", label: "Not sure, show both" },
-                { value: "large", label: "Large airline" },
-                { value: "small", label: "Small airline" },
-              ]}
-              hint="The Canadian Transportation Agency sets which airlines are large or small."
-            />
-          ) : null}
-          </div>
-
-          <h2 className="gap">Your details, optional</h2>
-          <p className="hint">Used only to fill in the sample wording. Leave anything blank and you will see a placeholder to fill in.</p>
-          <div className="fgrid">
-          <TextField id="fc-name" label="Your name" value={details.name} onChange={(v) => setD("name", v)} />
-          <TextField id="fc-air" label="Airline" value={details.airline} onChange={(v) => setD("airline", v)} />
-          <TextField id="fc-flight" label="Flight number" value={details.flight} onChange={(v) => setD("flight", v)} />
-          <TextField id="fc-date" label="Flight date" value={details.date} onChange={(v) => setD("date", v)} placeholder="for example 12 September 2026" />
-          <TextField id="fc-origin" label="From" value={details.from} onChange={(v) => setD("from", v)} />
-          <TextField id="fc-dest" label="To" value={details.to} onChange={(v) => setD("to", v)} />
-          <TextField id="fc-booking" label="Booking reference" value={details.booking} onChange={(v) => setD("booking", v)} />
-          {finder.issue !== "bumped" ? (
-            <TextField
-              id="fc-arrival"
-              label="How late you arrived"
-              value={details.arrival}
-              onChange={(v) => setD("arrival", v)}
-              placeholder="for example 4 hours 10 minutes"
-            />
-          ) : null}
-          <TextField
-            id="fc-reason"
-            label="Reason the airline gave, if any"
-            value={details.reason}
-            onChange={(v) => setD("reason", v)}
-          />
-          <div className="field wide">
-            <label htmlFor="fc-costs">Costs you paid while waiting, one per line</label>
-            <textarea
-              id="fc-costs"
-              rows={3}
-              value={details.costs}
-              placeholder={"Hotel, one night: 180 EUR\nMeals: 45 EUR"}
-              onChange={(e) => setD("costs", e.target.value)}
-            />
-            <p className="hint">Used for the expenses wording. Keep itemised receipts.</p>
-          </div>
-          </div>
-
-          {error ? (
-            <p className="form-error" role="alert">
-              {error}
-            </p>
-          ) : null}
-          <div className="btns">
-            <button className="btn solid" type="submit">
-              Show my path
-            </button>
-            <button className="btn" type="button" onClick={onReset}>
-              Reset
-            </button>
-          </div>
-          <p className="hint">Nothing you type is sent or saved. It runs in your browser.</p>
-        </form>
-
         <div className="result" aria-live="polite" ref={resultRef}>
           {!run ? (
             <div className="card">
               <h2>Your path</h2>
-              <p className="note">
-                Answer the questions and press Show my path. You will see which published rules may apply,
-                the amounts and deadlines, the order of steps, where to file, and sample wording.
-              </p>
+              <ol className="path">
+                <li>
+                  <strong>Answer the questions below</strong> and press Show my path.
+                </li>
+                <li>
+                  <strong>See which published rules may apply,</strong> the amounts, the deadlines, and where to file.
+                </li>
+                <li>
+                  <strong>Copy and edit the wording,</strong> then send it yourself.
+                </li>
+              </ol>
             </div>
           ) : (
             <>
               <div className="card">
                 <h2>Rules that may apply</h2>
+                <p className="answers">
+                  Your answers: {ISSUE_LABEL[run.finder.issue]}. {PLACE_LABEL[run.finder.from]} to{" "}
+                  {PLACE_LABEL[run.finder.to]}, airline based in {PLACE_LABEL[run.finder.airline]}.{" "}
+                  <a href="#claim-form">Change my answers</a>
+                </p>
                 {run.regimes.length === 0 ? (
                   <p className="note">
                     None of the rule sets we cover appears to apply to this route. Rights exist in other
@@ -456,6 +344,130 @@ export default function FlightClaims() {
             </>
           )}
         </div>
+
+        <form className="card tool-form" id="claim-form" onSubmit={onSubmit} noValidate>
+          <h2>What happened</h2>
+
+          <div className="fgrid">
+          <Select<Issue>
+            id="fc-issue"
+            label="What happened to your flight?"
+            value={finder.issue}
+            onChange={(v) => set("issue", v)}
+            options={(Object.keys(ISSUE_LABEL) as Issue[]).map((k) => ({ value: k, label: ISSUE_LABEL[k] }))}
+          />
+          <Select<Place>
+            id="fc-from"
+            label="Where did the flight leave from?"
+            value={finder.from}
+            onChange={(v) => set("from", v)}
+            options={PLACES.map((p) => ({ value: p, label: PLACE_LABEL[p] }))}
+            hint="Iceland, Norway and Switzerland are not covered by this guide yet."
+          />
+          <Select<Place>
+            id="fc-to"
+            label="Where was it going?"
+            value={finder.to}
+            onChange={(v) => set("to", v)}
+            options={PLACES.map((p) => ({ value: p, label: PLACE_LABEL[p] }))}
+          />
+          <Select<Place>
+            id="fc-airline"
+            label="Where is the airline based?"
+            value={finder.airline}
+            onChange={(v) => set("airline", v)}
+            options={PLACES.map((p) => ({ value: p, label: PLACE_LABEL[p] }))}
+            hint="This matters for flights arriving in the EU or UK."
+          />
+          {finder.issue !== "bumped" ? (
+            <Select<DelayBand>
+              id="fc-delay"
+              label={finder.issue === "cancel" ? "How late did you finally arrive?" : "How late did you arrive?"}
+              value={finder.delay}
+              onChange={(v) => set("delay", v)}
+              options={(Object.keys(DELAY_LABEL) as DelayBand[]).map((k) => ({ value: k, label: DELAY_LABEL[k] }))}
+              hint="Delay is measured at your final destination, not at departure."
+            />
+          ) : null}
+          {showDistance ? (
+            <Select<Distance>
+              id="fc-distance"
+              label="Flight distance"
+              value={finder.distance}
+              onChange={(v) => set("distance", v)}
+              options={(Object.keys(DISTANCE_LABEL) as Distance[]).map((k) => ({ value: k, label: DISTANCE_LABEL[k] }))}
+              hint="EU and UK amounts depend on distance."
+            />
+          ) : null}
+          {showSize ? (
+            <Select<Size>
+              id="fc-size"
+              label="Airline size in Canada"
+              value={finder.size}
+              onChange={(v) => set("size", v)}
+              options={[
+                { value: "unsure", label: "Not sure, show both" },
+                { value: "large", label: "Large airline" },
+                { value: "small", label: "Small airline" },
+              ]}
+              hint="The Canadian Transportation Agency sets which airlines are large or small."
+            />
+          ) : null}
+          </div>
+
+          <h2 className="gap">Your details, optional</h2>
+          <p className="hint">Used only to fill in the sample wording. Leave anything blank and you will see a placeholder to fill in.</p>
+          <div className="fgrid">
+          <TextField id="fc-name" label="Your name" value={details.name} onChange={(v) => setD("name", v)} />
+          <TextField id="fc-air" label="Airline" value={details.airline} onChange={(v) => setD("airline", v)} />
+          <TextField id="fc-flight" label="Flight number" value={details.flight} onChange={(v) => setD("flight", v)} />
+          <TextField id="fc-date" label="Flight date" value={details.date} onChange={(v) => setD("date", v)} placeholder="for example 12 September 2026" />
+          <TextField id="fc-origin" label="From" value={details.from} onChange={(v) => setD("from", v)} />
+          <TextField id="fc-dest" label="To" value={details.to} onChange={(v) => setD("to", v)} />
+          <TextField id="fc-booking" label="Booking reference" value={details.booking} onChange={(v) => setD("booking", v)} />
+          {finder.issue !== "bumped" ? (
+            <TextField
+              id="fc-arrival"
+              label="How late you arrived"
+              value={details.arrival}
+              onChange={(v) => setD("arrival", v)}
+              placeholder="for example 4 hours 10 minutes"
+            />
+          ) : null}
+          <TextField
+            id="fc-reason"
+            label="Reason the airline gave, if any"
+            value={details.reason}
+            onChange={(v) => setD("reason", v)}
+          />
+          <div className="field wide">
+            <label htmlFor="fc-costs">Costs you paid while waiting, one per line</label>
+            <textarea
+              id="fc-costs"
+              rows={3}
+              value={details.costs}
+              placeholder={"Hotel, one night: 180 EUR\nMeals: 45 EUR"}
+              onChange={(e) => setD("costs", e.target.value)}
+            />
+            <p className="hint">Used for the expenses wording. Keep itemised receipts.</p>
+          </div>
+          </div>
+
+          {error ? (
+            <p className="form-error" role="alert">
+              {error}
+            </p>
+          ) : null}
+          <div className="btns">
+            <button className="btn solid" type="submit">
+              Show my path
+            </button>
+            <button className="btn" type="button" onClick={onReset}>
+              Reset
+            </button>
+          </div>
+          <p className="hint">Nothing you type is sent or saved. It runs in your browser.</p>
+        </form>
       </div>
 
       <section className="band" id="rules">
