@@ -10,11 +10,35 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ConnectionCheckRouteImport } from './routes/connection-check'
+import { Route as DisclaimerRouteImport } from './routes/disclaimer'
+import { Route as FlightClaimsRouteImport } from './routes/flight-claims'
+import { Route as InsuranceAppealRouteImport } from './routes/insurance-appeal'
 import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConnectionCheckRoute = ConnectionCheckRouteImport.update({
+  id: '/connection-check',
+  path: '/connection-check',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DisclaimerRoute = DisclaimerRouteImport.update({
+  id: '/disclaimer',
+  path: '/disclaimer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FlightClaimsRoute = FlightClaimsRouteImport.update({
+  id: '/flight-claims',
+  path: '/flight-claims',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InsuranceAppealRoute = InsuranceAppealRouteImport.update({
+  id: '/insurance-appeal',
+  path: '/insurance-appeal',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
@@ -25,27 +49,43 @@ const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/connection-check': typeof ConnectionCheckRoute
+  '/disclaimer': typeof DisclaimerRoute
+  '/flight-claims': typeof FlightClaimsRoute
+  '/insurance-appeal': typeof InsuranceAppealRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/connection-check': typeof ConnectionCheckRoute
+  '/disclaimer': typeof DisclaimerRoute
+  '/flight-claims': typeof FlightClaimsRoute
+  '/insurance-appeal': typeof InsuranceAppealRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/connection-check': typeof ConnectionCheckRoute
+  '/disclaimer': typeof DisclaimerRoute
+  '/flight-claims': typeof FlightClaimsRoute
+  '/insurance-appeal': typeof InsuranceAppealRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/privacy-policy'
+  fullPaths: '/' | '/connection-check' | '/disclaimer' | '/flight-claims' | '/insurance-appeal' | '/privacy-policy'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/privacy-policy'
-  id: '__root__' | '/' | '/privacy-policy'
+  to: '/' | '/connection-check' | '/disclaimer' | '/flight-claims' | '/insurance-appeal' | '/privacy-policy'
+  id: '__root__' | '/' | '/connection-check' | '/disclaimer' | '/flight-claims' | '/insurance-appeal' | '/privacy-policy'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ConnectionCheckRoute: typeof ConnectionCheckRoute
+  DisclaimerRoute: typeof DisclaimerRoute
+  FlightClaimsRoute: typeof FlightClaimsRoute
+  InsuranceAppealRoute: typeof InsuranceAppealRoute
   PrivacyPolicyRoute: typeof PrivacyPolicyRoute
 }
 
@@ -56,6 +96,34 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/connection-check': {
+      id: '/connection-check'
+      path: '/connection-check'
+      fullPath: '/connection-check'
+      preLoaderRoute: typeof ConnectionCheckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/disclaimer': {
+      id: '/disclaimer'
+      path: '/disclaimer'
+      fullPath: '/disclaimer'
+      preLoaderRoute: typeof DisclaimerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/flight-claims': {
+      id: '/flight-claims'
+      path: '/flight-claims'
+      fullPath: '/flight-claims'
+      preLoaderRoute: typeof FlightClaimsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/insurance-appeal': {
+      id: '/insurance-appeal'
+      path: '/insurance-appeal'
+      fullPath: '/insurance-appeal'
+      preLoaderRoute: typeof InsuranceAppealRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy-policy': {
@@ -70,6 +138,10 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ConnectionCheckRoute: ConnectionCheckRoute,
+  DisclaimerRoute: DisclaimerRoute,
+  FlightClaimsRoute: FlightClaimsRoute,
+  InsuranceAppealRoute: InsuranceAppealRoute,
   PrivacyPolicyRoute: PrivacyPolicyRoute,
 }
 export const routeTree = rootRouteImport

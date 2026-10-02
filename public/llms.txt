@@ -1,8 +1,12 @@
 # reviewthengo
 
-> Worldwide travel rules, dated and sourced. Border systems, passenger rights and entry rules, each with its source and the date we last checked it. We label anything we cannot confirm.
+> Worldwide travel rules, dated and sourced. Border systems, passenger rights and entry rules, each with its source and the date we last checked it. We label anything we cannot confirm. Legal information, not legal advice.
 
 ## Pages
 
 - [Home and rules ledger](https://www.reviewthengo.com/): current entries, status, sources and check dates
+- [Flight claim guide](https://www.reviewthengo.com/flight-claims): which published rules may apply to a delayed, cancelled or overbooked flight (Canada, EU, UK, US), amounts, deadlines, where to file, and sample wording
+- [Insurance appeal pack](https://www.reviewthengo.com/insurance-appeal): build an appeal from your own policy wording, with the complaint route for Canada, the UK, the US and Australia
+- [Connection check](https://www.reviewthengo.com/connection-check): estimate how much time Schengen border checks may need, with sourced and assumed figures labelled
+- [Disclaimer](https://www.reviewthengo.com/disclaimer)
 - [Privacy policy](https://www.reviewthengo.com/privacy-policy)

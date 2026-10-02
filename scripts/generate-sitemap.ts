@@ -6,7 +6,7 @@ import { writeFileSync, mkdirSync } from "fs";
 import { resolve, dirname } from "path";
 
 const SITE = "https://www.reviewthengo.com";
-const PAGES = ["/", "/privacy-policy"];
+const PAGES = ["/", "/flight-claims", "/insurance-appeal", "/connection-check", "/disclaimer", "/privacy-policy"];
 const OUT_PATH = resolve("public/sitemap.xml");
 
 const today = new Date().toISOString().slice(0, 10);

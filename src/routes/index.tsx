@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import AlertForm from "@/components/site/AlertForm";
 import { SITE_URL } from "@/lib/site";
+import toolsCss from "../tools.css?url";
 
 type Status = "ok" | "unc" | "sched";
 const STATUS_LABEL: Record<Status, string> = {
@@ -68,7 +69,10 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: DESCRIPTION },
       { property: "og:url", content: `${SITE_URL}/` },
     ],
-    links: [{ rel: "canonical", href: `${SITE_URL}/` }],
+    links: [
+      { rel: "canonical", href: `${SITE_URL}/` },
+      { rel: "stylesheet", href: toolsCss },
+    ],
   }),
   component: Home,
 });
@@ -188,46 +192,60 @@ function Home() {
 
       <section className="band" id="tools">
         <div className="wrap">
-          <h2 className="s">Tools, only when they earn a place.</h2>
+          <h2 className="s">Tools, built on the rules.</h2>
           <p className="sub">
-            A tool goes live after we confirm people look for it and nothing free already does it
-            better. Two ideas below are not built yet. Tell us if you would use them.
+            Each tool says where its numbers come from and what we assumed. Nothing you type is sent or
+            saved. They give legal information, not legal advice, and we never send anything for you.
           </p>
           <div className="tools">
+            <div className="tool">
+              <span className="chip ok">Open</span>
+              <h3>Flight claim guide</h3>
+              <p>
+                Flight delayed or cancelled? See which rules may apply, the amounts and deadlines, where to
+                file, and wording you can edit and send yourself.
+              </p>
+              <a className="btn solid" href="/flight-claims">
+                Open the guide
+              </a>
+              <p className="fine">Canada, EU, UK and US rules.</p>
+            </div>
+            <div className="tool">
+              <span className="chip ok">Open</span>
+              <h3>Insurance appeal pack</h3>
+              <p>
+                Travel insurer denied delay or cancellation expenses? Build your appeal from your own policy
+                wording.
+              </p>
+              <a className="btn solid" href="/insurance-appeal">
+                Open the pack
+              </a>
+              <p className="fine">Complaint routes for Canada, UK, US and Australia.</p>
+            </div>
+            <div className="tool">
+              <span className="chip ok">Open</span>
+              <h3>Connection check</h3>
+              <p>
+                Changing planes into or out of Schengen? Estimate how much time border checks may need.
+              </p>
+              <a className="btn solid" href="/connection-check">
+                Open the tool
+              </a>
+              <p className="fine">Runs in your browser. Nothing is saved.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="band">
+        <div className="wrap">
+          <div className="tools one">
             <div className="tool dark" id="alerts">
               <span className="chip">Open</span>
               <h3>Rule change alerts</h3>
               <p>One email when a rule you follow changes. Nothing else.</p>
               <AlertForm source="home-alerts" interests={["rule-alerts"]} inputId="alerts-email" />
               <p className="fine">Unsubscribe in one click.</p>
-            </div>
-            <div className="tool">
-              <span className="chip test">Not built yet</span>
-              <h3>Connection check</h3>
-              <p>
-                Changing planes into or out of Schengen? Estimate how much time border checks may need.
-              </p>
-              <AlertForm
-                source="fakedoor-connection-check"
-                interests={["connection-check"]}
-                buttonText="I would use this"
-                inputId="connection-email"
-              />
-              <p className="fine">We only email you if we build it.</p>
-            </div>
-            <div className="tool">
-              <span className="chip test">Not built yet</span>
-              <h3>Appeal pack</h3>
-              <p>
-                Delay or cancellation expenses denied? Build your appeal from your own policy wording.
-              </p>
-              <AlertForm
-                source="fakedoor-appeal-pack"
-                interests={["appeal-pack"]}
-                buttonText="I would use this"
-                inputId="appeal-email"
-              />
-              <p className="fine">We only email you if we build it.</p>
             </div>
           </div>
         </div>
