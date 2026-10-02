@@ -293,3 +293,10 @@ details p { margin-top: 10px; }
 .prose a { text-decoration: underline; text-underline-offset: 2px; }
 .prose table { margin: 8px 0 20px; }
 .prose blockquote { border-left: 4px solid var(--accent); margin: 0 0 16px; padding: 4px 16px; color: var(--muted); }
+
+/* flight claim guide: form on top, results below, fields in a grid (no empty column) */
+.tool-grid.stacked { grid-template-columns: 1fr; gap: 28px; }
+.tool-grid.stacked .result { max-width: 64em; scroll-margin-top: 16px; }
+.fgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0 22px; }
+.fgrid .field { margin: 0 0 18px; }
+.fgrid .wide { grid-column: 1 / -1; }

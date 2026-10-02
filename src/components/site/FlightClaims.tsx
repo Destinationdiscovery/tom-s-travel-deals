@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import StatStrip from "@/components/site/StatStrip";
 import { Faq, Glossary, QuickAnswers, Related } from "@/components/site/PageParts";
 import { FAQ_CLAIMS, GLOSSARY_CLAIMS, QUICK_CLAIMS } from "@/lib/faq";
@@ -98,6 +98,12 @@ export default function FlightClaims() {
   const [run, setRun] = useState<{ n: number; finder: Finder; regimes: RegimeId[]; scripts: Script[] } | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const [edited, setEdited] = useState<Record<string, string>>({});
+  const resultRef = useRef<HTMLDivElement>(null);
+
+  // After "Show my path", bring the results into view (they sit below the form).
+  useEffect(() => {
+    if (run) resultRef.current?.scrollIntoView?.({ behavior: "smooth", block: "start" });
+  }, [run?.n]);
 
   function set<K extends keyof Finder>(key: K, value: Finder[K]) {
     setFinder((f) => ({ ...f, [key]: value }));
@@ -170,8 +176,8 @@ export default function FlightClaims() {
         <p className="eyebrow">Guide</p>
         <h1>Flight delay and cancellation claim guide</h1>
         <p className="lede">
-          Flight delayed, cancelled or overbooked? See which published compensation rules may apply in Canada,
-          the EU, the UK and the US, the amounts and deadlines, where to file, and wording you can edit and send
+          Flight delayed, cancelled or overbooked? See which published compensation rules may apply (EU261, UK261,
+          Canada's APPR and US rules), the amounts and deadlines, where to file, and wording you can edit and send
           yourself.
         </p>
         <p className="notice">
@@ -189,10 +195,11 @@ export default function FlightClaims() {
         note="Checked 02 Oct 2026. Rules and figures change, and the table further down shows what is in force."
       />
 
-      <div className="wrap tool-grid" id="tool">
+      <div className="wrap tool-grid stacked" id="tool">
         <form className="card tool-form" onSubmit={onSubmit} noValidate>
           <h2>What happened</h2>
 
+          <div className="fgrid">
           <Select<Issue>
             id="fc-issue"
             label="What happened to your flight?"
@@ -257,9 +264,11 @@ export default function FlightClaims() {
               hint="The Canadian Transportation Agency sets which airlines are large or small."
             />
           ) : null}
+          </div>
 
           <h2 className="gap">Your details, optional</h2>
           <p className="hint">Used only to fill in the sample wording. Leave anything blank and you will see a placeholder to fill in.</p>
+          <div className="fgrid">
           <TextField id="fc-name" label="Your name" value={details.name} onChange={(v) => setD("name", v)} />
           <TextField id="fc-air" label="Airline" value={details.airline} onChange={(v) => setD("airline", v)} />
           <TextField id="fc-flight" label="Flight number" value={details.flight} onChange={(v) => setD("flight", v)} />
@@ -282,7 +291,7 @@ export default function FlightClaims() {
             value={details.reason}
             onChange={(v) => setD("reason", v)}
           />
-          <div className="field">
+          <div className="field wide">
             <label htmlFor="fc-costs">Costs you paid while waiting, one per line</label>
             <textarea
               id="fc-costs"
@@ -292,6 +301,7 @@ export default function FlightClaims() {
               onChange={(e) => setD("costs", e.target.value)}
             />
             <p className="hint">Used for the expenses wording. Keep itemised receipts.</p>
+          </div>
           </div>
 
           {error ? (
@@ -310,7 +320,7 @@ export default function FlightClaims() {
           <p className="hint">Nothing you type is sent or saved. It runs in your browser.</p>
         </form>
 
-        <div className="result" aria-live="polite">
+        <div className="result" aria-live="polite" ref={resultRef}>
           {!run ? (
             <div className="card">
               <h2>Your path</h2>
