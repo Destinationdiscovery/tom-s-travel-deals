@@ -10,33 +10,14 @@ import {
 } from "@tanstack/react-router";
 
 import { reportLovableError } from "@/lib/lovable-error-reporting";
-import { SITE_URL } from "@/lib/site";
+import { OG_IMAGE, OG_IMAGE_ALT, siteGraph } from "@/lib/seo";
 import SiteHeader from "@/components/site/SiteHeader";
 import SiteFooter from "@/components/site/SiteFooter";
 import appCss from "../styles.css?url";
 
-const structuredData = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Organization",
-      "@id": `${SITE_URL}/#organization`,
-      name: "reviewthengo",
-      url: SITE_URL,
-      logo: `${SITE_URL}/favicon.png`,
-      sameAs: ["https://www.instagram.com/reviewthengo"],
-    },
-    {
-      "@type": "WebSite",
-      "@id": `${SITE_URL}/#website`,
-      url: SITE_URL,
-      name: "reviewthengo",
-      description:
-        "Worldwide travel rules, dated and sourced. Border systems, passenger rights and entry rules, with the source and the date we last checked.",
-      publisher: { "@id": `${SITE_URL}/#organization` },
-    },
-  ],
-};
+const SITE_TITLE = "Flight Compensation, EES and Insurance Rules | reviewthengo";
+const SITE_DESCRIPTION =
+  "Dated, sourced travel rules: flight delay compensation (Canada, EU, UK, US), EES border queues and travel insurance appeals. We label what we cannot confirm.";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
@@ -46,22 +27,31 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         name: "viewport",
         content: "width=device-width, initial-scale=1.0, viewport-fit=cover",
       },
-      { title: "reviewthengo: travel rules, dated and sourced" },
-      {
-        name: "description",
-        content:
-          "Border systems, passenger rights and entry rules change with little warning. Every answer names its source and the day we last checked it.",
-      },
+      { title: SITE_TITLE },
+      { name: "description", content: SITE_DESCRIPTION },
+      { name: "robots", content: "index, follow, max-image-preview:large" },
       { name: "theme-color", content: "#E7EAE3" },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "reviewthengo" },
-      { name: "twitter:card", content: "summary" },
+      { property: "og:locale", content: "en" },
+      { property: "og:title", content: SITE_TITLE },
+      { property: "og:description", content: SITE_DESCRIPTION },
+      { property: "og:image", content: OG_IMAGE },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:alt", content: OG_IMAGE_ALT },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: SITE_TITLE },
+      { name: "twitter:description", content: SITE_DESCRIPTION },
+      { name: "twitter:image", content: OG_IMAGE },
+      { name: "twitter:image:alt", content: OG_IMAGE_ALT },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
       { rel: "icon", type: "image/png", href: "/favicon.png" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
@@ -84,7 +74,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       {
         type: "application/ld+json",
-        children: JSON.stringify(structuredData),
+        children: JSON.stringify(siteGraph),
       },
     ],
   }),
@@ -140,7 +130,9 @@ function NotFound() {
     <main className="plain">
       <h1>Page not found</h1>
       <p>
-        This page does not exist. <a href="/">Go back home</a>.
+        This page does not exist. <a href="/">Go back home</a>, or see the{" "}
+        <a href="/flight-claims">flight claim guide</a>, the <a href="/insurance-appeal">insurance appeal pack</a> and
+        the <a href="/connection-check">connection check</a>.
       </p>
     </main>
   );

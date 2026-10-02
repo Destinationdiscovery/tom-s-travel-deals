@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import AlertForm from "@/components/site/AlertForm";
-import { SITE_URL } from "@/lib/site";
+import { Faq } from "@/components/site/PageParts";
+import { FAQ_HOME } from "@/lib/faq";
+import { pageHead } from "@/lib/seo";
 import toolsCss from "../tools.css?url";
 
 type Status = "ok" | "unc" | "sched";
@@ -20,26 +22,70 @@ type Entry = {
 };
 
 // Add or edit ledger entries here. Every entry needs a status, a checked date, and sources.
+// Newest or most important first. Write each body as "According to [source], ..." and label what you cannot confirm.
 const ENTRIES: Entry[] = [
   {
-    title: "EES, Entry/Exit System",
-    body: "Registers non-EU travellers at Schengen external borders. Phased in from 12 Oct 2025 and fully operational at all external borders from 10 Apr 2026.",
+    title: "EES, congestion pause ended",
+    body: "According to Regulation (EU) 2025/1534, for a limited time after the rollout countries could pause biometric registration at a named crossing for up to six hours when waits were excessive. That power ran 90 days plus an automatic 60-day extension after the rollout ended on 9 April 2026. By our count the last day was 6 September 2026, and it ceased from 7 September. The regulation has no mechanism to extend it.",
     status: "ok",
-    checked: "01 Oct 2026",
+    checked: "02 Oct 2026",
     sources: [
+      { label: "Regulation (EU) 2025/1534, EUR-Lex", href: "https://eur-lex.europa.eu/eli/reg/2025/1534/oj" },
+      {
+        label: "European Commission, 10 Apr 2026",
+        href: "https://home-affairs.ec.europa.eu/news/entryexit-system-ees-fully-operational-2026-04-10_en",
+      },
+    ],
+  },
+  {
+    title: "EES, reports of continued limits in nine countries",
+    body: "According to press reports that trace to a single Times report, France, Belgium, the Netherlands, Germany, Greece, Malta, Portugal, Italy and Switzerland were allowed to keep limiting biometric checks after the deadline, with no new date. We found no official statement or legal instrument confirming it, and the European Commission has not commented.",
+    status: "unc",
+    checked: "02 Oct 2026",
+    sources: [
+      {
+        label: "Connexion France",
+        href: "https://www.connexionfrance.com/news/france-listed-among-countries-to-delay-full-ees-border-check-rollout/814138",
+      },
+      { label: "Your Mileage May Vary", href: "https://yourmileagemayvary.com/2026/09/15/europe-ees-border-checks-inconsistent/" },
+      {
+        label: "Remote Work Europe",
+        href: "https://remoteworkeurope.eu/news/2026/ees-biometric-derogation-expired-commission-silent/",
+      },
+    ],
+  },
+  {
+    title: "EES, Entry/Exit System",
+    body: "According to the European Commission, EES became fully operational across all Schengen countries on 10 April 2026, after a progressive start that began on 12 October 2025. It registers non-EU travellers on short stays, including fingerprints and a facial image, in place of passport stamps.",
+    status: "ok",
+    checked: "02 Oct 2026",
+    sources: [
+      {
+        label: "European Commission, 10 Apr 2026",
+        href: "https://home-affairs.ec.europa.eu/news/entryexit-system-ees-fully-operational-2026-04-10_en",
+      },
+      { label: "Official EES site", href: "https://travel-europe.europa.eu/en/ees" },
       {
         label: "TTG Media",
         href: "https://www.ttgmedia.com/news/eu-confirms-october-start-date-for-new-biometric-border-rules-and-etias-visa-waiver-price-hike-52893",
       },
+    ],
+  },
+  {
+    title: "UK, CAA guidance on the NATS disruption",
+    body: "According to the UK Civil Aviation Authority (9 September 2026), a technical issue at NATS on 8 September led to delays and the cancellation of hundreds of UK flights. The CAA considers delays and cancellations directly caused by it likely to be extraordinary circumstances, so passengers are unlikely to be entitled to compensation for those. Airlines must still look after passengers, offer a refund or re-routing, and promptly reimburse reasonable costs when passengers arrange their own care. The CAA calls this guidance only, says each case turns on its facts, and says passengers can still claim, including in court. It also published a statement on a further disruption on 21 September, which we have not summarised.",
+    status: "ok",
+    checked: "02 Oct 2026",
+    sources: [
       {
-        label: "VisasNews",
-        href: "https://visasnews.com/en/despite-a-rocky-ees-rollout-etias-is-still-expected-by-late-2026/",
+        label: "UK Civil Aviation Authority, 9 Sep 2026",
+        href: "https://www.caa.co.uk/newsroom/news/caa-statement-on-passenger-compensation-following-nats-disruption-on-8-september/",
       },
     ],
   },
   {
     title: "ETIAS",
-    body: "Travel authorisation for visa-exempt visitors to Europe. Scheduled for Q4 2026, with a fee of €20 (up from €7). No confirmed launch date in the sources we checked.",
+    body: "According to press reports, ETIAS, the travel authorisation for visa-exempt visitors to Europe, is scheduled for Q4 2026, with a fee of €20 (up from €7). We found no confirmed launch date in the sources we checked.",
     status: "unc",
     checked: "01 Oct 2026",
     sources: [
@@ -56,24 +102,20 @@ const ENTRIES: Entry[] = [
   },
 ];
 
-const TITLE = "reviewthengo: travel rules, dated and sourced";
+const TITLE = "Flight Compensation, EES and Insurance Rules | reviewthengo";
 const DESCRIPTION =
-  "Border systems, passenger rights and entry rules change with little warning. Every answer names its source and the day we last checked it.";
+  "Dated, sourced travel rules: flight delay compensation (Canada, EU, UK, US), EES border queues and travel insurance appeals. We label what we cannot confirm.";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: TITLE },
-      { name: "description", content: DESCRIPTION },
-      { property: "og:title", content: TITLE },
-      { property: "og:description", content: DESCRIPTION },
-      { property: "og:url", content: `${SITE_URL}/` },
-    ],
-    links: [
-      { rel: "canonical", href: `${SITE_URL}/` },
-      { rel: "stylesheet", href: toolsCss },
-    ],
-  }),
+  head: () =>
+    pageHead({
+      title: TITLE,
+      description: DESCRIPTION,
+      path: "/",
+      modified: "2026-10-02",
+      css: toolsCss,
+      faq: FAQ_HOME,
+    }),
   component: Home,
 });
 
@@ -87,7 +129,9 @@ function Home() {
           <p className="lede">
             Border systems, passenger rights and entry rules change with little warning. Every answer
             here names its source and the day we last verified it, so you can review before you go.
-            When we are not sure, we say so.
+            When we are not sure, we say so. Start with flight delay and cancellation compensation rules for Canada,
+            the EU, the UK and the US, travel insurance claim appeals, or how much time EES border checks may need
+            on a Schengen connection.
           </p>
           <div className="cta">
             <a className="btn solid" href="#ledger">
@@ -103,7 +147,7 @@ function Home() {
           <div className="stamp" aria-hidden="true">
             Checked
             <br />
-            01 Oct 2026
+            02 Oct 2026
           </div>
           <h2>Rules ledger</h2>
           <table>
@@ -184,7 +228,10 @@ function Home() {
             <div>
               <b>04</b>
               <h3>Public corrections</h3>
-              <p>When we get something wrong, the fix and the date are listed openly.</p>
+              <p>
+                When we get something wrong, the fix and the date are listed on the{" "}
+                <a href="/corrections">corrections page</a>.
+              </p>
             </div>
           </div>
         </div>
@@ -262,6 +309,21 @@ function Home() {
               <span className="chip unc">Unconfirmed</span>
             </li>
             <li>
+              <span className="d">13 Sep 2026</span>
+              <span className="t">Reports that nine countries may keep limiting EES biometric checks</span>
+              <span className="chip unc">Unconfirmed</span>
+            </li>
+            <li>
+              <span className="d">9 Sep 2026</span>
+              <span className="t">UK CAA guidance on compensation after the 8 September NATS disruption</span>
+              <span className="chip ok">In force</span>
+            </li>
+            <li>
+              <span className="d">7 Sep 2026</span>
+              <span className="t">EES congestion pause ceased to apply, last day 6 September</span>
+              <span className="chip ok">In force</span>
+            </li>
+            <li>
               <span className="d">10 Apr 2026</span>
               <span className="t">EES fully operational at all Schengen external borders</span>
               <span className="chip ok">In force</span>
@@ -287,6 +349,11 @@ function Home() {
           </div>
         </div>
       </section>
+      <Faq
+        title="Common questions, answered."
+        intro="Short answers, each tied to its source. Legal information, not legal advice."
+        items={FAQ_HOME}
+      />
     </main>
   );
 }

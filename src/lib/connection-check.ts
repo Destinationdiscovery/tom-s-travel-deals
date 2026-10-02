@@ -44,7 +44,7 @@ export type ScenarioResult = {
   verdict: Verdict;
 };
 
-export const CHECKED = "01 Oct 2026";
+export const CHECKED = "02 Oct 2026";
 export const DEFAULT_GATE_MINUTES = 30;
 export const OK_MARGIN_MINUTES = 20;
 
@@ -244,29 +244,65 @@ const BMI: Source = {
   label: "Austrian Interior Ministry, EES",
   href: "https://www.bmi.gv.at/202/Fremdenpolizei_und_Grenzkontrolle/Entry_Exit_System/start_en.aspx",
 };
+const EUR_LEX: Source = {
+  label: "Regulation (EU) 2025/1534, EUR-Lex",
+  href: "https://eur-lex.europa.eu/eli/reg/2025/1534/oj",
+};
+const COMMISSION: Source = {
+  label: "European Commission, EES fully operational",
+  href: "https://home-affairs.ec.europa.eu/news/entryexit-system-ees-fully-operational-2026-04-10_en",
+};
+const EES_SITE: Source = { label: "Official EES site", href: "https://travel-europe.europa.eu/en/ees" };
+const EURONEWS: Source = {
+  label: "Euronews, 12 Aug 2026",
+  href: "https://www.euronews.com/travel/2026/08/12/europes-new-border-system-is-causing-huge-airport-queues-as-ees-wait-times-double",
+};
+const CAA_DELAYS: Source = {
+  label: "UK Civil Aviation Authority, delays",
+  href: "https://www.caa.co.uk/air-passengers/travel-problems-and-rights/flight-delays-and-cancellations/delays/",
+};
 
 export const FACTS: Fact[] = [
   {
     title: "Where the border check happens",
-    body: "EES applies at the first Schengen entry and the last Schengen exit. If you stay in the transit area during a flight within Schengen and no border check is carried out, your data is not recorded in EES. Whether you can stay airside depends on your route and passport, so ask your airline.",
+    body: "According to the Austrian Interior Ministry, EES applies at the first Schengen entry and the last Schengen exit. If you stay in the transit area during a flight within Schengen and no border check is carried out, your data is not recorded in EES. Whether you can stay airside depends on your route and passport, so ask your airline.",
     status: "ok",
     sources: [BMI],
   },
   {
     title: "Who is registered",
-    body: "Non-EU travellers on short stays are registered. Some groups are exempt. The official list of exemptions is on the EU Travel Europe site and on the Austrian ministry page.",
+    body: "According to the Austrian Interior Ministry, non-EU travellers on short stays are registered, and some groups are exempt. The official list of exemptions is on the EU's EES site and on the ministry page.",
     status: "ok",
-    sources: [BMI, { label: "EU Travel Europe", href: "https://travel-europe.europa.eu" }],
+    sources: [BMI, EES_SITE],
+  },
+  {
+    title: "EES is fully operational",
+    body: "According to the European Commission, EES became fully operational across all Schengen countries on 10 April 2026, after a progressive start that began in October 2025. The Commission says it remains in close contact with member states on implementation.",
+    status: "ok",
+    sources: [COMMISSION, EES_SITE],
+  },
+  {
+    title: "The congestion pause ended",
+    body: "According to Regulation (EU) 2025/1534, for a limited time after the rollout countries could pause biometric registration at a named crossing for up to six hours when waits were excessive. That power ceased to apply 330 days after EES began, which by our count means the last day was 6 September 2026 and it ceased from 7 September. The regulation has no mechanism to extend it.",
+    status: "ok",
+    sources: [EUR_LEX, COMMISSION],
+  },
+  {
+    title: "Reports of continued limits",
+    body: "According to press reports that trace to a single Times report, France, Belgium, the Netherlands, Germany, Greece, Malta, Portugal, Italy and Switzerland were allowed to keep limiting biometric checks after the deadline, with no new date. We found no official statement or legal instrument confirming it, and the Commission has not commented. This estimate assumes full biometric registration.",
+    status: "unc",
+    sources: [
+      { label: "Connexion France, 13 Sep 2026", href: "https://www.connexionfrance.com/news/france-listed-among-countries-to-delay-full-ees-border-check-rollout/814138" },
+      { label: "Your Mileage May Vary, 15 Sep 2026", href: "https://yourmileagemayvary.com/2026/09/15/europe-ees-border-checks-inconsistent/" },
+      { label: "Remote Work Europe, 13 Sep 2026", href: "https://remoteworkeurope.eu/news/2026/ees-biometric-derogation-expired-commission-silent/" },
+    ],
   },
   {
     title: "How long registration takes",
-    body: "A first registration captures four fingerprints and a facial image. One analysis of 2026 data reports about 70 seconds on average. An unofficial airport guide says 3 to 7 minutes per person. Later trips are quicker, with a passport scan plus a fingerprint or photo. A registration lasts three years or until the passport expires.",
+    body: "According to an analysis by the Financial Times and Qsensor reported by Euronews, registration averages about 70 seconds. An unofficial airport guide says 3 to 7 minutes per person. According to an airport guide, a registration lasts three years or until the passport expires, and later trips are quicker, with a passport scan plus a fingerprint or photo.",
     status: "unc",
     sources: [
-      {
-        label: "Euronews, 12 Aug 2026",
-        href: "https://www.euronews.com/travel/2026/08/12/europes-new-border-system-is-causing-huge-airport-queues-as-ees-wait-times-double",
-      },
+      EURONEWS,
       { label: "FlightQueue guide", href: "https://flightqueue.com/ees-registration" },
       {
         label: "London Southend Airport guide",
@@ -276,30 +312,13 @@ export const FACTS: Fact[] = [
   },
   {
     title: "Reported waits, summer 2026",
-    body: "In an analysis by the Financial Times and Qsensor, reported by Euronews, the average wait at Frankfurt reached about 120 minutes in July, against about 60 a year earlier. Munich reached up to about 60 minutes, from 31. The maximum at Amsterdam reached about 120, from 80.",
+    body: "According to an analysis by the Financial Times and Qsensor, reported by Euronews, the average wait at Frankfurt reached about 120 minutes in July, against about 60 a year earlier. Munich reached up to about 60 minutes, from 31. The maximum at Amsterdam reached about 120, from 80. Press reports soon after the pause ended mention waits of up to about 150 minutes at Prague and about 41 minutes at Paris CDG.",
     status: "unc",
-    sources: [
-      {
-        label: "Euronews, 12 Aug 2026",
-        href: "https://www.euronews.com/travel/2026/08/12/europes-new-border-system-is-causing-huge-airport-queues-as-ees-wait-times-double",
-      },
-    ],
-  },
-  {
-    title: "Emergency flexibility ended",
-    body: "A temporary rule that let countries pause biometric collection for up to six hours at congested crossings expired on 6 September 2026. Press reports say the European Commission did not extend it. Reports soon after mention waits of up to about 150 minutes at Prague and about 41 minutes at Paris CDG.",
-    status: "unc",
-    sources: [
-      {
-        label: "Travel Extra, 6 Sep 2026",
-        href: "https://www.travelextra.ie/eu-border-checks-tighten-as-ees-emergency-flexibility-expires-today-what-we-need-to-know/",
-      },
-      { label: "Travel Extra, queues", href: "https://www.travelextra.ie/?p=146639" },
-    ],
+    sources: [EURONEWS, { label: "Travel Extra, queues", href: "https://www.travelextra.ie/?p=146639" }],
   },
   {
     title: "Advice on connection buffers",
-    body: "Press reports quote airlines and airports advising travellers not to rely on the shortest published connection time through hard-hit hubs. One report says to consider four hours at the most affected airports in peak periods. This is commentary, not a rule.",
+    body: "According to press reports, airlines and airports are advising travellers not to rely on the shortest published connection time through hard-hit hubs, and one report says to consider four hours at the most affected airports in peak periods. This is commentary, not a rule.",
     status: "unc",
     sources: [
       {
@@ -307,6 +326,12 @@ export const FACTS: Fact[] = [
         href: "https://www.visaverge.com/travel/end-of-ees-flexibility-cuts-schengen-airport-connection-buffers-with-biometric-checks/",
       },
     ],
+  },
+  {
+    title: "Separate bookings",
+    body: "According to the UK Civil Aviation Authority, under UK rules a journey made of separate bookings, sometimes called self-transfer, carries no statutory right to care, compensation or onward transport if a delay makes you miss a flight. On a single booking, rights are based on the distance between the first and last airport. The CAA also says that if you miss a flight because of long queues at security, an airline is unlikely to pay compensation or provide a free alternative. That statement is about security queues, not border queues.",
+    status: "ok",
+    sources: [CAA_DELAYS, { label: "UK Civil Aviation Authority, missed flights", href: "https://www.caa.co.uk/air-passengers/travel-problems-and-rights/flight-delays-and-cancellations/missed-flights/" }],
   },
 ];
 
@@ -348,36 +373,21 @@ export const PAIN: Stat[] = [
   {
     n: "120 min",
     text: "was the average border wait at Frankfurt in July 2026, against about 60 minutes a year earlier, in an analysis by the Financial Times and Qsensor.",
-    sources: [
-      {
-        label: "Euronews, 12 Aug 2026",
-        href: "https://www.euronews.com/travel/2026/08/12/europes-new-border-system-is-causing-huge-airport-queues-as-ees-wait-times-double",
-      },
-    ],
+    sources: [EURONEWS],
   },
   {
     n: "70 sec",
     text: "is the average registration time in the same analysis. The queue before the desk, not the registration itself, is what eats a connection.",
-    sources: [
-      {
-        label: "Euronews, 12 Aug 2026",
-        href: "https://www.euronews.com/travel/2026/08/12/europes-new-border-system-is-causing-huge-airport-queues-as-ees-wait-times-double",
-      },
-    ],
+    sources: [EURONEWS],
   },
   {
-    n: "6 Sep 2026",
-    text: "is when the temporary rule that let countries pause biometric checks for up to six hours expired. Press reports say the European Commission did not extend it.",
-    sources: [
-      {
-        label: "Travel Extra, 6 Sep 2026",
-        href: "https://www.travelextra.ie/eu-border-checks-tighten-as-ees-emergency-flexibility-expires-today-what-we-need-to-know/",
-      },
-    ],
+    n: "7 Sep 2026",
+    text: "is when the legal power to pause biometric checks for congestion ceased to apply, after a last day of 6 September. Press reports say some countries may still limit checks, which we could not confirm.",
+    sources: [EUR_LEX],
   },
   {
     n: "150 min",
-    text: "is the longest wait reported at Prague soon after the rule expired, with about 41 minutes reported at Paris CDG. Waits swing widely by airport and hour.",
+    text: "is the longest wait reported at Prague soon after the pause ended, with about 41 minutes reported at Paris CDG. Waits swing widely by airport and hour.",
     sources: [{ label: "Travel Extra, queues", href: "https://www.travelextra.ie/?p=146639" }],
   },
 ];

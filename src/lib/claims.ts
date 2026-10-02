@@ -3,7 +3,7 @@
 // This tool shows which published rules may apply to a disrupted flight, the published
 // amounts and deadlines, where to file, and sample wording the visitor edits and sends.
 // It does not decide whether anyone is owed money, and it never files anything.
-// Every rule below carries a source and a status. To change a rule, edit it here.
+// Every rule below carries a source, a status and the date we checked it.
 
 export type Issue = "delay" | "cancel" | "bumped";
 export type Place = "ca" | "us" | "eu" | "uk" | "other";
@@ -26,12 +26,12 @@ export type Source = { label: string; href: string };
 export type Status = "ok" | "unc" | "sched";
 export type Line = { label: string; value: string };
 
-export const CHECKED = "01 Oct 2026";
+export const CHECKED = "02 Oct 2026";
 
 export const PLACE_LABEL: Record<Place, string> = {
   ca: "Canada",
   us: "United States",
-  eu: "EU, Iceland, Norway or Switzerland",
+  eu: "European Union",
   uk: "United Kingdom",
   other: "Somewhere else",
 };
@@ -77,7 +77,13 @@ export function regimesFor(f: Finder): RegimeId[] {
   const out: RegimeId[] = [];
   if (f.from === "ca" || f.to === "ca") out.push("ca");
   if (f.from === "eu" || (f.to === "eu" && f.airline === "eu")) out.push("eu");
-  if (f.from === "uk" || (f.to === "uk" && (f.airline === "uk" || f.airline === "eu"))) {
+  // UK law covers flights leaving the UK on any airline, flights arriving in the UK on an EU or UK airline,
+  // and flights arriving in the EU on a UK airline (UK Civil Aviation Authority).
+  if (
+    f.from === "uk" ||
+    (f.to === "uk" && (f.airline === "uk" || f.airline === "eu")) ||
+    (f.to === "eu" && f.airline === "uk")
+  ) {
     out.push("uk");
   }
   // US denied boarding compensation covers flights leaving the US. Refund rules cover flights to or from the US.
@@ -92,61 +98,68 @@ export type RegimeInfo = {
   official: Source;
   deadline: string;
   escalation: { text: string; href: string; label: string };
+  checked: string;
 };
 
 export const REGIMES: Record<RegimeId, RegimeInfo> = {
   ca: {
     id: "ca",
     name: "Canada, Air Passenger Protection Regulations",
-    scope: "Flights to, from and within Canada.",
+    scope: "According to the Canadian Transportation Agency, these rules cover flights to, from and within Canada.",
     official: {
       label: "Canadian Transportation Agency",
       href: "https://protection-passager-passenger.otc-cta.gc.ca/en/refunds-and-compensation/flight-delays-cancellations-rebooking-refunds-compensation",
     },
     deadline:
-      "Claim to the airline in writing within one year. The airline should answer within 30 days. If it does not, or you disagree, you can complain to the Canadian Transportation Agency or go to small claims court. Court action for damages under the Montreal Convention has a two-year limit.",
+      "According to the Canadian Transportation Agency, a claim goes to the airline in writing within one year. The airline should answer within 30 days. If it does not, or you disagree, you can complain to the Agency or go to small claims court. Court action for damages under the Montreal Convention has a two-year limit.",
     escalation: {
       text: "Complain to the Canadian Transportation Agency after you have written to the airline.",
       href: "https://protection-passager-passenger.otc-cta.gc.ca/en",
       label: "Canadian Transportation Agency",
     },
+    checked: "01 Oct 2026",
   },
   eu: {
     id: "eu",
     name: "European Union, Regulation 261/2004",
     scope:
-      "Flights leaving an airport in the EU, Iceland, Norway or Switzerland on any airline, and flights into the EU from outside it on an EU airline.",
+      "According to Your Europe, EU rules apply to flights within the EU on any airline, flights from the EU to a non-EU country on any airline, and flights into the EU from outside it on an EU airline. They do not apply if you already received benefits for the same journey under a non-EU country's law.",
     official: {
       label: "Your Europe, air passenger rights",
-      href: "https://europa.eu/youreurope/citizens/travel/passenger-rights/air/index_en.htm",
+      href: "https://europa.eu/youreurope/citizens/travel/passenger-rights/air",
     },
     deadline:
-      "Time limits to claim depend on the country where a claim would be brought. Check yours early, and do not wait.",
+      "According to Your Europe, you should contact the airline first. Time limits to claim depend on the country where a claim would be brought, so check yours early.",
     escalation: {
       text: "Complain to the national enforcement body of the country where the disruption happened. The official page explains how to find it.",
-      href: "https://europa.eu/youreurope/citizens/travel/passenger-rights/air/index_en.htm",
+      href: "https://europa.eu/youreurope/citizens/travel/passenger-rights/air",
       label: "Your Europe, air passenger rights",
     },
+    checked: "02 Oct 2026",
   },
   uk: {
     id: "uk",
     name: "United Kingdom, UK261",
     scope:
-      "Flights leaving a UK airport on any airline, and flights arriving in the UK from outside the UK on a UK or EU airline.",
-    official: { label: "UK Civil Aviation Authority", href: "https://www.caa.co.uk" },
-    deadline:
-      "Reported time limits are six years in England and Wales and five in Scotland. Confirm with the Civil Aviation Authority.",
-    escalation: {
-      text: "Many UK airlines belong to an approved alternative dispute resolution scheme. The Civil Aviation Authority publishes guidance on both.",
-      href: "https://www.caa.co.uk",
-      label: "UK Civil Aviation Authority",
+      "According to the UK Civil Aviation Authority, UK law covers flights leaving a UK airport on any airline, flights arriving at a UK airport on an EU or UK airline, and flights arriving at an EU airport on a UK airline.",
+    official: {
+      label: "UK Civil Aviation Authority, delays",
+      href: "https://www.caa.co.uk/air-passengers/travel-problems-and-rights/flight-delays-and-cancellations/delays/",
     },
+    deadline:
+      "According to the UK Civil Aviation Authority, compensation is not paid automatically, so you claim from the airline first. If the airline takes more than eight weeks to respond, or you are not satisfied with its final response, you can escalate. The CAA pages we read do not state a time limit for claims, so check the limit that applies where you would bring one.",
+    escalation: {
+      text: "Escalate to an approved alternative dispute resolution body if the airline is signed up to one. If it is not, the CAA's Passenger Advice and Complaints Team can help.",
+      href: "https://www.caa.co.uk/air-passengers/travel-problems-and-rights/travel-complaints/making-a-claim/claiming-for-costs-and-compensation/",
+      label: "UK Civil Aviation Authority, claiming for costs and compensation",
+    },
+    checked: "02 Oct 2026",
   },
   us: {
     id: "us",
     name: "United States, Department of Transportation rules",
     scope:
-      "Refund rules cover flights to, within and from the US. Denied boarding compensation covers domestic flights and international flights leaving the US.",
+      "According to the US Department of Transportation, denied boarding compensation covers domestic flights and international flights leaving the US. Refund rules cover flights to, within and from the US.",
     official: {
       label: "US Department of Transportation, bumping and oversales",
       href: "https://www.transportation.gov/individuals/aviation-consumer-protection/bumping-oversales",
@@ -157,11 +170,18 @@ export const REGIMES: Record<RegimeId, RegimeInfo> = {
       href: "https://www.transportation.gov/airconsumer/fly-rights",
       label: "US Department of Transportation, Fly Rights",
     },
+    checked: "01 Oct 2026",
   },
 };
 
 const EU_AMOUNT: Record<Distance, string> = { short: "€250", medium: "€400", long: "€600" };
-const UK_AMOUNT: Record<Distance, string> = { short: "£220", medium: "£350", long: "£520" };
+
+// UK tiers from the Civil Aviation Authority's delay, cancellation and denied boarding pages.
+const UK_TIER: Record<Distance, { full: string; half: string; hours: string }> = {
+  short: { full: "£220", half: "£110", hours: "2" },
+  medium: { full: "£350", half: "£175", hours: "3" },
+  long: { full: "£520", half: "£260", hours: "4" },
+};
 
 // The published amounts that line up with the visitor's answers. These are published figures,
 // not a finding that the visitor is owed them.
@@ -206,13 +226,18 @@ export function amountLines(regime: RegimeId, f: Finder): Line[] {
           "The cause is fully within the airline's control and not required for safety, you were told 14 days or less before departure, and you arrived 3 or more hours late. You cannot receive it if you already received compensation for the same disruption under another country's rules.",
       });
     }
+    lines.push({
+      label: "Care while you wait",
+      value:
+        "The standard of treatment (food, drink, communication, accommodation) depends on the delay and its cause. See the Canadian Transportation Agency page.",
+    });
   }
 
   if (regime === "eu") {
     if (f.issue === "delay" && f.delay === "under3") {
       lines.push({
         label: "Arriving under 3 hours late",
-        value: "No fixed compensation under this rule. The published threshold is 3 hours at arrival.",
+        value: "No fixed compensation under this rule. The published threshold is 3 hours at your final destination.",
       });
     } else {
       lines.push({
@@ -235,27 +260,73 @@ export function amountLines(regime: RegimeId, f: Finder): Line[] {
       label: "Exception in the published rule",
       value: "No compensation if the airline shows the cause was an extraordinary circumstance it could not avoid.",
     });
+    lines.push({
+      label: "Care while you wait",
+      value: "Meals and drinks, hotel accommodation with transfers if needed, and communication facilities, depending on the wait and the distance.",
+    });
   }
 
   if (regime === "uk") {
-    if (f.issue === "delay" && f.delay === "under3") {
-      lines.push({
-        label: "Arriving under 3 hours late",
-        value: "No fixed compensation under this rule. The published threshold is 3 hours at arrival.",
-      });
-    } else {
-      lines.push({
-        label: `Flight distance, ${DISTANCE_LABEL[f.distance].toLowerCase()}`,
-        value: `${UK_AMOUNT[f.distance]} per passenger`,
-      });
+    const t = UK_TIER[f.distance];
+    if (f.issue === "delay") {
+      if (f.delay === "under3") {
+        lines.push({
+          label: "Arriving under 3 hours late",
+          value: "No fixed compensation under this rule. The published threshold is more than three hours at your destination airport.",
+        });
+      } else if (f.distance === "long") {
+        lines.push({
+          label: `Flight distance, ${DISTANCE_LABEL.long.toLowerCase()}`,
+          value: "£260 per person if you arrive 3 to 4 hours late, £520 per person if you arrive more than 4 hours late.",
+        });
+      } else {
+        lines.push({
+          label: `Flight distance, ${DISTANCE_LABEL[f.distance].toLowerCase()}`,
+          value: `${t.full} per person`,
+        });
+      }
       lines.push({
         label: "Published amounts by distance",
-        value: "£220 up to 1,500 km, £350 up to 3,500 km, £520 beyond. Reported: £260 for 3 to 4 hours late on flights over 3,500 km.",
+        value: "£220 under 1,500 km, £350 from 1,500 to 3,500 km, £520 over 3,500 km (£260 if you arrive 3 to 4 hours late).",
+      });
+      lines.push({
+        label: "If your delay is long",
+        value:
+          "A delay of at least five hours lets you choose not to travel and get a refund for the flights you have not yet taken.",
+      });
+    }
+    if (f.issue === "cancel") {
+      lines.push({
+        label: "Notice of 14 days or more",
+        value: "The CAA says compensation may apply if you received less than 14 days' notice of the cancellation.",
+      });
+      lines.push({
+        label: `Notice of 7 to 14 days, ${DISTANCE_LABEL[f.distance].toLowerCase()}`,
+        value: `${t.full} if you arrive ${t.hours} or more hours late, ${t.half} if you arrive less late. Some replacement-flight timings pay nothing, so read the CAA table.`,
+      });
+      lines.push({
+        label: `Notice of under 7 days, ${DISTANCE_LABEL[f.distance].toLowerCase()}`,
+        value:
+          f.distance === "long"
+            ? "£520 if you arrive 4 or more hours late, £260 if less late. No compensation if the new flight leaves no more than one hour earlier and arrives less than two hours later."
+            : `${t.full} if you arrive ${t.hours} or more hours late. No compensation if the new flight leaves no more than one hour earlier and arrives less than two hours later.`,
+      });
+    }
+    if (f.issue === "bumped") {
+      lines.push({
+        label: `Denied boarding against your will, ${DISTANCE_LABEL[f.distance].toLowerCase()}`,
+        value: `${t.full} if you arrive ${t.hours} or more hours later than planned, ${t.half} if you arrive less late. You must have checked in on time.`,
       });
     }
     lines.push({
       label: "Exception in the published rule",
-      value: "No compensation if the airline shows the cause was an extraordinary circumstance it could not avoid.",
+      value:
+        "No compensation if the airline shows the cause was an extraordinary circumstance. The CAA lists weather, unrelated strikes, terrorism or sabotage, security risks, civil unrest and hidden manufacturing defects as likely examples.",
+    });
+    lines.push({
+      label: "Care while you wait",
+      value:
+        "Food and drink, two calls or emails, and a hotel with transport if you are delayed overnight, whatever the cause, once your delay passes 2 hours (under 1,500 km), 3 hours (1,500 to 3,500 km) or 4 hours (over 3,500 km).",
     });
   }
 
@@ -291,32 +362,58 @@ export type Rule = {
   title: string;
   body: string;
   status: Status;
+  checked: string;
   sources: Source[];
+};
+
+const CAA_DELAYS_SRC: Source = {
+  label: "UK Civil Aviation Authority, delays",
+  href: "https://www.caa.co.uk/air-passengers/travel-problems-and-rights/flight-delays-and-cancellations/delays/",
+};
+const CAA_CANCEL_SRC: Source = {
+  label: "UK Civil Aviation Authority, cancellations",
+  href: "https://www.caa.co.uk/air-passengers/travel-problems-and-rights/flight-delays-and-cancellations/cancellations/",
+};
+const CAA_BUMP_SRC: Source = {
+  label: "UK Civil Aviation Authority, denied boarding",
+  href: "https://www.caa.co.uk/air-passengers/travel-problems-and-rights/flight-delays-and-cancellations/denied-boarding/",
+};
+const CAA_CLAIM_SRC: Source = {
+  label: "UK Civil Aviation Authority, claiming for costs and compensation",
+  href: "https://www.caa.co.uk/air-passengers/travel-problems-and-rights/travel-complaints/making-a-claim/claiming-for-costs-and-compensation/",
+};
+const CAA_EXTRA_SRC: Source = {
+  label: "UK Civil Aviation Authority, am I entitled to compensation",
+  href: "https://www.caa.co.uk/air-passengers/travel-problems-and-rights/travel-complaints/making-a-claim/am-i-entitled-to-compensation/",
 };
 
 export const RULES: Rule[] = [
   {
     title: "Canada, APPR",
-    body: "Flights to, from and within Canada. Compensation for delays and cancellations when the cause is fully within the airline's control and not required for safety, you were told 14 days or less before departure, and you arrive 3 or more hours late. Large airlines: C$400, C$700 and C$1,000 at 3, 6 and 9 hours. Small airlines: C$125, C$250 and C$500. Claim in writing to the airline within one year. Not available if you already received compensation for the same disruption under another country's rules.",
+    body: "According to the Canadian Transportation Agency, these rules cover flights to, from and within Canada. Compensation for delays and cancellations applies when the cause is fully within the airline's control and not required for safety, you were told 14 days or less before departure, and you arrive 3 or more hours late. Large airlines: C$400, C$700 and C$1,000 at 3, 6 and 9 hours. Small airlines: C$125, C$250 and C$500. A claim goes to the airline in writing within one year. It is not available if you already received compensation for the same disruption under another country's rules.",
     status: "ok",
+    checked: "01 Oct 2026",
     sources: [REGIMES.ca.official],
   },
   {
     title: "United States, denied boarding",
-    body: "Involuntary denied boarding on an oversold flight: 200% of the one-way fare (airlines may cap at $1,075) or 400% (capped at $2,150), depending on how late you arrive. Applies to domestic flights and international flights leaving the US.",
+    body: "According to the US Department of Transportation, involuntary denied boarding on an oversold flight pays 200% of the one-way fare (airlines may cap it at $1,075) or 400% (capped at $2,150), depending on how late you arrive. It applies to domestic flights and international flights leaving the US.",
     status: "ok",
+    checked: "01 Oct 2026",
     sources: [REGIMES.us.official],
   },
   {
     title: "United States, refunds and delays",
-    body: "No federal fixed payment for delays. A cash refund is available if the airline cancels or significantly changes your flight and you choose not to travel. The 3 hour domestic and 6 hour international thresholds come from secondary sources, so confirm them on the official site.",
+    body: "According to secondary sources, there is no federal fixed payment for a delayed flight, and a cash refund is available if the airline cancels or significantly changes your flight and you choose not to travel. The 3 hour domestic and 6 hour international thresholds come from those sources, so confirm them on the official site.",
     status: "unc",
+    checked: "01 Oct 2026",
     sources: [{ label: "US Department of Transportation, Fly Rights", href: "https://www.transportation.gov/airconsumer/fly-rights" }],
   },
   {
     title: "European Union, Regulation 261/2004",
-    body: "Flights leaving an EU airport on any airline, and flights into the EU on an EU airline from outside it. Compensation when you arrive 3 or more hours late, unless the airline shows extraordinary circumstances: €250 up to 1,500 km, €400 up to 3,500 km, €600 beyond. Time limits to claim depend on the country.",
+    body: "According to Your Europe, EU rules apply to flights within the EU on any airline, flights from the EU to a non-EU country on any airline, and flights into the EU from outside it on an EU airline. You are entitled to compensation if you arrive 3 or more hours late, unless the delay was due to extraordinary circumstances. According to FIA Region I, the amounts are €250 up to 1,500 km, €400 up to 3,500 km and €600 beyond. Time limits to claim depend on the country.",
     status: "ok",
+    checked: "02 Oct 2026",
     sources: [
       REGIMES.eu.official,
       {
@@ -327,8 +424,9 @@ export const RULES: Rule[] = [
   },
   {
     title: "European Union, reform of Regulation 261",
-    body: "The European Parliament approved a reform on 7 July 2026 by 646 votes to 12. It keeps the 3 hour threshold. Reported changes include nine months to file a request and 30 days for airlines to pay or explain. New rules are expected to apply from the second half of 2027, and today's rules apply until then. Reports differ on whether the lowest amount stays at €250 or moves to €300.",
+    body: "According to the Centre for Aviation, the European Parliament approved a reform on 7 July 2026 by 646 votes to 12. It keeps the 3 hour threshold. Reported changes include nine months to file a request and 30 days for airlines to pay or explain. New rules are expected to apply from the second half of 2027, and today's rules apply until then. Reports differ on whether the lowest amount stays at €250 or moves to €300.",
     status: "sched",
+    checked: "01 Oct 2026",
     sources: [
       {
         label: "Centre for Aviation, 7 Jul 2026",
@@ -342,13 +440,39 @@ export const RULES: Rule[] = [
     ],
   },
   {
-    title: "United Kingdom, UK261",
-    body: "Flights leaving a UK airport on any airline, and flights arriving in the UK from outside it on a UK or EU airline. Compensation when you arrive 3 or more hours late, unless the airline shows extraordinary circumstances: £220 up to 1,500 km, £350 up to 3,500 km, £520 beyond (reported £260 for 3 to 4 hours late on flights over 3,500 km). Reported time limits: six years in England and Wales, five in Scotland. We could not confirm these figures on the official site, so check the Civil Aviation Authority.",
-    status: "unc",
-    sources: [
-      { label: "Wego, UK261 explainer", href: "https://blog.wego.com/uk261/" },
-      REGIMES.uk.official,
-    ],
+    title: "United Kingdom, UK261 scope and amounts",
+    body: "According to the UK Civil Aviation Authority, UK law covers flights leaving a UK airport on any airline, flights arriving at a UK airport on an EU or UK airline, and flights arriving at an EU airport on a UK airline. For delays of more than three hours at your destination airport, the amounts are £220 under 1,500 km, £350 from 1,500 to 3,500 km, and over 3,500 km £260 for 3 to 4 hours late or £520 for more than 4 hours. Cancellations and denied boarding have lower tiers (£110, £175, £260) when you arrive less late, and cancellations depend on how much notice you had.",
+    status: "ok",
+    checked: "02 Oct 2026",
+    sources: [CAA_DELAYS_SRC, CAA_CANCEL_SRC, CAA_BUMP_SRC],
+  },
+  {
+    title: "United Kingdom, how to claim and escalate",
+    body: "According to the UK Civil Aviation Authority, compensation is not paid automatically and you claim from the airline first, often using its claim form. Some airlines will not deal with claims made through claims companies and want them submitted directly. If you are not satisfied with the final response, or the airline takes more than eight weeks, you can escalate to an approved alternative dispute resolution body, or to the CAA's Passenger Advice and Complaints Team if the airline is not signed up to one. The pages we read do not state a time limit for claims.",
+    status: "ok",
+    checked: "02 Oct 2026",
+    sources: [CAA_DELAYS_SRC, CAA_CLAIM_SRC],
+  },
+  {
+    title: "United Kingdom, extraordinary circumstances",
+    body: "According to the UK Civil Aviation Authority, no compensation is due where the cause was an extraordinary circumstance. The main categories likely to qualify are weather incompatible with safe flying, strikes unrelated to the airline, terrorism or sabotage, security risks, political or civil unrest, and hidden manufacturing defects. It says court rulings have generally not treated ordinary technical faults as extraordinary. If you are unsure, you can claim and the airline should explain the reason it relies on.",
+    status: "ok",
+    checked: "02 Oct 2026",
+    sources: [CAA_EXTRA_SRC],
+  },
+  {
+    title: "United Kingdom, care and expenses",
+    body: "According to the UK Civil Aviation Authority, airlines must provide care whatever the cause once a delay passes 2 hours (flights under 1,500 km), 3 hours (1,500 to 3,500 km) or 4 hours (over 3,500 km): food and drink, two phone calls or emails, and a hotel with transport if overnight. If the airline does not, you may make reasonable arrangements and claim the cost back. Keep itemised receipts, because airlines are unlikely to accept alcohol or luxury hotels. A delay of at least five hours lets you choose a refund instead of travelling.",
+    status: "ok",
+    checked: "02 Oct 2026",
+    sources: [CAA_DELAYS_SRC, CAA_CANCEL_SRC],
+  },
+  {
+    title: "United Kingdom, separate bookings",
+    body: "According to the UK Civil Aviation Authority, if your journey is made of separate bookings, sometimes called self-transfer, you do not have a statutory right to care, compensation or transport to your last destination if a delay makes you miss a flight. The entitlements for each individual flight still apply. On a single booking, your rights are based on the distance between the first and last airport.",
+    status: "ok",
+    checked: "02 Oct 2026",
+    sources: [CAA_DELAYS_SRC],
   },
 ];
 
@@ -406,6 +530,7 @@ export type Details = {
   booking: string;
   arrival: string;
   reason: string;
+  costs: string;
 };
 
 export const EMPTY_DETAILS: Details = {
@@ -418,6 +543,7 @@ export const EMPTY_DETAILS: Details = {
   booking: "",
   arrival: "",
   reason: "",
+  costs: "",
 };
 
 export type Script = { id: string; title: string; when: string; subject: string; body: string };
@@ -465,6 +591,20 @@ const REGIME_SHORT: Record<RegimeId, string> = {
   us: "US DOT",
 };
 
+// Reply windows come from the published process of each regulator. Where none is published, we ask for a reasonable time.
+const WINDOW: Record<RegimeId, string> = {
+  ca: "within 30 days",
+  uk: "within eight weeks",
+  eu: "within a reasonable time",
+  us: "within a reasonable time",
+};
+
+const CARE_RULE: Partial<Record<RegimeId, string>> = {
+  ca: "the Air Passenger Protection Regulations",
+  eu: "Regulation (EC) No 261/2004",
+  uk: "UK Regulation 261/2004 (UK261)",
+};
+
 export function buildScripts(f: Finder, regimes: RegimeId[], d: Details): Script[] {
   const name = v(d.name, "your name");
   const ref = `${v(d.flight, "flight number")}, ${v(d.date, "date")}`;
@@ -495,7 +635,30 @@ ${name}`,
 
 ${happened(f, d)}${d.reason.trim() ? `\n\nThe reason I was given was: ${sentence(d.reason)}` : ""}
 
-${REQUEST[r](f)} Please reply in writing within 30 days, and tell me the reason you rely on if you decide not to pay.
+${REQUEST[r](f)} Please reply in writing ${WINDOW[r]}, and tell me the reason you rely on if you decide not to pay.
+
+Thank you,
+${name}`,
+    });
+  }
+
+  const careRules = regimes.map((r) => CARE_RULE[r]).filter((x): x is string => Boolean(x));
+  if (careRules.length > 0) {
+    const window = WINDOW[regimes.find((r) => CARE_RULE[r]) as RegimeId];
+    out.push({
+      id: "expenses",
+      title: "Claim the costs you paid while waiting (food, hotel, transport)",
+      when: "Keep itemised receipts. Airlines often have a separate form for expenses, so send this alongside or apart from your compensation claim.",
+      subject: `Reimbursement of costs while waiting, flight ${ref}, booking ${v(d.booking, "booking reference")}`,
+      body: `To ${v(d.airline, "airline")} customer relations,
+
+${happened(f, d)}
+
+The airline did not provide for my care while I waited, so I paid for it myself. My costs were:
+
+${d.costs.trim() === "" ? "[List each cost with its amount and date, for example: Hotel, one night, 180 EUR]" : d.costs.trim()}
+
+I attach itemised receipts. I am requesting reimbursement of these reasonable costs under the care and assistance provisions of ${careRules.join(" or ")}. Please reply in writing ${window}.
 
 Thank you,
 ${name}`,
@@ -505,7 +668,7 @@ ${name}`,
   out.push({
     id: "follow-up",
     title: "Follow up if there is no answer",
-    when: "Send this after the response period has passed, for example 30 days.",
+    when: "Send this after the response period has passed.",
     subject: `Follow-up: claim for flight ${ref}, booking ${v(d.booking, "booking reference")}`,
     body: `To ${v(d.airline, "airline")} customer relations,
 

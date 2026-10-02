@@ -1,5 +1,4 @@
 export const SITE_URL = "https://www.reviewthengo.com";
 
-// Optional: put a contact email between the quotes (example: "hello@reviewthengo.com").
-// When set, it appears in the footer and on the privacy page. Leave empty to hide it.
-export const CONTACT_EMAIL = "";
+// Shown in the footer, the privacy page, the corrections page and the structured data.
+export const CONTACT_EMAIL = "reviewthengo@gmail.com";

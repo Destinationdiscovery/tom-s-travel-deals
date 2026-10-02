@@ -1,12 +1,17 @@
 # reviewthengo
 
-> Worldwide travel rules, dated and sourced. Border systems, passenger rights and entry rules, each with its source and the date we last checked it. We label anything we cannot confirm. Legal information, not legal advice.
+> Worldwide travel rules, dated and sourced. Flight delay and cancellation compensation rules (Canada, EU, UK, US), EES border queues and Schengen connection times, and travel insurance claim appeals. Each answer names its source and the date we last checked it, and we label anything we cannot confirm. Legal information, not legal advice. We are not lawyers.
 
-## Pages
+## Tools
 
-- [Home and rules ledger](https://www.reviewthengo.com/): current entries, status, sources and check dates
-- [Flight claim guide](https://www.reviewthengo.com/flight-claims): which published rules may apply to a delayed, cancelled or overbooked flight (Canada, EU, UK, US), amounts, deadlines, where to file, and sample wording
-- [Insurance appeal pack](https://www.reviewthengo.com/insurance-appeal): build an appeal from your own policy wording, with the complaint route for Canada, the UK, the US and Australia
-- [Connection check](https://www.reviewthengo.com/connection-check): estimate how much time Schengen border checks may need, with sourced and assumed figures labelled
+- [Flight claim guide](https://www.reviewthengo.com/flight-claims): which published rules may apply to a delayed, cancelled or overbooked flight, the amounts and deadlines, where to file, and wording to edit and send
+- [Insurance appeal pack](https://www.reviewthengo.com/insurance-appeal): build an appeal from your own policy wording after a travel insurer denies delay or cancellation costs, with the complaint route for Canada, the UK, the US and Australia
+- [Connection check](https://www.reviewthengo.com/connection-check): estimate how much time EES border checks may need on a Schengen connection, with sourced and assumed figures labelled
+
+## Reference
+
+- [Home and rules ledger](https://www.reviewthengo.com/): current entries on EES, ETIAS and UK guidance, each with status, sources and check date
+- [About and how we check](https://www.reviewthengo.com/about)
+- [Corrections](https://www.reviewthengo.com/corrections)
 - [Disclaimer](https://www.reviewthengo.com/disclaimer)
 - [Privacy policy](https://www.reviewthengo.com/privacy-policy)

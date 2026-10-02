@@ -1,5 +1,7 @@
 import { useState, type FormEvent } from "react";
 import StatStrip from "@/components/site/StatStrip";
+import { Faq, Glossary, QuickAnswers, Related } from "@/components/site/PageParts";
+import { FAQ_APPEAL, GLOSSARY_APPEAL, QUICK_APPEAL } from "@/lib/faq";
 import {
   CHECKED,
   CLAIM_LABEL,
@@ -110,23 +112,26 @@ export default function AppealPack() {
     <main>
       <div className="wrap toolhead">
         <p className="eyebrow">Tool</p>
-        <h1>Insurance appeal pack</h1>
+        <h1>Travel insurance claim denied? Build your appeal</h1>
         <p className="lede">
-          Travel insurer denied delay or cancellation expenses? Build your appeal from your own policy wording,
-          see the policy words worth checking, and see the published complaint route for your country.
+          Insurer denied trip delay, cancellation or interruption costs? Build an appeal from your own policy
+          wording, see the policy words worth checking, and see the published complaint route for Canada, the UK,
+          the US and Australia.
         </p>
         <p className="notice">
-          Legal information, not legal advice. We are not a law firm and we do not send anything for you. We do not
-          read your policy or decide whether your claim should be paid. You paste in the wording you rely on, and the
-          insurer, then an ombudsman or regulator, decides. Read the <a href="/disclaimer">disclaimer</a>.
+          We are not lawyers. This is legal information, not legal advice. We do not send anything for you, we do
+          not read your policy or decide whether your claim should be paid, and we are not liable for how you use
+          this tool. You paste in the wording you rely on, and the insurer, then an ombudsman or regulator,
+          decides. Read the <a href="/disclaimer">disclaimer</a>.
         </p>
+        <QuickAnswers items={QUICK_APPEAL} />
       </div>
 
       <StatStrip
         title="Why this pack exists."
         intro="Published complaint data is strongest for the United Kingdom. We did not find comparable figures for Canada or the United States."
         stats={PAIN}
-        note="Checked 01 Oct 2026. The first three figures come from trade press summaries of ombudsman and regulator data, so treat them as reported, not official."
+        note="Checked 02 Oct 2026. The first three figures come from trade press summaries of ombudsman and regulator data, so treat them as reported, not official."
       />
 
       <div className="wrap tool-grid" id="tool">
@@ -177,6 +182,12 @@ export default function AppealPack() {
                 <li key={w}>{w}</li>
               ))}
             </ul>
+            {input.reason === "recoverable" ? (
+              <p className="hint callout">
+                Claim from the airline first. The <a href="/flight-claims#tool">flight claim guide</a> has wording for
+                the costs you paid while waiting.
+              </p>
+            ) : null}
             <p className="lab">Evidence that may help</p>
             <ul className="plain-list">
               {reason.evidence.map((w) => (
@@ -480,7 +491,7 @@ export default function AppealPack() {
                     <td>
                       <span className={`chip ${r.status}`}>{STATUS_LABEL[r.status]}</span>
                     </td>
-                    <td className="date">{CHECKED}</td>
+                    <td className="date">{r.checked}</td>
                   </tr>
                 ))}
               </tbody>
@@ -514,6 +525,14 @@ export default function AppealPack() {
           </div>
         </div>
       </section>
+
+      <Glossary terms={GLOSSARY_APPEAL} />
+      <Faq
+        title="Travel insurance appeal questions, answered."
+        intro="Short answers, each tied to its source. These are published processes, not advice about your claim."
+        items={FAQ_APPEAL}
+      />
+      <Related current="/insurance-appeal" />
     </main>
   );
 }

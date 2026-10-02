@@ -1,24 +1,26 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CONTACT_EMAIL, SITE_URL } from "@/lib/site";
+import { CONTACT_EMAIL } from "@/lib/site";
+import { pageHead } from "@/lib/seo";
 
 // NOTE: This page states how the site works. It is not a substitute for a lawyer's review.
 // Have a licensed professional in your jurisdiction read it before you rely on it.
 
-const TITLE = "Disclaimer | reviewthengo";
+const TITLE = "Disclaimer: legal information, not legal advice | reviewthengo";
 const DESCRIPTION =
-  "reviewthengo gives legal information, not legal advice. We do not file or send anything for you, and we cannot promise any outcome.";
+  "reviewthengo is not a law firm and gives legal information, not legal advice. We file nothing for you, promise no outcome, and are not liable for how you use it.";
 
 export const Route = createFileRoute("/disclaimer")({
-  head: () => ({
-    meta: [
-      { title: TITLE },
-      { name: "description", content: DESCRIPTION },
-      { property: "og:title", content: TITLE },
-      { property: "og:description", content: DESCRIPTION },
-      { property: "og:url", content: `${SITE_URL}/disclaimer` },
-    ],
-    links: [{ rel: "canonical", href: `${SITE_URL}/disclaimer` }],
-  }),
+  head: () =>
+    pageHead({
+      title: TITLE,
+      description: DESCRIPTION,
+      path: "/disclaimer",
+      modified: "2026-10-02",
+      crumbs: [
+        { name: "Home", path: "/" },
+        { name: "Disclaimer", path: "/disclaimer" },
+      ],
+    }),
   component: Disclaimer,
 });
 
@@ -28,11 +30,11 @@ function Disclaimer() {
       <h1>Disclaimer</h1>
       <p className="when">Last updated: October 2026</p>
 
-      <h2>1. Information, not advice</h2>
+      <h2>1. We are not lawyers</h2>
       <p>
-        reviewthengo publishes information about travel rules and consumer rights, and tools that help you
-        organise your own facts. It is legal information, not legal advice. We are not a law firm, and nothing here
-        creates a lawyer and client relationship.
+        reviewthengo and its owner are not lawyers, and reviewthengo is not a law firm. Nothing on this site is
+        legal advice, and nothing here creates a lawyer and client relationship. It is legal information about
+        travel rules and consumer rights, and tools that help you organise your own facts.
       </p>
 
       <h2>2. We do not act for you</h2>
@@ -43,9 +45,10 @@ function Disclaimer() {
 
       <h2>3. Official rules come first</h2>
       <p>
-        Regulations and the decisions of regulators, ombudsmen and courts override anything on this site. Each rule
-        shows its sources and the date we last checked it. Rules change, and some figures come from press reports,
-        which we label. Check the official source before you rely on anything.
+        Regulations and the decisions of regulators, ombudsmen and courts override anything on this site. Where we
+        describe a rule we say according to whom, and each rule shows its sources and the date we last checked it.
+        Rules change, and some figures come from press reports, which we label. Check the official source before
+        you rely on anything.
       </p>
 
       <h2>4. No guarantee</h2>
@@ -55,33 +58,30 @@ function Disclaimer() {
         not find a reported figure, the page says it is our assumption.
       </p>
 
-      <h2>5. Your information</h2>
+      <h2>5. We are not liable</h2>
+      <p>
+        To the extent permitted by law, reviewthengo and its owner are not liable for any loss, cost or damage that
+        comes from using this site or relying on it, including a missed flight, a rejected claim, a missed
+        deadline or an incorrect figure. You use the site at your own risk. Some places do not allow certain limits,
+        so this applies only where it is allowed.
+      </p>
+
+      <h2>6. Your information</h2>
       <p>
         What you type into the tools stays in your browser and is not sent to us or saved. The site records
         anonymous counts of how often a tool is used. See the <a href="/privacy-policy">privacy policy</a>.
       </p>
 
-      <h2>6. Other websites</h2>
+      <h2>7. Other websites</h2>
       <p>
         We link to government and other sites. A link is not an endorsement, and we are not responsible for their
         content.
       </p>
 
-      <h2>7. Limits on our responsibility</h2>
+      <h2>8. Corrections and contact</h2>
       <p>
-        The site is provided as it is. To the extent the law allows, we are not responsible for losses that come
-        from relying on it. Some places do not allow certain limits, so this applies only where it is allowed.
-      </p>
-
-      <h2>8. Corrections</h2>
-      <p>
-        If you find something wrong, tell us. We list corrections openly with the date.
-        {CONTACT_EMAIL ? (
-          <>
-            {" "}
-            Contact: <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
-          </>
-        ) : null}
+        If you find something wrong, tell us at <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>. We list
+        fixes openly on the <a href="/corrections">corrections page</a> with the date.
       </p>
     </main>
   );

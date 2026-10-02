@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as ConnectionCheckRouteImport } from './routes/connection-check'
+import { Route as CorrectionsRouteImport } from './routes/corrections'
 import { Route as DisclaimerRouteImport } from './routes/disclaimer'
 import { Route as FlightClaimsRouteImport } from './routes/flight-claims'
 import { Route as InsuranceAppealRouteImport } from './routes/insurance-appeal'
@@ -21,9 +23,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConnectionCheckRoute = ConnectionCheckRouteImport.update({
   id: '/connection-check',
   path: '/connection-check',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CorrectionsRoute = CorrectionsRouteImport.update({
+  id: '/corrections',
+  path: '/corrections',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DisclaimerRoute = DisclaimerRouteImport.update({
@@ -49,7 +61,9 @@ const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/connection-check': typeof ConnectionCheckRoute
+  '/corrections': typeof CorrectionsRoute
   '/disclaimer': typeof DisclaimerRoute
   '/flight-claims': typeof FlightClaimsRoute
   '/insurance-appeal': typeof InsuranceAppealRoute
@@ -57,7 +71,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/connection-check': typeof ConnectionCheckRoute
+  '/corrections': typeof CorrectionsRoute
   '/disclaimer': typeof DisclaimerRoute
   '/flight-claims': typeof FlightClaimsRoute
   '/insurance-appeal': typeof InsuranceAppealRoute
@@ -66,7 +82,9 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/connection-check': typeof ConnectionCheckRoute
+  '/corrections': typeof CorrectionsRoute
   '/disclaimer': typeof DisclaimerRoute
   '/flight-claims': typeof FlightClaimsRoute
   '/insurance-appeal': typeof InsuranceAppealRoute
@@ -74,15 +92,17 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/connection-check' | '/disclaimer' | '/flight-claims' | '/insurance-appeal' | '/privacy-policy'
+  fullPaths: '/' | '/about' | '/connection-check' | '/corrections' | '/disclaimer' | '/flight-claims' | '/insurance-appeal' | '/privacy-policy'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/connection-check' | '/disclaimer' | '/flight-claims' | '/insurance-appeal' | '/privacy-policy'
-  id: '__root__' | '/' | '/connection-check' | '/disclaimer' | '/flight-claims' | '/insurance-appeal' | '/privacy-policy'
+  to: '/' | '/about' | '/connection-check' | '/corrections' | '/disclaimer' | '/flight-claims' | '/insurance-appeal' | '/privacy-policy'
+  id: '__root__' | '/' | '/about' | '/connection-check' | '/corrections' | '/disclaimer' | '/flight-claims' | '/insurance-appeal' | '/privacy-policy'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
   ConnectionCheckRoute: typeof ConnectionCheckRoute
+  CorrectionsRoute: typeof CorrectionsRoute
   DisclaimerRoute: typeof DisclaimerRoute
   FlightClaimsRoute: typeof FlightClaimsRoute
   InsuranceAppealRoute: typeof InsuranceAppealRoute
@@ -98,11 +118,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/connection-check': {
       id: '/connection-check'
       path: '/connection-check'
       fullPath: '/connection-check'
       preLoaderRoute: typeof ConnectionCheckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/corrections': {
+      id: '/corrections'
+      path: '/corrections'
+      fullPath: '/corrections'
+      preLoaderRoute: typeof CorrectionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/disclaimer': {
@@ -138,7 +172,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
   ConnectionCheckRoute: ConnectionCheckRoute,
+  CorrectionsRoute: CorrectionsRoute,
   DisclaimerRoute: DisclaimerRoute,
   FlightClaimsRoute: FlightClaimsRoute,
   InsuranceAppealRoute: InsuranceAppealRoute,

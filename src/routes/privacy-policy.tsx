@@ -1,21 +1,23 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CONTACT_EMAIL, SITE_URL } from "@/lib/site";
+import { CONTACT_EMAIL } from "@/lib/site";
+import { pageHead } from "@/lib/seo";
 
 const TITLE = "Privacy policy | reviewthengo";
 const DESCRIPTION =
-  "How reviewthengo collects, uses, and protects the information of visitors and subscribers.";
+  "How reviewthengo collects, uses, and protects visitor and subscriber information. What you type into our tools stays in your browser and is not saved.";
 
 export const Route = createFileRoute("/privacy-policy")({
-  head: () => ({
-    meta: [
-      { title: TITLE },
-      { name: "description", content: DESCRIPTION },
-      { property: "og:title", content: TITLE },
-      { property: "og:description", content: DESCRIPTION },
-      { property: "og:url", content: `${SITE_URL}/privacy-policy` },
-    ],
-    links: [{ rel: "canonical", href: `${SITE_URL}/privacy-policy` }],
-  }),
+  head: () =>
+    pageHead({
+      title: TITLE,
+      description: DESCRIPTION,
+      path: "/privacy-policy",
+      modified: "2026-10-02",
+      crumbs: [
+        { name: "Home", path: "/" },
+        { name: "Privacy policy", path: "/privacy-policy" },
+      ],
+    }),
   component: PrivacyPolicy,
 });
 

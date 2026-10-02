@@ -1,5 +1,7 @@
 import { useState, type FormEvent } from "react";
 import StatStrip from "@/components/site/StatStrip";
+import { Faq, Glossary, QuickAnswers, Related } from "@/components/site/PageParts";
+import { FAQ_CLAIMS, GLOSSARY_CLAIMS, QUICK_CLAIMS } from "@/lib/faq";
 import {
   CHECKED,
   DEFAULT_FINDER,
@@ -166,23 +168,25 @@ export default function FlightClaims() {
     <main>
       <div className="wrap toolhead">
         <p className="eyebrow">Guide</p>
-        <h1>Flight claim guide</h1>
+        <h1>Flight delay and cancellation claim guide</h1>
         <p className="lede">
-          Flight delayed, cancelled or overbooked? See which published rules may apply, the amounts and
-          deadlines, where to file, and wording you can edit and send yourself.
+          Flight delayed, cancelled or overbooked? See which published compensation rules may apply in Canada,
+          the EU, the UK and the US, the amounts and deadlines, where to file, and wording you can edit and send
+          yourself.
         </p>
         <p className="notice">
-          Legal information, not legal advice. We are not a law firm. We do not file, send or negotiate
-          anything for you, and we cannot tell you that you are owed money. The airline and the regulator
-          decide. Read the <a href="/disclaimer">disclaimer</a>.
+          We are not lawyers. This is legal information, not legal advice. We do not file, send or negotiate
+          anything for you, we cannot tell you that you are owed money, and we are not liable for how you use
+          this guide. The airline and the regulator decide. Read the <a href="/disclaimer">disclaimer</a>.
         </p>
+        <QuickAnswers items={QUICK_CLAIMS} />
       </div>
 
       <StatStrip
         title="Why this guide exists."
         intro="Most of these figures come from AirHelp, a company that sells claims services, so it has an interest. They are the best published numbers we found, and each one links to its source."
         stats={PAIN}
-        note="Checked 01 Oct 2026. Rules and figures change, and the table further down shows what is in force."
+        note="Checked 02 Oct 2026. Rules and figures change, and the table further down shows what is in force."
       />
 
       <div className="wrap tool-grid" id="tool">
@@ -202,6 +206,7 @@ export default function FlightClaims() {
             value={finder.from}
             onChange={(v) => set("from", v)}
             options={PLACES.map((p) => ({ value: p, label: PLACE_LABEL[p] }))}
+            hint="Iceland, Norway and Switzerland are not covered by this guide yet."
           />
           <Select<Place>
             id="fc-to"
@@ -277,6 +282,17 @@ export default function FlightClaims() {
             value={details.reason}
             onChange={(v) => setD("reason", v)}
           />
+          <div className="field">
+            <label htmlFor="fc-costs">Costs you paid while waiting, one per line</label>
+            <textarea
+              id="fc-costs"
+              rows={3}
+              value={details.costs}
+              placeholder={"Hotel, one night: 180 EUR\nMeals: 45 EUR"}
+              onChange={(e) => setD("costs", e.target.value)}
+            />
+            <p className="hint">Used for the expenses wording. Keep itemised receipts.</p>
+          </div>
 
           {error ? (
             <p className="form-error" role="alert">
@@ -352,7 +368,7 @@ export default function FlightClaims() {
                             <a href={info.official.href} rel="noopener noreferrer" target="_blank">
                               {info.official.label}
                             </a>
-                            . Checked {CHECKED}.
+                            . Checked {info.checked}.
                           </p>
                         </section>
                       );
@@ -472,7 +488,7 @@ export default function FlightClaims() {
                     <td>
                       <span className={`chip ${r.status}`}>{STATUS_LABEL[r.status]}</span>
                     </td>
-                    <td className="date">{CHECKED}</td>
+                    <td className="date">{r.checked}</td>
                   </tr>
                 ))}
               </tbody>
@@ -506,6 +522,14 @@ export default function FlightClaims() {
           </div>
         </div>
       </section>
+
+      <Glossary terms={GLOSSARY_CLAIMS} />
+      <Faq
+        title="Flight compensation questions, answered."
+        intro="Short answers, each tied to its source. These are published rules, not advice about your case."
+        items={FAQ_CLAIMS}
+      />
+      <Related current="/flight-claims" />
     </main>
   );
 }

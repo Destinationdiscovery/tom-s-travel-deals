@@ -12,10 +12,10 @@ export default function SiteHeader() {
             review<span>then</span>go
           </a>
           <nav aria-label="Primary">
-            <a href="/#ledger">Rules ledger</a>
-            <a href="/#tools">Tools</a>
-            <a href="/#changes">Changes</a>
-            <a href="/#method">How we check</a>
+            <a href="/flight-claims">Flight claims</a>
+            <a href="/insurance-appeal">Insurance appeals</a>
+            <a href="/connection-check">Connection check</a>
+            <a href="/about">How we check</a>
           </nav>
           <a className="btn" href="/#alerts">
             Change alerts

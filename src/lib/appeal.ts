@@ -11,7 +11,7 @@ export type ClaimType = "delay" | "cancellation" | "interruption" | "connection"
 export type Source = { label: string; href: string };
 export type Status = "ok" | "unc" | "sched";
 
-export const CHECKED = "01 Oct 2026";
+export const CHECKED = "02 Oct 2026";
 
 export const COUNTRY_LABEL: Record<Country, string> = {
   ca: "Canada",
@@ -403,22 +403,40 @@ export const PAIN: Stat[] = [
   },
 ];
 
-export type Rule = { title: string; body: string; status: Status; sources: Source[] };
+export type Rule = { title: string; body: string; status: Status; checked: string; sources: Source[] };
 
 export const RULES: Rule[] = [
   {
     title: "UK, how to complain",
-    body: "Insurers regulated by the FCA must handle complaints under set rules. The insurer has up to eight weeks to send a final response. After that, or if you disagree, you can refer the complaint to the Financial Ombudsman Service within six months of the date on the final response.",
+    body: "According to the UK Parliament library, insurers regulated by the FCA must handle complaints under set rules. According to the Financial Ombudsman Service, the insurer has up to eight weeks to send a final response. After that, or if you disagree, you can refer the complaint to the ombudsman within six months of the date on the final response.",
     status: "ok",
+    checked: "01 Oct 2026",
     sources: [
       { label: "Financial Ombudsman Service, time limits", href: "https://www.financial-ombudsman.org.uk/consumers/expect/time-limits" },
       { label: "UK Parliament library, insurance FAQs", href: "https://commonslibrary.parliament.uk/research-briefings/cbp-8742/" },
     ],
   },
   {
-    title: "Canada, how to complain",
-    body: "Complain to the insurer first and ask for its final position letter. Independent ombudservices exist for life and health insurance (which includes travel in Alberta's guidance) and for general insurance. Ontario's regulator FSRA also asks for the final position letter.",
+    title: "UK, claim from the airline first",
+    body: "According to the Financial Ombudsman Service, most travel insurance policies do not cover claims if the losses can be recovered from another source, so it advises asking the airline or travel provider for a refund or compensation before contacting your insurer. The UK Civil Aviation Authority says airlines must provide care while you wait and that you can claim reasonable costs back with itemised receipts.",
     status: "ok",
+    checked: "02 Oct 2026",
+    sources: [
+      {
+        label: "Financial Ombudsman Service, travel insurance",
+        href: "https://www.financial-ombudsman.org.uk/consumers/complaints-can-help/insurance/travel-insurance",
+      },
+      {
+        label: "UK Civil Aviation Authority, delays",
+        href: "https://www.caa.co.uk/air-passengers/travel-problems-and-rights/flight-delays-and-cancellations/delays/",
+      },
+    ],
+  },
+  {
+    title: "Canada, how to complain",
+    body: "According to Alberta's insurance regulator, complain to the insurer first, and independent ombudservices exist for life and health insurance (which includes travel in Alberta's guidance) and for general insurance. According to Ontario's regulator FSRA, the insurer's final position letter is needed to review a complaint.",
+    status: "ok",
+    checked: "01 Oct 2026",
     sources: [
       { label: "Alberta, insurance consumer complaints", href: "https://www.alberta.ca/insurance-consumer-complaints" },
       { label: "Saskatchewan, travel insurance", href: "https://fcaa.gov.sk.ca/consumers-investors-pension-plan-members/consumers/purchasing-insurance/travel-insurance" },
@@ -430,14 +448,16 @@ export const RULES: Rule[] = [
   },
   {
     title: "United States, how to complain",
-    body: "File a complaint against the insurer with your state department of insurance. It is free, and the process varies by state. Start from the NAIC consumer page.",
+    body: "According to the National Association of Insurance Commissioners, you can file a complaint against your insurer with your state department of insurance. It is free, and the process varies by state. The NAIC consumer page is the place to start.",
     status: "ok",
+    checked: "01 Oct 2026",
     sources: [{ label: "NAIC", href: "https://content.naic.org/consumer.htm" }],
   },
   {
     title: "Australia, how to complain",
-    body: "The Australian Financial Complaints Authority can consider complaints about travel and ticket insurance, including denied claims. The page we read was not recently updated.",
+    body: "According to the Australian Financial Complaints Authority, it can consider complaints about travel and ticket insurance, including denied claims. The page we read was not recently updated, so confirm the steps on its site.",
     status: "unc",
+    checked: "01 Oct 2026",
     sources: [{ label: "AFCA", href: "https://www.afca.org.au/make-a-complaint/insurance" }],
   },
 ];

@@ -234,3 +234,28 @@ details p { margin-top: 10px; }
 .dates .lab { font-family: var(--mono); font-size: 13px; font-weight: 500; margin: 0 0 8px; }
 .card a { text-underline-offset: 2px; }
 .note a, .notice a, .hint a { text-decoration: underline; }
+
+/* quick answers, faq, glossary, related, about */
+.quick { border: 2px solid var(--ink); background: var(--panel); padding: 16px 20px; margin: 16px 0 0; max-width: 60em; }
+.quick .lab { font-family: var(--mono); font-size: 13px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; margin: 0 0 8px; color: var(--accent); }
+.quick ul { margin: 0; padding-left: 20px; }
+.quick li { padding: 3px 0; font-size: 16px; }
+.faq { border-top: 2px solid var(--ink); }
+.faq-item { padding: 20px 0; border-bottom: 1px solid var(--rule); max-width: 52em; }
+.faq-item h3 { font-family: var(--display); font-size: 24px; line-height: 1.15; letter-spacing: -0.02em; margin: 0 0 8px; }
+.faq-item p { margin: 0 0 8px; color: var(--muted); }
+.faq-item .src { font-family: var(--mono); font-size: 12px; color: var(--muted); display: block; line-height: 1.6; }
+.faq-item .src a { text-decoration: underline; text-underline-offset: 2px; }
+.glossary { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0; border-top: 2px solid var(--ink); border-left: 2px solid var(--ink); margin: 0; }
+.glossary div { padding: 16px 18px; border-right: 2px solid var(--ink); border-bottom: 2px solid var(--ink); background: var(--panel); }
+.glossary dt { font-family: var(--display); font-weight: 700; font-size: 20px; margin: 0 0 4px; }
+.glossary dd { margin: 0; font-size: 16px; color: var(--muted); }
+.related { list-style: none; margin: 0; padding: 0; border-top: 2px solid var(--ink); }
+.related li { display: grid; grid-template-columns: 240px 1fr; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--rule); align-items: baseline; }
+.related a { font-family: var(--display); font-weight: 700; font-size: 20px; }
+.related span { color: var(--muted); font-size: 16px; }
+.about-body { max-width: 46em; }
+.about-body p { margin: 0 0 16px; color: var(--muted); }
+.corr-empty { font-family: var(--mono); font-size: 14px; }
+@media (max-width: 860px) { .related li { grid-template-columns: 1fr; gap: 4px; } }
+.callout { background: var(--warn); color: var(--warnink); padding: 8px 10px; border: 2px solid var(--ink); margin: 0 0 12px; }

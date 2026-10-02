@@ -1,5 +1,7 @@
 import { useMemo, useState, type FormEvent } from "react";
 import StatStrip from "@/components/site/StatStrip";
+import { Faq, Glossary, QuickAnswers, Related } from "@/components/site/PageParts";
+import { FAQ_CONNECTION, GLOSSARY_EES, QUICK_CONNECTION } from "@/lib/faq";
 import {
   CHECKED,
   PAIN,
@@ -174,23 +176,25 @@ export default function ConnectionCheck() {
     <main>
       <div className="wrap toolhead">
         <p className="eyebrow">Tool</p>
-        <h1>Connection check</h1>
+        <h1>Schengen connection check: how much time may EES border checks need?</h1>
         <p className="lede">
-          Changing planes into or out of Schengen? Estimate how much time border checks may need, and
-          see how your connection holds up if the queue is quiet, typical or busy.
+          Changing planes into or out of Schengen? Estimate how much time EES border checks may need, and see how
+          your connection holds up if the queue is quiet, typical or busy.
         </p>
         <p className="notice">
-          A planning estimate, not a prediction. Queues change by the hour and by airport. Where we
-          could not find a reported figure, the page says it is our assumption. Information, not
-          travel advice. Your airline&apos;s own minimum connection time is a different figure.
+          A planning estimate, not a prediction. Queues change by the hour and by airport. Where we could not find a
+          reported figure, the page says it is our assumption. We are not lawyers or your airline. This is
+          information, not travel or legal advice, and we are not liable for how you use it. Your airline&apos;s own
+          minimum connection time is a different figure. Read the <a href="/disclaimer">disclaimer</a>.
         </p>
+        <QuickAnswers items={QUICK_CONNECTION} />
       </div>
 
       <StatStrip
         title="Why this tool exists."
         intro="Border queues at Schengen hubs became the weak point of a connection in 2026. These are the figures that shaped the estimate. They are press reports, not official statistics, and they are labelled that way below."
         stats={PAIN}
-        note="Checked 01 Oct 2026."
+        note="Checked 02 Oct 2026."
       />
 
       <div className="wrap tool-grid" id="tool">
@@ -496,7 +500,7 @@ export default function ConnectionCheck() {
               ) : null}
               <p className="note">
                 {run.separate
-                  ? "On separate bookings, check what each airline will do if you miss the second flight before you rely on this connection."
+                  ? "According to the UK Civil Aviation Authority, under UK rules separate bookings carry no statutory right to care, compensation or onward transport if you miss the second flight. Check what each airline will do before you rely on this connection."
                   : "On one booking, ask your airline how it handles a missed connection, so you know before you travel."}
               </p>
             </>
@@ -695,6 +699,14 @@ export default function ConnectionCheck() {
           </div>
         </div>
       </section>
+
+      <Glossary terms={GLOSSARY_EES} />
+      <Faq
+        title="EES and connection questions, answered."
+        intro="Short answers, each tied to its source. Queue figures are reported, not guaranteed."
+        items={FAQ_CONNECTION}
+      />
+      <Related current="/connection-check" />
     </main>
   );
 }
