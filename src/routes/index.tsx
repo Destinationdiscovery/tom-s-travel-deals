@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import AlertForm from "@/components/site/AlertForm";
+import { ArticleCards } from "@/components/site/Articles";
 import { Faq } from "@/components/site/PageParts";
+import { ARTICLES } from "@/lib/articles-data";
 import { FAQ_HOME } from "@/lib/faq";
 import { pageHead } from "@/lib/seo";
 import toolsCss from "../tools.css?url";
@@ -129,6 +131,8 @@ const CHANGES: Change[] = [
   { d: "7 Sep 2026", t: "EES congestion pause ceased to apply, last day 6 September", status: "ok" },
   { d: "10 Apr 2026", t: "EES fully operational at all Schengen external borders", status: "ok" },
 ];
+
+const FEATURED = [...ARTICLES.filter((a) => a.featured), ...ARTICLES.filter((a) => !a.featured)].slice(0, 3);
 
 function Home() {
   return (
@@ -323,6 +327,19 @@ function Home() {
           </div>
         </div>
       </section>
+
+      {FEATURED.length > 0 ? (
+        <section className="band" id="articles">
+          <div className="wrap">
+            <h2 className="s">Latest articles.</h2>
+            <p className="sub">
+              Guides and dated updates on flight compensation, EES, ETIAS and travel insurance appeals.{" "}
+              <a href="/articles">See all articles</a>.
+            </p>
+            <ArticleCards items={FEATURED} />
+          </div>
+        </section>
+      ) : null}
 
       <section className="band">
         <div className="wrap">

@@ -71,6 +71,7 @@ const ALL: { path: string; name: string; text: string }[] = [
   { path: "/flight-claims", name: "Flight claim guide", text: "Delayed or cancelled flight: rules, amounts, deadlines and wording." },
   { path: "/insurance-appeal", name: "Insurance appeal pack", text: "Travel insurer denied your costs: build an appeal from your policy wording." },
   { path: "/connection-check", name: "Connection check", text: "Changing planes in Schengen: how much time EES checks may need." },
+  { path: "/articles", name: "Articles", text: "Guides and dated updates, each with its source." },
   { path: "/#ledger", name: "Rules ledger", text: "Every rule with its source, status and the day we checked it." },
   { path: "/corrections", name: "Corrections", text: "What we got wrong and when we fixed it." },
 ];

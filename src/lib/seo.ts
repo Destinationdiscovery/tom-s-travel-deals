@@ -19,7 +19,8 @@ type Options = {
   crumbs?: Crumb[];
   faq?: FaqLike[];
   css?: string;
-  type?: "WebPage" | "AboutPage";
+  type?: "WebPage" | "AboutPage" | "Article";
+  published?: string;
 };
 
 export function pageHead(o: Options) {
@@ -39,6 +40,16 @@ export function pageHead(o: Options) {
       ...(o.crumbs && o.crumbs.length > 1 ? { breadcrumb: { "@id": `${url}#breadcrumb` } } : {}),
     },
   ];
+
+  if (o.type === "Article") {
+    Object.assign(graph[0], {
+      "@type": "Article",
+      headline: o.title,
+      datePublished: o.published ?? o.modified,
+      mainEntityOfPage: url,
+      author: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
+    });
+  }
 
   if (o.crumbs && o.crumbs.length > 1) {
     graph.push({
@@ -70,7 +81,13 @@ export function pageHead(o: Options) {
       { title: o.title },
       { name: "description", content: o.description },
       { name: "robots", content: "index, follow, max-image-preview:large" },
-      { property: "og:type", content: "website" },
+      { property: "og:type", content: o.type === "Article" ? "article" : "website" },
+      ...(o.type === "Article"
+        ? [
+            { property: "article:published_time", content: o.published ?? o.modified },
+            { property: "article:modified_time", content: o.modified },
+          ]
+        : []),
       { property: "og:site_name", content: SITE_NAME },
       { property: "og:locale", content: "en" },
       { property: "og:title", content: o.title },

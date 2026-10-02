@@ -270,3 +270,26 @@ details p { margin-top: 10px; }
 .ledger-wide td:first-child { max-width: 62em; }
 .ledger-wide td:first-child strong { font-size: 20px; }
 @media (max-width: 860px) { .ledger-wide td:first-child { max-width: none; } }
+
+/* articles */
+.article-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); border-top: 2px solid var(--ink); border-left: 2px solid var(--ink); }
+.article-grid li { border-right: 2px solid var(--ink); border-bottom: 2px solid var(--ink); background: var(--panel); }
+.article-grid a { display: block; padding: 22px; height: 100%; box-sizing: border-box; text-decoration: none; color: var(--ink); }
+.article-grid a:hover h3 { text-decoration: underline; text-underline-offset: 3px; }
+.article-grid .kind { font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); }
+.article-grid h3 { font-family: var(--display); font-size: 24px; line-height: 1.12; letter-spacing: -0.02em; margin: 8px 0; }
+.article-grid p { margin: 0 0 12px; color: var(--muted); font-size: 16px; }
+.article-grid .meta { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.crumbs { font-family: var(--mono); font-size: 13px; color: var(--muted); margin: 0 0 12px; }
+.crumbs a { text-decoration: underline; text-underline-offset: 2px; }
+.art-meta { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; font-family: var(--mono); font-size: 13px; color: var(--muted); margin: 14px 0; }
+.prose { max-width: 46em; padding: 8px 0 40px; }
+.prose h2 { font-family: var(--display); font-size: clamp(26px, 3vw, 34px); letter-spacing: -0.02em; line-height: 1.1; margin: 36px 0 12px; }
+.prose h3 { font-family: var(--display); font-size: 22px; margin: 24px 0 8px; }
+.prose p, .prose li { font-size: 18px; line-height: 1.6; }
+.prose p { margin: 0 0 16px; }
+.prose ul, .prose ol { padding-left: 22px; margin: 0 0 16px; }
+.prose li { padding: 2px 0; }
+.prose a { text-decoration: underline; text-underline-offset: 2px; }
+.prose table { margin: 8px 0 20px; }
+.prose blockquote { border-left: 4px solid var(--accent); margin: 0 0 16px; padding: 4px 16px; color: var(--muted); }

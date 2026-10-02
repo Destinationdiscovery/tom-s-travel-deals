@@ -19,6 +19,7 @@ export default function SiteFooter() {
             <li><a href="/flight-claims">Flight claim guide</a></li>
             <li><a href="/insurance-appeal">Insurance appeal pack</a></li>
             <li><a href="/connection-check">Connection check</a></li>
+            <li><a href="/articles">Articles</a></li>
             <li><a href="/#ledger">Rules ledger</a></li>
           </ul>
         </div>

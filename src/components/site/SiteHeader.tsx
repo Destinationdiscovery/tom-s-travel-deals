@@ -15,7 +15,7 @@ export default function SiteHeader() {
             <a href="/flight-claims">Flight claims</a>
             <a href="/insurance-appeal">Insurance appeals</a>
             <a href="/connection-check">Connection check</a>
-            <a href="/about">How we check</a>
+            <a href="/articles">Articles</a>
           </nav>
           <a className="btn" href="/#alerts">
             Change alerts

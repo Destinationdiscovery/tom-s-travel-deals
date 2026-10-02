@@ -8,6 +8,10 @@
 - [Insurance appeal pack](https://www.reviewthengo.com/insurance-appeal): build an appeal from your own policy wording after a travel insurer denies delay or cancellation costs, with the complaint route for Canada, the UK, the US and Australia
 - [Connection check](https://www.reviewthengo.com/connection-check): estimate how much time EES border checks may need on a Schengen connection, with sourced and assumed figures labelled
 
+## Articles
+
+- [Articles](https://www.reviewthengo.com/articles): guides and dated updates on flight compensation (EU261, UK261, APPR), EES, ETIAS and travel insurance appeals, each with sources and the day we checked it
+
 ## Reference
 
 - [Home and rules ledger](https://www.reviewthengo.com/): current entries on EES, ETIAS and UK guidance, each with status, sources and check date

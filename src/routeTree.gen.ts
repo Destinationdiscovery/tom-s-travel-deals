@@ -11,6 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as ArticlesRouteImport } from './routes/articles'
+import { Route as ArticlesSlugRouteImport } from './routes/articles_.$slug'
 import { Route as ConnectionCheckRouteImport } from './routes/connection-check'
 import { Route as CorrectionsRouteImport } from './routes/corrections'
 import { Route as DisclaimerRouteImport } from './routes/disclaimer'
@@ -26,6 +28,16 @@ const IndexRoute = IndexRouteImport.update({
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArticlesRoute = ArticlesRouteImport.update({
+  id: '/articles',
+  path: '/articles',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArticlesSlugRoute = ArticlesSlugRouteImport.update({
+  id: '/articles_/$slug',
+  path: '/articles/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConnectionCheckRoute = ConnectionCheckRouteImport.update({
@@ -62,6 +74,8 @@ const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/articles': typeof ArticlesRoute
+  '/articles/$slug': typeof ArticlesSlugRoute
   '/connection-check': typeof ConnectionCheckRoute
   '/corrections': typeof CorrectionsRoute
   '/disclaimer': typeof DisclaimerRoute
@@ -72,6 +86,8 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/articles': typeof ArticlesRoute
+  '/articles/$slug': typeof ArticlesSlugRoute
   '/connection-check': typeof ConnectionCheckRoute
   '/corrections': typeof CorrectionsRoute
   '/disclaimer': typeof DisclaimerRoute
@@ -83,6 +99,8 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/articles': typeof ArticlesRoute
+  '/articles_/$slug': typeof ArticlesSlugRoute
   '/connection-check': typeof ConnectionCheckRoute
   '/corrections': typeof CorrectionsRoute
   '/disclaimer': typeof DisclaimerRoute
@@ -92,15 +110,17 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/connection-check' | '/corrections' | '/disclaimer' | '/flight-claims' | '/insurance-appeal' | '/privacy-policy'
+  fullPaths: '/' | '/about' | '/articles' | '/articles/$slug' | '/connection-check' | '/corrections' | '/disclaimer' | '/flight-claims' | '/insurance-appeal' | '/privacy-policy'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/connection-check' | '/corrections' | '/disclaimer' | '/flight-claims' | '/insurance-appeal' | '/privacy-policy'
-  id: '__root__' | '/' | '/about' | '/connection-check' | '/corrections' | '/disclaimer' | '/flight-claims' | '/insurance-appeal' | '/privacy-policy'
+  to: '/' | '/about' | '/articles' | '/articles/$slug' | '/connection-check' | '/corrections' | '/disclaimer' | '/flight-claims' | '/insurance-appeal' | '/privacy-policy'
+  id: '__root__' | '/' | '/about' | '/articles' | '/articles_/$slug' | '/connection-check' | '/corrections' | '/disclaimer' | '/flight-claims' | '/insurance-appeal' | '/privacy-policy'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  ArticlesRoute: typeof ArticlesRoute
+  ArticlesSlugRoute: typeof ArticlesSlugRoute
   ConnectionCheckRoute: typeof ConnectionCheckRoute
   CorrectionsRoute: typeof CorrectionsRoute
   DisclaimerRoute: typeof DisclaimerRoute
@@ -123,6 +143,20 @@ declare module '@tanstack/react-router' {
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/articles': {
+      id: '/articles'
+      path: '/articles'
+      fullPath: '/articles'
+      preLoaderRoute: typeof ArticlesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/articles_/$slug': {
+      id: '/articles_/$slug'
+      path: '/articles/$slug'
+      fullPath: '/articles/$slug'
+      preLoaderRoute: typeof ArticlesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/connection-check': {
@@ -173,6 +207,8 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  ArticlesRoute: ArticlesRoute,
+  ArticlesSlugRoute: ArticlesSlugRoute,
   ConnectionCheckRoute: ConnectionCheckRoute,
   CorrectionsRoute: CorrectionsRoute,
   DisclaimerRoute: DisclaimerRoute,
