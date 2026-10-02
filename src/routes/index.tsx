@@ -119,6 +119,17 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
+type Change = { d: string; t: string; status: Status; upcoming?: boolean };
+
+// Newest first. The hero shows the latest three that already happened; the Recent changes section shows all.
+const CHANGES: Change[] = [
+  { d: "Q4 2026", t: "ETIAS launch scheduled, date not yet confirmed", status: "unc", upcoming: true },
+  { d: "13 Sep 2026", t: "Reports that nine countries may keep limiting EES biometric checks", status: "unc" },
+  { d: "9 Sep 2026", t: "UK CAA guidance on compensation after the 8 September NATS disruption", status: "ok" },
+  { d: "7 Sep 2026", t: "EES congestion pause ceased to apply, last day 6 September", status: "ok" },
+  { d: "10 Apr 2026", t: "EES fully operational at all Schengen external borders", status: "ok" },
+];
+
 function Home() {
   return (
     <main>
@@ -143,58 +154,87 @@ function Home() {
           </div>
         </div>
 
-        <div className="card" id="ledger">
-          <div className="stamp" aria-hidden="true">
-            Checked
-            <br />
-            02 Oct 2026
-          </div>
-          <h2>Rules ledger</h2>
-          <table>
-            <caption>Rules ledger</caption>
-            <thead>
-              <tr>
-                <th scope="col">Rule</th>
-                <th scope="col">Status</th>
-                <th scope="col" className="date">
-                  Checked
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {ENTRIES.map((e) => (
-                <tr key={e.title}>
-                  <td>
-                    <strong>{e.title}</strong>
-                    {e.body}
-                    <span className="src">
-                      Sources:{" "}
-                      {e.sources.map((s, i) => (
-                        <span key={s.href + s.label}>
-                          {i > 0 ? ", " : ""}
-                          <a href={s.href} rel="noopener noreferrer" target="_blank">
-                            {s.label}
-                          </a>
-                        </span>
-                      ))}
-                    </span>
-                  </td>
-                  <td>
-                    <span className={`chip ${e.status}`}>{STATUS_LABEL[e.status]}</span>
-                  </td>
-                  <td className="date">{e.checked}</td>
-                </tr>
+        <div className="card latest">
+          <h2>Latest changes</h2>
+          <ul className="latest-list">
+            {CHANGES.filter((c) => !c.upcoming)
+              .slice(0, 3)
+              .map((c) => (
+                <li key={c.d + c.t}>
+                  <span className="d">{c.d}</span>
+                  <span className="t">{c.t}</span>
+                  <span className={`chip ${c.status}`}>{STATUS_LABEL[c.status]}</span>
+                </li>
               ))}
-              <tr>
-                <td className="more" colSpan={3}>
-                  More entries are added as each one is checked. Links to official government pages
-                  are attached wherever we can find them.
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          </ul>
+          <p className="hint">
+            <a href="#ledger">See the full rules ledger</a> and the <a href="#changes">whole change log</a>.
+          </p>
         </div>
       </div>
+
+      <section className="band" id="ledger">
+        <div className="wrap">
+          <h2 className="s">Rules ledger.</h2>
+          <p className="sub">
+            Every entry names its source, its status and the day we last checked it. Anything we cannot confirm is
+            labelled Unconfirmed.
+          </p>
+          <div className="ledger-wide">
+            <div className="card">
+              <div className="stamp" aria-hidden="true">
+                Checked
+                <br />
+                02 Oct 2026
+              </div>
+              <h2>Rules ledger</h2>
+              <table>
+                <caption>Rules ledger</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Rule</th>
+                    <th scope="col">Status</th>
+                    <th scope="col" className="date">
+                      Checked
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ENTRIES.map((e) => (
+                    <tr key={e.title}>
+                      <td>
+                        <strong>{e.title}</strong>
+                        {e.body}
+                        <span className="src">
+                          Sources:{" "}
+                          {e.sources.map((s, i) => (
+                            <span key={s.href + s.label}>
+                              {i > 0 ? ", " : ""}
+                              <a href={s.href} rel="noopener noreferrer" target="_blank">
+                                {s.label}
+                              </a>
+                            </span>
+                          ))}
+                        </span>
+                      </td>
+                      <td>
+                        <span className={`chip ${e.status}`}>{STATUS_LABEL[e.status]}</span>
+                      </td>
+                      <td className="date">{e.checked}</td>
+                    </tr>
+                  ))}
+                  <tr>
+                    <td className="more" colSpan={3}>
+                      More entries are added as each one is checked. Links to official government pages
+                      are attached wherever we can find them.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section className="band" id="method">
         <div className="wrap">
@@ -303,31 +343,13 @@ function Home() {
           <h2 className="s">Recent changes.</h2>
           <p className="sub">The log of what moved, newest first.</p>
           <ul className="changes">
-            <li>
-              <span className="d">Q4 2026</span>
-              <span className="t">ETIAS launch scheduled, date not yet confirmed</span>
-              <span className="chip unc">Unconfirmed</span>
-            </li>
-            <li>
-              <span className="d">13 Sep 2026</span>
-              <span className="t">Reports that nine countries may keep limiting EES biometric checks</span>
-              <span className="chip unc">Unconfirmed</span>
-            </li>
-            <li>
-              <span className="d">9 Sep 2026</span>
-              <span className="t">UK CAA guidance on compensation after the 8 September NATS disruption</span>
-              <span className="chip ok">In force</span>
-            </li>
-            <li>
-              <span className="d">7 Sep 2026</span>
-              <span className="t">EES congestion pause ceased to apply, last day 6 September</span>
-              <span className="chip ok">In force</span>
-            </li>
-            <li>
-              <span className="d">10 Apr 2026</span>
-              <span className="t">EES fully operational at all Schengen external borders</span>
-              <span className="chip ok">In force</span>
-            </li>
+            {CHANGES.map((c) => (
+              <li key={c.d + c.t}>
+                <span className="d">{c.d}</span>
+                <span className="t">{c.t}</span>
+                <span className={`chip ${c.status}`}>{STATUS_LABEL[c.status]}</span>
+              </li>
+            ))}
           </ul>
         </div>
       </section>
