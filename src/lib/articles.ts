@@ -26,7 +26,7 @@ export type Article = {
   checked: string;
   status: Status;
   featured: boolean;
-  tool?: { label: string; href: string };
+  tool?: { label: string; href: string } | undefined;
   sources: Source[];
   body: string;
   minutes: number;
