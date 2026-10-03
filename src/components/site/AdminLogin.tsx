@@ -67,7 +67,7 @@ export default function AdminLogoTrigger() {
   );
 }
 
-function AdminLoginModal({ onClose }: { onClose: () => void }) {
+export function AdminLoginModal({ onClose }: { onClose: () => void }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);

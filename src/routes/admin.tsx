@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ADMIN_DEVICE_KEY } from "@/components/site/AdminLogin";
+import { ADMIN_DEVICE_KEY, AdminLoginModal } from "@/components/site/AdminLogin";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -46,9 +46,8 @@ function AdminPage() {
   if (status === "denied")
     return (
       <main className="wrap adm-page">
-        <p className="eyebrow">Admin</p>
-        <h1 className="adm-h1">Restricted</h1>
-        <p className="adm-small">Please sign in as admin to view this page.</p>
+        <h1 className="adm-h1">Admin sign in</h1>
+        <AdminLoginModal onClose={() => (window.location.href = "/")} />
       </main>
     );
 
