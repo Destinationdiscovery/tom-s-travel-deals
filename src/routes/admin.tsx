@@ -46,9 +46,8 @@ function AdminPage() {
   if (status === "denied")
     return (
       <main className="wrap adm-page">
-        <p className="eyebrow">Admin</p>
-        <h1 className="adm-h1">Restricted</h1>
-        <p className="adm-small">Please sign in as admin to view this page.</p>
+        <h1 className="adm-h1">Admin sign in</h1>
+        <AdminLoginModal onClose={() => (window.location.href = "/")} />
       </main>
     );
 
