@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
 const SESSION_KEY = "rtg-session-id";
-const EXCLUDED_PREFIXES = ["/gear-admin"];
+const EXCLUDED_PREFIXES = ["/gear-admin", "/admin"];
 
 function getSessionId(): string {
   let id = sessionStorage.getItem(SESSION_KEY);
@@ -13,6 +13,8 @@ function getSessionId(): string {
 }
 
 function isExcluded(path: string): boolean {
+  // Never count visits from the admin's own devices
+  if (localStorage.getItem("rtg-admin-device") === "1") return true;
   return EXCLUDED_PREFIXES.some((p) => path.startsWith(p));
 }
 
