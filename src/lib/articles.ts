@@ -26,7 +26,7 @@ export type Article = {
   checked: string;
   status: Status;
   featured: boolean;
-  tool?: { label: string; href: string };
+  tool?: { label: string; href: string } | undefined;
   sources: Source[];
   body: string;
   minutes: number;
@@ -38,7 +38,7 @@ const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "
 export function formatDate(iso: string): string {
   if (!DATE.test(iso)) return iso;
   const [y, m, d] = iso.split("-").map(Number);
-  return `${String(d).padStart(2, "0")} ${MONTHS[m - 1]} ${y}`;
+  return `${String(d).padStart(2, "0")} ${MONTHS[(m ?? 1) - 1]} ${y}`;
 }
 
 type Parsed = { single: Record<string, string>; lists: Record<string, string[]>; body: string };
@@ -55,9 +55,10 @@ export function parseFrontmatter(raw: string): Parsed | null {
   for (const line of head.split("\n")) {
     const m = /^([A-Za-z]+):\s*(.*)$/.exec(line.trim());
     if (!m) continue;
-    const key = m[1].toLowerCase();
-    if (key === "source") (lists.source ??= []).push(m[2]);
-    else single[key] = m[2].trim();
+    const key = (m[1] ?? "").toLowerCase();
+    const val = m[2] ?? "";
+    if (key === "source") (lists["source"] ??= []).push(val);
+    else single[key] = val.trim();
   }
   return { single, lists, body };
 }
@@ -78,7 +79,11 @@ export function parseArticle(raw: string, file: string): { article?: Article; pr
   }
   const parsed = parseFrontmatter(raw);
   if (!parsed) return { problem: `${base}: the file must start with a --- header and close it with ---` };
-  const { single: m, lists, body } = parsed;
+  const { single, lists, body } = parsed;
+  const m = single as Record<string, string> & {
+    title: string; description: string; kind: string; published: string; checked: string; status: string;
+    featured?: string; tool?: string;
+  };
 
   for (const k of ["title", "description", "kind", "published", "checked", "status"]) {
     if (!m[k]) return { problem: `${base}: the header is missing "${k}"` };
@@ -91,7 +96,7 @@ export function parseArticle(raw: string, file: string): { article?: Article; pr
     return { problem: `${base}: status must be ok, unc or sched` };
   }
   const sources: Source[] = [];
-  for (const line of lists.source ?? []) {
+  for (const line of lists["source"] ?? []) {
     const p = splitPipe(line);
     if (!p || !/^https?:\/\//.test(p.second)) {
       return { problem: `${base}: each source line must look like: source: Name | https://link` };
@@ -114,10 +119,10 @@ export function parseArticle(raw: string, file: string): { article?: Article; pr
       slug,
       title: m.title,
       description: m.description,
-      kind: m.kind,
+      kind: m.kind as Article["kind"],
       published: m.published,
       checked: m.checked,
-      status: m.status,
+      status: m.status as Status,
       featured: /^(yes|true)$/i.test(m.featured ?? ""),
       tool,
       sources,

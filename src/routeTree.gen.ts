@@ -11,14 +11,15 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ArticlesRouteImport } from './routes/articles'
-import { Route as ArticlesSlugRouteImport } from './routes/articles_.$slug'
 import { Route as ConnectionCheckRouteImport } from './routes/connection-check'
 import { Route as CorrectionsRouteImport } from './routes/corrections'
 import { Route as DisclaimerRouteImport } from './routes/disclaimer'
 import { Route as FlightClaimsRouteImport } from './routes/flight-claims'
 import { Route as InsuranceAppealRouteImport } from './routes/insurance-appeal'
 import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
+import { Route as ArticlesSlugRouteImport } from './routes/articles_.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -30,14 +31,14 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ArticlesRoute = ArticlesRouteImport.update({
   id: '/articles',
   path: '/articles',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ArticlesSlugRoute = ArticlesSlugRouteImport.update({
-  id: '/articles_/$slug',
-  path: '/articles/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConnectionCheckRoute = ConnectionCheckRouteImport.update({
@@ -70,63 +71,106 @@ const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
   path: '/privacy-policy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ArticlesSlugRoute = ArticlesSlugRouteImport.update({
+  id: '/articles_/$slug',
+  path: '/articles/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRoute
   '/articles': typeof ArticlesRoute
-  '/articles/$slug': typeof ArticlesSlugRoute
   '/connection-check': typeof ConnectionCheckRoute
   '/corrections': typeof CorrectionsRoute
   '/disclaimer': typeof DisclaimerRoute
   '/flight-claims': typeof FlightClaimsRoute
   '/insurance-appeal': typeof InsuranceAppealRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
+  '/articles/$slug': typeof ArticlesSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRoute
   '/articles': typeof ArticlesRoute
-  '/articles/$slug': typeof ArticlesSlugRoute
   '/connection-check': typeof ConnectionCheckRoute
   '/corrections': typeof CorrectionsRoute
   '/disclaimer': typeof DisclaimerRoute
   '/flight-claims': typeof FlightClaimsRoute
   '/insurance-appeal': typeof InsuranceAppealRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
+  '/articles/$slug': typeof ArticlesSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRoute
   '/articles': typeof ArticlesRoute
-  '/articles_/$slug': typeof ArticlesSlugRoute
   '/connection-check': typeof ConnectionCheckRoute
   '/corrections': typeof CorrectionsRoute
   '/disclaimer': typeof DisclaimerRoute
   '/flight-claims': typeof FlightClaimsRoute
   '/insurance-appeal': typeof InsuranceAppealRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
+  '/articles_/$slug': typeof ArticlesSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/articles' | '/articles/$slug' | '/connection-check' | '/corrections' | '/disclaimer' | '/flight-claims' | '/insurance-appeal' | '/privacy-policy'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/admin'
+    | '/articles'
+    | '/connection-check'
+    | '/corrections'
+    | '/disclaimer'
+    | '/flight-claims'
+    | '/insurance-appeal'
+    | '/privacy-policy'
+    | '/articles/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/articles' | '/articles/$slug' | '/connection-check' | '/corrections' | '/disclaimer' | '/flight-claims' | '/insurance-appeal' | '/privacy-policy'
-  id: '__root__' | '/' | '/about' | '/articles' | '/articles_/$slug' | '/connection-check' | '/corrections' | '/disclaimer' | '/flight-claims' | '/insurance-appeal' | '/privacy-policy'
+  to:
+    | '/'
+    | '/about'
+    | '/admin'
+    | '/articles'
+    | '/connection-check'
+    | '/corrections'
+    | '/disclaimer'
+    | '/flight-claims'
+    | '/insurance-appeal'
+    | '/privacy-policy'
+    | '/articles/$slug'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/admin'
+    | '/articles'
+    | '/connection-check'
+    | '/corrections'
+    | '/disclaimer'
+    | '/flight-claims'
+    | '/insurance-appeal'
+    | '/privacy-policy'
+    | '/articles_/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AdminRoute: typeof AdminRoute
   ArticlesRoute: typeof ArticlesRoute
-  ArticlesSlugRoute: typeof ArticlesSlugRoute
   ConnectionCheckRoute: typeof ConnectionCheckRoute
   CorrectionsRoute: typeof CorrectionsRoute
   DisclaimerRoute: typeof DisclaimerRoute
   FlightClaimsRoute: typeof FlightClaimsRoute
   InsuranceAppealRoute: typeof InsuranceAppealRoute
   PrivacyPolicyRoute: typeof PrivacyPolicyRoute
+  ArticlesSlugRoute: typeof ArticlesSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -145,18 +189,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/articles': {
       id: '/articles'
       path: '/articles'
       fullPath: '/articles'
       preLoaderRoute: typeof ArticlesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/articles_/$slug': {
-      id: '/articles_/$slug'
-      path: '/articles/$slug'
-      fullPath: '/articles/$slug'
-      preLoaderRoute: typeof ArticlesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/connection-check': {
@@ -201,20 +245,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyPolicyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/articles_/$slug': {
+      id: '/articles_/$slug'
+      path: '/articles/$slug'
+      fullPath: '/articles/$slug'
+      preLoaderRoute: typeof ArticlesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AdminRoute: AdminRoute,
   ArticlesRoute: ArticlesRoute,
-  ArticlesSlugRoute: ArticlesSlugRoute,
   ConnectionCheckRoute: ConnectionCheckRoute,
   CorrectionsRoute: CorrectionsRoute,
   DisclaimerRoute: DisclaimerRoute,
   FlightClaimsRoute: FlightClaimsRoute,
   InsuranceAppealRoute: InsuranceAppealRoute,
   PrivacyPolicyRoute: PrivacyPolicyRoute,
+  ArticlesSlugRoute: ArticlesSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

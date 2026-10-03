@@ -42,7 +42,7 @@ export function pageHead(o: Options) {
   ];
 
   if (o.type === "Article") {
-    Object.assign(graph[0], {
+    Object.assign(graph[0] ?? {}, {
       "@type": "Article",
       headline: o.title,
       datePublished: o.published ?? o.modified,

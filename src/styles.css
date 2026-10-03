@@ -163,3 +163,33 @@ h2.s { font-family: var(--display); font-weight: 800; font-size: clamp(32px, 4.6
   td.date, th.date { display: none; }
   .lede { font-size: 19px; }
 }
+
+/* admin */
+.adm-overlay { position: fixed; inset: 0; background: rgba(18,22,28,0.55); display: flex; align-items: center; justify-content: center; z-index: 200; padding: 20px; }
+.adm-modal { background: var(--panel); border: 2px solid var(--ink); padding: 28px; width: 100%; max-width: 380px; }
+.adm-form { display: flex; flex-direction: column; gap: 14px; }
+.adm-form label { display: flex; flex-direction: column; gap: 6px; font-family: var(--mono); font-size: 13px; }
+.adm-form input, .adm-toolbar input, .adm-toolbar select { min-height: 44px; padding: 0 12px; border: 2px solid var(--ink); background: var(--ground); color: var(--ink); font-size: 16px; }
+.adm-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.adm-error { color: var(--accent); font-family: var(--mono); font-size: 13px; margin: 0; }
+.adm-small { font-family: var(--mono); font-size: 13px; color: var(--muted); margin: 0; }
+.adm-page { padding-top: 40px; padding-bottom: 80px; }
+.adm-h1 { font-size: clamp(36px, 5vw, 56px); margin: 0 0 8px; }
+.adm-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; margin-bottom: 24px; }
+.adm-tabs { display: flex; border-bottom: 2px solid var(--ink); margin-bottom: 28px; }
+.adm-tabs button { font-family: var(--mono); font-size: 14px; padding: 12px 20px; background: transparent; border: none; border-bottom: 3px solid transparent; cursor: pointer; color: var(--ink); margin-bottom: -2px; }
+.adm-tabs button.on { border-bottom-color: var(--accent); font-weight: 500; }
+.adm-stack { display: flex; flex-direction: column; gap: 22px; }
+.adm-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+.adm-stat { padding: 18px 20px; }
+.adm-num { font-family: var(--display); font-weight: 800; font-size: 40px; line-height: 1; letter-spacing: -0.03em; }
+.adm-card { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+.adm-toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.adm-toolbar input { flex: 1; min-width: 200px; }
+.adm-scroll { overflow-x: auto; }
+.adm-del { background: transparent; border: none; color: var(--accent); font-family: var(--mono); font-size: 13px; cursor: pointer; text-decoration: underline; }
+.adm-bars { display: flex; align-items: flex-end; gap: 3px; height: 160px; }
+.adm-bar { flex: 1; height: 100%; display: flex; align-items: flex-end; }
+.adm-bar span { display: block; width: 100%; background: var(--ink); min-height: 2px; }
+.adm-two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 760px) { .adm-two { grid-template-columns: 1fr; } }
