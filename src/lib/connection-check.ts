@@ -31,7 +31,7 @@ export type Line = {
   label: string;
   minutes: number;
   basis: Basis;
-  note?: string;
+  note?: string | undefined;
 };
 
 export type ScenarioResult = {
