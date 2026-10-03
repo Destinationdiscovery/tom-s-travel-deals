@@ -315,3 +315,8 @@ details p { margin-top: 10px; }
 .tool-grid.stacked { scroll-margin-top: 16px; }
 .tool-grid.stacked .result { max-width: none; }
 .tool-grid.stacked .result .card { max-width: 64em; }
+
+/* home: two topic signup cards */
+.tools.pair { grid-template-columns: 1fr 1fr; gap: 24px; border: none; }
+.tools.pair .tool { border: 2px solid var(--ink); }
+@media (max-width: 860px) { .tools.pair { grid-template-columns: 1fr; } }

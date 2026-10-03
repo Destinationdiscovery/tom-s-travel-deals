@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 
 type Props = {
   /** Saved with the signup so you can see which button it came from. */
@@ -6,13 +6,21 @@ type Props = {
   interests?: string[];
   buttonText?: string;
   inputId: string;
+  /** What the visitor sees after signing up. */
+  doneText?: string;
 };
 
-export default function AlertForm({ source, interests = [], buttonText = "Notify me", inputId }: Props) {
+export default function AlertForm({
+  source,
+  interests = [],
+  buttonText = "Notify me",
+  inputId,
+  doneText = "Thanks. You are on the list.",
+}: Props) {
   const [email, setEmail] = useState("");
   const [state, setState] = useState<"idle" | "sending" | "done" | "error">("idle");
 
-  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const trimmed = email.trim();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
@@ -36,7 +44,7 @@ export default function AlertForm({ source, interests = [], buttonText = "Notify
   if (state === "done") {
     return (
       <p className="form-done" role="status">
-        Thanks. You are on the list.
+        {doneText}
       </p>
     );
   }

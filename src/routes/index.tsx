@@ -153,7 +153,7 @@ function Home() {
               Read the rules ledger
             </a>
             <a className="btn" href="#alerts">
-              Get change alerts
+              Get notified
             </a>
           </div>
         </div>
@@ -341,15 +341,50 @@ function Home() {
         </section>
       ) : null}
 
-      <section className="band">
+      <section className="band" id="alerts">
         <div className="wrap">
-          <div className="tools one">
-            <div className="tool dark" id="alerts">
-              <span className="chip">Open</span>
-              <h3>Rule change alerts</h3>
-              <p>One email when a rule you follow changes. Nothing else.</p>
-              <AlertForm source="home-alerts" interests={["rule-alerts"]} inputId="alerts-email" />
-              <p className="fine">Unsubscribe in one click.</p>
+          <h2 className="s">One email when we confirm it.</h2>
+          <p className="sub">
+            We cannot promise an email for every change. Two items on the ledger are Unconfirmed. Leave your email for
+            the one you care about, and we will send a single note if an official source confirms or changes it.
+          </p>
+          <div className="tools pair">
+            <div className="tool dark">
+              <span className="chip">Unconfirmed</span>
+              <h3>EES, nine countries limiting checks</h3>
+              <p>
+                Press reports say nine countries may still limit biometric checks after the deadline. We found no
+                official statement.
+              </p>
+              <AlertForm
+                source="notify-ees-limits"
+                interests={["ees-limits-confirmation"]}
+                buttonText="Email me once"
+                inputId="notify-ees-email"
+                doneText="Thanks. We will email you once if an official source confirms or changes this. If it does not arrive, check your spam or junk folder."
+              />
+              <p className="fine">
+                One email about this only. By signing up you agree to get it. Every email has an unsubscribe link. If it
+                does not arrive, check your spam or junk folder.
+              </p>
+            </div>
+            <div className="tool dark">
+              <span className="chip">Unconfirmed</span>
+              <h3>ETIAS launch date</h3>
+              <p>
+                Press reports say ETIAS is scheduled for the fourth quarter of 2026. We found no confirmed launch date.
+              </p>
+              <AlertForm
+                source="notify-etias-date"
+                interests={["etias-launch-date"]}
+                buttonText="Email me once"
+                inputId="notify-etias-email"
+                doneText="Thanks. We will email you once when an official source confirms the ETIAS launch date. If it does not arrive, check your spam or junk folder."
+              />
+              <p className="fine">
+                One email about this only. By signing up you agree to get it. Every email has an unsubscribe link. If it
+                does not arrive, check your spam or junk folder.
+              </p>
             </div>
           </div>
         </div>

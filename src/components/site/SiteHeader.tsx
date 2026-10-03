@@ -1,5 +1,3 @@
-import AdminLogoTrigger from "./AdminLogin";
-
 export default function SiteHeader() {
   return (
     <>
@@ -10,7 +8,9 @@ export default function SiteHeader() {
       </div>
       <header className="top">
         <div className="wrap bar">
-          <AdminLogoTrigger />
+          <a className="mark" href="/">
+            review<span>then</span>go
+          </a>
           <nav aria-label="Primary">
             <a href="/flight-claims">Flight claims</a>
             <a href="/insurance-appeal">Insurance appeals</a>
@@ -18,7 +18,7 @@ export default function SiteHeader() {
             <a href="/articles">Articles</a>
           </nav>
           <a className="btn" href="/#alerts">
-            Change alerts
+            Get notified
           </a>
         </div>
       </header>
