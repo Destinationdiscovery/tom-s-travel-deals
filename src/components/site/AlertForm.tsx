@@ -29,12 +29,14 @@ export default function AlertForm({
     }
     setState("sending");
     try {
-      // Loaded only in the browser, when someone submits.
-      const { supabase } = await import("@/integrations/supabase/client");
-      const { error } = await supabase.functions.invoke("subscribe", {
-        body: { email: trimmed, source_slug: source, interests },
-      });
-      if (error) throw error;
+      // Sent straight to the owner's Google Form (no backend needed).
+      void source;
+      void interests;
+      const body = new URLSearchParams({ "entry.1220368946": trimmed });
+      await fetch(
+        "https://docs.google.com/forms/d/e/1FAIpQLSddiVYxqrivbBNB9Fb5XAsISZdvJFdANdpJwrFfhxrulflPXw/formResponse",
+        { method: "POST", mode: "no-cors", body },
+      );
       setState("done");
     } catch {
       setState("error");
