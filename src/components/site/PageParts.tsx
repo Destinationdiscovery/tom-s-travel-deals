@@ -68,6 +68,7 @@ export function Glossary({ title = "Terms used on this page.", terms }: { title?
 }
 
 const ALL: { path: string; name: string; text: string }[] = [
+  { path: "/before-you-fly", name: "Before you fly from Canada", text: "UK ETA, ETIAS, EES, connections and separate tickets in one checklist." },
   { path: "/flight-claims", name: "Flight claim guide", text: "Delayed or cancelled flight: rules, amounts, deadlines and wording." },
   { path: "/insurance-appeal", name: "Insurance appeal pack", text: "Travel insurer denied your costs: build an appeal from your policy wording." },
   { path: "/connection-check", name: "Connection check", text: "Changing planes in Schengen: how much time EES checks may need." },

@@ -174,6 +174,9 @@ function Home() {
               Get notified
             </a>
           </div>
+          <p className="hint">
+            Flying from Canada? Start with the <a href="/before-you-fly">five rules to check first</a>.
+          </p>
         </div>
 
         <div className="card latest">

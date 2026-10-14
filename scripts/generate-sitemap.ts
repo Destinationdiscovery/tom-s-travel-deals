@@ -12,6 +12,7 @@ const PAGES: { path: string; lastmod: string }[] = [
   { path: "/flight-claims", lastmod: "2026-10-02" },
   { path: "/insurance-appeal", lastmod: "2026-10-02" },
   { path: "/connection-check", lastmod: "2026-10-02" },
+  { path: "/before-you-fly", lastmod: "2026-10-14" },
   { path: "/about", lastmod: "2026-10-02" },
   { path: "/corrections", lastmod: "2026-10-14" },
   { path: "/disclaimer", lastmod: "2026-10-02" },

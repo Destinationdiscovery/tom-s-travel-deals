@@ -17,6 +17,7 @@ export default function SiteFooter() {
         <div>
           <h4>Tools</h4>
           <ul>
+            <li><a href="/before-you-fly">Before you fly from Canada</a></li>
             <li><a href="/flight-claims">Flight claim guide</a></li>
             <li><a href="/insurance-appeal">Insurance appeal pack</a></li>
             <li><a href="/connection-check">Connection check</a></li>
