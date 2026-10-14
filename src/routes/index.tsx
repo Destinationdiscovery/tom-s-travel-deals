@@ -86,20 +86,31 @@ const ENTRIES: Entry[] = [
     ],
   },
   {
-    title: "ETIAS",
-    body: "According to press reports, ETIAS, the travel authorisation for visa-exempt visitors to Europe, is scheduled for Q4 2026, with a fee of €20 (up from €7). We found no confirmed launch date in the sources we checked.",
+    title: "ETIAS, not yet live, no confirmed date",
+    body: "According to the Government of Canada (Europe travel page last modified 2 September 2026), ETIAS is not yet live and the EU will announce the specific date several months before launch, so there is nothing to apply for yet. According to press reports, the official ETIAS website dropped its fourth quarter 2026 target in July 2026, and signals point to 2027. We found no official launch date in the sources we checked, and could not read the official page's wording ourselves. The fee is reported as €20.",
     status: "unc",
-    checked: "01 Oct 2026",
+    checked: "14 Oct 2026",
     sources: [
-      {
-        label: "Business Travel News Europe",
-        href: "https://www.businesstravelnewseurope.com/Management/EU-names-date-for-launch-of-much-delayed-Entry-Exit-System",
-      },
-      {
-        label: "VisasNews",
-        href: "https://visasnews.com/en/despite-a-rocky-ees-rollout-etias-is-still-expected-by-late-2026/",
-      },
+      { label: "Government of Canada, travel advice for Europe", href: "https://travel.gc.ca/travelling/travelling-europe" },
       { label: "Official ETIAS portal", href: "https://travel-europe.europa.eu/etias" },
+      {
+        label: "iVisa news, 20 Jul 2026",
+        href: "https://www.ivisa.com/news/2026-07-20-eu-etias-launch-date-removed-website-delay",
+      },
+      { label: "Daily Hive, 10 Aug 2026", href: "https://dailyhive.com/canada/europe-union-etias-delayed" },
+    ],
+  },
+  {
+    title: "UK, electronic travel authorisation (ETA)",
+    body: "According to GOV.UK, you usually need an ETA rather than a visa if you are from Europe, the USA, Australia, Canada or certain other countries. It costs £20, covers travel to the UK, Jersey, Guernsey or the Isle of Man for up to 6 months, and does not guarantee entry. Babies and children need their own. GOV.UK warns that other websites may charge more. We did not find how long an approved ETA stays valid or how long approval takes on the pages we read.",
+    status: "ok",
+    checked: "14 Oct 2026",
+    sources: [
+      { label: "GOV.UK, electronic travel authorisation", href: "https://www.gov.uk/eta" },
+      {
+        label: "GOV.UK, ETA guidance",
+        href: "https://www.gov.uk/guidance/electronic-travel-authorisation-eta",
+      },
     ],
   },
 ];
@@ -114,7 +125,7 @@ export const Route = createFileRoute("/")({
       title: TITLE,
       description: DESCRIPTION,
       path: "/",
-      modified: "2026-10-02",
+      modified: "2026-10-14",
       css: toolsCss,
       faq: FAQ_HOME,
     }),
@@ -125,10 +136,10 @@ type Change = { d: string; t: string; status: Status; upcoming?: boolean };
 
 // Newest first. The hero shows the latest three that already happened; the Recent changes section shows all.
 const CHANGES: Change[] = [
-  { d: "Q4 2026", t: "ETIAS launch scheduled, date not yet confirmed", status: "unc", upcoming: true },
   { d: "13 Sep 2026", t: "Reports that nine countries may keep limiting EES biometric checks", status: "unc" },
   { d: "9 Sep 2026", t: "UK CAA guidance on compensation after the 8 September NATS disruption", status: "ok" },
   { d: "7 Sep 2026", t: "EES congestion pause ceased to apply, last day 6 September", status: "ok" },
+  { d: "Jul 2026", t: "Official ETIAS website dropped its Q4 2026 target, no new date confirmed", status: "unc" },
   { d: "10 Apr 2026", t: "EES fully operational at all Schengen external borders", status: "ok" },
 ];
 
@@ -372,7 +383,8 @@ function Home() {
               <span className="chip">Unconfirmed</span>
               <h3>ETIAS launch date</h3>
               <p>
-                Press reports say ETIAS is scheduled for the fourth quarter of 2026. We found no confirmed launch date.
+                The Government of Canada says ETIAS is not yet live and the EU will announce the date months ahead. We
+                found no confirmed launch date.
               </p>
               <AlertForm
                 source="notify-etias-date"

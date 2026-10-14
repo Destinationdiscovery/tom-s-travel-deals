@@ -53,6 +53,12 @@ const EURO_NEWS: Source = {
   label: "Euronews, 12 Aug 2026",
   href: "https://www.euronews.com/travel/2026/08/12/europes-new-border-system-is-causing-huge-airport-queues-as-ees-wait-times-double",
 };
+const GOV_CANADA_EUROPE: Source = {
+  label: "Government of Canada, travel advice for Europe",
+  href: "https://travel.gc.ca/travelling/travelling-europe",
+};
+const ETIAS_PORTAL: Source = { label: "Official ETIAS portal", href: "https://travel-europe.europa.eu/etias" };
+const GOV_UK_ETA: Source = { label: "GOV.UK, electronic travel authorisation", href: "https://www.gov.uk/eta" };
 
 // ---------------------------------------------------------------------------
 // Quick answers: the short facts shown right under each page heading.
@@ -97,8 +103,18 @@ export const FAQ_HOME: FaqItem[] = [
   },
   {
     q: "What is ETIAS and when does it start?",
-    a: "According to press reports, ETIAS, the pre-travel authorisation for visa-exempt visitors to Europe, is scheduled for the fourth quarter of 2026 with a fee of €20. We found no confirmed launch date in the sources we checked.",
-    sources: [{ label: "Official ETIAS portal", href: "https://travel-europe.europa.eu/etias" }],
+    a: "According to the Government of Canada, whose Europe travel page was last modified on 2 September 2026, ETIAS is not yet live, and the EU will announce the specific date several months before launch. We found no confirmed launch date. Press reports say the official ETIAS website dropped its fourth quarter 2026 target in July 2026 and point to 2027, which we have not confirmed from an official page.",
+    sources: [GOV_CANADA_EUROPE, ETIAS_PORTAL],
+  },
+  {
+    q: "Do Canadians need ETIAS right now?",
+    a: "No. According to the Government of Canada, ETIAS is not yet live, so there is nothing to apply for today. Once it is in place, Canadians will need it for short stays in Schengen countries and Cyprus. The Government of Canada also warns about fraudulent websites that claim to sell ETIAS authorisations.",
+    sources: [GOV_CANADA_EUROPE],
+  },
+  {
+    q: "Do Canadians need a UK ETA?",
+    a: "According to GOV.UK, you usually need an electronic travel authorisation rather than a visa if you are from Canada, the USA, Australia, Europe or certain other countries. An ETA costs £20 and lets you travel to the UK for up to 6 months. GOV.UK warns that other websites may charge more.",
+    sources: [GOV_UK_ETA],
   },
   {
     q: "Where can I find flight delay compensation rules?",
@@ -240,7 +256,7 @@ export const GLOSSARY_EES: Term[] = [
   { term: "Schengen Area", meaning: "The 29 European countries without internal border checks. EES applies at its external borders." },
   { term: "Transit area", meaning: "The part of an airport you stay in when changing planes without a border check." },
   { term: "Minimum connection time", meaning: "The shortest time an airline will sell between two flights. It can be too short on a busy day." },
-  { term: "ETIAS", meaning: "A separate pre-travel authorisation for visa-exempt visitors to Europe, scheduled for late 2026." },
+  { term: "ETIAS", meaning: "A separate pre-travel authorisation for visa-exempt visitors to Europe. According to the Government of Canada it is not yet live, and no launch date is confirmed." },
 ];
 
 export const GLOSSARY_APPEAL: Term[] = [

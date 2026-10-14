@@ -8,12 +8,12 @@ import { resolve, dirname } from "path";
 
 const SITE = "https://www.reviewthengo.com";
 const PAGES: { path: string; lastmod: string }[] = [
-  { path: "/", lastmod: "2026-10-02" },
+  { path: "/", lastmod: "2026-10-14" },
   { path: "/flight-claims", lastmod: "2026-10-02" },
   { path: "/insurance-appeal", lastmod: "2026-10-02" },
   { path: "/connection-check", lastmod: "2026-10-02" },
   { path: "/about", lastmod: "2026-10-02" },
-  { path: "/corrections", lastmod: "2026-10-02" },
+  { path: "/corrections", lastmod: "2026-10-14" },
   { path: "/disclaimer", lastmod: "2026-10-02" },
   { path: "/privacy-policy", lastmod: "2026-10-02" },
 ];

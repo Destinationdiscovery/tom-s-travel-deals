@@ -1,25 +1,30 @@
 ---
 title: ETIAS: what we know and what is unconfirmed
-description: ETIAS is the planned travel authorisation for visa-exempt visitors to Europe. Here is what the sources say about the fee and the date, and what they do not.
+description: ETIAS has no confirmed launch date. The Government of Canada says it is not yet live, and press reports say the official site dropped its 2026 target.
 kind: update
 published: 2026-10-02
-checked: 2026-10-02
+checked: 2026-10-14
 status: unc
 featured: yes
 tool: /#ledger | See the rules ledger
-source: Business Travel News Europe | https://www.businesstravelnewseurope.com/Management/EU-names-date-for-launch-of-much-delayed-Entry-Exit-System
-source: VisasNews | https://visasnews.com/en/despite-a-rocky-ees-rollout-etias-is-still-expected-by-late-2026/
+source: Government of Canada, travel advice for Europe | https://travel.gc.ca/travelling/travelling-europe
 source: Official ETIAS portal | https://travel-europe.europa.eu/etias
+source: iVisa news, 20 Jul 2026 | https://www.ivisa.com/news/2026-07-20-eu-etias-launch-date-removed-website-delay
+source: Daily Hive, 10 Aug 2026 | https://dailyhive.com/canada/europe-union-etias-delayed
 source: European Commission, EES fully operational | https://home-affairs.ec.europa.eu/news/entryexit-system-ees-fully-operational-2026-04-10_en
 ---
 
 ## The short version
 
-According to press reports, ETIAS, the travel authorisation for visa-exempt visitors to Europe, is scheduled for the fourth quarter of 2026. The same reports give a fee of €20, up from the €7 first announced. We found no confirmed launch date in the sources we checked, so the rules ledger marks ETIAS as Unconfirmed.
+According to the Government of Canada (its Europe travel page was last modified on 2 September 2026), ETIAS is not yet live, and the EU will announce the specific date several months before launch. We found no confirmed launch date in the sources we checked on 14 October 2026, so the rules ledger marks ETIAS as Unconfirmed.
+
+## What changed since 2 October
+
+On 2 October we wrote that press reports expected a fourth quarter 2026 launch. That is out of date. According to iVisa, the official ETIAS website dropped its "last quarter of 2026" target in July 2026 without a press release, and now says ETIAS is not in operation and no applications are collected. iVisa reports that the European Commission has not issued a formal delay statement, and that signals point to 2027. We could not load the official page ourselves to read the wording, so treat the 2027 figure as a press expectation, not an official date. We logged the fix on the corrections page.
 
 ## What ETIAS is
 
-ETIAS is an authorisation for visitors who do not need a visa to enter Europe. It is something you obtain before you travel. The official portal is travel-europe.europa.eu/etias.
+ETIAS is an authorisation you would obtain before travelling, for visitors who do not need a visa for Europe. According to the Government of Canada, Canadians will need it for short stays in Schengen countries and Cyprus once it is in place. For the plain answer for Canadians, see our guide on whether Canadians need ETIAS.
 
 ## ETIAS is not EES
 
@@ -27,10 +32,12 @@ They are two different systems. ETIAS is an authorisation you obtain before you 
 
 ## What we could not confirm
 
-- The firm launch date. The sources say the fourth quarter of 2026, and none of them gave a confirmed day.
-- How long an authorisation lasts, and how long approval takes. We did not find these in a source we could verify, so we do not state them.
+- A launch date. No source we checked gave a confirmed one.
+- The fee. According to Daily Hive, it is €20 once launched, but we did not find that on an official page we could read.
+- How long approval takes. We did not find this in a source we could verify, so we do not state it.
 
 ## What to do now
 
-- Treat the official portal as the place to apply once applications open. We have not checked the many other sites that offer ETIAS services, so we do not vouch for them.
+- There is nothing to apply for yet. According to the Government of Canada, be cautious of fraudulent websites claiming to sell ETIAS authorisations.
+- Treat the official portal at travel-europe.europa.eu/etias as the place to apply once applications open.
 - Check the rules ledger. We change the date and the status only after we re-check the sources.
