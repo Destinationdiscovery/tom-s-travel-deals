@@ -13,6 +13,7 @@ import { reportLovableError } from "@/lib/lovable-error-reporting";
 import { OG_IMAGE, OG_IMAGE_ALT, siteGraph } from "@/lib/seo";
 import SiteHeader from "@/components/site/SiteHeader";
 import SiteFooter from "@/components/site/SiteFooter";
+import PreferredSourceBadge from "@/components/site/PreferredSourceBadge";
 import appCss from "../styles.css?url";
 
 const SITE_TITLE = "Flight Compensation, EES and Insurance Rules | reviewthengo";
@@ -72,8 +73,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         async: true,
         crossOrigin: "anonymous",
       },
-      // Google Preferred Sources button library (renders the footer button)
-      { src: "https://news.google.com/swg/js/v1/publisher.js", async: true },
+      // Google Preferred Sources library in manual mode. Our own footer button and
+      // floating badge trigger the flow through src/lib/preferred-source.ts.
+      {
+        src: "https://news.google.com/swg/js/v1/publisher.js",
+        async: true,
+        ...({ "preferred-sources-control": "manual" } as Record<string, string>),
+      },
       {
         type: "application/ld+json",
         children: JSON.stringify(siteGraph),
@@ -123,6 +129,7 @@ function RootComponent() {
         <Outlet />
       </div>
       <SiteFooter />
+      <PreferredSourceBadge />
     </QueryClientProvider>
   );
 }
