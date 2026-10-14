@@ -1,4 +1,5 @@
 import { CONTACT_EMAIL } from "@/lib/site";
+import PreferredSourceButton from "@/components/site/PreferredSourceButton";
 
 export default function SiteFooter() {
   return (
@@ -41,6 +42,7 @@ export default function SiteFooter() {
           </ul>
         </div>
       </div>
+      <PreferredSourceButton />
     </footer>
   );
 }

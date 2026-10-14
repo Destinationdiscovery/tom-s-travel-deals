@@ -72,6 +72,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         async: true,
         crossOrigin: "anonymous",
       },
+      // Google Preferred Sources button library (renders the footer button)
+      { src: "https://news.google.com/swg/js/v1/publisher.js", async: true },
       {
         type: "application/ld+json",
         children: JSON.stringify(siteGraph),
