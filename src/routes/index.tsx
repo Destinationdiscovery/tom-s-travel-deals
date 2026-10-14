@@ -30,7 +30,7 @@ const ENTRIES: Entry[] = [
     title: "EES, congestion pause ended",
     body: "According to Regulation (EU) 2025/1534, for a limited time after the rollout countries could pause biometric registration at a named crossing for up to six hours when waits were excessive. That power ran 90 days plus an automatic 60-day extension after the rollout ended on 9 April 2026. By our count the last day was 6 September 2026, and it ceased from 7 September. The regulation has no mechanism to extend it.",
     status: "ok",
-    checked: "02 Oct 2026",
+    checked: "14 Oct 2026",
     sources: [
       { label: "Regulation (EU) 2025/1534, EUR-Lex", href: "https://eur-lex.europa.eu/eli/reg/2025/1534/oj" },
       {
@@ -41,15 +41,16 @@ const ENTRIES: Entry[] = [
   },
   {
     title: "EES, reports of continued limits in nine countries",
-    body: "According to press reports that trace to a single Times report, France, Belgium, the Netherlands, Germany, Greece, Malta, Portugal, Italy and Switzerland were allowed to keep limiting biometric checks after the deadline, with no new date. We found no official statement or legal instrument confirming it, and the European Commission has not commented.",
+    body: "According to press reports that trace to a single Times report, France, Belgium, the Netherlands, Germany, Greece, Malta, Portugal, Italy and Switzerland were allowed to keep limiting biometric checks after the deadline, with no new date. The European Commission has declined to comment, and we found no EU-level statement or legal instrument confirming it. France's interior ministry has said its own flexibility around pre-registration kiosks and tablets lasts until the end of the year, as reported by Connexion France.",
     status: "unc",
-    checked: "02 Oct 2026",
+    checked: "14 Oct 2026",
     sources: [
       {
         label: "Connexion France",
         href: "https://www.connexionfrance.com/news/france-listed-among-countries-to-delay-full-ees-border-check-rollout/814138",
       },
       { label: "Your Mileage May Vary", href: "https://yourmileagemayvary.com/2026/09/15/europe-ees-border-checks-inconsistent/" },
+      { label: "Biometric Update, 14 Sep 2026", href: "https://www.biometricupdate.com/202609/eu-lets-9-schengen-countries-delay-full-ees-biometric-checks" },
       {
         label: "Remote Work Europe",
         href: "https://remoteworkeurope.eu/news/2026/ees-biometric-derogation-expired-commission-silent/",
@@ -60,7 +61,7 @@ const ENTRIES: Entry[] = [
     title: "EES, Entry/Exit System",
     body: "According to the European Commission, EES became fully operational across all Schengen countries on 10 April 2026, after a progressive start that began on 12 October 2025. It registers non-EU travellers on short stays, including fingerprints and a facial image, in place of passport stamps.",
     status: "ok",
-    checked: "02 Oct 2026",
+    checked: "14 Oct 2026",
     sources: [
       {
         label: "European Commission, 10 Apr 2026",
@@ -75,13 +76,17 @@ const ENTRIES: Entry[] = [
   },
   {
     title: "UK, CAA guidance on the NATS disruption",
-    body: "According to the UK Civil Aviation Authority (9 September 2026), a technical issue at NATS on 8 September led to delays and the cancellation of hundreds of UK flights. The CAA considers delays and cancellations directly caused by it likely to be extraordinary circumstances, so passengers are unlikely to be entitled to compensation for those. Airlines must still look after passengers, offer a refund or re-routing, and promptly reimburse reasonable costs when passengers arrange their own care. The CAA calls this guidance only, says each case turns on its facts, and says passengers can still claim, including in court. It also published a statement on a further disruption on 21 September, which we have not summarised.",
+    body: "According to the UK Civil Aviation Authority (9 September 2026), a technical issue at NATS on 8 September led to delays and the cancellation of hundreds of UK flights. The CAA considers delays and cancellations directly caused by it likely to be extraordinary circumstances, so passengers are unlikely to be entitled to compensation for those. Airlines must still look after passengers, offer a refund or re-routing, and promptly reimburse reasonable costs when passengers arrange their own care. The CAA calls this guidance only, says each case turns on its facts, and says passengers can still claim, including in court. A second CAA statement on 21 September 2026, about a technical issue at NATS Prestwick, says the same: delays and cancellations caused by it, and some knock-on ones, are likely extraordinary circumstances, so passengers are unlikely to be entitled to compensation for them. Airlines must still offer a refund or re-routing, provide meals, refreshments and hotel in proportion to the delay, and promptly reimburse reasonable costs if they cannot.",
     status: "ok",
-    checked: "02 Oct 2026",
+    checked: "14 Oct 2026",
     sources: [
       {
         label: "UK Civil Aviation Authority, 9 Sep 2026",
         href: "https://www.caa.co.uk/newsroom/news/caa-statement-on-passenger-compensation-following-nats-disruption-on-8-september/",
+      },
+      {
+        label: "UK Civil Aviation Authority, 21 Sep 2026",
+        href: "https://www.caa.co.uk/newsroom/news/caa-statement-on-passenger-compensation-following-nats-disruption-on-21-september/",
       },
     ],
   },
@@ -136,6 +141,8 @@ type Change = { d: string; t: string; status: Status; upcoming?: boolean };
 
 // Newest first. The hero shows the latest three that already happened; the Recent changes section shows all.
 const CHANGES: Change[] = [
+  { d: "14 Oct 2026", t: "ETIAS has no confirmed launch date, Government of Canada says it is not yet live", status: "unc" },
+  { d: "21 Sep 2026", t: "UK CAA second statement on a NATS fault, same guidance on compensation and care", status: "ok" },
   { d: "13 Sep 2026", t: "Reports that nine countries may keep limiting EES biometric checks", status: "unc" },
   { d: "9 Sep 2026", t: "UK CAA guidance on compensation after the 8 September NATS disruption", status: "ok" },
   { d: "7 Sep 2026", t: "EES congestion pause ceased to apply, last day 6 September", status: "ok" },
@@ -200,7 +207,7 @@ function Home() {
               <div className="stamp" aria-hidden="true">
                 Checked
                 <br />
-                02 Oct 2026
+                14 Oct 2026
               </div>
               <h2>Rules ledger</h2>
               <table>
@@ -364,8 +371,8 @@ function Home() {
               <span className="chip">Unconfirmed</span>
               <h3>EES, nine countries limiting checks</h3>
               <p>
-                Press reports say nine countries may still limit biometric checks after the deadline. We found no
-                official statement.
+                Press reports say nine countries may still limit biometric checks after the deadline. France's interior
+                ministry confirmed its own flexibility to year end, but we found no EU-level statement.
               </p>
               <AlertForm
                 source="notify-ees-limits"

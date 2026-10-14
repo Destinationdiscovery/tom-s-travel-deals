@@ -98,7 +98,7 @@ export const FAQ_HOME: FaqItem[] = [
   },
   {
     q: "Is the EES biometric check still required?",
-    a: "According to Regulation (EU) 2025/1534, the power to pause biometric registration because of congestion ceased to apply on 7 September 2026 (last day 6 September). Press reports say nine countries may still limit checks. We could not confirm that from an official source, so it is marked Unconfirmed.",
+    a: "According to Regulation (EU) 2025/1534, the power to pause biometric registration because of congestion ceased to apply on 7 September 2026 (last day 6 September). Press reports say nine countries may still limit checks. We could not confirm that at EU level, so it is marked Unconfirmed. France's interior ministry has said its own flexibility around pre-registration kiosks and tablets lasts until the end of the year.",
     sources: [EUR_LEX, COMMISSION_EES],
   },
   {
@@ -228,7 +228,7 @@ export const FAQ_CONNECTION: FaqItem[] = [
   },
   {
     q: "Can countries still pause biometric checks when queues are long?",
-    a: "According to Regulation (EU) 2025/1534, the power to pause biometric registration for up to six hours at a congested crossing ceased to apply on 7 September 2026. Press reports say nine countries may still limit checks, but we could not confirm that officially.",
+    a: "According to Regulation (EU) 2025/1534, the power to pause biometric registration for up to six hours at a congested crossing ceased to apply on 7 September 2026. Press reports say nine countries may still limit checks, but we could not confirm that at EU level. France's interior ministry has said its own flexibility around pre-registration kiosks and tablets lasts until the end of the year.",
     sources: [EUR_LEX],
   },
   {

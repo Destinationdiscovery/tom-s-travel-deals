@@ -3,7 +3,7 @@ title: EES at the border: what changed in 2026
 description: How EES works, where the check happens, what the reported queues were, and what happened when the congestion pause ended in September 2026.
 kind: update
 published: 2026-10-02
-checked: 2026-10-02
+checked: 2026-10-14
 status: ok
 tool: /connection-check | Open the connection check
 source: European Commission, EES fully operational | https://home-affairs.ec.europa.eu/news/entryexit-system-ees-fully-operational-2026-04-10_en
@@ -11,6 +11,8 @@ source: Regulation (EU) 2025/1534, EUR-Lex | https://eur-lex.europa.eu/eli/reg/2
 source: Austrian Interior Ministry, EES | https://www.bmi.gv.at/202/Fremdenpolizei_und_Grenzkontrolle/Entry_Exit_System/start_en.aspx
 source: Euronews, 12 Aug 2026 | https://www.euronews.com/travel/2026/08/12/europes-new-border-system-is-causing-huge-airport-queues-as-ees-wait-times-double
 source: Remote Work Europe, 13 Sep 2026 | https://remoteworkeurope.eu/news/2026/ees-biometric-derogation-expired-commission-silent/
+source: Biometric Update, 14 Sep 2026 | https://www.biometricupdate.com/202609/eu-lets-9-schengen-countries-delay-full-ees-biometric-checks
+source: Connexion France | https://www.connexionfrance.com/news/france-listed-among-countries-to-delay-full-ees-border-check-rollout/814138
 ---
 
 ## The short version
@@ -31,7 +33,9 @@ According to Regulation (EU) 2025/1534, for a limited time after the rollout cou
 
 ## What is not confirmed
 
-According to press reports that trace to a single Times report, nine countries were allowed to keep limiting biometric checks after the deadline. They are France, Belgium, the Netherlands, Germany, Greece, Malta, Portugal, Italy and Switzerland. We found no official statement or legal instrument confirming this, and the Commission has not commented, so we label it Unconfirmed.
+According to press reports that trace to a single Sunday Times report, nine countries were allowed to keep limiting biometric checks after the deadline. They are France, Belgium, the Netherlands, Germany, Greece, Malta, Portugal, Italy and Switzerland. According to Biometric Update (14 September 2026), the reports rest on informal approval, with no new EU-level deadline, and the Commission declined to comment. Remote Work Europe found no successor legal instrument.
+
+The one official statement we found covers France only. According to Connexion France, as relayed by Biometric Update, France's interior ministry said flexibility around pre-registration kiosks and tablets will last until the end of the year. We found no EU-level statement confirming the wider claim, so we label it Unconfirmed.
 
 ## What it means for a connection
 
