@@ -10,6 +10,8 @@ export type PortfolioItem = {
   domain: string;
   url: string;
   image: string;
+  /** Used automatically if the primary image fails to load. */
+  fallbackImage?: string;
   description: string;
   category: PortfolioCategory;
 };
@@ -32,7 +34,8 @@ export const PORTFOLIO: PortfolioItem[] = [
     name: "BrantfordTopRealtor.com",
     domain: "brantfordtoprealtor.com",
     url: "https://brantfordtoprealtor.com",
-    image: brantfordHero.url,
+    image: "https://screenshot2.lovable.dev/lovp_2nadybypep99ks4cmq72kd35qn/b1c314e766b2ae6ab0cf43c1172389be_1791989235920.png",
+    fallbackImage: brantfordHero.url,
     description:
       "Brantford realtor site with MLS listings, a home valuation tool and a local SEO content plan. Built for Jake Laracy, a Silver Community Votes 2026 winner.",
     category: "Real Estate",
@@ -59,7 +62,8 @@ export const PORTFOLIO: PortfolioItem[] = [
     name: "ReviewThenGo.com",
     domain: "reviewthengo.com",
     url: "https://www.reviewthengo.com",
-    image: reviewThenGoHero.url,
+    image: "https://screenshot2.lovable.dev/lovp_04nemxjagx8vsvc0p2z867r6g5/7f697e77baef4405dc50bfd0bf2f2f09_1792023603326.png",
+    fallbackImage: reviewThenGoHero.url,
     description:
       "Free, sourced entry rules and tools for Canadians flying to the UK and Europe. Every rule shows its source and the day it was last checked.",
     category: "Web Apps",
