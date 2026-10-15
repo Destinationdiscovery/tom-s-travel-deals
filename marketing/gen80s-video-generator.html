@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TikTok Video Generator</title>
+<style>
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; min-height:100vh; background:#080810; color:#fff;
+    font-family:'Segoe UI',system-ui,sans-serif;
+    display:flex; flex-direction:column; align-items:center;
+    padding:28px 20px 60px;
+  }
+  .eyebrow{ font-size:11px; letter-spacing:4px; color:#555; text-transform:uppercase; margin-bottom:6px; text-align:center; }
+  .handle{ font-size:28px; font-weight:900; letter-spacing:-1px; text-align:center; margin-bottom:18px; }
+
+  .picker-label{ font-size:10px; color:#444; letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; text-align:center; }
+  .picker-row{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-bottom:14px; max-width:600px; }
+  .pill{ padding:7px 15px; border-radius:20px; border:none; cursor:pointer; font-size:12px; font-weight:700; background:#ffffff10; color:#666; font-family:inherit; }
+  .pill.active{ color:#fff; }
+  .pill.theme.active{ color:#000; }
+
+  .input-row{ display:flex; gap:8px; margin-bottom:12px; width:100%; max-width:480px; }
+  .input-row input{ flex:1; padding:12px 16px; border-radius:10px; outline:none; border:1px solid #ffffff20; background:#ffffff0a; color:#fff; font-size:14px; }
+  .gen-btn{ padding:12px 22px; border-radius:10px; border:none; color:#000; font-weight:800; font-size:14px; cursor:pointer; white-space:nowrap; }
+  .gen-btn:disabled{ cursor:not-allowed; background:#333 !important; }
+
+  .error-box{ display:none; color:#ff5555; margin-bottom:16px; font-size:13px; text-align:center; max-width:420px; }
+
+  .chips-wrap{ text-align:center; margin-bottom:18px; }
+  .chips-wrap .lbl{ font-size:11px; color:#3a3a4a; margin-bottom:12px; letter-spacing:1px; text-transform:uppercase; }
+  .chips{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; max-width:500px; }
+  .chip{ padding:7px 13px; border-radius:20px; border:1px solid #ffffff12; background:#ffffff07; color:#777; cursor:pointer; font-size:12px; font-family:inherit; }
+
+  .main-grid{ display:none; width:100%; max-width:920px; gap:24px; align-items:flex-start; flex-wrap:wrap; justify-content:center; }
+
+  .slides-col{ flex:1 1 420px; min-width:320px; max-width:480px; }
+  .tts-hint{ font-size:12px; color:#777; background:#ffffff08; border:1px solid #ffffff14; border-radius:10px; padding:10px 14px; margin-bottom:14px; line-height:1.6; }
+  .tts-hint a{ color:#7cc4ff; }
+
+  .slide-card{ background:#0d0d16; border:1px solid #ffffff12; border-radius:14px; padding:14px 16px; margin-bottom:12px; }
+  .slide-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .slide-tag{ font-size:11px; font-weight:800; letter-spacing:1px; text-transform:uppercase; }
+  .slide-remove{ background:none; border:none; color:#555; cursor:pointer; font-size:14px; }
+  .slide-text{ width:100%; min-height:54px; padding:10px; border-radius:8px; border:1px solid #ffffff18; background:#ffffff08; color:#fff; font-size:13px; font-family:inherit; resize:vertical; margin-bottom:10px; }
+  .slide-row{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .slide-btn{ padding:7px 12px; border-radius:8px; border:1px solid #ffffff18; background:#ffffff0a; color:#aaa; font-size:11.5px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; }
+  .slide-btn input[type=file]{ display:none; }
+  .slide-thumb{ width:26px; height:26px; border-radius:5px; object-fit:cover; }
+  .audio-badge{ font-size:11px; color:#5c5; background:#0d1a0d; border:1px solid #2a4a2a; padding:5px 10px; border-radius:8px; }
+  .add-slide-btn{ width:100%; padding:12px; border-radius:10px; border:1.5px dashed #ffffff20; background:transparent; color:#666; cursor:pointer; font-size:13px; font-weight:600; }
+
+  .preview-col{ flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:14px; }
+  .phone-frame{ padding:10px; background:#111118; border-radius:40px; border:1.5px solid #ffffff12; position:relative; }
+  .phone-notch{ position:absolute; top:20px; left:50%; transform:translateX(-50%); width:70px; height:5px; background:#1a1a22; border-radius:3px; z-index:20; }
+  #stageCanvas{ display:block; border-radius:30px; }
+
+  .actions-row{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+  .act-btn{ padding:10px 20px; border-radius:9px; border:1px solid #ffffff20; background:#ffffff08; color:#aaa; cursor:pointer; font-size:13px; font-weight:600; font-family:inherit; }
+  .dl-btn{ padding:10px 24px; border-radius:9px; border:none; cursor:pointer; font-size:13px; font-weight:800; min-width:170px; font-family:inherit; }
+  .dl-btn:disabled{ background:#2a2a2a !important; color:#666 !important; cursor:not-allowed; }
+
+  .progress-track{ display:none; width:280px; height:4px; background:#222; border-radius:2px; }
+  .progress-fill{ width:0%; height:100%; border-radius:2px; transition:width .2s; }
+
+  .ready-panel{ display:none; flex-direction:column; align-items:center; gap:10px; padding:16px 20px; background:#0d1a0d; border:1px solid #2a4a2a; border-radius:14px; max-width:320px; text-align:center; }
+  .ready-panel .ok{ font-size:13px; color:#5c5; font-weight:700; }
+  .ready-panel a{ padding:12px 28px; border-radius:10px; border:none; color:#000; font-size:14px; font-weight:900; text-decoration:none; display:block; width:100%; box-sizing:border-box; }
+  .ready-panel .fmt-note{ font-size:11px; color:#444; line-height:1.5; }
+
+  .total-len{ font-size:11px; color:#555; text-align:center; }
+  .speed-row{ display:flex; align-items:center; gap:8px; font-size:11px; color:#888; }
+  .speed-row input[type=range]{ width:110px; accent-color:#00f5ff; }
+  .speed-val{ min-width:32px; font-weight:700; color:#aaa; }
+
+  .hook-panel{ display:none; width:100%; max-width:640px; margin-bottom:18px; background:#0d0d16; border:1px solid #00c87a33; border-radius:14px; padding:12px 14px; }
+  .hook-panel summary{ cursor:pointer; font-size:12px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:#00c87a; }
+  .hook-note{ font-size:11px; color:#777; line-height:1.5; margin:8px 0 10px; }
+  .lvl-row{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+  .lvl-pill{ padding:5px 11px; border-radius:16px; border:1px solid #ffffff18; background:#ffffff08; color:#888; font-size:11px; font-weight:700; cursor:pointer; font-family:inherit; }
+  .lvl-pill.active{ background:#00c87a; color:#000; border-color:#00c87a; }
+  .hook-list{ display:flex; flex-direction:column; gap:6px; max-height:300px; overflow:auto; }
+  .hook-btn{ text-align:left; padding:9px 11px; border-radius:9px; border:1px solid #ffffff12; background:#ffffff06; color:#ccc; font-size:12px; line-height:1.4; cursor:pointer; font-family:inherit; }
+  .hook-btn:hover{ border-color:#00c87a88; }
+  .hook-btn b{ color:#00c87a; margin-right:6px; }
+  .hook-btn i{ color:#666; font-style:normal; font-size:10.5px; display:block; margin-top:2px; }
+  .caption-box{ display:none; width:100%; max-width:320px; }
+  .caption-box .lbl{ font-size:10px; color:#555; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:6px; }
+  .caption-box textarea{ width:100%; min-height:150px; padding:10px; border-radius:8px; border:1px solid #ffffff18; background:#ffffff08; color:#fff; font-size:12px; font-family:inherit; resize:vertical; margin-bottom:8px; }
+  .lvl-help{ font-size:11px; color:#666; text-align:center; max-width:520px; line-height:1.5; margin:-6px 0 14px; }
+</style>
+</head>
+<body>
+
+  <div class="eyebrow">TikTok Video Generator</div>
+  <div class="handle" id="handleEl">@gen80s</div>
+
+  <div class="picker-label">Brand</div>
+  <div class="picker-row" id="brandPicker"></div>
+
+  <div class="picker-label">Style</div>
+  <div class="picker-row" id="themePicker"></div>
+
+  <div class="picker-label">Awareness level (who you are talking to)</div>
+  <div class="picker-row" id="levelPicker"></div>
+  <div class="lvl-help" id="levelHelp"></div>
+
+  <div class="input-row">
+    <input id="topicInput" placeholder="e.g. 5 hidden gems in Rome">
+    <button class="gen-btn" id="generateBtn" type="button">Generate</button>
+  </div>
+
+  <div class="error-box" id="errorBox"></div>
+
+  <div class="chips-wrap" id="chipsWrap">
+    <div class="lbl">Try these</div>
+    <div class="chips" id="chips"></div>
+  </div>
+
+  <details class="hook-panel" id="hookPanel" open>
+    <summary id="hookTitle">ReviewThenGo hook library (20 hooks, sourced)</summary>
+    <div class="hook-note" id="hookNote">Pick a hook to build the slides: hook, fact, source, then the site link. Facts were checked on 14 Oct 2026 and match reviewthengo.com. Re-check anything a few weeks old before you post. Link in your bio should go to reviewthengo.com/before-you-fly.</div>
+    <div class="lvl-row" id="lvlRow"></div>
+    <div class="hook-list" id="hookList"></div>
+  </details>
+
+  <div class="main-grid" id="mainGrid">
+    <div class="slides-col">
+      <div class="tts-hint">
+        For each slide: click <b>Copy text</b>, paste it into a free TTS site like
+        <a href="https://ttsmp3.com" target="_blank" rel="noopener">ttsmp3.com</a>, download the mp3,
+        then click <b>Upload MP3</b> on that same slide. Slides without audio just hold for 3 seconds, silent.
+      </div>
+      <div id="slidesList"></div>
+      <button class="add-slide-btn" id="addSlideBtn" type="button">+ Add slide</button>
+    </div>
+
+    <div class="preview-col">
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <canvas id="stageCanvas" width="390" height="692"></canvas>
+      </div>
+      <div class="total-len" id="totalLen"></div>
+
+      <div class="speed-row">
+        <span class="speed-label">Text speed</span>
+        <input type="range" id="speedSlider" min="0.5" max="2" step="0.1" value="1">
+        <span class="speed-val" id="speedVal">1.0x</span>
+      </div>
+
+      <div class="actions-row">
+        <button class="act-btn primary" id="playBtn" type="button">▶ Play preview</button>
+        <button class="act-btn" id="newBtn" type="button">← New</button>
+      </div>
+
+      <button class="dl-btn" id="exportBtn" type="button">⬇ Export Video</button>
+      <div class="progress-track" id="progressTrack"><div class="progress-fill" id="progressFill"></div></div>
+
+      <div class="ready-panel" id="readyPanel">
+        <div class="ok">✓ Your video is ready!</div>
+        <a id="readyLink" download="" target="_blank" rel="noopener">⬇ Save Video to device</a>
+        <div class="fmt-note" id="fmtNote"></div>
+      </div>
+
+      <div class="caption-box" id="captionBox">
+        <div class="lbl">Caption (edit, then copy)</div>
+        <textarea id="captionText"></textarea>
+        <button class="act-btn" id="copyCaptionBtn" type="button">📋 Copy caption</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+const W = 390, H = 692;
+let uidCounter = 0;
+const uid = () => 'slide_' + (++uidCounter) + '_' + Math.random().toString(36).slice(2,7);
+
+const BRANDS = {
+  gen80s:           { name:"gen80s",          label:"gen80s lifehack",  handle:"@gen80s",           tagline:"follow for more lifehacks", color:"#00f5ff", prompt:"You write TikTok lifehack scripts for @gen80s (100k+ followers). Focus on tech, life, and productivity hacks." },
+  reviewthengo:     { name:"ReviewThenGo",    label:"reviewthengo tip", handle:"@reviewthengo",     tagline:"follow for travel rules",     color:"#00c87a", prompt:"RTG_PROMPT_PLACEHOLDER" },
+  keywordarchitect: { name:"KeywordArchitect",label:"keywordarchitect", handle:"@keywordarchitect", tagline:"follow for SEO tips",        color:"#a78bfa", prompt:"You write TikTok SEO and digital marketing scripts for @KeywordArchitect, an AI keyword clustering tool. Focus on SEO hacks, Google Ads tips, keyword strategy." },
+  unlabeled:        { name:"No Label",        label:"",                 handle:"",                  tagline:"",                          color:"#ff6b9d", prompt:"You write punchy, engaging TikTok tip scripts on any topic. Make content that is genuinely useful and surprising." },
+};
+const THEMES = {
+  cyber:  { name:"⚡ Cyber",  bg1:"#0a0a0f", bg2:"#0d1117", accent:"#00f5ff", accent2:"#ff006e", text:"#ffffff", sub:"#8892a4" },
+  fire:   { name:"🔥 Fire",   bg1:"#1a0500", bg2:"#2d0a00", accent:"#ff6b00", accent2:"#ffd700", text:"#ffffff", sub:"#ffaa66" },
+  neon:   { name:"💜 Neon",   bg1:"#05001a", bg2:"#0a0028", accent:"#bf00ff", accent2:"#00ff9f", text:"#ffffff", sub:"#aa88cc" },
+  clean:  { name:"✨ Clean",  bg1:"#f0f4ff", bg2:"#e8edff", accent:"#2563eb", accent2:"#f59e0b", text:"#0f172a", sub:"#64748b" },
+  sunset: { name:"🌅 Sunset", bg1:"#1a0020", bg2:"#2d0535", accent:"#ff6b9d", accent2:"#ffb347", text:"#ffffff", sub:"#cc88aa" },
+  matrix: { name:"🟢 Matrix", bg1:"#000a00", bg2:"#001200", accent:"#00ff41", accent2:"#00cc33", text:"#ccffcc", sub:"#448844" },
+};
+const CHIPS_BY_BRAND = {
+  gen80s:           ["Android hidden features","iPhone battery tricks","Gmail shortcuts","Chrome hacks","Windows shortcuts","WhatsApp tricks"],
+  reviewthengo:     ["UK ETA for Canadians","ETIAS is not live yet","Separate tickets risk","Flight delay claim in Canada","Travel insurance claim denied","Short connection in Schengen"],
+  keywordarchitect: ["Google Ads keyword tips","SEO in 2025","Long tail keywords","Keyword clustering","Negative keywords","Quality Score hacks"],
+  unlabeled:        ["Morning productivity","Social media growth","Save money fast","Sleep better tonight","Focus and deep work","Build a habit in 30 days"],
+};
+
+
+/* ---------- ReviewThenGo hook library (awareness levels 1 to 5) ----------
+   Every fact below was checked on 14 Oct 2026 and is on reviewthengo.com with its source.
+   Edit HOOKS_CHECKED and the facts together when you re-verify. No em dashes. */
+const HOOKS_CHECKED = "14 Oct 2026";
+const LEVELS = {
+  1:{ name:"Unaware",        emoji:"⚠️" },
+  2:{ name:"Problem aware",  emoji:"😤" },
+  3:{ name:"Solution aware", emoji:"🧭" },
+  4:{ name:"Product aware",  emoji:"✅" },
+  5:{ name:"Most aware",     emoji:"✈️" },
+};
+const HOOKS = [
+  { id:"1.1", level:1, angle:"Consequence", hook:"Booked London? Canadians usually need a £20 UK ETA before they go. Did anyone tell you?", fact:"The UK ETA costs £20 and covers up to 6 months. Babies and children need their own.", source:"GOV.UK", cta:"Follow for rules that changed", path:"/before-you-fly" },
+  { id:"1.2", level:1, angle:"Mistake", hook:"Two separate tickets to save money? A delay on the first can mean no hotel, no compensation and no new flight on the second.", fact:"Under UK rules, separate bookings carry no statutory right to care, compensation or onward transport.", source:"UK Civil Aviation Authority", cta:"Save this before you book", path:"/before-you-fly" },
+  { id:"1.3", level:1, angle:"Curiosity", hook:"Reported: Frankfurt's average border wait hit about 120 minutes in July, up from about 60 a year earlier. What is your connection time?", fact:"A short connection at your first Schengen airport can disappear in that queue.", source:"Financial Times and Qsensor analysis, reported by Euronews, 12 Aug 2026", cta:"Follow for border updates", path:"/before-you-fly" },
+  { id:"1.4", level:1, angle:"Story", hook:"21 people. 10 days in Italy. One thing I checked before we booked: [your real check from the Italy trip].", fact:"Entry rules for Canadians change. Check them before you book.", source:"reviewthengo.com", cta:"Follow for the checklist", path:"/before-you-fly", placeholder:true },
+  { id:"2.1", level:2, angle:"Pain", hook:"Landed 3 or more hours late in Canada? The published payout starts at C$400 from large airlines, if the cause was in their control.", fact:"C$400 at 3 hours, C$700 at 6 hours, C$1,000 at 9 hours.", source:"Canadian Transportation Agency", cta:"Save this", path:"/flight-claims" },
+  { id:"2.2", level:2, angle:"Mistake", hook:"Extraordinary circumstances is the airline's favourite phrase. In the UK, an ordinary technical fault generally has not counted as one.", fact:"UK and EU court rulings have generally not treated ordinary technical faults as extraordinary.", source:"UK Civil Aviation Authority", cta:"Follow for what airlines do not say", path:"/flight-claims" },
+  { id:"2.3", level:2, angle:"Pain", hook:"Your travel insurer said no to your delay costs. First question: did you ask the airline?", fact:"Policies often do not cover what you can recover elsewhere.", source:"UK Financial Ombudsman Service", cta:"Save this for later", path:"/insurance-appeal" },
+  { id:"2.4", level:2, angle:"Curiosity", hook:"A website is selling you ETIAS for Europe. Canada says ETIAS is not even live yet.", fact:"The Government of Canada warns about fraudulent sites that claim to sell ETIAS.", source:"Government of Canada, travel advice for Europe", cta:"Share with someone flying to Europe", path:"/articles/do-canadians-need-etias" },
+  { id:"3.1", level:3, angle:"Comparison", hook:"UK ETA is live and costs £20. ETIAS is not live yet. Do not mix them up.", fact:"No ETIAS launch date is confirmed. The EU says it will announce the date several months ahead.", source:"GOV.UK and Government of Canada", cta:"Save this", path:"/before-you-fly" },
+  { id:"3.2", level:3, angle:"How-to", hook:"You do not need a middleman to ask an airline for compensation. In Canada the first step is a written claim, within one year.", fact:"Claim from the airline first, in writing, within one year.", source:"Canadian Transportation Agency", cta:"Follow for the wording", path:"/flight-claims" },
+  { id:"3.3", level:3, angle:"Order of steps", hook:"Insurer said no? Airline first, then the insurer's final response, then the ombudsman.", fact:"In the UK you have six months after the insurer's final response to go to the ombudsman.", source:"UK Financial Ombudsman Service", cta:"Save the steps", path:"/insurance-appeal" },
+  { id:"3.4", level:3, angle:"Curiosity", hook:"Where does the EES border check actually happen? Your first Schengen entry and your last exit.", fact:"If you stay in the transit area and no border check is carried out, your data is not recorded in EES. Ask your airline.", source:"Austrian Interior Ministry", cta:"Follow for border rules", path:"/connection-check" },
+  { id:"4.1", level:4, angle:"Proof", hook:"Every rule on reviewthengo shows the day we last checked it. If we are not sure, it says Unconfirmed.", fact:"Each rule has a status: In force, Unconfirmed or Scheduled.", source:"reviewthengo rules ledger", cta:"See the ledger", path:"/#ledger" },
+  { id:"4.2", level:4, angle:"Honesty", hook:"We published a correction this week. ETIAS was marked Q4 2026. The facts changed, so we did too.", fact:"The correction is dated 14 Oct 2026 on the public corrections page.", source:"reviewthengo corrections page", cta:"See the corrections page", path:"/corrections" },
+  { id:"4.3", level:4, angle:"Method", hook:"How we check a rule: government page first, press second, date on every line.", fact:"If we cannot confirm it, we label it Unconfirmed.", source:"reviewthengo rules ledger", cta:"Read how we check", path:"/#ledger" },
+  { id:"4.4", level:4, angle:"Trust", hook:"How the site is funded: ads and affiliate links, labelled, never inside the sourced answer.", fact:"The funding section is on the home page.", source:"reviewthengo home page", cta:"Read it yourself", path:"/" },
+  { id:"4.5", level:4, angle:"Limits", hook:"We are not lawyers and we send nothing for you. Here is what the tools do instead.", fact:"They give you rules, amounts, deadlines and wording you can edit.", source:"reviewthengo tools", cta:"Try a tool", path:"/flight-claims" },
+  { id:"5.1", level:5, angle:"Direct", hook:"Flight late right now? Open the flight claim guide.", fact:"Rules, amounts, deadlines and wording you can edit.", source:"reviewthengo flight claim guide", cta:"Open the guide", path:"/flight-claims" },
+  { id:"5.2", level:5, angle:"Direct", hook:"Insurer denied your delay costs? Build your appeal from your own policy wording.", fact:"The appeal pack builds your letter from your own policy wording.", source:"reviewthengo insurance appeal pack", cta:"Open the appeal pack", path:"/insurance-appeal" },
+  { id:"5.3", level:5, angle:"Direct", hook:"Flying soon? Get one email when a rule on your route changes.", fact:"Free, with an unsubscribe link in every email.", source:"reviewthengo.com/before-you-fly", cta:"Leave your email", path:"/before-you-fly" },
+];
+const RTG_HASHTAGS = "#canadatravel #traveltips #flightdelay #uketa #etias";
+const RTG_FACT_SHEET = HOOKS.map(h=>`- ${h.fact} (Source: ${h.source}, checked ${HOOKS_CHECKED})`).join("\n");
+BRANDS.reviewthengo.prompt = `You write TikTok travel rule scripts for @ReviewThenGo, a Canadian site with free sourced rules and tools for Canadians flying to the UK and Europe.
+Use ONLY the verified facts below for any rule, price, amount, deadline or date. Never invent statistics, prices, dates, testimonials or results. If the topic is not covered by the facts, give general planning advice with no numbers and tell viewers to check reviewthengo.com/before-you-fly.
+Start with a hook about the viewer's situation or a mistake they could make, not about the site. End with a soft call to action (follow, save or share).
+Verified facts:
+${RTG_FACT_SHEET}`;
+
+
+/* ---------- awareness levels for every brand (Schwartz) ---------- */
+const LEVEL_RULES = {
+  0:"Choose the awareness level that best fits the topic. Default to levels 1 to 3. The hook must be about the viewer's life, problem or a mistake they make, not about the brand, unless the topic is clearly about the brand. Use a soft call to action (follow, save or share).",
+  1:"Awareness level 1, UNAWARE: the viewer does not know they have this problem. The hook is about their daily life or a mistake they are making, never about the brand or a product. End with a soft call to action: follow, save or share.",
+  2:"Awareness level 2, PROBLEM AWARE: the viewer feels the pain but does not know a fix exists. Name the pain in their words, then show that a fix exists. End with a soft call to action: follow, save or share.",
+  3:"Awareness level 3, SOLUTION AWARE: the viewer knows fixes exist but not the best one. Compare options or give the right order of steps. End with a soft call to action: follow, save or share.",
+  4:"Awareness level 4, PRODUCT AWARE: the viewer knows the brand but is not convinced. Build trust with how it works, what it can and cannot do, and honest limits. Never invent results or testimonials. End with a direct call to action: visit or try it.",
+  5:"Awareness level 5, MOST AWARE: the viewer is ready to act. Be direct: say exactly what to do next. End with a direct call to action: open it, try it or start now.",
+};
+const ANGLES = ["Pain","Curiosity","Mistake","Comparison","Story","How-to","Consequence","Proof","Method","Limits","Direct","Order of steps"];
+function levelPrompt(level, angle){
+  let t = LEVEL_RULES[level] || LEVEL_RULES[0];
+  if(angle) t += ` Use the "${angle}" angle for the hook.`;
+  t += " Never invent statistics, testimonials, case studies, prices or results. If a fact is not given, keep it general with no numbers.";
+  return t;
+}
+BRANDS.gen80s.tags = "#lifehacks #techtips #productivity";
+BRANDS.keywordarchitect.tags = "#seo #googleads #keywordresearch #ppc";
+BRANDS.reviewthengo.tags = "#canadatravel #traveltips #flightdelay #uketa #etias";
+BRANDS.unlabeled.tags = "";
+
+/* Starter hook library for the other brands. Each entry sets the level and angle, then the AI writes the script. */
+const HOOKLIB = {
+  gen80s:[
+    { id:"G1", level:1, angle:"Mistake",     topic:"3 phone habits that quietly drain your battery" },
+    { id:"G2", level:1, angle:"Curiosity",   topic:"3 hidden phone features most people never open" },
+    { id:"G3", level:1, angle:"Consequence", topic:"3 computer tasks you are doing the slow way" },
+    { id:"G4", level:2, angle:"Pain",        topic:"Phone storage full, 3 fixes that work" },
+    { id:"G5", level:2, angle:"Mistake",     topic:"3 password habits that put your accounts at risk" },
+    { id:"G6", level:2, angle:"Pain",        topic:"3 reasons your home wifi feels slow" },
+    { id:"G7", level:3, angle:"Comparison",  topic:"3 free ways to scan a document with your phone" },
+    { id:"G8", level:3, angle:"How-to",      topic:"How to screenshot a full webpage" },
+    { id:"G9", level:3, angle:"Order of steps", topic:"Back up your phone photos in 3 steps" },
+    { id:"G10",level:4, angle:"Proof",       topic:"3 hacks you can try in 30 seconds right now" },
+    { id:"G11",level:5, angle:"Direct",      topic:"Pick one hack from this video and try it today" },
+  ],
+  keywordarchitect:[
+    { id:"K1", level:1, angle:"Consequence", topic:"Google Ads clicks that never turn into customers" },
+    { id:"K2", level:1, angle:"Mistake",     topic:"3 keyword match type mistakes that waste ad budget" },
+    { id:"K3", level:1, angle:"Curiosity",   topic:"What the search terms report shows that most advertisers skip" },
+    { id:"K4", level:2, angle:"Pain",        topic:"Low Quality Score and high cost per click, 3 causes" },
+    { id:"K5", level:2, angle:"Mistake",     topic:"Why a huge messy keyword list hurts your campaigns" },
+    { id:"K6", level:2, angle:"Pain",        topic:"Ad groups with too many keywords, 3 problems" },
+    { id:"K7", level:3, angle:"Comparison",  topic:"Manual keyword grouping vs keyword clustering" },
+    { id:"K8", level:3, angle:"How-to",      topic:"How to cluster keywords into ad groups" },
+    { id:"K9", level:3, angle:"Order of steps", topic:"Build a negative keyword list in 3 steps" },
+    { id:"K10",level:4, angle:"Method",      topic:"How AI keyword clustering groups your list" },
+    { id:"K11",level:4, angle:"Limits",      topic:"What an AI keyword clusterer can and cannot do" },
+    { id:"K12",level:5, angle:"Direct",      topic:"Paste your keyword list and cluster it today" },
+  ],
+};
+function renderLibHooks(){
+  const lib = HOOKLIB[state.brandKey];
+  const list = document.getElementById('hookList');
+  const lr = document.getElementById('lvlRow');
+  lr.innerHTML = [`<button class="lvl-pill ${state.hookLevel===0?'active':''}" type="button" data-lvl="0">All</button>`]
+    .concat(Object.entries(LEVELS).map(([n,l])=>`<button class="lvl-pill ${state.hookLevel==n?'active':''}" type="button" data-lvl="${n}">L${n} ${escapeHtml(l.name)}</button>`)).join('');
+  lr.querySelectorAll('[data-lvl]').forEach(b=>b.addEventListener('click',()=>{ state.hookLevel = parseInt(b.dataset.lvl,10); renderHooks(); }));
+  list.innerHTML = lib.filter(h=>!state.hookLevel || h.level===state.hookLevel).map(h=>`
+    <button class="hook-btn" type="button" data-lib="${h.id}"><b>${h.id}</b>${escapeHtml(h.topic)}<i>L${h.level} ${escapeHtml(LEVELS[h.level].name)} · ${escapeHtml(h.angle)}</i></button>
+  `).join('');
+  list.querySelectorAll('[data-lib]').forEach(b=>b.addEventListener('click',()=>{
+    const h = lib.find(x=>x.id===b.dataset.lib); if(!h) return;
+    state.level = h.level; state.angle = h.angle; state.topic = h.topic;
+    document.getElementById('topicInput').value = h.topic;
+    generate(h.topic);
+  }));
+}
+
+
+/* ---------- Foundsite brand: free-preview website offer for local business owners ---------- */
+BRANDS.foundsite = { name:"Foundsite", label:"foundsite tip", handle:"foundsite.co", tagline:"see your site before you pay", color:"#2563eb", tags:"#smallbusiness #localbusiness #website #brantford #shoplocal", prompt:"" };
+BRANDS.foundsite.prompt = `You write short TikTok and Reels scripts for Foundsite (foundsite.co), a small team in Brantford, Ontario that builds websites for local businesses such as restaurants, trades, salons, clinics, retail and fitness. The viewer is a local business owner.
+Use ONLY these facts about Foundsite: the setup fee is C$299 one time, plus C$20 a month for hosting and maintenance. The owner fills out a short form and sees a free preview of their site before paying anything. Sites go live within 48 hours. If they already have a site they dislike, Foundsite rebuilds it at the same price. Add-ons such as extra pages, an online store, Google Business Profile setup, email setup and a speed and SEO audit are quoted separately, so never state add-on prices. A real person builds each site.
+Never state statistics, percentages, rankings, customer numbers, testimonials or results. Speak about what a customer sees and what an owner can do, in plain words. Start with the owner's situation, not with Foundsite.`;
+CHIPS_BY_BRAND.foundsite = ["What customers find when they Google you","Facebook page vs a real website","What your site needs on one page","Google Business Profile basics","Website quotes explained","See your site before you pay"];
+HOOKLIB.foundsite = [
+  { id:"F1",  level:1, angle:"Consequence", topic:"Someone looked up your business last night, what did they find" },
+  { id:"F2",  level:1, angle:"Mistake",     topic:"Your Facebook page is not a website, what customers cannot find there" },
+  { id:"F3",  level:1, angle:"Curiosity",   topic:"Search your own business name on your phone, would you call you" },
+  { id:"F4",  level:1, angle:"Story",       topic:"A local business owner I met who had no website, [your real story]" },
+  { id:"F5",  level:2, angle:"Pain",        topic:"Customers keep messaging your hours and prices, 3 things a one page site answers for you" },
+  { id:"F6",  level:2, angle:"Pain",        topic:"Your competitor looks bigger than you online, what actually makes a business look established" },
+  { id:"F7",  level:2, angle:"Mistake",     topic:"A website that does not work on a phone loses people before they read a word" },
+  { id:"F8",  level:2, angle:"Pain",        topic:"Website quotes are confusing, what a simple local site should include" },
+  { id:"F9",  level:3, angle:"Comparison",  topic:"Build it yourself or have someone do it, what each really costs in time" },
+  { id:"F10", level:3, angle:"How-to",      topic:"What a local business website needs on one page" },
+  { id:"F11", level:3, angle:"Order of steps", topic:"Set up your Google Business Profile in 3 steps" },
+  { id:"F12", level:3, angle:"Comparison",  topic:"One page site or a big site, which does a local business need first" },
+  { id:"F13", level:4, angle:"Proof",       topic:"We build your site first, you see it before you pay anything" },
+  { id:"F14", level:4, angle:"Method",      topic:"What is included in the C$299 setup, one page site, contact form, SEO setup, domain connected" },
+  { id:"F15", level:4, angle:"Honesty",     topic:"C$299 setup plus C$20 a month, here is what the monthly covers" },
+  { id:"F16", level:4, angle:"Proof",       topic:"Real sites we built, BrantfordTopRealtor.com, WalnutLandscaping.ca and ClosingClearance.com" },
+  { id:"F17", level:4, angle:"Limits",      topic:"A one page site is not an online store, that is an add-on we quote separately" },
+  { id:"F18", level:5, angle:"Direct",      topic:"Want to see your website before you pay, get your free preview at foundsite.co" },
+  { id:"F19", level:5, angle:"Direct",      topic:"Already have a site you do not like, we rebuild it at the same price" },
+  { id:"F20", level:5, angle:"Direct",      topic:"Book a 15 minute demo call and see what we would build for you" },
+];
+
+function siteUrl(path){ return (state.brandKey==="foundsite" ? "foundsite.co" : "reviewthengo.com") + (path && path !== "/" ? path : ""); }
+function buildCaption(h){
+  const lines = [h.hook, "", h.fact, "", `Source: ${h.source}. Checked ${HOOKS_CHECKED}.`, "", `${h.cta}. Link in bio: ${siteUrl("/before-you-fly")}`];
+  if(h.path !== "/before-you-fly") lines.push(`More: ${siteUrl(h.path)}`);
+  lines.push("", RTG_HASHTAGS);
+  return noDash(lines.join("\n")).replace(/ ?\n ?/g,"\n");
+}
+function buildFromHook(id){
+  const h = HOOKS.find(x=>x.id===id); if(!h) return;
+  stopPreview();
+  const lv = LEVELS[h.level];
+  state.slides = [
+    newSlide({ emoji:lv.emoji, label:h.angle, text:h.hook }),
+    newSlide({ label:"The fact", text:h.fact }),
+    newSlide({ label:"Source", text:`${h.source}. Checked ${HOOKS_CHECKED}.` }),
+    newSlide({ text:h.cta }),
+  ];
+  state.slides.forEach(sl=>{ sl.text = noDash(sl.text); sl.label = noDash(sl.label); });
+  state.brandKey = "reviewthengo";
+  state.topic = `RTG ${h.id} ${h.angle}`;
+  state.siteLink = h.path;
+  state.caption = buildCaption(h);
+  state.error = h.placeholder ? "Fill in the [bracketed] part of slide 1 with your real detail from the trip before you export. Nothing is invented here." : "";
+  state.videoUrl = null;
+  document.getElementById('topicInput').value = state.topic;
+  staticPreviewIdx = 0;
+  render(); drawStatic(0); scheduleSave();
+}
+function renderRtgHooks(){
+  const panel = document.getElementById('hookPanel');
+  const show = state.brandKey === 'reviewthengo';
+  panel.style.display = show ? 'block' : 'none';
+  if(!show) return;
+  const lr = document.getElementById('lvlRow');
+  lr.innerHTML = [`<button class="lvl-pill ${state.hookLevel===0?'active':''}" type="button" data-lvl="0">All</button>`]
+    .concat(Object.entries(LEVELS).map(([n,l])=>`<button class="lvl-pill ${state.hookLevel==n?'active':''}" type="button" data-lvl="${n}">L${n} ${escapeHtml(l.name)}</button>`)).join('');
+  lr.querySelectorAll('[data-lvl]').forEach(b=>b.addEventListener('click',()=>{ state.hookLevel = parseInt(b.dataset.lvl,10); renderHooks(); }));
+  const list = document.getElementById('hookList');
+  list.innerHTML = HOOKS.filter(h=>!state.hookLevel || h.level===state.hookLevel).map(h=>`
+    <button class="hook-btn" type="button" data-hook="${h.id}"><b>${h.id}</b>${escapeHtml(h.hook)}<i>L${h.level} ${escapeHtml(LEVELS[h.level].name)} · ${escapeHtml(h.angle)} · ${escapeHtml(h.source)}</i></button>
+  `).join('');
+  list.querySelectorAll('[data-hook]').forEach(b=>b.addEventListener('click',()=>buildFromHook(b.dataset.hook)));
+}
+function renderHooks(){
+  const panel = document.getElementById('hookPanel');
+  if(state.brandKey === 'reviewthengo'){
+    document.getElementById('hookTitle').textContent = "ReviewThenGo hook library (20 hooks, sourced)";
+    document.getElementById('hookNote').textContent = "Pick a hook to build the slides: hook, fact, source, then the site link. Facts were checked on 14 Oct 2026 and match reviewthengo.com. Re-check anything a few weeks old before you post. Link in your bio should go to reviewthengo.com/before-you-fly.";
+    renderRtgHooks();
+  } else if(HOOKLIB[state.brandKey]){
+    panel.style.display = 'block';
+    document.getElementById('hookTitle').textContent = currentBrand().name + " hook library (" + HOOKLIB[state.brandKey].length + " starters by awareness level)";
+    document.getElementById('hookNote').textContent = "Each starter sets the awareness level and hook angle, then writes the script. Check any step or setting on a real device before you post. Nothing here is a statistic or a result.";
+    renderLibHooks();
+  } else { panel.style.display = 'none'; }
+}
+function renderLevelPicker(){
+  const el = document.getElementById('levelPicker');
+  el.innerHTML = [`<button class="pill ${state.level===0?'active':''}" type="button" data-level="0" style="${state.level===0?'background:#ffffff30;':''}">Auto</button>`]
+    .concat(Object.entries(LEVELS).map(([n,l])=>`<button class="pill ${state.level==n?'active':''}" type="button" data-level="${n}" style="${state.level==n?'background:linear-gradient(135deg,#00c87acc,#00c87a66);':''}">L${n} ${escapeHtml(l.name)}</button>`)).join('');
+  el.querySelectorAll('[data-level]').forEach(b=>b.addEventListener('click',()=>{ state.level = parseInt(b.dataset.level,10); state.angle=""; renderLevelPicker(); scheduleSave(); }));
+  const helps = {0:"Auto: the AI picks a level and leans on levels 1 to 3.",1:"Unaware: about their life or a mistake, not your product. Soft call to action.",2:"Problem aware: name the pain, show a fix exists. Soft call to action.",3:"Solution aware: compare options or give the right order. Soft call to action.",4:"Product aware: how it works, honest limits. Direct call to action.",5:"Most aware: say exactly what to do next. Direct call to action."};
+  document.getElementById('levelHelp').textContent = helps[state.level] || "";
+}
+function renderCaption(){
+  const box = document.getElementById('captionBox');
+  const show = state.slides.length > 0 && !!state.caption;
+  box.style.display = show ? 'block' : 'none';
+  const ta = document.getElementById('captionText');
+  if(show && ta.value !== state.caption) ta.value = state.caption;
+}
+
+/* ---------- helpers ---------- */
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function noDash(s){ return typeof s === 'string' ? s.replace(/[—–]/g, ', ').replace(/,\s*,/g,',').replace(/\s{2,}/g,' ').trim() : s; }
+function stripDashes(parsed){
+  if(parsed.hook) parsed.hook = noDash(parsed.hook);
+  if(parsed.payoff) parsed.payoff = noDash(parsed.payoff);
+  if(parsed.tag) parsed.tag = noDash(parsed.tag);
+  if(Array.isArray(parsed.steps)) parsed.steps = parsed.steps.map(noDash);
+}
+function roundRect(c,x,y,w,h,r){
+  c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.arcTo(x+w,y,x+w,y+r,r);
+  c.lineTo(x+w,y+h-r);c.arcTo(x+w,y+h,x+w-r,y+h,r);
+  c.lineTo(x+r,y+h);c.arcTo(x,y+h,x,y+h-r,r);
+  c.lineTo(x,y+r);c.arcTo(x,y,x+r,y,r);c.closePath();
+}
+function wrapLines(ctx, text, maxWidth, font){
+  ctx.font = font;
+  const words = (text||"").split(" ");
+  const lines = []; let line = "";
+  for(const w of words){
+    const test = line ? line+" "+w : w;
+    if(ctx.measureText(test).width > maxWidth && line){ lines.push(line); line = w; }
+    else line = test;
+  }
+  if(line) lines.push(line);
+  return lines;
+}
+function drawRevealedWrapped(ctx, text, revealChars, cx, cy, maxWidth, lineHeight, font){
+  const lines = wrapLines(ctx, text, maxWidth, font);
+  ctx.font = font;
+  const startY = cy - (lines.length-1)*lineHeight/2;
+  let consumed = 0;
+  lines.forEach((line,i)=>{
+    let shown;
+    if(consumed + line.length <= revealChars) shown = line;
+    else if(consumed >= revealChars) shown = "";
+    else shown = line.slice(0, revealChars - consumed);
+    if(shown) ctx.fillText(shown, cx, startY + i*lineHeight);
+    consumed += line.length + 1;
+  });
+}
+function initParticles(accent, accent2){
+  return Array.from({length:18},(_,i)=>({
+    x:Math.random()*W, y:Math.random()*H, r:Math.random()*2.2+0.5,
+    vx:(Math.random()-0.5)*0.4, vy:(Math.random()-0.5)*0.4,
+    color:i%2===0?accent:accent2, alpha:Math.random()*0.5+0.1, pulse:Math.random()*Math.PI*2,
+  }));
+}
+function pickMimeType(){
+  const candidates = [
+    "video/mp4;codecs=avc1.42E01E,mp4a.40.2",
+    "video/mp4",
+    "video/webm;codecs=vp9,opus",
+    "video/webm;codecs=vp8,opus",
+    "video/webm",
+  ];
+  for(const c of candidates){ if(MediaRecorder.isTypeSupported(c)) return c; }
+  return "video/webm";
+}
+function extFor(mimeType){ return mimeType.startsWith("video/mp4") ? "mp4" : "webm"; }
+function fixWebmDuration(blob){
+  return new Promise(resolve=>{
+    const v=document.createElement("video"); v.preload="metadata"; v.muted=true;
+    const url=URL.createObjectURL(blob); v.src=url;
+    v.onloadedmetadata=()=>{
+      if(isFinite(v.duration) && v.duration>0 && v.duration<3600){ URL.revokeObjectURL(url); resolve(blob); return; }
+      v.currentTime=1e9;
+    };
+    v.onseeked=()=>{
+      const dur=v.duration; URL.revokeObjectURL(url);
+      if(!isFinite(dur) || dur<=0){ resolve(blob); return; }
+      blob.arrayBuffer().then(buf=>{
+        const view=new DataView(buf); const bytes=new Uint8Array(buf);
+        for(let i=0;i<bytes.length-9;i++){
+          if(bytes[i]===0x44 && bytes[i+1]===0x89){
+            const sc=bytes[i+2];
+            if(sc===0x84){ view.setFloat32(i+3, dur*1000, false); break; }
+            else if(sc===0x88){ view.setFloat64(i+3, dur*1000, false); break; }
+          }
+        }
+        resolve(new Blob([buf],{type:blob.type}));
+      });
+    };
+    v.onerror=()=>{ URL.revokeObjectURL(url); resolve(blob); };
+  });
+}
+
+/* ---------- drawing ---------- */
+function drawSlideFrame(ctx, opts){
+  const { slide, elapsed, duration, theme, brand, particles, isLast } = opts;
+  ctx.clearRect(0,0,W,H);
+  const hasImg = slide.bgImg && slide.bgImg.complete && slide.bgImg.naturalWidth;
+
+  if(hasImg){
+    const iw=slide.bgImg.naturalWidth, ih=slide.bgImg.naturalHeight;
+    const scale=Math.max(W/iw, H/ih);
+    const dw=iw*scale, dh=ih*scale, dx=(W-dw)/2, dy=(H-dh)/2;
+    ctx.globalAlpha=0.6; ctx.drawImage(slide.bgImg,dx,dy,dw,dh); ctx.globalAlpha=1;
+    const ov=ctx.createLinearGradient(0,0,0,H);
+    ov.addColorStop(0,"rgba(0,0,0,0.55)"); ov.addColorStop(0.5,"rgba(0,0,0,0.35)"); ov.addColorStop(1,"rgba(0,0,0,0.7)");
+    ctx.fillStyle=ov; ctx.fillRect(0,0,W,H);
+  } else {
+    const bg=ctx.createLinearGradient(0,0,W*.7,H);
+    bg.addColorStop(0,theme.bg1); bg.addColorStop(1,theme.bg2);
+    ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+    const o1=ctx.createRadialGradient(-30,-30,0,-30,-30,240);
+    o1.addColorStop(0,theme.accent+"28"); o1.addColorStop(1,"transparent");
+    ctx.fillStyle=o1; ctx.fillRect(0,0,W,H);
+    const o2=ctx.createRadialGradient(W+20,H+20,0,W+20,H+20,210);
+    o2.addColorStop(0,theme.accent2+"28"); o2.addColorStop(1,"transparent");
+    ctx.fillStyle=o2; ctx.fillRect(0,0,W,H);
+  }
+
+  particles.forEach(p=>{
+    p.x+=p.vx; p.y+=p.vy; p.pulse+=0.04;
+    if(p.x<0)p.x=W; if(p.x>W)p.x=0; if(p.y<0)p.y=H; if(p.y>H)p.y=0;
+    const a=p.alpha*(hasImg?0.4:0.7)*(0.7+0.3*Math.sin(p.pulse));
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle=p.color+Math.round(a*255).toString(16).padStart(2,"0"); ctx.fill();
+  });
+
+  if(brand.label){
+    ctx.save();
+    ctx.fillStyle=theme.accent+"33"; ctx.strokeStyle=theme.accent+"88"; ctx.lineWidth=1;
+    const bw=brand.label.length*8+28;
+    roundRect(ctx,24,22,bw,24,12); ctx.fill(); ctx.stroke();
+    ctx.fillStyle="#fff"; ctx.font="800 10px 'Segoe UI',sans-serif"; ctx.textAlign="left";
+    ctx.shadowColor="rgba(0,0,0,0.8)"; ctx.shadowBlur=6;
+    ctx.fillText(brand.label.toUpperCase(),34,38);
+    ctx.shadowBlur=0;
+    ctx.restore();
+  }
+
+  if(slide.emoji){
+    ctx.save(); ctx.font="46px serif"; ctx.textAlign="center";
+    ctx.fillText(slide.emoji, W/2, 150);
+    ctx.restore();
+  }
+  if(slide.label){
+    ctx.save();
+    ctx.fillStyle = hasImg?"#fff":theme.accent; ctx.font="900 13px 'Segoe UI',sans-serif"; ctx.textAlign="center";
+    ctx.shadowColor="rgba(0,0,0,0.85)"; ctx.shadowBlur=8;
+    ctx.fillText(slide.label.toUpperCase(), W/2, slide.emoji ? 178 : 130);
+    ctx.shadowBlur=0;
+    ctx.restore();
+  }
+
+  const revealChars = Math.floor((slide.text||"").length * Math.min(1, (elapsed*state.textSpeed)/Math.max(duration,1)));
+  ctx.save();
+  ctx.fillStyle = hasImg ? "#fff" : theme.text;
+  ctx.textAlign="center";
+  ctx.shadowColor="rgba(0,0,0,0.85)"; ctx.shadowBlur = hasImg?10:6;
+  drawRevealedWrapped(ctx, slide.text, revealChars, W/2, H/2, W-64, 34, "900 25px 'Segoe UI',sans-serif");
+  ctx.shadowBlur=0;
+  ctx.restore();
+
+  if(isLast && brand.handle){
+    const p = Math.min(1, elapsed/Math.max(duration,1));
+    if(p>0.65){
+      const a=(p-0.65)/0.35;
+      ctx.save(); ctx.globalAlpha=a; ctx.textAlign="center";
+      ctx.shadowColor="rgba(0,0,0,0.9)"; ctx.shadowBlur=8;
+      if((state.brandKey==='reviewthengo' || state.brandKey==='foundsite') && state.siteLink){
+        ctx.fillStyle= hasImg?"#fff":theme.accent2; ctx.font="800 14px 'Segoe UI',sans-serif";
+        ctx.fillText(siteUrl(state.siteLink), W/2, H-66);
+      }
+      ctx.fillStyle= hasImg?"rgba(255,255,255,0.75)":theme.sub; ctx.font="400 12px 'Segoe UI',sans-serif";
+      ctx.fillText(brand.tagline, W/2, H-36);
+      ctx.fillStyle= hasImg?"#fff":theme.accent; ctx.font="900 15px 'Segoe UI',sans-serif";
+      ctx.fillText(brand.handle, W/2, H-16);
+      ctx.shadowBlur=0;
+      ctx.restore();
+    }
+  }
+}
+
+/* ---------- app state ---------- */
+const state = {
+  topic:"", loading:false, error:"", brandKey:"gen80s", themeKey:"cyber",
+  slides:[], playing:false, exporting:false, progress:0, videoUrl:null, videoExt:"mp4",
+  textSpeed:1, level:0, angle:"", hookLevel:0, siteLink:"", caption:"",
+};
+const stageCanvas = document.getElementById('stageCanvas');
+const stageCtx = stageCanvas.getContext('2d');
+let previewParticles = [];
+let previewRAF = null;
+
+function currentTheme(){ return THEMES[state.themeKey]; }
+function currentBrand(){ return BRANDS[state.brandKey]; }
+
+/* ---------- autosave / restore (survives reloads and future edits) ---------- */
+const STORAGE_KEY = 'project';
+let saveTimer = null;
+function scheduleSave(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveProject, 900);
+}
+function blobUrlToBase64Capped(url, capBytes){
+  return fetch(url).then(res=>res.blob()).then(blob=>{
+    if(blob.size > capBytes) return null;
+    return new Promise((resolve,reject)=>{
+      const r = new FileReader();
+      r.onload=()=>resolve(r.result); r.onerror=()=>resolve(null);
+      r.readAsDataURL(blob);
+    });
+  }).catch(()=>null);
+}
+let storageDisabled = false;
+async function saveProject(){
+  if(!window.storage || storageDisabled) return;
+  try{
+    const slidesForSave = await Promise.all(state.slides.map(async s=>{
+      const out = { id:s.id, label:s.label, emoji:s.emoji, text:s.text, audioDuration:s.audioDuration };
+      if(s.bgUrl){
+        if(s.bgUrl.startsWith('data:')){ if(s.bgUrl.length <= 1900000) out.bgDataUrl = s.bgUrl; }
+        else { const b64 = await blobUrlToBase64Capped(s.bgUrl, 1400000); if(b64) out.bgDataUrl = b64; }
+      }
+      if(s.audioB64) out.audioB64 = s.audioB64;
+      return out;
+    }));
+    const snapshot = { topic: state.topic, brandKey: state.brandKey, themeKey: state.themeKey, level: state.level, textSpeed: state.textSpeed, siteLink: state.siteLink, caption: state.caption, slides: slidesForSave };
+    const json = JSON.stringify(snapshot);
+    if(json.length < 4800000){
+      await window.storage.set(STORAGE_KEY, json, false);
+    }
+  }catch(e){
+    // Autosave is a nice-to-have, not required for generating/exporting videos.
+    // Some environments (e.g. certain mobile app versions) don't support this
+    // storage API reliably yet — fail quietly after the first attempt instead
+    // of spamming the console or retrying on every change.
+    storageDisabled = true;
+  }
+}
+async function loadProject(){
+  if(!window.storage || storageDisabled) return false;
+  try{
+    const result = await window.storage.get(STORAGE_KEY, false);
+    if(!result || !result.value) return false;
+    const snap = JSON.parse(result.value);
+    if(!snap.slides || !snap.slides.length) return false;
+    state.topic = snap.topic || "";
+    state.brandKey = snap.brandKey || state.brandKey;
+    state.themeKey = snap.themeKey || state.themeKey;
+    state.textSpeed = snap.textSpeed || 1;
+    state.level = snap.level || 0;
+    state.siteLink = snap.siteLink || "";
+    state.caption = snap.caption || "";
+    state.slides = snap.slides.map(s=>{
+      const slide = newSlide({ id:s.id, label:s.label, emoji:s.emoji, text:s.text, audioDuration:s.audioDuration });
+      if(s.bgDataUrl){
+        const img = new Image();
+        img.onload = () => { slide.bgImg = img; drawStatic(); };
+        img.src = s.bgDataUrl;
+        slide.bgUrl = s.bgDataUrl;
+      }
+      if(s.audioB64){
+        slide.audioB64 = s.audioB64;
+        slide.audioLoading = true;
+        // Decode lazily but immediately; context may start suspended until
+        // the first click, decodeAudioData still works while suspended.
+        try{
+          const bytes = b64ToArrayBuffer(s.audioB64);
+          ensureAudioCtx().decodeAudioData(bytes).then(buf=>{
+            slide.audioBuffer = buf;
+            slide.audioDuration = buf.duration;
+            slide.audioLoading = false;
+            renderSlides(); render();
+          }).catch(()=>{
+            slide.audioLoading = false;
+            slide.audioError = "saved audio couldn't be restored — reupload the mp3";
+            renderSlides(); render();
+          });
+        }catch(err){
+          slide.audioLoading = false;
+          slide.audioError = "saved audio couldn't be restored — reupload the mp3";
+        }
+      }
+      return slide;
+    });
+    return true;
+  }catch(e){ return false; }
+}
+function newSlide(overrides){
+  return Object.assign({ id: uid(), label:"", emoji:"", text:"", bgUrl:null, bgImg:null, audioBuffer:null, audioB64:null, audioDuration:null, audioLoading:false, audioError:null }, overrides||{});
+}
+
+/* ---------- Web Audio pipeline (no <audio> elements — sandbox-safe) ---------- */
+let sharedAudioCtx = null;
+function ensureAudioCtx(){
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if(!sharedAudioCtx) sharedAudioCtx = new AC();
+  if(sharedAudioCtx.state === 'suspended') sharedAudioCtx.resume().catch(()=>{});
+  return sharedAudioCtx;
+}
+function arrayBufferToB64(buf){
+  const bytes = new Uint8Array(buf);
+  let bin = '';
+  const CHUNK = 0x8000;
+  for(let i=0;i<bytes.length;i+=CHUNK){ bin += String.fromCharCode.apply(null, bytes.subarray(i,i+CHUNK)); }
+  return btoa(bin);
+}
+function b64ToArrayBuffer(b64){
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
+  return bytes.buffer;
+}
+async function decodeSlideAudio(slide, arrayBuffer){
+  const ctx = ensureAudioCtx();
+  // decodeAudioData detaches the buffer, so keep a copy for saving first
+  slide.audioB64 = arrayBuffer.byteLength <= 1600000 ? arrayBufferToB64(arrayBuffer.slice(0)) : null;
+  const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+  slide.audioBuffer = audioBuffer;
+  slide.audioDuration = audioBuffer.duration;
+}
+function slidesFromScript(parsed){
+  const slides = [];
+  slides.push(newSlide({ label: parsed.tag, emoji: parsed.emoji, text: parsed.hook }));
+  (parsed.steps||[]).forEach((s,i)=>{
+    slides.push(newSlide({ label: parsed.type==="list" ? `#${i+1}` : `Step ${i+1}`, text: s }));
+  });
+  slides.push(newSlide({ text: parsed.payoff }));
+  return slides;
+}
+const SLIDE_GAP_MS = 1000; // hold each finished slide for 1s before the next
+function slideDurationMs(slide){ return slide.audioDuration ? slide.audioDuration*1000 : 3000; }
+// How long the slide must actually stay on screen so the text fully finishes
+// revealing at the current speed setting. Speeding up just finishes early
+// (fine — the normal 1s hold covers that). Slowing down needs the window
+// itself extended, or the slide would advance before the text is done.
+function effectiveDurationMs(slide){
+  const base = slideDurationMs(slide);
+  return state.textSpeed < 1 ? base / Math.max(state.textSpeed, 0.05) : base;
+}
+function totalDurationMs(){ return state.slides.reduce((sum,s)=>sum+effectiveDurationMs(s)+SLIDE_GAP_MS,0); }
+
+/* ---------- render ---------- */
+function renderPickers(){
+  document.getElementById('brandPicker').innerHTML = Object.entries(BRANDS).map(([key,b])=>`
+    <button class="pill ${state.brandKey===key?'active':''}" type="button" data-brand="${key}"
+      style="${state.brandKey===key?`background:linear-gradient(135deg,${b.color}cc,${b.color}66);box-shadow:0 0 14px ${b.color}55;`:''}">${escapeHtml(b.name)}</button>
+  `).join('');
+  document.querySelectorAll('#brandPicker .pill').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ state.brandKey = btn.dataset.brand; render(); if(state.slides.length){ drawStatic(); scheduleSave(); } });
+  });
+  document.getElementById('themePicker').innerHTML = Object.entries(THEMES).map(([key,t])=>`
+    <button class="pill theme ${state.themeKey===key?'active':''}" type="button" data-theme="${key}"
+      style="${state.themeKey===key?`background:linear-gradient(135deg,${t.accent},${t.accent2});box-shadow:0 0 12px ${t.accent}66;`:''}">${t.name}</button>
+  `).join('');
+  document.querySelectorAll('#themePicker .pill').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ state.themeKey = btn.dataset.theme; render(); if(state.slides.length){ drawStatic(); scheduleSave(); } });
+  });
+}
+function renderSlides(){
+  const list = document.getElementById('slidesList');
+  list.innerHTML = state.slides.map((s,i)=>`
+    <div class="slide-card" data-id="${s.id}">
+      <div class="slide-head">
+        <span class="slide-tag" style="color:${currentTheme().accent}">Slide ${i+1}${s.label?' · '+escapeHtml(s.label):''}</span>
+        <button class="slide-remove" data-remove="${s.id}" type="button">✕ remove</button>
+      </div>
+      <textarea class="slide-text" data-edit="${s.id}" placeholder="Slide text...">${escapeHtml(s.text)}</textarea>
+      <div class="slide-row">
+        <label class="slide-btn">🖼 ${s.bgUrl?'Change bg':'Background'} <input type="file" accept="image/*" data-bg="${s.id}"></label>
+        ${s.bgUrl ? `<img class="slide-thumb" src="${s.bgUrl}">` : ''}
+        <label class="slide-btn">🎵 ${s.audioBuffer?'Change mp3':'Upload MP3'} <input type="file" accept="audio/*" data-audio="${s.id}"></label>
+        ${s.audioLoading ? `<span class="audio-badge" style="color:#cc8;background:#1a1a0d;border-color:#443;">⏳ decoding…</span>`
+          : s.audioError ? `<span class="audio-badge" style="color:#e55;background:#1a0d0d;border-color:#442;">⚠ ${escapeHtml(s.audioError)}</span>`
+          : s.audioBuffer ? `<span class="audio-badge">✓ ${s.audioDuration.toFixed(1)}s</span>`
+          : `<span class="audio-badge" style="color:#666;background:#1a1a1a;border-color:#333;">3.0s silent</span>`}
+        <button class="slide-btn" data-copy="${s.id}" type="button">📋 Copy text</button>
+      </div>
+    </div>
+  `).join('');
+
+  list.querySelectorAll('[data-edit]').forEach(el=>{
+    el.addEventListener('input', ()=>{
+      const s = state.slides.find(x=>x.id===el.dataset.edit);
+      if(!s) return;
+      if(/[—–]/.test(el.value)){
+        const pos = el.selectionStart;
+        el.value = noDash(el.value);
+        el.setSelectionRange(pos, pos);
+      }
+      s.text = el.value; drawStatic(state.slides.indexOf(s)); scheduleSave();
+    });
+    el.addEventListener('focus', ()=>{
+      const s = state.slides.find(x=>x.id===el.dataset.edit);
+      if(s) drawStatic(state.slides.indexOf(s));
+    });
+  });
+  list.querySelectorAll('[data-remove]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      state.slides = state.slides.filter(x=>x.id!==el.dataset.remove);
+      renderSlides(); render(); drawStatic(); scheduleSave();
+    });
+  });
+  list.querySelectorAll('[data-bg]').forEach(el=>{
+    el.addEventListener('change', (e)=>{
+      const file = e.target.files[0]; if(!file) return;
+      const s = state.slides.find(x=>x.id===el.dataset.bg);
+      const idx = state.slides.indexOf(s);
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          s.bgImg = img; s.bgUrl = reader.result;
+          renderSlides(); drawStatic(idx); scheduleSave();
+        };
+        img.onerror = () => { state.error = "Could not read that image — try a different file (jpg/png work best)."; render(); };
+        img.src = reader.result;
+      };
+      reader.onerror = () => { state.error = "Could not read that image file."; render(); };
+      reader.readAsDataURL(file);
+    });
+  });
+  list.querySelectorAll('[data-audio]').forEach(el=>{
+    el.addEventListener('change', async (e)=>{
+      const file = e.target.files[0]; if(!file) return;
+      const s = state.slides.find(x=>x.id===el.dataset.audio);
+      s.audioBuffer = null; s.audioB64 = null; s.audioDuration = null;
+      s.audioLoading = true; s.audioError = null;
+      ensureAudioCtx(); // resume within the user gesture
+      renderSlides(); render();
+      try{
+        const buf = await file.arrayBuffer();
+        await decodeSlideAudio(s, buf);
+        s.audioLoading = false;
+      }catch(err){
+        console.warn('audio decode failed', err);
+        s.audioLoading = false;
+        s.audioError = "couldn't decode this file — try re-downloading the mp3";
+      }
+      renderSlides(); render();
+      scheduleSave();
+    });
+  });
+  list.querySelectorAll('[data-copy]').forEach(el=>{
+    el.addEventListener('click', async ()=>{
+      const s = state.slides.find(x=>x.id===el.dataset.copy);
+      if(!s) return;
+      const textarea = list.querySelector(`[data-edit="${s.id}"]`);
+      let copied = false;
+      try{
+        await navigator.clipboard.writeText(s.text);
+        copied = true;
+      }catch(err){ /* clipboard API blocked here — fall back below */ }
+      if(!copied && textarea){
+        textarea.focus();
+        textarea.select();
+        try{ copied = document.execCommand('copy'); }catch(err){ copied = false; }
+      }
+      if(copied){
+        el.textContent='✓ Copied'; setTimeout(()=>{ el.textContent='📋 Copy text'; },1200);
+      } else if(textarea){
+        textarea.focus(); textarea.select();
+        el.textContent='Selected — press Ctrl+C'; setTimeout(()=>{ el.textContent='📋 Copy text'; },2000);
+      }
+    });
+  });
+}
+function render(){
+  const theme = currentTheme(), brand = currentBrand(), ac = theme.accent;
+  document.getElementById('handleEl').textContent = brand.handle || "Unlabeled";
+  document.getElementById('handleEl').style.background = `linear-gradient(135deg,${brand.color},${ac})`;
+  document.getElementById('handleEl').style.webkitBackgroundClip = 'text';
+  document.getElementById('handleEl').style.webkitTextFillColor = 'transparent';
+
+  renderPickers();
+
+  const genBtn = document.getElementById('generateBtn');
+  genBtn.disabled = state.loading || !state.topic.trim();
+  genBtn.textContent = state.loading ? '...' : 'Generate';
+  genBtn.style.background = state.loading ? '#333' : `linear-gradient(135deg,${brand.color},${ac})`;
+
+  const errBox = document.getElementById('errorBox');
+  errBox.style.display = state.error ? 'block' : 'none';
+  errBox.textContent = state.error;
+
+  const hasSlides = state.slides.length > 0;
+  document.getElementById('mainGrid').style.display = hasSlides ? 'flex' : 'none';
+  document.getElementById('chipsWrap').style.display = (!hasSlides && !state.loading) ? 'block' : 'none';
+  if(!hasSlides && !state.loading){
+    document.getElementById('chips').innerHTML = (CHIPS_BY_BRAND[state.brandKey]||CHIPS_BY_BRAND.unlabeled).map(t=>`<button class="chip" type="button" data-topic="${escapeHtml(t)}">${escapeHtml(t)}</button>`).join('');
+    document.querySelectorAll('#chips .chip').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ document.getElementById('topicInput').value = btn.dataset.topic; state.topic = btn.dataset.topic; generate(); });
+    });
+  }
+
+  const totalS = totalDurationMs()/1000;
+  document.getElementById('totalLen').textContent = hasSlides ? `${state.slides.length} slides · ~${totalS.toFixed(1)}s total` : '';
+
+  const exportBtn = document.getElementById('exportBtn');
+  exportBtn.disabled = !hasSlides || state.exporting;
+  exportBtn.textContent = state.exporting ? `Exporting… ${state.progress}%` : '⬇ Export Video';
+  exportBtn.style.background = state.exporting ? '#2a2a2a' : `linear-gradient(135deg,${ac},${theme.accent2})`;
+  exportBtn.style.color = state.exporting ? '#666' : '#000';
+
+  document.getElementById('progressTrack').style.display = state.exporting ? 'block' : 'none';
+  const pf = document.getElementById('progressFill');
+  pf.style.width = state.progress + '%';
+  pf.style.background = `linear-gradient(90deg,${ac},${theme.accent2})`;
+
+  document.getElementById('playBtn').textContent = state.playing ? '⏸ Stop preview' : '▶ Play preview';
+
+  document.getElementById('readyPanel').style.display = (state.videoUrl && !state.exporting) ? 'flex' : 'none';
+  if(state.videoUrl){
+    const link = document.getElementById('readyLink');
+    link.href = state.videoUrl;
+    link.download = `${state.brandKey}-${state.topic.replace(/\s+/g,"-").toLowerCase()}.${state.videoExt}`;
+    link.style.background = `linear-gradient(135deg,${ac},${theme.accent2})`;
+    document.getElementById('fmtNote').textContent = state.videoExt === 'mp4'
+      ? '.mp4 · ready to upload to TikTok, Instagram, YouTube. On mobile, if tapping doesn\'t save it, the video opens in a new tab — use the ⬇ or share icon there to save it.'
+      : '.webm · this browser recorded webm instead of mp4 — convert with HandBrake (free) for TikTok';
+  }
+  renderLevelPicker(); renderHooks(); renderCaption();
+  if(hasSlides) renderSlides();
+}
+
+/* ---------- static (non-playing) preview draw ---------- */
+let staticPreviewIdx = 0;
+function drawStatic(idx){
+  if(!state.slides.length) return;
+  if(typeof idx === 'number') staticPreviewIdx = idx;
+  if(staticPreviewIdx >= state.slides.length) staticPreviewIdx = 0;
+  const slide = state.slides[staticPreviewIdx];
+  stageCtx.clearRect(0,0,W,H);
+  const particles = initParticles(currentTheme().accent, currentTheme().accent2);
+  const duration = slideDurationMs(slide);
+  // Show a representative mid-reveal frame (not fully revealed) so the text
+  // speed setting is visibly obvious on whichever slide is selected, without
+  // needing to hit Play.
+  const previewElapsed = duration * 0.5;
+  drawSlideFrame(stageCtx, { slide, elapsed: previewElapsed, duration, theme: currentTheme(), brand: currentBrand(), particles, isLast: staticPreviewIdx===state.slides.length-1 });
+}
+
+/* ---------- live preview playback ---------- */
+let previewSourceNode = null;
+function stopPreview(){
+  cancelAnimationFrame(previewRAF);
+  try{ previewSourceNode?.stop(); }catch(e){}
+  previewSourceNode = null;
+  state.playing = false;
+}
+async function playPreview(){
+  if(state.playing){ stopPreview(); render(); return; }
+  if(!state.slides.length) return;
+  ensureAudioCtx(); // resume within the click gesture
+  state.playing = true; render();
+  for(let i=0;i<state.slides.length && state.playing;i++){
+    await playSlidePreview(state.slides[i], i===state.slides.length-1);
+  }
+  state.playing = false; render();
+}
+function playSlidePreview(slide, isLast){
+  return new Promise(resolve=>{
+    previewParticles = initParticles(currentTheme().accent, currentTheme().accent2);
+    const duration = slideDurationMs(slide);
+    const windowMs = effectiveDurationMs(slide);
+    if(slide.audioBuffer){
+      const ctx = ensureAudioCtx();
+      const src = ctx.createBufferSource();
+      src.buffer = slide.audioBuffer;
+      src.connect(ctx.destination);
+      src.start();
+      previewSourceNode = src;
+    }
+    const start = performance.now();
+    function loop(ts){
+      if(!state.playing){ try{ previewSourceNode?.stop(); }catch(e){} resolve(); return; }
+      const elapsed = ts - start;
+      drawSlideFrame(stageCtx, { slide, elapsed, duration, theme: currentTheme(), brand: currentBrand(), particles: previewParticles, isLast });
+      if(elapsed < windowMs + SLIDE_GAP_MS){ previewRAF = requestAnimationFrame(loop); }
+      else{ try{ previewSourceNode?.stop(); }catch(e){} resolve(); }
+    }
+    previewRAF = requestAnimationFrame(loop);
+  });
+}
+
+/* ---------- generate via Claude ---------- */
+async function generate(topicOverride){
+  const q = (topicOverride || state.topic).trim();
+  if(!q) return;
+  state.topic = q; state.loading = true; state.error = "";
+  stopPreview();
+  render();
+  try{
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({
+        model:"claude-sonnet-4-6", max_tokens:800,
+        system:`${currentBrand().prompt}
+${levelPrompt(state.level, state.angle)}
+Return ONLY valid JSON, no markdown, no backticks:
+{"emoji":"one emoji","tag":"2-3 WORD CATEGORY","hook":"punchy hook max 8 words no ending punctuation","type":"steps OR list","steps":["item1","item2","...as many as requested"],"payoff":"one punchy benefit sentence"}
+Set "type" to "steps" for how-to instructions, "list" for lists of things/places/ideas.
+Return EXACTLY the number of items asked for. If no number specified, return 3. Items under 16 words each.
+Never use an em dash (—) or en dash (–) anywhere in any field. Use a comma, period, or separate sentence instead.`,
+        messages:[{role:"user", content:`Topic: ${q}`}],
+      }),
+    });
+    const json = await res.json();
+    const raw = (json.content||[]).map(b=>b.text||"").join("");
+    const parsed = JSON.parse(raw.replace(/```json|```/g,"").trim());
+    stripDashes(parsed);
+    state.slides = slidesFromScript(parsed);
+    if(state.brandKey==='reviewthengo'){
+      state.siteLink = "/before-you-fly";
+      state.caption = noDash([parsed.hook, "", ...(parsed.steps||[]).map(t=>"- "+t), "", parsed.payoff, "", "Link in bio: "+siteUrl("/before-you-fly"), "", RTG_HASHTAGS].join("\n"));
+    } else if(state.brandKey==='foundsite'){
+      state.siteLink = "/";
+      state.caption = noDash([parsed.hook, "", ...(parsed.steps||[]).map((t,i)=>(parsed.type==="list" ? (i+1)+". " : "- ")+t), "", parsed.payoff, "", "Link in bio: "+siteUrl("/"), "", BRANDS.foundsite.tags].join("\n")).replace(/ ?\n ?/g,"\n").trim();
+    } else {
+      state.siteLink = "";
+      const b = currentBrand();
+      state.caption = noDash([parsed.hook, "", ...(parsed.steps||[]).map((t,i)=>(parsed.type==="list" ? (i+1)+". " : "- ")+t), "", parsed.payoff, "", [b.handle, b.tags].filter(Boolean).join(" ")].join("\n")).replace(/ ?\n ?/g,"\n").trim();
+    }
+    render();
+    drawStatic();
+  }catch(e){
+    console.error(e);
+    state.error = "Generation failed — check your connection and try again.";
+  }finally{
+    state.loading = false;
+    render();
+  }
+}
+
+/* ---------- export: mux canvas + decoded audio buffers, no live capture needed ---------- */
+async function exportVideo(){
+  if(!state.slides.length || state.exporting) return;
+  stopPreview();
+
+  const audioCtx = ensureAudioCtx(); // resume within the click gesture
+
+  state.exporting = true; state.progress = 0; state.videoUrl = null; state.error = "";
+  render();
+
+  try{
+    const canvas = document.createElement('canvas');
+    const SCALE = 2;
+    canvas.width = W*SCALE; canvas.height = H*SCALE;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(SCALE, SCALE);
+
+    const dest = audioCtx.createMediaStreamDestination();
+    // Keep a silent oscillator running so the audio track always has data,
+    // even during silent slides — some encoders drop tracks with no samples.
+    const silent = audioCtx.createGain();
+    silent.gain.value = 0;
+    const osc = audioCtx.createOscillator();
+    osc.connect(silent); silent.connect(dest);
+    osc.start();
+
+    const videoTracks = canvas.captureStream(30).getVideoTracks();
+    const combined = new MediaStream([...videoTracks, ...dest.stream.getAudioTracks()]);
+    const mimeType = pickMimeType();
+    const recorder = new MediaRecorder(combined, { mimeType, videoBitsPerSecond: 10000000 });
+    const chunks = [];
+    recorder.ondataavailable = e => e.data.size && chunks.push(e.data);
+    const stopped = new Promise(res=>{ recorder.onstop = res; });
+
+    recorder.start(100);
+
+    const total = totalDurationMs();
+    let elapsedTotal = 0;
+
+    for(let i=0;i<state.slides.length;i++){
+      const slide = state.slides[i];
+      const isLast = i === state.slides.length-1;
+      const duration = slideDurationMs(slide);
+      const windowMs = effectiveDurationMs(slide);
+      const particles = initParticles(currentTheme().accent, currentTheme().accent2);
+      let srcNode = null;
+
+      if(slide.audioBuffer){
+        srcNode = audioCtx.createBufferSource();
+        srcNode.buffer = slide.audioBuffer;
+        srcNode.connect(dest);
+        srcNode.start();
+      }
+
+      await new Promise(resolve=>{
+        const start = performance.now();
+        function loop(ts){
+          const elapsed = ts - start;
+          drawSlideFrame(ctx, { slide, elapsed, duration, theme: currentTheme(), brand: currentBrand(), particles, isLast });
+          state.progress = Math.min(99, Math.round(((elapsedTotal+Math.min(elapsed,windowMs+SLIDE_GAP_MS))/total)*100));
+          const btn = document.getElementById('exportBtn');
+          if(btn) btn.textContent = `Exporting… ${state.progress}%`;
+          if(elapsed < windowMs + SLIDE_GAP_MS){ requestAnimationFrame(loop); }
+          else resolve();
+        }
+        requestAnimationFrame(loop);
+      });
+
+      try{ srcNode?.stop(); }catch(e){}
+      elapsedTotal += windowMs + SLIDE_GAP_MS;
+    }
+
+    await new Promise(r=>setTimeout(r, 400));
+    recorder.stop();
+    await stopped;
+    try{ osc.stop(); }catch(e){}
+    // NOTE: sharedAudioCtx stays open — it's reused by preview and future exports
+
+    const rawBlob = new Blob(chunks, { type: mimeType });
+    const fixedBlob = rawBlob.type.startsWith('video/webm') ? await fixWebmDuration(rawBlob) : rawBlob;
+    if(state.videoUrl && state.videoUrl.startsWith('blob:')) URL.revokeObjectURL(state.videoUrl);
+    state.videoUrl = URL.createObjectURL(fixedBlob);
+    state.videoExt = extFor(mimeType);
+  }catch(e){
+    console.error(e);
+    state.error = "Export failed — try again. If it keeps happening, try Chrome or Edge on desktop.";
+  }finally{
+    state.exporting = false; state.progress = 0;
+    render();
+    drawStatic();
+    scheduleSave();
+  }
+}
+
+/* ---------- wire up static controls ---------- */
+document.getElementById('topicInput').addEventListener('input', e=>{ state.topic = e.target.value; render(); });
+document.getElementById('topicInput').addEventListener('keydown', e=>{ if(e.key==='Enter') generate(); });
+document.getElementById('generateBtn').addEventListener('click', ()=>generate());
+document.getElementById('addSlideBtn').addEventListener('click', ()=>{
+  state.slides.push(newSlide({ text:"New slide text..." }));
+  renderSlides(); render(); drawStatic(); scheduleSave();
+});
+document.getElementById('newBtn').addEventListener('click', ()=>{
+  stopPreview();
+  state.slides = []; state.topic=""; state.videoUrl=null; state.siteLink=""; state.caption=""; state.error="";
+  document.getElementById('topicInput').value='';
+  render();
+  scheduleSave();
+});
+document.getElementById('playBtn').addEventListener('click', playPreview);
+document.getElementById('speedSlider').addEventListener('input', (e)=>{
+  state.textSpeed = parseFloat(e.target.value);
+  document.getElementById('speedVal').textContent = state.textSpeed.toFixed(1) + 'x';
+  drawStatic();
+  scheduleSave();
+});
+document.getElementById('exportBtn').addEventListener('click', exportVideo);
+document.getElementById('captionText').addEventListener('input', e=>{
+  let v = e.target.value;
+  if(/[—–]/.test(v)){ const pos = e.target.selectionStart; v = v.replace(/[—–]/g, ', '); e.target.value = v; e.target.setSelectionRange(pos,pos); }
+  state.caption = v; scheduleSave();
+});
+document.getElementById('copyCaptionBtn').addEventListener('click', async ()=>{
+  const btn = document.getElementById('copyCaptionBtn'), ta = document.getElementById('captionText');
+  let ok = false;
+  try{ await navigator.clipboard.writeText(ta.value); ok = true; }catch(err){}
+  if(!ok){ ta.focus(); ta.select(); try{ ok = document.execCommand('copy'); }catch(err){} }
+  btn.textContent = ok ? '✓ Copied' : 'Selected, press Ctrl+C';
+  setTimeout(()=>{ btn.textContent='📋 Copy caption'; },1500);
+});
+
+(async function init(){
+  const restored = await loadProject();
+  if(restored){ document.getElementById('topicInput').value = state.topic; }
+  document.getElementById('speedSlider').value = state.textSpeed;
+  document.getElementById('speedVal').textContent = state.textSpeed.toFixed(1) + 'x';
+  render();
+  if(restored) drawStatic();
+})();
+</script>
+</body>
+</html>
