@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ArticlesRouteImport } from './routes/articles'
+import { Route as BeforeYouFlyRouteImport } from './routes/before-you-fly'
 import { Route as ConnectionCheckRouteImport } from './routes/connection-check'
 import { Route as CorrectionsRouteImport } from './routes/corrections'
 import { Route as DisclaimerRouteImport } from './routes/disclaimer'
@@ -39,6 +40,11 @@ const AdminRoute = AdminRouteImport.update({
 const ArticlesRoute = ArticlesRouteImport.update({
   id: '/articles',
   path: '/articles',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BeforeYouFlyRoute = BeforeYouFlyRouteImport.update({
+  id: '/before-you-fly',
+  path: '/before-you-fly',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConnectionCheckRoute = ConnectionCheckRouteImport.update({
@@ -82,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
   '/articles': typeof ArticlesRoute
+  '/before-you-fly': typeof BeforeYouFlyRoute
   '/connection-check': typeof ConnectionCheckRoute
   '/corrections': typeof CorrectionsRoute
   '/disclaimer': typeof DisclaimerRoute
@@ -95,6 +102,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
   '/articles': typeof ArticlesRoute
+  '/before-you-fly': typeof BeforeYouFlyRoute
   '/connection-check': typeof ConnectionCheckRoute
   '/corrections': typeof CorrectionsRoute
   '/disclaimer': typeof DisclaimerRoute
@@ -109,6 +117,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
   '/articles': typeof ArticlesRoute
+  '/before-you-fly': typeof BeforeYouFlyRoute
   '/connection-check': typeof ConnectionCheckRoute
   '/corrections': typeof CorrectionsRoute
   '/disclaimer': typeof DisclaimerRoute
@@ -124,6 +133,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/articles'
+    | '/before-you-fly'
     | '/connection-check'
     | '/corrections'
     | '/disclaimer'
@@ -137,6 +147,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/articles'
+    | '/before-you-fly'
     | '/connection-check'
     | '/corrections'
     | '/disclaimer'
@@ -150,6 +161,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/articles'
+    | '/before-you-fly'
     | '/connection-check'
     | '/corrections'
     | '/disclaimer'
@@ -164,6 +176,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRoute
   ArticlesRoute: typeof ArticlesRoute
+  BeforeYouFlyRoute: typeof BeforeYouFlyRoute
   ConnectionCheckRoute: typeof ConnectionCheckRoute
   CorrectionsRoute: typeof CorrectionsRoute
   DisclaimerRoute: typeof DisclaimerRoute
@@ -201,6 +214,13 @@ declare module '@tanstack/react-router' {
       path: '/articles'
       fullPath: '/articles'
       preLoaderRoute: typeof ArticlesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/before-you-fly': {
+      id: '/before-you-fly'
+      path: '/before-you-fly'
+      fullPath: '/before-you-fly'
+      preLoaderRoute: typeof BeforeYouFlyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/connection-check': {
@@ -260,6 +280,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AdminRoute: AdminRoute,
   ArticlesRoute: ArticlesRoute,
+  BeforeYouFlyRoute: BeforeYouFlyRoute,
   ConnectionCheckRoute: ConnectionCheckRoute,
   CorrectionsRoute: CorrectionsRoute,
   DisclaimerRoute: DisclaimerRoute,
