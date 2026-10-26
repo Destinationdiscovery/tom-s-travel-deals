@@ -1,7 +1,7 @@
 // Writes public/sitemap.xml with the pages that exist now, including every article.
 // Runs via the predev / prebuild hooks in package.json. No network needed.
 // When you add a page (not an article), add it to PAGES below. Articles are picked up from src/content/articles.
-// When a page's content really changes, update its date. Honest dates help search engines trust the site.
+// When a page content really changes, update its date. Honest dates help search engines trust the site.
 
 import { readdirSync, readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
 import { resolve, dirname } from "path";
@@ -17,6 +17,7 @@ const PAGES: { path: string; lastmod: string }[] = [
   { path: "/corrections", lastmod: "2026-10-14" },
   { path: "/disclaimer", lastmod: "2026-10-02" },
   { path: "/privacy-policy", lastmod: "2026-10-02" },
+  { path: "/newsletter-1", lastmod: "2026-10-26" },
 ];
 const OUT_PATH = resolve("public/sitemap.xml");
 const ARTICLES_DIR = resolve("src/content/articles");
@@ -27,7 +28,7 @@ if (existsSync(ARTICLES_DIR)) {
     if (!file.endsWith(".md")) continue;
     const text = readFileSync(resolve(ARTICLES_DIR, file), "utf-8");
     const checked = /^checked:\s*(\d{4}-\d{2}-\d{2})\s*$/m.exec(text)?.[1];
-    if (!checked) continue; // skipped by the site as well, so keep it out of the sitemap
+    if (!checked) continue;
     articles.push({ path: `/articles/${file.replace(/\.md$/, "")}`, lastmod: checked });
   }
 }
