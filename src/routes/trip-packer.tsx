@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { pageHead } from "@/lib/seo";
 
 const TARGET =
-  "https://muse.ai/s/trip-packer-xqxv6xgxpxnxkp2xs/hfuWpe68hE8xSTxoFJ3owAtXmY_Q6sZCAApJCCDBqFw";
+  "https://muse.ai/s/trip-packer-2-xzr6xgxsxmxxx01xxxv/cIFe0SIdwtb5oEb5p25i852jX6vvLsWoYLEZnGTNUz8";
 
 export const Route = createFileRoute("/trip-packer")({
   head: () =>
