@@ -18,6 +18,7 @@ const PAGES: { path: string; lastmod: string }[] = [
   { path: "/disclaimer", lastmod: "2026-10-02" },
   { path: "/privacy-policy", lastmod: "2026-10-02" },
   { path: "/newsletter-1", lastmod: "2026-10-26" },
+  { path: "/trip-packer", lastmod: "2026-10-26" },
 ];
 const OUT_PATH = resolve("public/sitemap.xml");
 const ARTICLES_DIR = resolve("src/content/articles");
