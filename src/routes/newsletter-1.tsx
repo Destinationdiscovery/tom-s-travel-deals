@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 
 const TARGET =
@@ -8,6 +8,11 @@ const OG_IMAGE = "https://www.reviewthengo.com/newsletter-first-edition-og.jpg";
 const TITLE = "TravelOnly With Tom Newsletter, First Edition";
 const DESCRIPTION =
   "Mexico in winter, a December packing list, ETIAS in plain language, UK ETA, the free Trip Packer, and a deal window ending October 31.";
+const COUNTER_API = "https://countapi.mileshilliard.com/api/v1/hit";
+const COUNTER_KEY = "reviewthengo-newsletter-1";
+// To see the total clicks without adding one, open:
+// https://countapi.mileshilliard.com/api/v1/get/reviewthengo-newsletter-1
+// Do not open the /hit/ URL to check, that adds 1.
 
 export const Route = createFileRoute("/newsletter-1")({
   head: () => ({
@@ -36,8 +41,28 @@ export const Route = createFileRoute("/newsletter-1")({
 });
 
 function NewsletterRedirect() {
+  const countedRef = useRef(false);
   useEffect(() => {
-    window.location.replace(TARGET);
+    if (countedRef.current) return;
+    countedRef.current = true;
+    const params = new URLSearchParams(window.location.search);
+    const rawSource = params.get("src") || params.get("utm_source") || "";
+    const source = rawSource
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]/g, "")
+      .slice(0, 32);
+    const keys = [COUNTER_KEY];
+    if (source) keys.push(`${COUNTER_KEY}-src-${source}`);
+    const hits = keys.map((key) =>
+      fetch(`${COUNTER_API}/${key}`, {
+        cache: "no-store",
+        keepalive: true,
+      }).catch(() => undefined)
+    );
+    const timeout = new Promise((resolve) => setTimeout(resolve, 500));
+    Promise.race([Promise.allSettled(hits), timeout]).finally(() => {
+      window.location.replace(TARGET);
+    });
   }, []);
   return (
     <main>
